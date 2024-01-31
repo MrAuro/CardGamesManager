@@ -5,12 +5,19 @@ import { theme } from "./theme";
 
 import "@mantine/core/styles.css";
 import { Counter } from "./components/counter";
+import { ModalsProvider } from "@mantine/modals";
 import { Game } from "./components/Game";
 
 export interface State {
   count: number;
   gameState: GameState;
+  players: Player[];
 }
+
+export type Player = {
+  name: string;
+  stack: number;
+};
 
 export enum GameState {
   NONE,
@@ -20,6 +27,7 @@ export enum GameState {
 export const defaultState: State = {
   count: 0,
   gameState: GameState.NONE,
+  players: [],
 };
 
 export const STATE = atom({
@@ -59,13 +67,15 @@ function debounce(func: any, wait: any) {
 function App() {
   return (
     <MantineProvider theme={theme} defaultColorScheme="auto">
-      <RecoilRoot>
-        <Container>
-          <Title mt="sm">Poker Manager</Title>
-          <Divider my="sm" />
-          <Game />
-        </Container>
-      </RecoilRoot>
+      <ModalsProvider>
+        <RecoilRoot>
+          <Container>
+            <Title mt="sm">H1 Title</Title>
+            <Divider my="sm" />
+            <Game />
+          </Container>
+        </RecoilRoot>
+      </ModalsProvider>
     </MantineProvider>
   );
 }

@@ -1,6 +1,7 @@
 import { useRecoilState, useRecoilValue } from "recoil";
 import { GameState, STATE, STATE_WATCHER, State } from "../App";
 import { Button } from "@mantine/core";
+import { Table } from "./Table";
 
 export function Game() {
   const [state, setState] = useRecoilState(STATE);
@@ -16,12 +17,6 @@ export function Game() {
         </Button>
       );
     case GameState.CREATING:
-      return (
-        <Button
-          onClick={() => setState({ ...state, gameState: GameState.NONE })}
-        >
-          Cancel
-        </Button>
-      );
+      return <Table />;
   }
 }
