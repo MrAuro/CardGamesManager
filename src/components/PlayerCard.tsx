@@ -1,31 +1,32 @@
 import {
-  useMantineTheme,
-  NumberInput,
-  Paper,
+  ActionIcon,
   Box,
+  Button,
+  Divider,
+  Grid,
   Group,
   Menu,
-  ActionIcon,
-  rem,
-  Divider,
-  Button,
+  NumberInput,
+  Paper,
   Text,
+  rem,
+  useMantineTheme,
 } from "@mantine/core";
+import { UseListStateHandlers, useMediaQuery } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
 import {
-  IconCurrencyDollar,
-  IconChevronDown,
-  IconPencil,
-  IconCoin,
   IconBolt,
+  IconChevronDown,
+  IconCoin,
+  IconCurrencyDollar,
+  IconPencil,
   IconTrash,
 } from "@tabler/icons-react";
 import { useState } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { STATE, STATE_WATCHER, State } from "../App";
 import { Card, Player } from "../utils/Game";
 import PlayingCard from "./PlayingCard";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { STATE, State, STATE_WATCHER } from "../App";
-import { UseListStateHandlers } from "@mantine/hooks";
 
 export default function PlayerCard(props: {
   name: string;
@@ -42,35 +43,15 @@ export default function PlayerCard(props: {
   const [state, setState] = useRecoilState(STATE);
   const val = useRecoilValue<State>(STATE_WATCHER);
 
-  const openModal = () =>
-    modals.openConfirmModal({
-      title: `Placing Bet`,
-      centered: true,
-      radius: "md",
-      children: (
-        <NumberInput
-          label="Bet Amount"
-          allowNegative={false}
-          decimalScale={2}
-          fixedDecimalScale
-          defaultValue={0}
-          leftSection={<IconCurrencyDollar />}
-        />
-      ),
-      labels: { confirm: "Confirm", cancel: "Cancel" },
-      onCancel: () => console.log("Cancel"),
-      onConfirm: () => console.log("Confirmed"),
-    });
+  const [bet, setBet] = useState(0);
 
   const openDeleteConfirmModal = () =>
     modals.openConfirmModal({
       title: "Delete player",
       children: "Are you sure that you want to delete this player?",
       labels: { confirm: `Delete ${props.name}`, cancel: "Cancel" },
-      centered: true,
       confirmProps: { color: "red", variant: "light" },
       cancelProps: { color: "gray", variant: "light" },
-      radius: "md",
       groupProps: { grow: true },
       onConfirm: () => {
         console.log("Player deleted");
@@ -166,20 +147,61 @@ export default function PlayerCard(props: {
         </Group>
         <Divider my="xs" />
         <Group grow gap="xs" justify="center">
-          <Button color="blue" variant="light" disabled={!props.turn}>
-            Check
-          </Button>
-          <Button color="red" variant="light" disabled={!props.turn}>
-            Fold
-          </Button>
-          <Button
-            color="green"
-            variant="light"
-            disabled={!props.turn}
-            onClick={openModal}
-          >
-            Bet
-          </Button>
+          {isBetting ? (
+            <>
+              <Grid gutter="xs">
+                <Grid.Col span={{ base: 12, xs: 8 }}>
+                  <NumberInput
+                    allowNegative={false}
+                    decimalScale={2}
+                    fixedDecimalScale
+                    thousandSeparator=","
+                    radius="md"
+                    leftSection={<IconCurrencyDollar />}
+                    value={bet}
+                    onChange={(value) => setBet(parseFloat(`${value}`))}
+                  />
+                </Grid.Col>
+                <Grid.Col span={{ base: 12, xs: 2 }}>
+                  <Button
+                    variant="light"
+                    fullWidth
+                    color="gray"
+                    onClick={() => setIsBetting(false)}
+                  >
+                    Back
+                  </Button>
+                </Grid.Col>
+                <Grid.Col span={{ base: 12, xs: 2 }}>
+                  <Button
+                    variant="light"
+                    fullWidth
+                    color="green"
+                    onClick={() => setIsBetting(false)}
+                  >
+                    Bet
+                  </Button>
+                </Grid.Col>
+              </Grid>
+            </>
+          ) : (
+            <>
+              <Button color="blue" variant="light" disabled={!props.turn}>
+                Check
+              </Button>
+              <Button color="red" variant="light" disabled={!props.turn}>
+                Fold
+              </Button>
+              <Button
+                color="green"
+                variant="light"
+                disabled={!props.turn}
+                onClick={() => setIsBetting(true)}
+              >
+                Bet
+              </Button>
+            </>
+          )}
         </Group>
       </Box>
     </Paper>

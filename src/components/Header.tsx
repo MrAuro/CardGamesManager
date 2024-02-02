@@ -1,14 +1,23 @@
-import { Burger, Container, Group, Tabs, Title } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import {
+  Burger,
+  Container,
+  Group,
+  Tabs,
+  Title,
+  useMantineTheme,
+} from "@mantine/core";
 import { useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { ROUTES, STATE, STATE_WATCHER, State } from "../App";
+import { useMediaQuery } from "@mantine/hooks";
 
 export default function Header() {
-  const [opened, { toggle }] = useDisclosure(false);
   const [state, setState] = useRecoilState(STATE);
   const val = useRecoilValue<State>(STATE_WATCHER);
   const [active, setActive] = useState(val.activeTab);
+  const theme = useMantineTheme();
+
+  const size = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
 
   const items = ROUTES.map((link) => (
     <Tabs.Tab
@@ -29,16 +38,16 @@ export default function Header() {
   return (
     <header>
       <Container size="md" mt="sm">
-        <Group gap={5} visibleFrom="xs" justify="space-between">
-          <Title order={1}>
-            {ROUTES.find((r) => r.link === active)?.label}
-          </Title>
+        <Group gap={5} justify={size ? "center" : "space-between"}>
+          {!size && (
+            <Title order={1}>
+              {ROUTES.find((r) => r.link === active)?.label}
+            </Title>
+          )}
           <Tabs variant="pills">
             <Tabs.List>{items}</Tabs.List>
           </Tabs>
         </Group>
-
-        <Burger opened={opened} onClick={toggle} hiddenFrom="xs" size="sm" />
       </Container>
     </header>
   );
