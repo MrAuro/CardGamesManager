@@ -1,63 +1,84 @@
 import {
-  Paper,
-  Title,
-  Text,
-  Box,
-  SimpleGrid,
-  useMantineTheme,
-  Button,
-  Center,
-  Group,
-  NumberInput,
-  Pill,
+  DragDropContext,
+  Draggable,
+  DraggableLocation,
+  Droppable,
+} from "@hello-pangea/dnd";
+import {
+  ActionIcon,
   Badge,
-  Collapse,
+  Box,
+  Button,
   Divider,
+  Group,
+  Menu,
+  NumberInput,
+  Paper,
+  Text,
+  rem,
+  useMantineTheme,
 } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useListState } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
+import {
+  IconBolt,
+  IconChevronDown,
+  IconCoin,
+  IconCurrencyDollar,
+  IconDots,
+  IconPencil,
+  IconTrash,
+} from "@tabler/icons-react";
+import cx from "clsx";
 import { useState } from "react";
-import ReactGridLayout from "react-grid-layout";
-import { IconCurrencyDollar } from "@tabler/icons-react";
 import { Card, CardType } from "./Card";
 
-const players: {
+import classes from "./Table.module.css";
+
+type Player = {
   name: string;
   role: string;
   turn: boolean;
+  id: string;
   cards: CardType[];
-}[] = [
+};
+
+const data: Player[] = [
   {
-    name: "AAA",
+    name: "Michael",
     role: "BTN",
     turn: true,
+    id: newId(),
     cards: [
       { value: "A", suit: "hearts" },
       { value: "K", suit: "hearts" },
     ],
   },
   {
-    name: "BBB",
+    name: "Jim",
     role: "BB",
     turn: false,
+    id: newId(),
     cards: [
       { value: "2", suit: "clubs" },
       { value: "5", suit: "diamonds" },
     ],
   },
   {
-    name: "CCC",
+    name: "Oscar",
     role: "SB",
     turn: false,
+    id: newId(),
     cards: [
       { value: "7", suit: "spades" },
       { value: "J", suit: "hearts" },
     ],
   },
   {
-    name: "DDD",
+    name: "Stanley",
     role: "",
     turn: false,
+    id: newId(),
     cards: [
       { value: "A", suit: "spades" },
       { value: "A", suit: "spades" },
@@ -66,37 +87,49 @@ const players: {
 ];
 
 export function Table() {
-  /*
-  const [layout, setLayout] = useState([
-    { i: "a", x: 0, y: 0, w: 1, h: 2, static: true },
-    { i: "b", x: 1, y: 0, w: 3, h: 2, minW: 2, maxW: 4 },
-    { i: "c", x: 4, y: 0, w: 1, h: 2 },
-  ]);
+  const theme = useMantineTheme();
 
-    <ReactGridLayout
-      className="layout"
-      layout={layout}
-      cols={12}
-      rowHeight={30}
-      width={1200}
-    >
-      <div key="a"></div>
-      <div key="b"></div>
-      <div key="c"></div>
-    </ReactGridLayout>
-*/
+  // const [state, handlers] = useListState();
+
+  const [state, handlers] = useListState(data);
+
+  const items = state.map((item, index) => (
+    <Draggable key={item.id} index={index} draggableId={item.id}>
+      {(provided, snapshot) => (
+        <div
+          className={cx(classes.item, {
+            [classes.itemDragging]: snapshot.isDragging,
+          })}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+          ref={provided.innerRef}
+        >
+          <Player
+            name={item.name}
+            role={item.role}
+            turn={item.turn}
+            cards={item.cards}
+          />
+        </div>
+      )}
+    </Draggable>
+  ));
+
   return (
-    <SimpleGrid>
-      {players.map((player, i) => (
-        <Player
-          key={i}
-          name={player.name}
-          role={player.role}
-          turn={player.turn}
-          cards={player.cards}
-        />
-      ))}
-    </SimpleGrid>
+    <DragDropContext
+      onDragEnd={({ destination, source }) =>
+        handlers.reorder({ from: source.index, to: destination?.index || 0 })
+      }
+    >
+      <Droppable droppableId="dnd-list" direction="vertical">
+        {(provided) => (
+          <div {...provided.droppableProps} ref={provided.innerRef}>
+            {items}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+    </DragDropContext>
   );
 }
 
@@ -108,6 +141,7 @@ function Player(props: {
 }) {
   const theme = useMantineTheme();
   const [isBetting, setIsBetting] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
 
   const openModal = () =>
     modals.openConfirmModal({
@@ -131,6 +165,7 @@ function Player(props: {
   return (
     <Paper
       withBorder
+      radius="md"
       styles={{
         root: {
           backgroundColor: props.turn
@@ -143,9 +178,56 @@ function Player(props: {
         <Group grow justify="space-between">
           <div>
             <Text size={props.turn ? "xl" : "lg"} fw={props.turn ? 700 : 500}>
-              <div style={{ display: "flex", alignItems: "center" }}>
-                {props.name}{" "}
-                {props.role && (
+              {props.name}{" "}
+              <Menu position="bottom-start">
+                <Menu.Target>
+                  <ActionIcon
+                    variant="transparent"
+                    color={theme.colors.dark[1]}
+                    onClick={() => setShowMenu(!showMenu)}
+                  >
+                    <IconChevronDown
+                      style={{ width: rem(20), height: rem(20) }}
+                    />
+                  </ActionIcon>
+                </Menu.Target>
+
+                <Menu.Dropdown>
+                  <Menu.Label>Bought in with $12.23</Menu.Label>
+                  <Menu.Divider />
+                  <Menu.Label>Actions</Menu.Label>
+                  <Menu.Item
+                    leftSection={
+                      <IconPencil style={{ width: rem(20), height: rem(20) }} />
+                    }
+                  >
+                    Change Name
+                  </Menu.Item>
+                  <Menu.Item
+                    leftSection={
+                      <IconCoin style={{ width: rem(20), height: rem(20) }} />
+                    }
+                  >
+                    Set Balance
+                  </Menu.Item>
+                  <Menu.Item
+                    leftSection={
+                      <IconBolt style={{ width: rem(20), height: rem(20) }} />
+                    }
+                  >
+                    Force Turn
+                  </Menu.Item>
+                  <Menu.Item
+                    leftSection={
+                      <IconTrash style={{ width: rem(20), height: rem(20) }} />
+                    }
+                    color="red"
+                  >
+                    Remove Player
+                  </Menu.Item>
+                </Menu.Dropdown>
+              </Menu>
+              {/* {props.role && (
                   <Badge
                     ml="xs"
                     variant="light"
@@ -153,8 +235,7 @@ function Player(props: {
                   >
                     {props.role}
                   </Badge>
-                )}
-              </div>
+                )} */}
             </Text>
             <Text size={props.turn ? "md" : "sm"} c="dimmed">
               $21.23
@@ -186,4 +267,8 @@ function Player(props: {
       </Box>
     </Paper>
   );
+}
+
+function newId(): string {
+  return `${Math.floor(Math.random() * 1_000_000)}`;
 }

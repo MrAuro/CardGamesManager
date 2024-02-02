@@ -9,9 +9,10 @@ export function Card(props: CardType) {
       <Paper
         withBorder
         shadow="xs"
+        radius="md"
         style={{
           backgroundColor: theme.colors.gray[0],
-          borderColor: "#121212",
+          borderColor: theme.colors.dark[9],
           borderWidth: "3px",
         }}
       >
