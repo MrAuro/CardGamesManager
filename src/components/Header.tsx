@@ -15,6 +15,7 @@ export default function Header() {
       value={link.link}
       data-active={active === link.link || undefined}
       leftSection={link.icon}
+      key={link.link}
       onClick={(event) => {
         event.preventDefault();
         setState({ ...state, activeTab: link.link });

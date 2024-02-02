@@ -1,67 +1,29 @@
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
-import { useMantineTheme } from "@mantine/core";
+import { Button, useMantineTheme } from "@mantine/core";
 import { useListState } from "@mantine/hooks";
 import cx from "clsx";
-import { CardType } from "./Card";
 
 import classes from "../styles/Table.module.css";
-import Player from "./Player";
-
-type Player = {
-  name: string;
-  role: string;
-  turn: boolean;
-  id: string;
-  cards: CardType[];
-};
-
-const data: Player[] = [
-  {
-    name: "Michael",
-    role: "BTN",
-    turn: true,
-    id: newId(),
-    cards: [
-      { value: "A", suit: "hearts" },
-      { value: "K", suit: "hearts" },
-    ],
-  },
-  {
-    name: "Jim",
-    role: "BB",
-    turn: false,
-    id: newId(),
-    cards: [
-      { value: "2", suit: "clubs" },
-      { value: "5", suit: "diamonds" },
-    ],
-  },
-  {
-    name: "Oscar",
-    role: "SB",
-    turn: false,
-    id: newId(),
-    cards: [
-      { value: "7", suit: "spades" },
-      { value: "J", suit: "hearts" },
-    ],
-  },
-  {
-    name: "Stanley",
-    role: "",
-    turn: false,
-    id: newId(),
-    cards: [
-      { value: "A", suit: "spades" },
-      { value: "A", suit: "spades" },
-    ],
-  },
-];
+import { STATE, STATE_WATCHER, State } from "../App";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { Player } from "../utils/Game";
+import PlayerCard from "./PlayerCard";
+import { useEffect } from "react";
 
 export function Table() {
-  const [state, handlers] = useListState(data);
+  const [state, setState] = useRecoilState(STATE);
+  const val = useRecoilValue<State>(STATE_WATCHER);
 
-  const items = state.map((item, index) => (
+  const [listState, handlers] = useListState(val.players);
+
+  useEffect(() => {
+    setState({
+      ...state,
+      players: listState,
+    });
+  }, [listState]);
+
+  const items = listState.map((item, index) => (
     <Draggable key={item.id} index={index} draggableId={item.id}>
       {(provided, snapshot) => (
         <div
@@ -72,11 +34,13 @@ export function Table() {
           {...provided.dragHandleProps}
           ref={provided.innerRef}
         >
-          <Player
+          <PlayerCard
             name={item.name}
-            role={item.role}
-            turn={item.turn}
+            role={""}
+            turn={true}
             cards={item.cards}
+            id={item.id}
+            handler={handlers}
           />
         </div>
       )}
@@ -84,23 +48,35 @@ export function Table() {
   ));
 
   return (
-    <DragDropContext
-      onDragEnd={({ destination, source }) =>
-        handlers.reorder({ from: source.index, to: destination?.index || 0 })
-      }
-    >
-      <Droppable droppableId="dnd-list" direction="vertical">
-        {(provided) => (
-          <div {...provided.droppableProps} ref={provided.innerRef}>
-            {items}
-            {provided.placeholder}
-          </div>
-        )}
-      </Droppable>
-    </DragDropContext>
+    <>
+      <DragDropContext
+        onDragEnd={({ destination, source }) => {
+          handlers.reorder({ from: source.index, to: destination?.index || 0 });
+        }}
+      >
+        <Droppable droppableId="dnd-list" direction="vertical">
+          {(provided) => (
+            <div {...provided.droppableProps} ref={provided.innerRef}>
+              {items}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
+      <Button
+        variant="subtle"
+        fullWidth
+        onClick={() => {
+          handlers.append({
+            balance: 0,
+            cards: [],
+            id: crypto.randomUUID(),
+            name: "Player " + (listState.length + 1),
+          });
+        }}
+      >
+        Add Player
+      </Button>
+    </>
   );
-}
-
-function newId(): string {
-  return `${Math.floor(Math.random() * 1_000_000)}`;
 }

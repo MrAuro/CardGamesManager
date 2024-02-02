@@ -7,6 +7,7 @@ import Header from "./components/Header";
 import Game from "./pages/Game";
 import Home from "./pages/Home";
 import Settings from "./pages/Settings";
+import { GameManager, Player } from "./utils/Game";
 
 export interface State {
   count: number;
@@ -15,11 +16,6 @@ export interface State {
   gameState: GameState;
   players: Player[];
 }
-
-export type Player = {
-  name: string;
-  stack: number;
-};
 
 export enum GameState {
   NONE,

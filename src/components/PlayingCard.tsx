@@ -1,7 +1,8 @@
 import { Paper, Text, useMantineTheme } from "@mantine/core";
 import Twemoji from "react-twemoji";
+import { Card } from "../utils/Game";
 
-export default function Card(props: CardType) {
+export default function PlayingCard(props: { card: Card }) {
   const theme = useMantineTheme();
 
   return (
@@ -12,8 +13,6 @@ export default function Card(props: CardType) {
         radius="md"
         style={{
           backgroundColor: theme.colors.gray[0],
-          borderColor: theme.colors.dark[9],
-          borderWidth: "3px",
         }}
       >
         <Text
@@ -21,14 +20,14 @@ export default function Card(props: CardType) {
           size="xl"
           fw={800}
           c={
-            props.suit === "hearts" || props.suit === "diamonds"
+            props.card.suit == "hearts" || props.card.suit === "diamonds"
               ? "red.8"
               : "dark.8"
           }
         >
           <div style={{ display: "flex", alignItems: "center" }}>
             <Twemoji options={{ className: "twemoji" }}>
-              {nameToEmoji(props.suit)} {props.value}
+              {nameToEmoji(props.card.suit)} {props.card.rank}
             </Twemoji>
           </div>
         </Text>
@@ -36,24 +35,6 @@ export default function Card(props: CardType) {
     </div>
   );
 }
-
-export type CardType = {
-  value:
-    | "2"
-    | "3"
-    | "4"
-    | "5"
-    | "6"
-    | "7"
-    | "8"
-    | "9"
-    | "10"
-    | "J"
-    | "Q"
-    | "K"
-    | "A";
-  suit: "hearts" | "diamonds" | "clubs" | "spades";
-};
 
 const nameToEmoji = (name: string) => {
   switch (name) {

@@ -21,22 +21,32 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import { useState } from "react";
-import Card, { CardType } from "./Card";
+import { Card, Player } from "../utils/Game";
+import PlayingCard from "./PlayingCard";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { STATE, State, STATE_WATCHER } from "../App";
+import { UseListStateHandlers } from "@mantine/hooks";
 
-export default function Player(props: {
+export default function PlayerCard(props: {
   name: string;
   turn: boolean;
   role: string;
-  cards: CardType[];
+  id: string;
+  cards: Card[];
+  handler: UseListStateHandlers<Player>;
 }) {
   const theme = useMantineTheme();
   const [isBetting, setIsBetting] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
+  const [state, setState] = useRecoilState(STATE);
+  const val = useRecoilValue<State>(STATE_WATCHER);
+
   const openModal = () =>
     modals.openConfirmModal({
       title: `Placing Bet`,
       centered: true,
+      radius: "md",
       children: (
         <NumberInput
           label="Bet Amount"
@@ -50,6 +60,22 @@ export default function Player(props: {
       labels: { confirm: "Confirm", cancel: "Cancel" },
       onCancel: () => console.log("Cancel"),
       onConfirm: () => console.log("Confirmed"),
+    });
+
+  const openDeleteConfirmModal = () =>
+    modals.openConfirmModal({
+      title: "Delete player",
+      children: "Are you sure that you want to delete this player?",
+      labels: { confirm: `Delete ${props.name}`, cancel: "Cancel" },
+      centered: true,
+      confirmProps: { color: "red", variant: "light" },
+      cancelProps: { color: "gray", variant: "light" },
+      radius: "md",
+      groupProps: { grow: true },
+      onConfirm: () => {
+        console.log("Player deleted");
+        props.handler.filter((item) => item.id !== props.id);
+      },
     });
 
   return (
@@ -112,8 +138,9 @@ export default function Player(props: {
                       <IconTrash style={{ width: rem(20), height: rem(20) }} />
                     }
                     color="red"
+                    onClick={openDeleteConfirmModal}
                   >
-                    Remove Player
+                    Delete Player
                   </Menu.Item>
                 </Menu.Dropdown>
               </Menu>
@@ -133,7 +160,7 @@ export default function Player(props: {
           </div>
           <Group justify="flex-end">
             {props.cards.map((card, i) => (
-              <Card key={i} value={card.value} suit={card.suit} />
+              <PlayingCard key={i} card={card} />
             ))}
           </Group>
         </Group>
