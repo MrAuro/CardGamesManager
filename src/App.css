@@ -1,3 +1,9 @@
 html {
     font-family: "Roboto", sans-serif;
 }
+
+img.twemoji {
+    height: 1em;
+    width: auto;
+    display: inline-block;
+  }

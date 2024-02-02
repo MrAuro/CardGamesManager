@@ -19,6 +19,51 @@ import { modals } from "@mantine/modals";
 import { useState } from "react";
 import ReactGridLayout from "react-grid-layout";
 import { IconCurrencyDollar } from "@tabler/icons-react";
+import { Card, CardType } from "./Card";
+
+const players: {
+  name: string;
+  role: string;
+  turn: boolean;
+  cards: CardType[];
+}[] = [
+  {
+    name: "AAA",
+    role: "BTN",
+    turn: true,
+    cards: [
+      { value: "A", suit: "hearts" },
+      { value: "K", suit: "hearts" },
+    ],
+  },
+  {
+    name: "BBB",
+    role: "BB",
+    turn: false,
+    cards: [
+      { value: "2", suit: "clubs" },
+      { value: "5", suit: "diamonds" },
+    ],
+  },
+  {
+    name: "CCC",
+    role: "SB",
+    turn: false,
+    cards: [
+      { value: "7", suit: "spades" },
+      { value: "J", suit: "hearts" },
+    ],
+  },
+  {
+    name: "DDD",
+    role: "",
+    turn: false,
+    cards: [
+      { value: "A", suit: "spades" },
+      { value: "A", suit: "spades" },
+    ],
+  },
+];
 
 export function Table() {
   /*
@@ -41,16 +86,26 @@ export function Table() {
     </ReactGridLayout>
 */
   return (
-    <SimpleGrid cols={{ base: 1, sm: 2, lg: 5 }}>
-      <Player name="John" turn role="BTN" />
-      <Player name="Doe" role="BB" />
-      <Player name="Test" role="SB" />
-      <Player name="Asdfasdf" role="" />
+    <SimpleGrid>
+      {players.map((player, i) => (
+        <Player
+          key={i}
+          name={player.name}
+          role={player.role}
+          turn={player.turn}
+          cards={player.cards}
+        />
+      ))}
     </SimpleGrid>
   );
 }
 
-function Player(props: { name: string; turn?: boolean; role: string }) {
+function Player(props: {
+  name: string;
+  turn: boolean;
+  role: string;
+  cards: CardType[];
+}) {
   const theme = useMantineTheme();
   const [isBetting, setIsBetting] = useState(false);
 
@@ -85,35 +140,44 @@ function Player(props: { name: string; turn?: boolean; role: string }) {
       }}
     >
       <Box m="xs">
-        <Text size="xl" fw={props.turn ? 700 : 500}>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            {props.name}{" "}
-            {props.role && (
-              <Badge
-                ml="xs"
-                variant="light"
-                color={props.turn ? "blue" : "gray"}
-              >
-                {props.role}
-              </Badge>
-            )}
+        <Group grow justify="space-between">
+          <div>
+            <Text size={props.turn ? "xl" : "lg"} fw={props.turn ? 700 : 500}>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                {props.name}{" "}
+                {props.role && (
+                  <Badge
+                    ml="xs"
+                    variant="light"
+                    color={props.turn ? "blue" : "gray"}
+                  >
+                    {props.role}
+                  </Badge>
+                )}
+              </div>
+            </Text>
+            <Text size={props.turn ? "md" : "sm"} c="dimmed">
+              $21.23
+            </Text>
           </div>
-        </Text>
-        <Text size="sm" c="dimmed">
-          $21.23
-        </Text>
+          <Group justify="flex-end">
+            {props.cards.map((card, i) => (
+              <Card key={i} value={card.value} suit={card.suit} />
+            ))}
+          </Group>
+        </Group>
         <Divider my="xs" />
         <Group grow gap="xs" justify="center">
-          <Button color="blue" variant="light" disabled={!!!props.turn}>
+          <Button color="blue" variant="light" disabled={!props.turn}>
             Check
           </Button>
-          <Button color="red" variant="light" disabled={!!!props.turn}>
+          <Button color="red" variant="light" disabled={!props.turn}>
             Fold
           </Button>
           <Button
             color="green"
             variant="light"
-            disabled={!!!props.turn}
+            disabled={!props.turn}
             onClick={openModal}
           >
             Bet
