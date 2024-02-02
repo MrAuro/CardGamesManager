@@ -8,4 +8,6 @@ img.twemoji {
     display: inline-block;
   }
 
-  
+  body {
+    overflow-y: scroll; /* Show scrollbars */
+  }

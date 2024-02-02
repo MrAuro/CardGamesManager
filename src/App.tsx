@@ -1,5 +1,11 @@
-import { Container, Divider, MantineProvider, Title } from "@mantine/core";
-import { RecoilRoot, atom, selector } from "recoil";
+import {
+  Container,
+  Divider,
+  MantineProvider,
+  Title,
+  Text,
+} from "@mantine/core";
+import { RecoilRoot, atom, selector, useRecoilValue } from "recoil";
 import "./App.css";
 import { theme } from "./theme";
 
@@ -7,9 +13,15 @@ import "@mantine/core/styles.css";
 import { Counter } from "./components/counter";
 import { ModalsProvider } from "@mantine/modals";
 import { Game } from "./components/Game";
+import { Header } from "./components/Header";
+import { IconCards, IconHome, IconSettings } from "@tabler/icons-react";
+import { Table } from "./components/Table";
+import { Base } from "./components/Base";
 
 export interface State {
   count: number;
+  activeTab: string;
+  scale: 1;
   gameState: GameState;
   players: Player[];
 }
@@ -24,8 +36,28 @@ export enum GameState {
   CREATING,
 }
 
+export const ROUTES = [
+  {
+    label: "Home",
+    link: "home",
+    icon: <IconHome size="1.4rem" />,
+  },
+  {
+    label: "Game",
+    link: "game",
+    icon: <IconCards size="1.4rem" />,
+  },
+  {
+    label: "Settings",
+    link: "settings",
+    icon: <IconSettings size="1.4rem" />,
+  },
+];
+
 export const defaultState: State = {
   count: 0,
+  activeTab: "home",
+  scale: 1,
   gameState: GameState.NONE,
   players: [],
 };
@@ -66,13 +98,13 @@ function debounce(func: any, wait: any) {
 
 function App() {
   return (
-    <MantineProvider theme={theme} defaultColorScheme="auto">
+    <MantineProvider theme={theme} defaultColorScheme="dark">
       <ModalsProvider>
         <RecoilRoot>
           <Container>
-            <Title mt="sm">H1 Title</Title>
+            <Header />
             <Divider my="sm" />
-            <Game />
+            <Base />
           </Container>
         </RecoilRoot>
       </ModalsProvider>
