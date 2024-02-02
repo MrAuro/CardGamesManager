@@ -1,7 +1,7 @@
 import { Paper, Text, useMantineTheme } from "@mantine/core";
 import Twemoji from "react-twemoji";
 
-export function Card(props: CardType) {
+export default function Card(props: CardType) {
   const theme = useMantineTheme();
 
   return (

@@ -1,9 +1,9 @@
 img.twemoji {
-    height: 1em;
-    width: auto;
-    display: inline-block;
-  }
+  height: 1em;
+  width: auto;
+  display: inline-block;
+}
 
-  body {
-    overflow-y: scroll; /* Show scrollbars */
-  }
+body {
+  overflow-y: scroll; /* Show scrollbars */
+}

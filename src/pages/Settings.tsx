@@ -2,7 +2,7 @@ import { Container, Input, Slider, useMantineTheme } from "@mantine/core";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { STATE, State, STATE_WATCHER } from "../App";
 
-export function Settings() {
+export default function Settings() {
   const [state, setState] = useRecoilState(STATE);
   const val = useRecoilValue<State>(STATE_WATCHER);
   const theme = useMantineTheme();

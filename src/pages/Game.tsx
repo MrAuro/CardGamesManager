@@ -1,9 +1,9 @@
 import { useRecoilState, useRecoilValue } from "recoil";
 import { GameState, STATE, STATE_WATCHER, State } from "../App";
 import { Button } from "@mantine/core";
-import { Table } from "./Table";
+import { Table } from "../components/Table";
 
-export function Game() {
+export default function Game() {
   const [state, setState] = useRecoilState(STATE);
   const val = useRecoilValue<State>(STATE_WATCHER);
 

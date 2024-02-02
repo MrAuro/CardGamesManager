@@ -1,22 +1,12 @@
-import {
-  Container,
-  Divider,
-  MantineProvider,
-  Title,
-  Text,
-} from "@mantine/core";
-import { RecoilRoot, atom, selector, useRecoilValue } from "recoil";
-import "./App.css";
-import { theme } from "./theme";
-
+import { Container, Divider, Text } from "@mantine/core";
 import "@mantine/core/styles.css";
-import { Counter } from "./components/counter";
-import { ModalsProvider } from "@mantine/modals";
-import { Game } from "./components/Game";
-import { Header } from "./components/Header";
 import { IconCards, IconHome, IconSettings } from "@tabler/icons-react";
-import { Table } from "./components/Table";
-import { Base } from "./components/Base";
+import { atom, selector, useRecoilValue } from "recoil";
+import "./App.css";
+import Header from "./components/Header";
+import Game from "./pages/Game";
+import Home from "./pages/Home";
+import Settings from "./pages/Settings";
 
 export interface State {
   count: number;
@@ -97,18 +87,30 @@ function debounce(func: any, wait: any) {
 }
 
 function App() {
+  const val = useRecoilValue<State>(STATE_WATCHER);
+
+  // Mantine uses fontSize for scaling
+  document.documentElement.style.fontSize = `${val.scale * 100}%`;
+
+  let content = <Text>No content</Text>;
+  switch (val.activeTab) {
+    case "home":
+      content = <Home />;
+      break;
+    case "game":
+      content = <Game />;
+      break;
+    case "settings":
+      content = <Settings />;
+      break;
+  }
+
   return (
-    <MantineProvider theme={theme} defaultColorScheme="dark">
-      <ModalsProvider>
-        <RecoilRoot>
-          <Container>
-            <Header />
-            <Divider my="sm" />
-            <Base />
-          </Container>
-        </RecoilRoot>
-      </ModalsProvider>
-    </MantineProvider>
+    <>
+      <Header />
+      <Divider my="xs" />
+      <Container>{content}</Container>
+    </>
   );
 }
 

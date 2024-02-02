@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { ROUTES, STATE, STATE_WATCHER, State } from "../App";
 
-export function Header() {
+export default function Header() {
   const [opened, { toggle }] = useDisclosure(false);
   const [state, setState] = useRecoilState(STATE);
   const val = useRecoilValue<State>(STATE_WATCHER);
