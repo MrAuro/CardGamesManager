@@ -16,7 +16,7 @@ type Card = {
   rank: CardRank;
 };
 
-type CardSuit = "hearts" | "diamonds" | "clubs" | "spades";
+type CardSuit = "hearts" | "diamonds" | "clubs" | "spades" | "NONE";
 type CardRank =
   | "2"
   | "3"
@@ -30,12 +30,13 @@ type CardRank =
   | "J"
   | "Q"
   | "K"
-  | "A";
+  | "A"
+  | "NONE";
 
 type Player = {
   id: string;
   name: string;
-  cards: Card[];
+  cards: [Card, Card];
   balance: number;
 };
 
