@@ -9,6 +9,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { STATE, STATE_WATCHER, State } from "../App";
 import classes from "../styles/Table.module.css";
 import PlayerCard from "./PlayerCard";
+import CommunityCards from "./CommunityCards";
 
 export function Table() {
   const [state, setState] = useRecoilState(STATE);
@@ -50,6 +51,7 @@ export function Table() {
 
   return (
     <>
+      <CommunityCards cards={val.communityCards} />
       <DragDropContext
         onDragEnd={({ destination, source }) => {
           handlers.reorder({ from: source.index, to: destination?.index || 0 });
@@ -71,8 +73,8 @@ export function Table() {
           handlers.append({
             balance: 0,
             cards: [
-              { rank: "K", suit: "clubs" },
-              { rank: "A", suit: "hearts" },
+              { rank: "NONE", suit: "NONE" },
+              { rank: "NONE", suit: "NONE" },
             ],
             id: crypto.randomUUID(),
             name: "Player " + (listState.length + 1),

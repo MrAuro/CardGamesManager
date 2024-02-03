@@ -9,7 +9,6 @@ import {
   Modal,
   NumberInput,
   Paper,
-  SimpleGrid,
   Text,
   TextInput,
   rem,
@@ -26,12 +25,8 @@ import { notifications, showNotification } from "@mantine/notifications";
 import {
   IconBolt,
   IconChevronDown,
-  IconClubsFilled,
   IconCurrencyDollar,
-  IconDiamondsFilled,
-  IconHeartFilled,
   IconPencil,
-  IconSpadeFilled,
   IconTrash,
   IconUserFilled,
 } from "@tabler/icons-react";
@@ -46,6 +41,7 @@ import {
   rankToName,
   suitToName,
 } from "../utils/Game";
+import CardPicker from "./CardPicker";
 import PlayingCard from "./PlayingCard";
 
 export default function PlayerCard(props: {
@@ -229,297 +225,14 @@ export default function PlayerCard(props: {
                   </ActionIcon>
                 </Menu.Target>
 
-                <Modal
-                  opened={setCardModelOpened}
-                  onClose={saveCard}
-                  title="Set Card"
-                  centered
-                  radius="md"
-                >
-                  <>
-                    <Group justify="center" grow>
-                      <ActionIcon
-                        radius="sm"
-                        size="xl"
-                        variant={setCardSuit == "clubs" ? "filled" : "outline"}
-                        onClick={() => setSetCardSuit("clubs")}
-                        color="gray.0"
-                        styles={{
-                          icon: {
-                            color:
-                              setCardSuit == "clubs"
-                                ? theme.colors.dark[8]
-                                : "white",
-                          },
-                        }}
-                      >
-                        <IconClubsFilled />
-                      </ActionIcon>
-                      <ActionIcon
-                        radius="sm"
-                        size="xl"
-                        variant={
-                          setCardSuit == "diamonds" ? "filled" : "outline"
-                        }
-                        onClick={() => setSetCardSuit("diamonds")}
-                        color="#ff2626"
-                      >
-                        <IconDiamondsFilled />
-                      </ActionIcon>
-                      <ActionIcon
-                        radius="sm"
-                        size="xl"
-                        variant={setCardSuit == "spades" ? "filled" : "outline"}
-                        onClick={() => setSetCardSuit("spades")}
-                        color="gray.0"
-                        styles={{
-                          icon: {
-                            color:
-                              setCardSuit == "spades"
-                                ? theme.colors.dark[8]
-                                : "white",
-                          },
-                        }}
-                      >
-                        <IconSpadeFilled />
-                      </ActionIcon>
-                      <ActionIcon
-                        radius="sm"
-                        size="xl"
-                        variant={setCardSuit == "hearts" ? "filled" : "outline"}
-                        onClick={() => setSetCardSuit("hearts")}
-                        color="#ff2626"
-                      >
-                        <IconHeartFilled />
-                      </ActionIcon>
-                    </Group>
-                    <Divider my="md" />
-                    {/* 2,3,4,5,6
-                        7,8,9,T
-                        J,Q,K,A */}
-                    <Group grow>
-                      <SimpleGrid
-                        cols={{ sm: 7, xs: 2 }}
-                        spacing="xs"
-                        verticalSpacing="xs"
-                      >
-                        <Button
-                          radius="md"
-                          size="compact-xl"
-                          fullWidth
-                          p="xs"
-                          fw="bold"
-                          justify="center"
-                          variant={setCardRank == "2" ? "filled" : "outline"}
-                          onClick={() => {
-                            setSetCardRank("2");
-                          }}
-                        >
-                          {" "}
-                          2
-                        </Button>
-                        <Button
-                          radius="md"
-                          size="compact-xl"
-                          fullWidth
-                          p="xs"
-                          fw="bold"
-                          justify="center"
-                          variant={setCardRank == "3" ? "filled" : "outline"}
-                          onClick={() => {
-                            setSetCardRank("3");
-                          }}
-                        >
-                          {" "}
-                          3
-                        </Button>
-                        <Button
-                          radius="md"
-                          size="compact-xl"
-                          fullWidth
-                          p="xs"
-                          fw="bold"
-                          justify="center"
-                          variant={setCardRank == "4" ? "filled" : "outline"}
-                          onClick={() => {
-                            setSetCardRank("4");
-                          }}
-                        >
-                          {" "}
-                          4
-                        </Button>
-                        <Button
-                          radius="md"
-                          size="compact-xl"
-                          fullWidth
-                          p="xs"
-                          fw="bold"
-                          justify="center"
-                          variant={setCardRank == "5" ? "filled" : "outline"}
-                          onClick={() => {
-                            setSetCardRank("5");
-                          }}
-                        >
-                          {" "}
-                          5
-                        </Button>
-                        <Button
-                          radius="md"
-                          size="compact-xl"
-                          fullWidth
-                          p="xs"
-                          fw="bold"
-                          justify="center"
-                          variant={setCardRank == "6" ? "filled" : "outline"}
-                          onClick={() => {
-                            setSetCardRank("6");
-                          }}
-                        >
-                          {" "}
-                          6
-                        </Button>
-                        <Button
-                          radius="md"
-                          size="compact-xl"
-                          fullWidth
-                          p="xs"
-                          fw="bold"
-                          justify="center"
-                          variant={setCardRank == "7" ? "filled" : "outline"}
-                          onClick={() => {
-                            setSetCardRank("7");
-                          }}
-                        >
-                          {" "}
-                          7
-                        </Button>
-                        <Button
-                          radius="md"
-                          size="compact-xl"
-                          fullWidth
-                          p="xs"
-                          fw="bold"
-                          justify="center"
-                          variant={setCardRank == "8" ? "filled" : "outline"}
-                          onClick={() => {
-                            setSetCardRank("8");
-                          }}
-                        >
-                          {" "}
-                          8
-                        </Button>
-                        <Button
-                          radius="md"
-                          size="compact-xl"
-                          fullWidth
-                          p="xs"
-                          fw="bold"
-                          justify="center"
-                          variant={setCardRank == "9" ? "filled" : "outline"}
-                          onClick={() => {
-                            setSetCardRank("9");
-                          }}
-                        >
-                          {" "}
-                          9
-                        </Button>
-                        <Button
-                          radius="md"
-                          size="compact-xl"
-                          fullWidth
-                          p="xs"
-                          fw="bold"
-                          justify="center"
-                          variant={setCardRank == "10" ? "filled" : "outline"}
-                          onClick={() => {
-                            setSetCardRank("10");
-                          }}
-                        >
-                          {" "}
-                          10
-                        </Button>
-                        <Button
-                          radius="md"
-                          size="compact-xl"
-                          fullWidth
-                          p="xs"
-                          fw="bold"
-                          justify="center"
-                          variant={setCardRank == "J" ? "filled" : "outline"}
-                          onClick={() => {
-                            setSetCardRank("J");
-                          }}
-                        >
-                          {" "}
-                          J
-                        </Button>
-                        <Button
-                          radius="md"
-                          size="compact-xl"
-                          fullWidth
-                          p="xs"
-                          fw="bold"
-                          justify="center"
-                          variant={setCardRank == "Q" ? "filled" : "outline"}
-                          onClick={() => {
-                            setSetCardRank("Q");
-                          }}
-                        >
-                          {" "}
-                          Q
-                        </Button>
-                        <Button
-                          radius="md"
-                          size="compact-xl"
-                          fullWidth
-                          p="xs"
-                          fw="bold"
-                          justify="center"
-                          variant={setCardRank == "K" ? "filled" : "outline"}
-                          onClick={() => {
-                            setSetCardRank("K");
-                          }}
-                        >
-                          {" "}
-                          K
-                        </Button>
-                        <Button
-                          radius="md"
-                          size="compact-xl"
-                          fullWidth
-                          p="xs"
-                          fw="bold"
-                          justify="center"
-                          variant={setCardRank == "A" ? "filled" : "outline"}
-                          onClick={() => {
-                            setSetCardRank("A");
-                          }}
-                        >
-                          A
-                        </Button>
-                        <Button
-                          radius="md"
-                          size="compact-xl"
-                          fullWidth
-                          p="xs"
-                          fw="bold"
-                          justify="center"
-                          variant={setCardRank == "NONE" ? "filled" : "outline"}
-                          onClick={() => {
-                            setSetCardRank("NONE");
-                            setSetCardSuit("NONE");
-                          }}
-                        >
-                          /
-                        </Button>
-                      </SimpleGrid>
-                    </Group>
-                    <Divider my="md" />
-                    <Button fullWidth onClick={saveCard}>
-                      Save
-                    </Button>
-                  </>
-                </Modal>
+                <CardPicker
+                  setCardModelOpened={setCardModelOpened}
+                  saveCard={saveCard}
+                  setCardRank={setCardRank}
+                  setSetCardRank={setSetCardRank}
+                  setSetCardSuit={setSetCardSuit}
+                  setCardSuit={setCardSuit}
+                />
 
                 <Modal
                   opened={editModalOpened}

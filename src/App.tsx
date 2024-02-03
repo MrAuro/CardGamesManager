@@ -7,7 +7,7 @@ import Header from "./components/Header";
 import Game from "./pages/Game";
 import Home from "./pages/Home";
 import Settings from "./pages/Settings";
-import { Player } from "./utils/Game";
+import { Card, Player } from "./utils/Game";
 
 export interface State {
   count: number;
@@ -15,6 +15,7 @@ export interface State {
   scale: 1;
   gameState: GameState;
   players: Player[];
+  communityCards: Card[];
 }
 
 export enum GameState {
@@ -46,6 +47,7 @@ export const defaultState: State = {
   scale: 1,
   gameState: GameState.NONE,
   players: [],
+  communityCards: new Array(5).fill({ suit: "NONE", rank: "NONE" }),
 };
 
 export const STATE = atom({
