@@ -12,32 +12,30 @@ import {
   Text,
   TextInput,
   rem,
+  useComputedColorScheme,
+  useMantineColorScheme,
   useMantineTheme,
 } from "@mantine/core";
 import {
   UseListStateHandlers,
   getHotkeyHandler,
   useDisclosure,
-  useFocusTrap,
-  useMediaQuery,
 } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
+import { notifications } from "@mantine/notifications";
 import {
   IconBolt,
   IconChevronDown,
-  IconCoin,
   IconCurrencyDollar,
   IconPencil,
   IconTrash,
-  IconUser,
   IconUserFilled,
 } from "@tabler/icons-react";
-import { useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { STATE, STATE_WATCHER, State } from "../App";
 import { Card, Player } from "../utils/Game";
 import PlayingCard from "./PlayingCard";
-import { notifications } from "@mantine/notifications";
 
 export default function PlayerCard(props: {
   name: string;
@@ -56,18 +54,31 @@ export default function PlayerCard(props: {
   const val = useRecoilValue<State>(STATE_WATCHER);
 
   const [name, setName] = useState(props.name);
+  const [editName, setEditName] = useState(name);
   const [balance, setBalance] = useState(props.balance);
+  const [editBalance, setEditBalance] = useState(balance);
   const [editModalOpened, { open, close }] = useDisclosure(false);
 
+  useEffect(() => {
+    props.handler.applyWhere(
+      (item) => item.id === props.id,
+      (item) => ({ ...item, name, balance })
+    );
+  }, [name, balance]);
+
+  const { colorScheme } = useMantineColorScheme();
+
   const [bet, setBet] = useState<number | string>("");
+
+  let turn = name === "turn" ? true : false;
 
   const openDeleteConfirmModal = () =>
     modals.openConfirmModal({
       title: "Delete Player",
       children: "Are you sure that you want to delete this player?",
-      labels: { confirm: `Delete ${props.name}`, cancel: "Cancel" },
-      confirmProps: { color: "red", variant: "light" },
-      cancelProps: { color: "gray", variant: "light" },
+      labels: { confirm: `Delete "${name}"`, cancel: "Cancel" },
+      confirmProps: { color: "red" },
+      cancelProps: { color: "gray" },
       groupProps: { grow: true },
       onConfirm: () => {
         props.handler.filter((item) => item.id !== props.id);
@@ -79,6 +90,9 @@ export default function PlayerCard(props: {
     });
 
   const savePlayer = () => {
+    setName(editName);
+    setBalance(editBalance);
+
     modals.closeAll();
     props.handler.applyWhere(
       (item) => item.id === props.id,
@@ -89,6 +103,12 @@ export default function PlayerCard(props: {
       message: "Player Updated",
       color: "green",
     });
+  };
+
+  const revertPlayer = () => {
+    setEditName(name);
+    setEditBalance(balance);
+    close();
   };
 
   const placeBet = () => {
@@ -104,23 +124,39 @@ export default function PlayerCard(props: {
     setIsBetting(false);
   };
 
+  const removeCard = (card: Card) => {
+    console.log("Card removed");
+
+    let cards = [...props.cards];
+    cards[cards.indexOf(card)] = { suit: "NONE", rank: "NONE" };
+    props.handler.applyWhere(
+      (item) => item.id === props.id,
+      (item) => ({ ...item, cards: [cards[0], cards[1]] })
+    );
+  };
+
   return (
     <Paper
       withBorder
       radius="md"
       styles={{
         root: {
-          backgroundColor: props.turn
-            ? theme.colors.dark[8]
-            : theme.colors.dark[7],
+          backgroundColor:
+            colorScheme == "dark"
+              ? turn
+                ? theme.colors.dark[8]
+                : theme.colors.dark[7]
+              : turn
+              ? "#e6e6e6"
+              : theme.colors.gray[0],
         },
       }}
     >
       <Box m="xs">
         <Group grow justify="space-between">
           <div>
-            <Text size={props.turn ? "xl" : "lg"} fw={props.turn ? 700 : 500}>
-              {props.name}{" "}
+            <Text size={turn ? "xl" : "lg"} fw={turn ? 700 : 500}>
+              {name}{" "}
               <Menu position="bottom-start">
                 <Menu.Target>
                   <ActionIcon
@@ -136,7 +172,7 @@ export default function PlayerCard(props: {
 
                 <Modal
                   opened={editModalOpened}
-                  onClose={close}
+                  onClose={revertPlayer}
                   title="Edit Player"
                   centered
                   radius="md"
@@ -145,8 +181,10 @@ export default function PlayerCard(props: {
                     <TextInput
                       data-autofocus
                       label="Player Name"
-                      value={name}
-                      onChange={(event) => setName(event.currentTarget.value)}
+                      value={editName}
+                      onChange={(event) =>
+                        setEditName(event.currentTarget.value)
+                      }
                       onKeyDown={getHotkeyHandler([["enter", savePlayer]])}
                       radius="md"
                       leftSection={<IconUserFilled />}
@@ -161,21 +199,16 @@ export default function PlayerCard(props: {
                       mt="md"
                       radius="md"
                       leftSection={<IconCurrencyDollar />}
-                      value={balance}
+                      value={editBalance}
                       onChange={(value) =>
-                        setBalance(
+                        setEditBalance(
                           isNaN(parseFloat(`${value}`))
                             ? 0
                             : parseFloat(`${value}`)
                         )
                       }
                     />
-                    <Button
-                      fullWidth
-                      mt="md"
-                      variant="light"
-                      onClick={savePlayer}
-                    >
+                    <Button fullWidth mt="md" onClick={savePlayer}>
                       Save
                     </Button>
                   </>
@@ -190,6 +223,7 @@ export default function PlayerCard(props: {
                       <IconPencil style={{ width: rem(20), height: rem(20) }} />
                     }
                     onClick={open}
+                    fw={450}
                   >
                     Edit Player
                   </Menu.Item>
@@ -197,6 +231,7 @@ export default function PlayerCard(props: {
                     leftSection={
                       <IconBolt style={{ width: rem(20), height: rem(20) }} />
                     }
+                    fw={450}
                   >
                     Force Turn
                   </Menu.Item>
@@ -205,6 +240,7 @@ export default function PlayerCard(props: {
                       <IconTrash style={{ width: rem(20), height: rem(20) }} />
                     }
                     color="red"
+                    fw={450}
                     onClick={openDeleteConfirmModal}
                   >
                     Delete Player
@@ -221,13 +257,13 @@ export default function PlayerCard(props: {
                     </Badge>
                   )} */}
             </Text>
-            <Text size={props.turn ? "md" : "sm"} c="dimmed">
-              ${props.balance.toFixed(2)}
+            <Text size={turn ? "md" : "sm"} c="dimmed">
+              ${balance.toFixed(2)}
             </Text>
           </div>
           <Group justify="flex-end">
             {props.cards.map((card, i) => (
-              <PlayingCard key={i} card={card} />
+              <PlayingCard key={i} card={card} removeCard={removeCard} />
             ))}
           </Group>
         </Group>
@@ -254,22 +290,12 @@ export default function PlayerCard(props: {
                   />
                 </Grid.Col>
                 <Grid.Col span={{ base: 12, xs: 2 }}>
-                  <Button
-                    variant="light"
-                    fullWidth
-                    color="gray"
-                    onClick={cancelBet}
-                  >
+                  <Button fullWidth color="gray" onClick={cancelBet}>
                     Back
                   </Button>
                 </Grid.Col>
                 <Grid.Col span={{ base: 12, xs: 2 }}>
-                  <Button
-                    variant="light"
-                    fullWidth
-                    color="green"
-                    onClick={placeBet}
-                  >
+                  <Button fullWidth color="green" onClick={placeBet}>
                     Bet
                   </Button>
                 </Grid.Col>
@@ -277,16 +303,15 @@ export default function PlayerCard(props: {
             </>
           ) : (
             <>
-              <Button color="blue" variant="light" disabled={!props.turn}>
+              <Button color="blue" disabled={!turn}>
                 Check
               </Button>
-              <Button color="red" variant="light" disabled={!props.turn}>
+              <Button color="red" disabled={!turn}>
                 Fold
               </Button>
               <Button
                 color="green"
-                variant="light"
-                disabled={!props.turn}
+                disabled={!turn}
                 onClick={() => {
                   setIsBetting(true);
                 }}
