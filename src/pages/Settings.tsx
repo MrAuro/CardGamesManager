@@ -59,7 +59,7 @@ export default function Settings() {
           }}
         />
       </Input.Wrapper>
-      <InputWrapper label="Color Scheme" mb="xl">
+      <InputWrapper label="Color Scheme" mb="md">
         <Button.Group>
           <Button
             variant={colorScheme == "light" ? "filled" : "default"}
@@ -77,6 +77,15 @@ export default function Settings() {
           </Button>
         </Button.Group>
       </InputWrapper>
+      <Button
+        color="red"
+        onClick={() => {
+          localStorage.clear();
+          window.location.reload();
+        }}
+      >
+        Reset Game
+      </Button>
     </Container>
   );
 }
