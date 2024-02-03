@@ -1,13 +1,14 @@
 import { Container, Divider, Text } from "@mantine/core";
 import "@mantine/core/styles.css";
 import { IconCards, IconHome, IconSettings } from "@tabler/icons-react";
-import { atom, selector, useRecoilValue } from "recoil";
+import { atom, selector, useRecoilState, useRecoilValue } from "recoil";
 import "./App.css";
 import Header from "./components/Header";
 import Game from "./pages/Game";
 import Home from "./pages/Home";
 import Settings from "./pages/Settings";
 import { Card, Player } from "./utils/Game";
+import { useEffect } from "react";
 
 export interface State {
   activeTab: string;
@@ -19,6 +20,7 @@ export interface State {
   currentPlayer: number;
   dealerIndex: number;
   inRound: boolean;
+  usedCards: Card[];
 }
 
 export enum GameState {
@@ -54,6 +56,7 @@ export const defaultState: State = {
   currentPlayer: 0,
   dealerIndex: 0,
   inRound: false,
+  usedCards: [],
 };
 
 export const STATE = atom({
@@ -64,6 +67,11 @@ export const STATE = atom({
   },
 });
 
+export const USED_CARDS = atom({
+  key: "usedCards",
+  default: [] as Card[],
+});
+
 const debouncedSetItem = debounce((key: any, value: any) => {
   console.log({ key, value: JSON.parse(value) });
   localStorage.setItem(key, value);
@@ -72,7 +80,7 @@ const debouncedSetItem = debounce((key: any, value: any) => {
 export const STATE_WATCHER = selector({
   key: "stateWatcher",
   get: ({ get }) => {
-    const curr = get(STATE);
+    const curr: State = get(STATE);
     debouncedSetItem("state", JSON.stringify(curr));
     return curr;
   },
@@ -92,7 +100,19 @@ function debounce(func: any, wait: any) {
 
 function App() {
   const val = useRecoilValue<State>(STATE_WATCHER);
+  const [usedCards, setUsedCards] = useRecoilState<Card[]>(USED_CARDS);
 
+  useEffect(() => {
+    console.log("Used cards changed");
+    setUsedCards([
+      ...new Set(
+        [
+          ...val.communityCards,
+          ...val.players.map((player) => player.cards).flat(),
+        ].filter((card) => card.rank != "NONE" && card.suit != "NONE")
+      ),
+    ]);
+  }, [val]);
   // Mantine uses fontSize for scaling
   document.documentElement.style.fontSize = `${val.scale * 100}%`;
 

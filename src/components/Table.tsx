@@ -49,7 +49,7 @@ export function Table() {
 
   return (
     <>
-      <CommunityCards cards={val.communityCards} />
+      <CommunityCards />
       <DragDropContext
         onDragEnd={({ destination, source }) => {
           handlers.reorder({ from: source.index, to: destination?.index || 0 });

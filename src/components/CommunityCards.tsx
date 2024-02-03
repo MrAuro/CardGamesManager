@@ -21,7 +21,7 @@ import { showNotification } from "@mantine/notifications";
 import { STATE, STATE_WATCHER, State } from "../App";
 import { useRecoilState, useRecoilValue } from "recoil";
 
-export default function CommunityCards(props: { cards: Card[] }) {
+export default function CommunityCards() {
   const theme = useMantineTheme();
   const { colorScheme } = useMantineColorScheme();
   const [setCardModelOpened, { open: openSetCard, close: closeSetCard }] =
@@ -29,8 +29,8 @@ export default function CommunityCards(props: { cards: Card[] }) {
   const [setCardSuit, setSetCardSuit] = useState<CardSuit>("NONE");
   const [setCardRank, setSetCardRank] = useState<CardRank>("NONE");
   const [selectedCardIndex, setSelectedCardIndex] = useState<number>(0);
-  const [cards, setCards] = useState<Card[]>(props.cards);
-  const [state, setState] = useRecoilState(STATE);
+  const [state, setState] = useRecoilState<State>(STATE);
+  const [cards, setCards] = useState<Card[]>(state.communityCards);
   // const val = useRecoilValue<State>(STATE_WATCHER);
 
   const saveCard = () => {

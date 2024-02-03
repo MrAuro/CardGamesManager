@@ -13,7 +13,9 @@ import {
   IconHeartFilled,
   IconDiamondsFilled,
 } from "@tabler/icons-react";
-import { CardRank, CardSuit } from "../utils/Game";
+import { Card, CardRank, CardSuit } from "../utils/Game";
+import { useRecoilValue } from "recoil";
+import { USED_CARDS } from "../App";
 
 export default function CardPicker(props: {
   setCardModelOpened: boolean;
@@ -24,6 +26,7 @@ export default function CardPicker(props: {
   setCardSuit: CardSuit;
 }) {
   const theme = useMantineTheme();
+  const usedCards = useRecoilValue<Card[]>(USED_CARDS);
 
   return (
     <Modal
@@ -44,6 +47,9 @@ export default function CardPicker(props: {
               fw="bold"
               justify="center"
               variant={props.setCardRank == "2" ? "filled" : "outline"}
+              disabled={usedCards.some(
+                (card) => card.rank == "2" && card.suit == props.setCardSuit
+              )}
               onClick={() => {
                 props.setSetCardRank("2");
               }}
@@ -59,6 +65,9 @@ export default function CardPicker(props: {
               fw="bold"
               justify="center"
               variant={props.setCardRank == "3" ? "filled" : "outline"}
+              disabled={usedCards.some(
+                (card) => card.rank == "3" && card.suit == props.setCardSuit
+              )}
               onClick={() => {
                 props.setSetCardRank("3");
               }}
@@ -74,6 +83,9 @@ export default function CardPicker(props: {
               fw="bold"
               justify="center"
               variant={props.setCardRank == "4" ? "filled" : "outline"}
+              disabled={usedCards.some(
+                (card) => card.rank == "4" && card.suit == props.setCardSuit
+              )}
               onClick={() => {
                 props.setSetCardRank("4");
               }}
@@ -89,6 +101,9 @@ export default function CardPicker(props: {
               fw="bold"
               justify="center"
               variant={props.setCardRank == "5" ? "filled" : "outline"}
+              disabled={usedCards.some(
+                (card) => card.rank == "5" && card.suit == props.setCardSuit
+              )}
               onClick={() => {
                 props.setSetCardRank("5");
               }}
@@ -104,6 +119,9 @@ export default function CardPicker(props: {
               fw="bold"
               justify="center"
               variant={props.setCardRank == "6" ? "filled" : "outline"}
+              disabled={usedCards.some(
+                (card) => card.rank == "6" && card.suit == props.setCardSuit
+              )}
               onClick={() => {
                 props.setSetCardRank("6");
               }}
@@ -119,6 +137,9 @@ export default function CardPicker(props: {
               fw="bold"
               justify="center"
               variant={props.setCardRank == "7" ? "filled" : "outline"}
+              disabled={usedCards.some(
+                (card) => card.rank == "7" && card.suit == props.setCardSuit
+              )}
               onClick={() => {
                 props.setSetCardRank("7");
               }}
@@ -134,6 +155,9 @@ export default function CardPicker(props: {
               fw="bold"
               justify="center"
               variant={props.setCardRank == "8" ? "filled" : "outline"}
+              disabled={usedCards.some(
+                (card) => card.rank == "8" && card.suit == props.setCardSuit
+              )}
               onClick={() => {
                 props.setSetCardRank("8");
               }}
@@ -149,6 +173,9 @@ export default function CardPicker(props: {
               fw="bold"
               justify="center"
               variant={props.setCardRank == "9" ? "filled" : "outline"}
+              disabled={usedCards.some(
+                (card) => card.rank == "9" && card.suit == props.setCardSuit
+              )}
               onClick={() => {
                 props.setSetCardRank("9");
               }}
@@ -164,6 +191,9 @@ export default function CardPicker(props: {
               fw="bold"
               justify="center"
               variant={props.setCardRank == "10" ? "filled" : "outline"}
+              disabled={usedCards.some(
+                (card) => card.rank == "10" && card.suit == props.setCardSuit
+              )}
               onClick={() => {
                 props.setSetCardRank("10");
               }}
@@ -179,6 +209,9 @@ export default function CardPicker(props: {
               fw="bold"
               justify="center"
               variant={props.setCardRank == "J" ? "filled" : "outline"}
+              disabled={usedCards.some(
+                (card) => card.rank == "J" && card.suit == props.setCardSuit
+              )}
               onClick={() => {
                 props.setSetCardRank("J");
               }}
@@ -194,6 +227,9 @@ export default function CardPicker(props: {
               fw="bold"
               justify="center"
               variant={props.setCardRank == "Q" ? "filled" : "outline"}
+              disabled={usedCards.some(
+                (card) => card.rank == "Q" && card.suit == props.setCardSuit
+              )}
               onClick={() => {
                 props.setSetCardRank("Q");
               }}
@@ -209,6 +245,9 @@ export default function CardPicker(props: {
               fw="bold"
               justify="center"
               variant={props.setCardRank == "K" ? "filled" : "outline"}
+              disabled={usedCards.some(
+                (card) => card.rank == "K" && card.suit == props.setCardSuit
+              )}
               onClick={() => {
                 props.setSetCardRank("K");
               }}
@@ -224,6 +263,9 @@ export default function CardPicker(props: {
               fw="bold"
               justify="center"
               variant={props.setCardRank == "A" ? "filled" : "outline"}
+              disabled={usedCards.some(
+                (card) => card.rank == "A" && card.suit == props.setCardSuit
+              )}
               onClick={() => {
                 props.setSetCardRank("A");
               }}
@@ -253,12 +295,22 @@ export default function CardPicker(props: {
             radius="sm"
             size="xl"
             variant={props.setCardSuit == "clubs" ? "filled" : "outline"}
+            disabled={usedCards.some(
+              (card) => card.rank == props.setCardRank && card.suit == "clubs"
+            )}
             onClick={() => props.setSetCardSuit("clubs")}
             color="gray.0"
             styles={{
               icon: {
                 color:
-                  props.setCardSuit == "clubs" ? theme.colors.dark[8] : "white",
+                  props.setCardSuit == "clubs"
+                    ? theme.colors.dark[8]
+                    : usedCards.some(
+                        (card) =>
+                          card.rank == props.setCardRank && card.suit == "clubs"
+                      )
+                    ? theme.colors.dark[3]
+                    : "white",
               },
             }}
           >
@@ -268,6 +320,10 @@ export default function CardPicker(props: {
             radius="sm"
             size="xl"
             variant={props.setCardSuit == "diamonds" ? "filled" : "outline"}
+            disabled={usedCards.some(
+              (card) =>
+                card.rank == props.setCardRank && card.suit == "diamonds"
+            )}
             onClick={() => props.setSetCardSuit("diamonds")}
             color="#ff2626"
           >
@@ -277,6 +333,9 @@ export default function CardPicker(props: {
             radius="sm"
             size="xl"
             variant={props.setCardSuit == "spades" ? "filled" : "outline"}
+            disabled={usedCards.some(
+              (card) => card.rank == props.setCardRank && card.suit == "spades"
+            )}
             onClick={() => props.setSetCardSuit("spades")}
             color="gray.0"
             styles={{
@@ -284,6 +343,12 @@ export default function CardPicker(props: {
                 color:
                   props.setCardSuit == "spades"
                     ? theme.colors.dark[8]
+                    : usedCards.some(
+                        (card) =>
+                          card.rank == props.setCardRank &&
+                          card.suit == "spades"
+                      )
+                    ? theme.colors.dark[3]
                     : "white",
               },
             }}
@@ -294,6 +359,9 @@ export default function CardPicker(props: {
             radius="sm"
             size="xl"
             variant={props.setCardSuit == "hearts" ? "filled" : "outline"}
+            disabled={usedCards.some(
+              (card) => card.rank == props.setCardRank && card.suit == "hearts"
+            )}
             onClick={() => props.setSetCardSuit("hearts")}
             color="#ff2626"
           >
