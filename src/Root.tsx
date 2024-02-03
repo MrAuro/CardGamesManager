@@ -5,6 +5,8 @@ import { MantineProvider, Container } from "@mantine/core";
 import { ModalsProvider } from "@mantine/modals";
 import { RecoilRoot } from "recoil";
 import MantineTheme from "./MantineTheme";
+import { Notifications } from "@mantine/notifications";
+import "@mantine/notifications/styles.css";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
@@ -17,6 +19,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
       >
         <RecoilRoot>
           <Container>
+            <Notifications />
             <App />
           </Container>
         </RecoilRoot>
