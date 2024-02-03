@@ -9,6 +9,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { Player } from "../utils/Game";
 import PlayerCard from "./PlayerCard";
 import { useEffect } from "react";
+import { notifications } from "@mantine/notifications";
 
 export function Table() {
   const [state, setState] = useRecoilState(STATE);
@@ -40,6 +41,7 @@ export function Table() {
             turn={true}
             cards={item.cards}
             id={item.id}
+            balance={item.balance}
             handler={handlers}
           />
         </div>
@@ -72,6 +74,10 @@ export function Table() {
             cards: [],
             id: crypto.randomUUID(),
             name: "Player " + (listState.length + 1),
+          });
+          notifications.show({
+            message: "Player Added",
+            color: "green",
           });
         }}
       >
