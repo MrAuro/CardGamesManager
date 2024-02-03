@@ -1,5 +1,6 @@
 import {
   ActionIcon,
+  Badge,
   Box,
   Button,
   Divider,
@@ -24,15 +25,17 @@ import { modals } from "@mantine/modals";
 import { notifications, showNotification } from "@mantine/notifications";
 import {
   IconBolt,
+  IconCards,
   IconChevronDown,
   IconCurrencyDollar,
+  IconDots,
   IconPencil,
   IconTrash,
   IconUserFilled,
 } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-// import { useRecoilState, useRecoilValue } from "recoil";
-// import { STATE, STATE_WATCHER, State } from "../App";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { STATE, STATE_WATCHER, State } from "../App";
 import {
   Card,
   CardRank,
@@ -43,30 +46,32 @@ import {
 } from "../utils/Game";
 import CardPicker from "./CardPicker";
 import PlayingCard from "./PlayingCard";
+import PositionBadge from "./PosititionBadge";
 
 export default function PlayerCard(props: {
-  name: string;
-  turn: boolean;
-  role: string;
-  id: string;
-  cards: Card[];
-  balance: number;
+  // name: string;
+  // turn: boolean;
+  // role: string;
+  // id: string;
+  // cards: Card[];
+  // balance: number;
+  player: Player;
   handler: UseListStateHandlers<Player>;
 }) {
   const theme = useMantineTheme();
   const [isBetting, setIsBetting] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
-  // const [state, setState] = useRecoilState(STATE);
-  // const val = useRecoilValue<State>(STATE_WATCHER);
+  const [state, setState] = useRecoilState<State>(STATE);
+  const val = useRecoilValue<State>(STATE_WATCHER);
 
-  const [name, setName] = useState(props.name);
+  const [name, setName] = useState(props.player.name);
   const [editName, setEditName] = useState(name);
-  const [balance, setBalance] = useState(props.balance);
+  const [balance, setBalance] = useState(props.player.balance);
   const [editBalance, setEditBalance] = useState(balance);
   const [editModalOpened, { open, close }] = useDisclosure(false);
 
-  const [cards, setCards] = useState<Card[]>(props.cards);
+  const [cards, setCards] = useState<Card[]>(props.player.cards);
 
   const [setCardModelOpened, { open: openSetCard, close: closeSetCard }] =
     useDisclosure(false);
@@ -76,7 +81,7 @@ export default function PlayerCard(props: {
 
   useEffect(() => {
     props.handler.applyWhere(
-      (item) => item.id === props.id,
+      (item) => item.id === props.player.id,
       (item) => ({ ...item, name, balance })
     );
   }, [name, balance]);
@@ -85,7 +90,7 @@ export default function PlayerCard(props: {
 
   const [bet, setBet] = useState<number | string>("");
 
-  let turn = name === "turn" ? true : false;
+  let turn = state.currentPlayer === state.players.indexOf(props.player);
 
   const openDeleteConfirmModal = () =>
     modals.openConfirmModal({
@@ -96,7 +101,7 @@ export default function PlayerCard(props: {
       cancelProps: { color: "gray" },
       groupProps: { grow: true },
       onConfirm: () => {
-        props.handler.filter((item) => item.id !== props.id);
+        props.handler.filter((item) => item.id !== props.player.id);
         notifications.show({
           message: "Player Deleted",
           color: "red",
@@ -110,7 +115,7 @@ export default function PlayerCard(props: {
 
     modals.closeAll();
     props.handler.applyWhere(
-      (item) => item.id === props.id,
+      (item) => item.id === props.player.id,
       (item) => ({ ...item, name, balance })
     );
     close();
@@ -152,7 +157,7 @@ export default function PlayerCard(props: {
     else _cards[selectedCardIndex] = { suit: setCardSuit, rank: setCardRank };
 
     props.handler.applyWhere(
-      (item) => item.id === props.id,
+      (item) => item.id === props.player.id,
       (item) => ({ ...item, cards: [cards[0], cards[1]] })
     );
     setCards(_cards);
@@ -184,7 +189,7 @@ export default function PlayerCard(props: {
     let _cards = [...cards];
     _cards[_cards.indexOf(card)] = { suit: "NONE", rank: "NONE" };
     props.handler.applyWhere(
-      (item) => item.id === props.id,
+      (item) => item.id === props.player.id,
       (item) => ({ ...item, cards: [cards[0], cards[1]] })
     );
     setCards(_cards);
@@ -210,116 +215,151 @@ export default function PlayerCard(props: {
       <Box m="xs">
         <Group grow justify="space-between">
           <div>
-            <Text size={turn ? "xl" : "lg"} fw={turn ? 700 : 500}>
-              {name}{" "}
-              <Menu position="bottom-start">
-                <Menu.Target>
-                  <ActionIcon
-                    variant="transparent"
-                    color={theme.colors.dark[1]}
-                    onClick={() => setShowMenu(!showMenu)}
-                  >
-                    <IconChevronDown
-                      style={{ width: rem(20), height: rem(20) }}
-                    />
-                  </ActionIcon>
-                </Menu.Target>
+            <Text
+              size={turn ? "xl" : "lg"}
+              fw={turn ? 700 : 500}
+              tt="capitalize"
+            >
+              <div style={{ display: "flex", alignItems: "center" }}>
+                {name}
+                {
+                  <PositionBadge
+                    player={props.player}
+                    nextDealer={() => {
+                      setState({
+                        ...state,
+                        dealerIndex: (val.dealerIndex + 1) % val.players.length,
+                      });
+                    }}
+                  />
+                }
 
-                <CardPicker
-                  setCardModelOpened={setCardModelOpened}
-                  saveCard={saveCard}
-                  setCardRank={setCardRank}
-                  setSetCardRank={setSetCardRank}
-                  setSetCardSuit={setSetCardSuit}
-                  setCardSuit={setCardSuit}
-                />
-
-                <Modal
-                  opened={editModalOpened}
-                  onClose={revertPlayer}
-                  title="Edit Player"
-                  centered
-                  radius="md"
-                >
-                  <>
-                    <TextInput
-                      data-autofocus
-                      label="Player Name"
-                      value={editName}
-                      onChange={(event) =>
-                        setEditName(event.currentTarget.value)
-                      }
-                      onKeyDown={getHotkeyHandler([["enter", savePlayer]])}
-                      radius="md"
-                      leftSection={<IconUserFilled />}
-                    />
-                    <NumberInput
-                      label="Player Balance"
-                      allowNegative={false}
-                      decimalScale={2}
-                      onKeyDown={getHotkeyHandler([["enter", savePlayer]])}
-                      fixedDecimalScale
-                      thousandSeparator=","
-                      mt="md"
-                      radius="md"
-                      leftSection={<IconCurrencyDollar />}
-                      value={editBalance}
-                      onChange={(value) =>
-                        setEditBalance(
-                          isNaN(parseFloat(`${value}`))
-                            ? 0
-                            : parseFloat(`${value}`)
-                        )
-                      }
-                    />
-                    <Button fullWidth mt="md" onClick={savePlayer}>
-                      Save
-                    </Button>
-                  </>
-                </Modal>
-
-                <Menu.Dropdown>
-                  <Menu.Label>Bought in with $12.23</Menu.Label>
-                  <Menu.Divider />
-                  <Menu.Label>Actions</Menu.Label>
-                  <Menu.Item
-                    leftSection={
-                      <IconPencil style={{ width: rem(20), height: rem(20) }} />
-                    }
-                    onClick={open}
-                    fw={450}
-                  >
-                    Edit Player
-                  </Menu.Item>
-                  <Menu.Item
-                    leftSection={
-                      <IconBolt style={{ width: rem(20), height: rem(20) }} />
-                    }
-                    fw={450}
-                  >
-                    Force Turn
-                  </Menu.Item>
-                  <Menu.Item
-                    leftSection={
-                      <IconTrash style={{ width: rem(20), height: rem(20) }} />
-                    }
-                    color="red"
-                    fw={450}
-                    onClick={openDeleteConfirmModal}
-                  >
-                    Delete Player
-                  </Menu.Item>
-                </Menu.Dropdown>
-              </Menu>
-              {/* {props.role && (
-                    <Badge
-                      ml="xs"
-                      variant="light"
-                      color={props.turn ? "blue" : "gray"}
+                <Menu position="bottom-start">
+                  <Menu.Target>
+                    <ActionIcon
+                      variant="transparent"
+                      color={theme.colors.dark[1]}
+                      onClick={() => setShowMenu(!showMenu)}
                     >
-                      {props.role}
-                    </Badge>
-                  )} */}
+                      <IconChevronDown
+                        style={{ width: rem(22), height: rem(22) }}
+                      />
+                    </ActionIcon>
+                  </Menu.Target>
+
+                  <CardPicker
+                    setCardModelOpened={setCardModelOpened}
+                    saveCard={saveCard}
+                    setCardRank={setCardRank}
+                    setSetCardRank={setSetCardRank}
+                    setSetCardSuit={setSetCardSuit}
+                    setCardSuit={setCardSuit}
+                  />
+
+                  <Modal
+                    opened={editModalOpened}
+                    onClose={revertPlayer}
+                    title="Edit Player"
+                    centered
+                    radius="md"
+                  >
+                    <>
+                      <TextInput
+                        data-autofocus
+                        label="Player Name"
+                        value={editName}
+                        onChange={(event) =>
+                          setEditName(event.currentTarget.value)
+                        }
+                        onKeyDown={getHotkeyHandler([["enter", savePlayer]])}
+                        radius="md"
+                        leftSection={<IconUserFilled />}
+                      />
+                      <NumberInput
+                        label="Player Balance"
+                        allowNegative={false}
+                        decimalScale={2}
+                        onKeyDown={getHotkeyHandler([["enter", savePlayer]])}
+                        fixedDecimalScale
+                        thousandSeparator=","
+                        mt="md"
+                        radius="md"
+                        leftSection={<IconCurrencyDollar />}
+                        value={editBalance}
+                        onChange={(value) =>
+                          setEditBalance(
+                            isNaN(parseFloat(`${value}`))
+                              ? 0
+                              : parseFloat(`${value}`)
+                          )
+                        }
+                      />
+                      <Button fullWidth mt="md" onClick={savePlayer}>
+                        Save
+                      </Button>
+                    </>
+                  </Modal>
+
+                  <Menu.Dropdown>
+                    <Menu.Label>Bought in with $12.23</Menu.Label>
+                    <Menu.Divider />
+                    <Menu.Label>Actions</Menu.Label>
+                    <Menu.Item
+                      leftSection={
+                        <IconPencil
+                          style={{ width: rem(20), height: rem(20) }}
+                        />
+                      }
+                      onClick={open}
+                      fw={450}
+                    >
+                      Edit Player
+                    </Menu.Item>
+                    <Menu.Item
+                      leftSection={
+                        <IconBolt style={{ width: rem(20), height: rem(20) }} />
+                      }
+                      fw={450}
+                      onClick={() => {
+                        setState({
+                          ...state,
+                          currentPlayer: state.players.indexOf(props.player),
+                        });
+                      }}
+                    >
+                      Force Turn
+                    </Menu.Item>
+                    <Menu.Item
+                      leftSection={
+                        <IconCards
+                          style={{ width: rem(20), height: rem(20) }}
+                        />
+                      }
+                      fw={450}
+                      onClick={() => {
+                        setState({
+                          ...state,
+                          dealerIndex: state.players.indexOf(props.player),
+                        });
+                      }}
+                    >
+                      Make Dealer
+                    </Menu.Item>
+                    <Menu.Item
+                      leftSection={
+                        <IconTrash
+                          style={{ width: rem(20), height: rem(20) }}
+                        />
+                      }
+                      color="red"
+                      fw={450}
+                      onClick={openDeleteConfirmModal}
+                    >
+                      Delete Player
+                    </Menu.Item>
+                  </Menu.Dropdown>
+                </Menu>
+              </div>
             </Text>
             <Text size={turn ? "md" : "sm"} c="dimmed">
               ${balance.toFixed(2)}

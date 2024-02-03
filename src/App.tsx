@@ -10,12 +10,15 @@ import Settings from "./pages/Settings";
 import { Card, Player } from "./utils/Game";
 
 export interface State {
-  count: number;
   activeTab: string;
   scale: 1;
+
   gameState: GameState;
   players: Player[];
   communityCards: Card[];
+  currentPlayer: number;
+  dealerIndex: number;
+  inRound: boolean;
 }
 
 export enum GameState {
@@ -42,12 +45,15 @@ export const ROUTES = [
 ];
 
 export const defaultState: State = {
-  count: 0,
   activeTab: "home",
   scale: 1,
+
   gameState: GameState.NONE,
   players: [],
   communityCards: new Array(5).fill({ suit: "NONE", rank: "NONE" }),
+  currentPlayer: 0,
+  dealerIndex: 0,
+  inRound: false,
 };
 
 export const STATE = atom({
@@ -59,8 +65,8 @@ export const STATE = atom({
 });
 
 const debouncedSetItem = debounce((key: any, value: any) => {
+  console.log("Set item", key, value);
   localStorage.setItem(key, value);
-  console.log("STORED");
 }, 300);
 
 export const STATE_WATCHER = selector({
@@ -90,24 +96,36 @@ function App() {
   // Mantine uses fontSize for scaling
   document.documentElement.style.fontSize = `${val.scale * 100}%`;
 
-  let content = <Text>No content</Text>;
-  switch (val.activeTab) {
-    case "home":
-      content = <Home />;
-      break;
-    case "game":
-      content = <Game />;
-      break;
-    case "settings":
-      content = <Settings />;
-      break;
-  }
+  // let content = <Text>No content</Text>;
+  // switch (val.activeTab) {
+  //   case "home":
+  //     content = <Home />;
+  //     break;
+  //   case "game":
+  //     content = <Game />;
+  //     break;
+  //   case "settings":
+  //     content = <Settings />;
+  //     break;
+  // }
 
   return (
     <>
       <Header />
       <Divider my="xs" />
-      <Container>{content}</Container>
+      <Container>
+        <div style={{ display: val.activeTab == "home" ? "block" : "none" }}>
+          <Home />
+        </div>
+        <div style={{ display: val.activeTab == "game" ? "block" : "none" }}>
+          <Game />
+        </div>
+        <div
+          style={{ display: val.activeTab == "settings" ? "block" : "none" }}
+        >
+          <Settings />
+        </div>
+      </Container>
     </>
   );
 }

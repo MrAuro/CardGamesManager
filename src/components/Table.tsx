@@ -12,14 +12,19 @@ import PlayerCard from "./PlayerCard";
 import CommunityCards from "./CommunityCards";
 
 export function Table() {
-  const [state, setState] = useRecoilState(STATE);
+  const [state, setState] = useRecoilState<State>(STATE);
   const val = useRecoilValue<State>(STATE_WATCHER);
 
   const [listState, handlers] = useListState(val.players);
 
   useEffect(() => {
+    const previousDealer = state.players[val.dealerIndex];
+    const dealerIndex = listState.indexOf(previousDealer);
+
     setState({
       ...state,
+      // Not really sure what this is doing but it works
+      dealerIndex: dealerIndex == -1 ? val.dealerIndex : dealerIndex,
       players: listState,
     });
   }, [listState]);
@@ -35,15 +40,7 @@ export function Table() {
           {...provided.dragHandleProps}
           ref={provided.innerRef}
         >
-          <PlayerCard
-            name={item.name}
-            role={""}
-            turn={true}
-            cards={item.cards}
-            id={item.id}
-            balance={item.balance}
-            handler={handlers}
-          />
+          <PlayerCard player={item} handler={handlers} />
         </div>
       )}
     </Draggable>

@@ -1,16 +1,3 @@
-class GameManager {
-  players: Player[] = [];
-
-  addPlayer(player: Player) {
-    console.log("Adding player", player);
-    this.players.push(player);
-  }
-
-  removePlayer(playerId: string) {
-    this.players = this.players.filter((player) => player.id !== playerId);
-  }
-}
-
 type Card = {
   suit: CardSuit;
   rank: CardRank;
@@ -39,6 +26,8 @@ type Player = {
   cards: [Card, Card];
   balance: number;
 };
+
+type PlayerPosition = "sb" | "bb" | "btn" | "NONE";
 
 const suitToName = (suit: CardSuit) => {
   switch (suit) {
@@ -88,5 +77,5 @@ const rankToName = (rank: CardRank) => {
   }
 };
 
-export { GameManager, suitToName, rankToName };
-export type { Card, CardSuit, CardRank, Player };
+export { suitToName, rankToName };
+export type { Card, CardSuit, CardRank, Player, PlayerPosition };

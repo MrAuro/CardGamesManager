@@ -31,7 +31,7 @@ export default function CommunityCards(props: { cards: Card[] }) {
   const [selectedCardIndex, setSelectedCardIndex] = useState<number>(0);
   const [cards, setCards] = useState<Card[]>(props.cards);
   const [state, setState] = useRecoilState(STATE);
-  const val = useRecoilValue<State>(STATE_WATCHER);
+  // const val = useRecoilValue<State>(STATE_WATCHER);
 
   const saveCard = () => {
     console.log("Card set", selectedCardIndex);
