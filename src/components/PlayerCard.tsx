@@ -6,13 +6,21 @@ import {
   Grid,
   Group,
   Menu,
+  Modal,
   NumberInput,
   Paper,
   Text,
+  TextInput,
   rem,
   useMantineTheme,
 } from "@mantine/core";
-import { UseListStateHandlers, useMediaQuery } from "@mantine/hooks";
+import {
+  UseListStateHandlers,
+  getHotkeyHandler,
+  useDisclosure,
+  useFocusTrap,
+  useMediaQuery,
+} from "@mantine/hooks";
 import { modals } from "@mantine/modals";
 import {
   IconBolt,
@@ -21,12 +29,15 @@ import {
   IconCurrencyDollar,
   IconPencil,
   IconTrash,
+  IconUser,
+  IconUserFilled,
 } from "@tabler/icons-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { STATE, STATE_WATCHER, State } from "../App";
 import { Card, Player } from "../utils/Game";
 import PlayingCard from "./PlayingCard";
+import { notifications } from "@mantine/notifications";
 
 export default function PlayerCard(props: {
   name: string;
@@ -34,6 +45,7 @@ export default function PlayerCard(props: {
   role: string;
   id: string;
   cards: Card[];
+  balance: number;
   handler: UseListStateHandlers<Player>;
 }) {
   const theme = useMantineTheme();
@@ -43,21 +55,54 @@ export default function PlayerCard(props: {
   const [state, setState] = useRecoilState(STATE);
   const val = useRecoilValue<State>(STATE_WATCHER);
 
-  const [bet, setBet] = useState(0);
+  const [name, setName] = useState(props.name);
+  const [balance, setBalance] = useState(props.balance);
+  const [editModalOpened, { open, close }] = useDisclosure(false);
+
+  const [bet, setBet] = useState<number | string>("");
 
   const openDeleteConfirmModal = () =>
     modals.openConfirmModal({
-      title: "Delete player",
+      title: "Delete Player",
       children: "Are you sure that you want to delete this player?",
       labels: { confirm: `Delete ${props.name}`, cancel: "Cancel" },
       confirmProps: { color: "red", variant: "light" },
       cancelProps: { color: "gray", variant: "light" },
       groupProps: { grow: true },
       onConfirm: () => {
-        console.log("Player deleted");
         props.handler.filter((item) => item.id !== props.id);
+        notifications.show({
+          message: "Player Deleted",
+          color: "red",
+        });
       },
     });
+
+  const savePlayer = () => {
+    modals.closeAll();
+    props.handler.applyWhere(
+      (item) => item.id === props.id,
+      (item) => ({ ...item, name, balance })
+    );
+    close();
+    notifications.show({
+      message: "Player Updated",
+      color: "green",
+    });
+  };
+
+  const placeBet = () => {
+    console.log("Bet placed");
+    setIsBetting(false);
+    // ...
+    setBet("");
+  };
+
+  const cancelBet = () => {
+    console.log("Bet canceled");
+    setBet("");
+    setIsBetting(false);
+  };
 
   return (
     <Paper
@@ -89,6 +134,53 @@ export default function PlayerCard(props: {
                   </ActionIcon>
                 </Menu.Target>
 
+                <Modal
+                  opened={editModalOpened}
+                  onClose={close}
+                  title="Edit Player"
+                  centered
+                  radius="md"
+                >
+                  <>
+                    <TextInput
+                      data-autofocus
+                      label="Player Name"
+                      value={name}
+                      onChange={(event) => setName(event.currentTarget.value)}
+                      onKeyDown={getHotkeyHandler([["enter", savePlayer]])}
+                      radius="md"
+                      leftSection={<IconUserFilled />}
+                    />
+                    <NumberInput
+                      label="Player Balance"
+                      allowNegative={false}
+                      decimalScale={2}
+                      onKeyDown={getHotkeyHandler([["enter", savePlayer]])}
+                      fixedDecimalScale
+                      thousandSeparator=","
+                      mt="md"
+                      radius="md"
+                      leftSection={<IconCurrencyDollar />}
+                      value={balance}
+                      onChange={(value) =>
+                        setBalance(
+                          isNaN(parseFloat(`${value}`))
+                            ? 0
+                            : parseFloat(`${value}`)
+                        )
+                      }
+                    />
+                    <Button
+                      fullWidth
+                      mt="md"
+                      variant="light"
+                      onClick={savePlayer}
+                    >
+                      Save
+                    </Button>
+                  </>
+                </Modal>
+
                 <Menu.Dropdown>
                   <Menu.Label>Bought in with $12.23</Menu.Label>
                   <Menu.Divider />
@@ -97,15 +189,9 @@ export default function PlayerCard(props: {
                     leftSection={
                       <IconPencil style={{ width: rem(20), height: rem(20) }} />
                     }
+                    onClick={open}
                   >
-                    Change Name
-                  </Menu.Item>
-                  <Menu.Item
-                    leftSection={
-                      <IconCoin style={{ width: rem(20), height: rem(20) }} />
-                    }
-                  >
-                    Set Balance
+                    Edit Player
                   </Menu.Item>
                   <Menu.Item
                     leftSection={
@@ -136,7 +222,7 @@ export default function PlayerCard(props: {
                   )} */}
             </Text>
             <Text size={props.turn ? "md" : "sm"} c="dimmed">
-              $21.23
+              ${props.balance.toFixed(2)}
             </Text>
           </div>
           <Group justify="flex-end">
@@ -153,6 +239,11 @@ export default function PlayerCard(props: {
                 <Grid.Col span={{ base: 12, xs: 8 }}>
                   <NumberInput
                     allowNegative={false}
+                    autoFocus
+                    onKeyDown={getHotkeyHandler([
+                      ["Enter", () => placeBet()],
+                      ["Escape", () => cancelBet()],
+                    ])}
                     decimalScale={2}
                     fixedDecimalScale
                     thousandSeparator=","
@@ -167,7 +258,7 @@ export default function PlayerCard(props: {
                     variant="light"
                     fullWidth
                     color="gray"
-                    onClick={() => setIsBetting(false)}
+                    onClick={cancelBet}
                   >
                     Back
                   </Button>
@@ -177,7 +268,7 @@ export default function PlayerCard(props: {
                     variant="light"
                     fullWidth
                     color="green"
-                    onClick={() => setIsBetting(false)}
+                    onClick={placeBet}
                   >
                     Bet
                   </Button>
@@ -196,7 +287,9 @@ export default function PlayerCard(props: {
                 color="green"
                 variant="light"
                 disabled={!props.turn}
-                onClick={() => setIsBetting(true)}
+                onClick={() => {
+                  setIsBetting(true);
+                }}
               >
                 Bet
               </Button>
