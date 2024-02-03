@@ -40,5 +40,53 @@ type Player = {
   balance: number;
 };
 
-export { GameManager };
+const suitToName = (suit: CardSuit) => {
+  switch (suit) {
+    case "hearts":
+      return "Hearts";
+    case "diamonds":
+      return "Diamonds";
+    case "clubs":
+      return "Clubs";
+    case "spades":
+      return "Spades";
+    default:
+      return "";
+  }
+};
+
+const rankToName = (rank: CardRank) => {
+  switch (rank) {
+    case "2":
+      return "Two";
+    case "3":
+      return "Three";
+    case "4":
+      return "Four";
+    case "5":
+      return "Five";
+    case "6":
+      return "Six";
+    case "7":
+      return "Seven";
+    case "8":
+      return "Eight";
+    case "9":
+      return "Nine";
+    case "10":
+      return "Ten";
+    case "J":
+      return "Jack";
+    case "Q":
+      return "Queen";
+    case "K":
+      return "King";
+    case "A":
+      return "Ace";
+    default:
+      return "";
+  }
+};
+
+export { GameManager, suitToName, rankToName };
 export type { Card, CardSuit, CardRank, Player };

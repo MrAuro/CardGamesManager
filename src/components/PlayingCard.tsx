@@ -4,6 +4,7 @@ import {
   Paper,
   Text,
   rem,
+  useMantineColorScheme,
   useMantineTheme,
 } from "@mantine/core";
 import Twemoji from "react-twemoji";
@@ -14,14 +15,17 @@ import {
   IconClubs,
   IconClubsFilled,
   IconDiamondFilled,
+  IconDiamondsFilled,
   IconHeartFilled,
 } from "@tabler/icons-react";
 
 export default function PlayingCard(props: {
   card: Card;
   removeCard: (card: Card) => void;
+  openSetCardModal: (card: Card) => void;
 }) {
   const theme = useMantineTheme();
+  const { colorScheme } = useMantineColorScheme();
 
   return (
     <Paper
@@ -30,40 +34,57 @@ export default function PlayingCard(props: {
       style={{
         width: "4.5rem",
         height: "4.5rem",
-        backgroundColor: theme.colors.gray[0],
+        backgroundColor:
+          props.card.suit == "NONE"
+            ? colorScheme == "dark"
+              ? theme.colors.dark[6]
+              : theme.colors.gray[4]
+            : colorScheme == "dark"
+            ? theme.colors.gray[0]
+            : theme.colors.gray[1],
+        cursor: "pointer",
       }}
+      onClick={() => props.openSetCardModal(props.card)}
     >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100%",
-        }}
-      >
-        <Text
-          size="2rem"
-          fw={800}
-          ta="center"
-          c={
-            props.card.suit === "hearts" || props.card.suit === "diamonds"
-              ? theme.colors.red[6]
-              : theme.colors.dark[5]
-          }
+      {props.card.suit == "NONE" ? (
+        <>
+          <Center style={{ height: "100%" }}>
+            <Text size="xl" ta="center"></Text>
+          </Center>
+        </>
+      ) : (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100%",
+          }}
         >
-          <div
-            style={{
-              verticalAlign: "middle",
-              display: "flex",
-              alignContent: "center",
-              alignItems: "center",
-            }}
+          <Text
+            size="2rem"
+            fw={800}
+            ta="center"
+            c={
+              props.card.suit === "hearts" || props.card.suit === "diamonds"
+                ? theme.colors.red[6]
+                : theme.colors.dark[5]
+            }
           >
-            {suitToIcon(props.card.suit)}
-            {props.card.rank}
-          </div>
-        </Text>
-      </div>
+            <div
+              style={{
+                verticalAlign: "middle",
+                display: "flex",
+                alignContent: "center",
+                alignItems: "center",
+              }}
+            >
+              {suitToIcon(props.card.suit)}
+              {props.card.rank}
+            </div>
+          </Text>
+        </div>
+      )}
     </Paper>
   );
 }
@@ -75,7 +96,7 @@ const suitToIcon = (name: string): React.ReactNode => {
     case "hearts":
       return <IconHeartFilled size={size} />;
     case "diamonds":
-      return <IconDiamondFilled size={size} />;
+      return <IconDiamondsFilled size={size} />;
     case "clubs":
       return <IconClubsFilled size={size} />;
     case "spades":
