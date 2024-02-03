@@ -71,7 +71,10 @@ export function Table() {
         onClick={() => {
           handlers.append({
             balance: 0,
-            cards: [],
+            cards: [
+              { rank: "K", suit: "clubs" },
+              { rank: "A", suit: "hearts" },
+            ],
             id: crypto.randomUUID(),
             name: "Player " + (listState.length + 1),
           });
