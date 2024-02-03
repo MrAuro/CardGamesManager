@@ -9,6 +9,7 @@ import {
   IconClubsFilled,
   IconDiamondsFilled,
   IconHeartFilled,
+  IconSpadeFilled,
 } from "@tabler/icons-react";
 import { Card } from "../utils/Game";
 
@@ -93,6 +94,6 @@ const suitToIcon = (name: string): React.ReactNode => {
     case "clubs":
       return <IconClubsFilled size={size} />;
     case "spades":
-      return <IconClubsFilled size={size} />;
+      return <IconSpadeFilled size={size} />;
   }
 };
