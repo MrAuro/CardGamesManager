@@ -41,12 +41,14 @@ import {
   CardRank,
   CardSuit,
   Player,
+  cardToString,
   rankToName,
   suitToName,
 } from "../utils/Game";
 import CardPicker from "./CardPicker";
 import PlayingCard from "./PlayingCard";
 import PositionBadge from "./PosititionBadge";
+import * as Hand from "pokersolver";
 
 export default function PlayerCard(props: {
   // name: string;
@@ -79,12 +81,38 @@ export default function PlayerCard(props: {
   const [setCardRank, setSetCardRank] = useState<CardRank>("NONE");
   const [selectedCardIndex, setSelectedCardIndex] = useState<number>(0);
 
+  const [hand, setHand] = useState<any | null>(null);
+
   useEffect(() => {
     props.handler.applyWhere(
       (item) => item.id === props.player.id,
       (item) => ({ ...item, name, balance })
     );
   }, [name, balance]);
+
+  useEffect(() => {
+    let _cards = [...cards.filter((card) => card.suit != "NONE")];
+    _cards = [
+      ...cards,
+      ...state.communityCards.filter((card) => card.suit != "NONE"),
+    ];
+
+    let cardsString: string[] = [
+      ...new Set(_cards.map((card) => cardToString(card))),
+    ].filter((card) => card != "NONE");
+
+    if (cardsString.length >= 3) {
+      let _hand = Hand.Hand.solve(cardsString);
+
+      console.log(
+        `${name} has ${cardsString.length} cards: ${cardsString} (${_hand.name})`
+      );
+
+      setHand(_hand);
+    } else {
+      setHand(null);
+    }
+  }, [cards]);
 
   const { colorScheme } = useMantineColorScheme();
 
@@ -152,16 +180,19 @@ export default function PlayerCard(props: {
     console.log("Card set");
 
     let _cards = [...cards];
-    if (setCardRank == "NONE" || setCardSuit == "NONE")
+    if (setCardRank == "NONE" || setCardSuit == "NONE") {
       _cards[selectedCardIndex] = { suit: "NONE", rank: "NONE" };
-    else _cards[selectedCardIndex] = { suit: setCardSuit, rank: setCardRank };
+    } else {
+      _cards[selectedCardIndex] = { suit: setCardSuit, rank: setCardRank };
+    }
 
+    setCards(_cards);
     props.handler.applyWhere(
       (item) => item.id === props.player.id,
-      (item) => ({ ...item, cards: [cards[0], cards[1]] })
+      (item) => ({ ...item, cards: [_cards[0], _cards[1]] })
     );
-    setCards(_cards);
     closeSetCard();
+    setSelectedCardIndex(0);
 
     if (setCardRank == "NONE" || setCardSuit == "NONE") {
       showNotification({
@@ -366,6 +397,10 @@ export default function PlayerCard(props: {
             </Text>
           </div>
           <Group justify="flex-end">
+            <Text fw="bold" size="lg">
+              {}
+              {hand ? hand.name : ""}
+            </Text>
             {cards.map((card, i) => (
               <PlayingCard
                 key={i}
@@ -373,8 +408,8 @@ export default function PlayerCard(props: {
                 removeCard={removeCard}
                 openSetCardModal={(card: Card) => {
                   setSelectedCardIndex(i);
-                  setSetCardRank(card.rank);
-                  setSetCardSuit(card.suit);
+                  setSetCardRank("NONE");
+                  setSetCardSuit("NONE");
                   openSetCard();
                 }}
               />

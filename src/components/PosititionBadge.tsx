@@ -12,8 +12,6 @@ export default function PositionBadge(props: {
 
   let position: PlayerPosition = "NONE";
 
-  console.log(`PLAYER ${props.player.name} INDEX ${val.dealerIndex}`);
-
   let playerIndex = val.players.indexOf(props.player);
   if (playerIndex == val.dealerIndex) position = "btn";
   if (val.players.length >= 3) {

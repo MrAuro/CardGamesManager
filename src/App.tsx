@@ -65,7 +65,7 @@ export const STATE = atom({
 });
 
 const debouncedSetItem = debounce((key: any, value: any) => {
-  console.log("Set item", key, value);
+  console.log({ key, value: JSON.parse(value) });
   localStorage.setItem(key, value);
 }, 300);
 

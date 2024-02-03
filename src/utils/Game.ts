@@ -1,3 +1,5 @@
+import Hand from "pokersolver";
+
 type Card = {
   suit: CardSuit;
   rank: CardRank;
@@ -77,5 +79,12 @@ const rankToName = (rank: CardRank) => {
   }
 };
 
-export { suitToName, rankToName };
+const cardToString = (card: Card) => {
+  if (card.rank == "NONE" || card.suit == "NONE") {
+    return "NONE";
+  }
+  return `${card.rank}${card.suit[0]}`;
+};
+
+export { suitToName, rankToName, cardToString };
 export type { Card, CardSuit, CardRank, Player, PlayerPosition };

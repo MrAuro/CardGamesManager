@@ -4,12 +4,13 @@ import { useListState } from "@mantine/hooks";
 import cx from "clsx";
 
 import { notifications } from "@mantine/notifications";
-import { useEffect } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useEffect, useState } from "react";
+import { atom, useRecoilState, useRecoilValue } from "recoil";
 import { STATE, STATE_WATCHER, State } from "../App";
 import classes from "../styles/Table.module.css";
 import PlayerCard from "./PlayerCard";
 import CommunityCards from "./CommunityCards";
+import { Card } from "../utils/Game";
 
 export function Table() {
   const [state, setState] = useRecoilState<State>(STATE);
