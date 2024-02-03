@@ -1,11 +1,4 @@
-import {
-  Burger,
-  Container,
-  Group,
-  Tabs,
-  Title,
-  useMantineTheme,
-} from "@mantine/core";
+import { Container, Group, Tabs, Title, useMantineTheme } from "@mantine/core";
 import { useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { ROUTES, STATE, STATE_WATCHER, State } from "../App";

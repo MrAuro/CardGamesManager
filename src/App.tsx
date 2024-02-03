@@ -7,7 +7,7 @@ import Header from "./components/Header";
 import Game from "./pages/Game";
 import Home from "./pages/Home";
 import Settings from "./pages/Settings";
-import { GameManager, Player } from "./utils/Game";
+import { Player } from "./utils/Game";
 
 export interface State {
   count: number;

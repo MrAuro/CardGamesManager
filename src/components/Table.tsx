@@ -1,15 +1,14 @@
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
-import { Button, useMantineTheme } from "@mantine/core";
+import { Button } from "@mantine/core";
 import { useListState } from "@mantine/hooks";
 import cx from "clsx";
 
-import classes from "../styles/Table.module.css";
-import { STATE, STATE_WATCHER, State } from "../App";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { Player } from "../utils/Game";
-import PlayerCard from "./PlayerCard";
-import { useEffect } from "react";
 import { notifications } from "@mantine/notifications";
+import { useEffect } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { STATE, STATE_WATCHER, State } from "../App";
+import classes from "../styles/Table.module.css";
+import PlayerCard from "./PlayerCard";
 
 export function Table() {
   const [state, setState] = useRecoilState(STATE);

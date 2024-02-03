@@ -2,8 +2,6 @@ import {
   ActionIcon,
   Box,
   Button,
-  Center,
-  Container,
   Divider,
   Grid,
   Group,
@@ -15,7 +13,6 @@ import {
   Text,
   TextInput,
   rem,
-  useComputedColorScheme,
   useMantineColorScheme,
   useMantineTheme,
 } from "@mantine/core";
@@ -31,7 +28,6 @@ import {
   IconChevronDown,
   IconClubsFilled,
   IconCurrencyDollar,
-  IconDiamondFilled,
   IconDiamondsFilled,
   IconHeartFilled,
   IconPencil,
@@ -40,8 +36,8 @@ import {
   IconUserFilled,
 } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { STATE, STATE_WATCHER, State } from "../App";
+// import { useRecoilState, useRecoilValue } from "recoil";
+// import { STATE, STATE_WATCHER, State } from "../App";
 import {
   Card,
   CardRank,
@@ -65,8 +61,8 @@ export default function PlayerCard(props: {
   const [isBetting, setIsBetting] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
-  const [state, setState] = useRecoilState(STATE);
-  const val = useRecoilValue<State>(STATE_WATCHER);
+  // const [state, setState] = useRecoilState(STATE);
+  // const val = useRecoilValue<State>(STATE_WATCHER);
 
   const [name, setName] = useState(props.name);
   const [editName, setEditName] = useState(name);
@@ -147,9 +143,9 @@ export default function PlayerCard(props: {
     setIsBetting(false);
   };
 
-  const setCard = (i: number) => {
-    openSetCard();
-  };
+  // const setCard = (i: number) => {
+  //   openSetCard();
+  // };
 
   const saveCard = () => {
     console.log("Card set");

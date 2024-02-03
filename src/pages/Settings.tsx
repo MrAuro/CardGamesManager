@@ -4,18 +4,17 @@ import {
   Input,
   InputWrapper,
   Slider,
-  Space,
   useMantineColorScheme,
-  useMantineTheme,
+  // useMantineTheme,
 } from "@mantine/core";
+import { IconMoon, IconSun } from "@tabler/icons-react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { STATE, State, STATE_WATCHER } from "../App";
-import { IconDeviceDesktop, IconMoon, IconSun } from "@tabler/icons-react";
+import { STATE, STATE_WATCHER, State } from "../App";
 
 export default function Settings() {
   const [state, setState] = useRecoilState(STATE);
   const val = useRecoilValue<State>(STATE_WATCHER);
-  const theme = useMantineTheme();
+  // const theme = useMantineTheme();
   const { setColorScheme, colorScheme } = useMantineColorScheme();
 
   return (

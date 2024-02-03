@@ -1,23 +1,16 @@
 import {
   Center,
-  Container,
   Paper,
   Text,
-  rem,
   useMantineColorScheme,
   useMantineTheme,
 } from "@mantine/core";
-import Twemoji from "react-twemoji";
-import { Card } from "../utils/Game";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { STATE, State, STATE_WATCHER } from "../App";
 import {
-  IconClubs,
   IconClubsFilled,
-  IconDiamondFilled,
   IconDiamondsFilled,
   IconHeartFilled,
 } from "@tabler/icons-react";
+import { Card } from "../utils/Game";
 
 export default function PlayingCard(props: {
   card: Card;
