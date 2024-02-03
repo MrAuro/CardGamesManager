@@ -19,7 +19,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
       >
         <RecoilRoot>
           <Container>
-            <Notifications />
+            <Notifications limit={3} />
             <App />
           </Container>
         </RecoilRoot>
