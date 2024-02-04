@@ -207,10 +207,11 @@ function App() {
 
       result.getPlayers().forEach((player, i) => {
         let handRanking: string | null = null;
+        let highestRank = 0;
         for (let [rank, value] of Object.entries(
           result.toJson().players[i].ranks
         )) {
-          if (value == 1) {
+          if (value > highestRank) {
             handRanking = rank;
           }
         }
