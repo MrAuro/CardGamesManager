@@ -171,7 +171,7 @@ const rankingToName = (rank: string): string => {
     case "STRAIGHT_FLUSH":
       return "Straight Flush";
     case "QUADS":
-      return "Four of a Kind";
+      return "Quads";
     case "FULL_HOUSE":
       return "Full House";
     case "FLUSH":

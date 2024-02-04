@@ -105,7 +105,7 @@ function debounce(func: any, wait: any) {
 
 function App() {
   const [state] = useRecoilState<State>(STATE);
-  const [, setUsedCards] = useRecoilState<Card[]>(USED_CARDS);
+  const [usedCards, setUsedCards] = useRecoilState<Card[]>(USED_CARDS);
   const [, setHands] = useRecoilState(PLAYER_HANDS);
 
   useEffect(() => {
@@ -120,7 +120,9 @@ function App() {
         ].filter((card) => card.rank != "NONE" && card.suit != "NONE")
       ),
     ]);
+  }, [state]);
 
+  useEffect(() => {
     setHands([]);
 
     // prettier-ignore
@@ -292,7 +294,7 @@ function App() {
 
       setHands(playerResultsToStore);
     }
-  }, [state]);
+  }, [usedCards]);
 
   // Mantine uses fontSize for scaling
   document.documentElement.style.fontSize = `${state.scale * 100}%`;
