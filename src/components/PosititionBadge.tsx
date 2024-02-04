@@ -1,23 +1,23 @@
 import { Badge, useMantineColorScheme } from "@mantine/core";
 import { useRecoilValue } from "recoil";
-import { STATE_WATCHER, State } from "../App";
+import { STATE, State } from "../App";
 import { Player, PlayerPosition } from "../utils/Game";
 
 export default function PositionBadge(props: {
   player: Player;
   nextDealer: () => void;
 }) {
-  const val = useRecoilValue<State>(STATE_WATCHER);
+  const state = useRecoilValue<State>(STATE);
   const { colorScheme } = useMantineColorScheme();
 
   let position: PlayerPosition = "NONE";
 
-  let playerIndex = val.players.indexOf(props.player);
-  if (playerIndex == val.dealerIndex) position = "btn";
-  if (val.players.length >= 3) {
-    if (playerIndex == (val.dealerIndex + 1) % val.players.length)
+  let playerIndex = state.players.indexOf(props.player);
+  if (playerIndex == state.dealerIndex) position = "btn";
+  if (state.players.length >= 3) {
+    if (playerIndex == (state.dealerIndex + 1) % state.players.length)
       position = "sb";
-    if (playerIndex == (val.dealerIndex + 2) % val.players.length)
+    if (playerIndex == (state.dealerIndex + 2) % state.players.length)
       position = "bb";
   }
 

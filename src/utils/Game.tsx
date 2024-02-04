@@ -1,4 +1,9 @@
-import Hand from "pokersolver";
+import {
+  IconHeartFilled,
+  IconDiamondsFilled,
+  IconClubsFilled,
+  IconSpadeFilled,
+} from "@tabler/icons-react";
 
 type Card = {
   suit: CardSuit;
@@ -86,5 +91,37 @@ const cardToString = (card: Card) => {
   return `${card.rank}${card.suit[0]}`;
 };
 
-export { suitToName, rankToName, cardToString };
+const suitToIcon = (name: string): React.ReactNode => {
+  let size = "1.7rem";
+
+  switch (name) {
+    case "hearts":
+      return <IconHeartFilled size={size} />;
+    case "diamonds":
+      return <IconDiamondsFilled size={size} />;
+    case "clubs":
+      return <IconClubsFilled size={size} />;
+    case "spades":
+      return <IconSpadeFilled size={size} />;
+  }
+};
+
+const suitToEmoji = (name: string): string => {
+  return name
+    .replace(/H/gi, "♥️")
+    .replace(/D/gi, "♦️")
+    .replace(/C/gi, "♣️")
+    .replace(/S/gi, "♠️");
+};
+
+const EMPTY_CARD: Card = { suit: "NONE", rank: "NONE" };
+
+export {
+  suitToName,
+  rankToName,
+  cardToString,
+  suitToIcon,
+  suitToEmoji,
+  EMPTY_CARD,
+};
 export type { Card, CardSuit, CardRank, Player, PlayerPosition };

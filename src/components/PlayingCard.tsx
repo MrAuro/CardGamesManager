@@ -5,18 +5,11 @@ import {
   useMantineColorScheme,
   useMantineTheme,
 } from "@mantine/core";
-import {
-  IconClubsFilled,
-  IconDiamondsFilled,
-  IconHeartFilled,
-  IconSpadeFilled,
-} from "@tabler/icons-react";
-import { Card } from "../utils/Game";
+import { Card, suitToIcon } from "../utils/Game";
 
 export default function PlayingCard(props: {
   card: Card;
-  removeCard: (card: Card) => void;
-  openSetCardModal: (card: Card) => void;
+  onClick: () => void;
 }) {
   const theme = useMantineTheme();
   const { colorScheme } = useMantineColorScheme();
@@ -38,7 +31,7 @@ export default function PlayingCard(props: {
             : theme.colors.gray[1],
         cursor: "pointer",
       }}
-      onClick={() => props.openSetCardModal(props.card)}
+      onClick={() => props.onClick()}
     >
       {props.card.suit == "NONE" ? (
         <>
@@ -82,18 +75,3 @@ export default function PlayingCard(props: {
     </Paper>
   );
 }
-
-const suitToIcon = (name: string): React.ReactNode => {
-  let size = "1.7rem";
-
-  switch (name) {
-    case "hearts":
-      return <IconHeartFilled size={size} />;
-    case "diamonds":
-      return <IconDiamondsFilled size={size} />;
-    case "clubs":
-      return <IconClubsFilled size={size} />;
-    case "spades":
-      return <IconSpadeFilled size={size} />;
-  }
-};

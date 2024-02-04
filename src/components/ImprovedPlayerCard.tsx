@@ -10,220 +10,138 @@ import {
   Modal,
   NumberInput,
   Paper,
+  Stack,
   Text,
   TextInput,
   rem,
   useMantineColorScheme,
   useMantineTheme,
 } from "@mantine/core";
-import {
-  UseListStateHandlers,
-  getHotkeyHandler,
-  useDisclosure,
-} from "@mantine/hooks";
+import { getHotkeyHandler, useDisclosure } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
-import { notifications, showNotification } from "@mantine/notifications";
+import { notifications } from "@mantine/notifications";
 import {
   IconBolt,
   IconCards,
   IconChevronDown,
   IconCurrencyDollar,
-  IconDots,
   IconPencil,
   IconTrash,
   IconUserFilled,
 } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { STATE, STATE_WATCHER, State } from "../App";
-import {
-  Card,
-  CardRank,
-  CardSuit,
-  Player,
-  cardToString,
-  rankToName,
-  suitToName,
-} from "../utils/Game";
-import CardPicker from "./CardPicker";
+import { PLAYER_HANDS, STATE, State } from "../App";
+import { Card, Player, suitToEmoji } from "../utils/Game";
+import ImprovedCardPicker from "./ImprovedCardPicker";
 import PlayingCard from "./PlayingCard";
 import PositionBadge from "./PosititionBadge";
-import * as Hand from "pokersolver";
 
-export default function PlayerCard(props: {
-  // name: string;
-  // turn: boolean;
-  // role: string;
-  // id: string;
-  // cards: Card[];
-  // balance: number;
+export default function ImprovedPlayerCard(props: {
   player: Player;
-  handler: UseListStateHandlers<Player>;
+  handler: any;
 }) {
+  const { colorScheme } = useMantineColorScheme();
   const theme = useMantineTheme();
-  const [isBetting, setIsBetting] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
-
   const [state, setState] = useRecoilState<State>(STATE);
-  const val = useRecoilValue<State>(STATE_WATCHER);
+  const playerHands = useRecoilValue(PLAYER_HANDS);
 
-  const [name, setName] = useState(props.player.name);
-  const [editName, setEditName] = useState(name);
-  const [balance, setBalance] = useState(props.player.balance);
-  const [editBalance, setEditBalance] = useState(balance);
-  const [editModalOpened, { open, close }] = useDisclosure(false);
-
-  const [cards, setCards] = useState<Card[]>(props.player.cards);
-
-  const [setCardModelOpened, { open: openSetCard, close: closeSetCard }] =
-    useDisclosure(false);
-  const [setCardSuit, setSetCardSuit] = useState<CardSuit>("NONE");
-  const [setCardRank, setSetCardRank] = useState<CardRank>("NONE");
+  const [, dropdownMenuHandlers] = useDisclosure(false);
+  const [editPlayerModalOpened, editPlayerModalHandlers] = useDisclosure(false);
+  const [cardPickerOpened, cardPickerOpenedHandlers] = useDisclosure(false);
   const [selectedCardIndex, setSelectedCardIndex] = useState<number>(0);
 
-  const [hand, setHand] = useState<any | null>(null);
+  const [isCapturingBet, setIsCapturingBet] = useState(false);
 
-  useEffect(() => {
-    props.handler.applyWhere(
-      (item) => item.id === props.player.id,
-      (item) => ({ ...item, name, balance })
-    );
-  }, [name, balance]);
+  const [TEMP_name, setTEMP_name] = useState(props.player.name);
+  const [TEMP_balance, setTEMP_balance] = useState(props.player.balance);
+  const [TEMP_bet, setTEMP_bet] = useState(0);
 
-  useEffect(() => {
-    let _cards = [...cards.filter((card) => card.suit != "NONE")];
-    _cards = [
-      ...cards,
-      ...state.communityCards.filter((card) => card.suit != "NONE"),
-    ];
-
-    let cardsString: string[] = [
-      ...new Set(_cards.map((card) => cardToString(card))),
-    ].filter((card) => card != "NONE");
-
-    if (cardsString.length >= 3) {
-      let _hand = Hand.Hand.solve(cardsString);
-
-      console.log(
-        `${name} has ${cardsString.length} cards: ${cardsString} (${_hand.name})`
-      );
-
-      setHand(_hand);
-    } else {
-      setHand(null);
-    }
-  }, [cards]);
-
-  const { colorScheme } = useMantineColorScheme();
-
-  const [bet, setBet] = useState<number | string>("");
-
-  let turn = state.currentPlayer === state.players.indexOf(props.player);
-
-  const openDeleteConfirmModal = () =>
+  const openDeletePlayerModal = () => {
     modals.openConfirmModal({
       title: "Delete Player",
       children: "Are you sure that you want to delete this player?",
-      labels: { confirm: `Delete "${name}"`, cancel: "Cancel" },
+      labels: { confirm: `Delete "${props.player.name}"`, cancel: "Cancel" },
       confirmProps: { color: "red" },
       cancelProps: { color: "gray" },
       groupProps: { grow: true },
       onConfirm: () => {
-        props.handler.filter((item) => item.id !== props.player.id);
+        const _players = state.players.filter(
+          (player) => player.id !== props.player.id
+        );
+        props.handler.remove(props.player.id);
+        setState({ ...state, players: _players });
         notifications.show({
           message: "Player Deleted",
           color: "red",
         });
       },
     });
+  };
 
-  const savePlayer = () => {
-    setName(editName);
-    setBalance(editBalance);
+  const openHandRankingModal = () => {
+    const hand = playerHands[state.players.indexOf(props.player)];
 
-    modals.closeAll();
-    props.handler.applyWhere(
-      (item) => item.id === props.player.id,
-      (item) => ({ ...item, name, balance })
-    );
-    close();
-    notifications.show({
-      message: "Player Updated",
-      color: "green",
+    modals.open({
+      title: `${
+        state.players[state.players.indexOf(props.player)].name
+      }'s Hand`,
+      children: (
+        <>
+          <Text>
+            <b>Combination:</b> {hand.combination}
+          </Text>
+          <Text>
+            <b>Made Hand:</b> {suitToEmoji(hand.madeHand.join(" "))}
+          </Text>
+          <Text>
+            <b>Unused Cards:</b> {suitToEmoji(hand.unused.join(" "))}
+          </Text>
+          <Text>
+            <b>Rank:</b> #{hand.rank}
+          </Text>
+        </>
+      ),
     });
   };
 
-  const revertPlayer = () => {
-    setEditName(name);
-    setEditBalance(balance);
-    close();
-  };
+  const [turn, setTurn] = useState(false);
+  useEffect(() => {
+    setTurn(state.currentPlayerIndex == state.players.indexOf(props.player));
+  }, [state]);
 
   const placeBet = () => {
-    console.log("Bet placed");
-    setIsBetting(false);
-    // ...
-    setBet("");
+    console.log("Placing bet");
+    setIsCapturingBet(false);
   };
 
   const cancelBet = () => {
-    console.log("Bet canceled");
-    setBet("");
-    setIsBetting(false);
+    console.log("Cancelling bet");
+    setTEMP_bet(0);
+    setIsCapturingBet(false);
   };
 
-  // const setCard = (i: number) => {
-  //   openSetCard();
-  // };
-
-  const saveCard = () => {
-    console.log("Card set");
-
-    let _cards = [...cards];
-    if (setCardRank == "NONE" || setCardSuit == "NONE") {
-      _cards[selectedCardIndex] = { suit: "NONE", rank: "NONE" };
-    } else {
-      _cards[selectedCardIndex] = { suit: setCardSuit, rank: setCardRank };
-    }
-
-    setCards(_cards);
-    props.handler.applyWhere(
-      (item) => item.id === props.player.id,
-      (item) => ({ ...item, cards: [_cards[0], _cards[1]] })
-    );
-    closeSetCard();
-    setSelectedCardIndex(0);
-
-    if (setCardRank == "NONE" || setCardSuit == "NONE") {
-      showNotification({
-        title: "Card Set",
-        message: `Card removed`,
-        color: "blue",
-      });
-    } else {
-      setSetCardRank("NONE");
-      setSetCardSuit("NONE");
-
-      showNotification({
-        title: "Card Set",
-        message: `Card set to ${rankToName(setCardRank)} of ${suitToName(
-          setCardSuit
-        )}`,
-        color: "blue",
-      });
-    }
+  const stopEditingPlayer = () => {
+    editPlayerModalHandlers.close();
+    setTEMP_name(props.player.name);
+    setTEMP_balance(props.player.balance);
   };
 
-  const removeCard = (card: Card) => {
-    console.log("Card removed");
+  const saveEditedPlayer = () => {
+    console.log("Saving player");
+    editPlayerModalHandlers.close();
+    const _players = [...state.players];
+    _players[_players.indexOf(props.player)] = {
+      ...props.player,
+      name: TEMP_name,
+      balance: TEMP_balance,
+    };
+    setState({ ...state, players: _players });
 
-    let _cards = [...cards];
-    _cards[_cards.indexOf(card)] = { suit: "NONE", rank: "NONE" };
-    props.handler.applyWhere(
-      (item) => item.id === props.player.id,
-      (item) => ({ ...item, cards: [cards[0], cards[1]] })
-    );
-    setCards(_cards);
+    notifications.show({
+      message: "Player Saved",
+      color: "green",
+    });
   };
 
   return (
@@ -244,7 +162,7 @@ export default function PlayerCard(props: {
       }}
     >
       <Box m="xs">
-        <Group grow justify="space-between">
+        <Group justify="space-between">
           <div>
             <Text
               size={turn ? "xl" : "lg"}
@@ -252,15 +170,12 @@ export default function PlayerCard(props: {
               tt="capitalize"
             >
               <div style={{ display: "flex", alignItems: "center" }}>
-                {name}
+                {props.player.name}
                 {
                   <PositionBadge
                     player={props.player}
                     nextDealer={() => {
-                      setState({
-                        ...state,
-                        dealerIndex: (val.dealerIndex + 1) % val.players.length,
-                      });
+                      console.log("NEXT DEALER");
                     }}
                   />
                 }
@@ -270,7 +185,7 @@ export default function PlayerCard(props: {
                     <ActionIcon
                       variant="transparent"
                       color={theme.colors.dark[1]}
-                      onClick={() => setShowMenu(!showMenu)}
+                      onClick={() => dropdownMenuHandlers.toggle()}
                     >
                       <IconChevronDown
                         style={{ width: rem(22), height: rem(22) }}
@@ -278,18 +193,33 @@ export default function PlayerCard(props: {
                     </ActionIcon>
                   </Menu.Target>
 
-                  <CardPicker
-                    setCardModelOpened={setCardModelOpened}
-                    saveCard={saveCard}
-                    setCardRank={setCardRank}
-                    setSetCardRank={setSetCardRank}
-                    setSetCardSuit={setSetCardSuit}
-                    setCardSuit={setCardSuit}
+                  <ImprovedCardPicker
+                    opened={cardPickerOpened}
+                    handleClose={(card: Card) => {
+                      cardPickerOpenedHandlers.close();
+
+                      const playerCards = [
+                        ...state.players[state.players.indexOf(props.player)]
+                          .cards,
+                      ];
+                      playerCards[selectedCardIndex] = card;
+
+                      const _players = [...state.players];
+                      _players[_players.indexOf(props.player)] = {
+                        ...props.player,
+                        cards: [playerCards[0], playerCards[1]],
+                      };
+
+                      setState({
+                        ...state,
+                        players: _players,
+                      });
+                    }}
                   />
 
                   <Modal
-                    opened={editModalOpened}
-                    onClose={revertPlayer}
+                    opened={editPlayerModalOpened}
+                    onClose={stopEditingPlayer}
                     title="Edit Player"
                     centered
                     radius="md"
@@ -298,11 +228,13 @@ export default function PlayerCard(props: {
                       <TextInput
                         data-autofocus
                         label="Player Name"
-                        value={editName}
+                        value={TEMP_name}
                         onChange={(event) =>
-                          setEditName(event.currentTarget.value)
+                          setTEMP_name(event.currentTarget.value)
                         }
-                        onKeyDown={getHotkeyHandler([["enter", savePlayer]])}
+                        onKeyDown={getHotkeyHandler([
+                          ["enter", saveEditedPlayer],
+                        ])}
                         radius="md"
                         leftSection={<IconUserFilled />}
                       />
@@ -310,22 +242,24 @@ export default function PlayerCard(props: {
                         label="Player Balance"
                         allowNegative={false}
                         decimalScale={2}
-                        onKeyDown={getHotkeyHandler([["enter", savePlayer]])}
+                        onKeyDown={getHotkeyHandler([
+                          ["enter", saveEditedPlayer],
+                        ])}
                         fixedDecimalScale
                         thousandSeparator=","
                         mt="md"
                         radius="md"
                         leftSection={<IconCurrencyDollar />}
-                        value={editBalance}
+                        value={TEMP_balance}
                         onChange={(value) =>
-                          setEditBalance(
+                          setTEMP_balance(
                             isNaN(parseFloat(`${value}`))
                               ? 0
                               : parseFloat(`${value}`)
                           )
                         }
                       />
-                      <Button fullWidth mt="md" onClick={savePlayer}>
+                      <Button fullWidth mt="md" onClick={saveEditedPlayer}>
                         Save
                       </Button>
                     </>
@@ -341,7 +275,7 @@ export default function PlayerCard(props: {
                           style={{ width: rem(20), height: rem(20) }}
                         />
                       }
-                      onClick={open}
+                      onClick={editPlayerModalHandlers.open}
                       fw={450}
                     >
                       Edit Player
@@ -354,7 +288,9 @@ export default function PlayerCard(props: {
                       onClick={() => {
                         setState({
                           ...state,
-                          currentPlayer: state.players.indexOf(props.player),
+                          currentPlayerIndex: state.players.indexOf(
+                            props.player
+                          ),
                         });
                       }}
                     >
@@ -384,7 +320,7 @@ export default function PlayerCard(props: {
                       }
                       color="red"
                       fw={450}
-                      onClick={openDeleteConfirmModal}
+                      onClick={openDeletePlayerModal}
                     >
                       Delete Player
                     </Menu.Item>
@@ -393,32 +329,77 @@ export default function PlayerCard(props: {
               </div>
             </Text>
             <Text size={turn ? "md" : "sm"} c="dimmed">
-              ${balance.toFixed(2)}
+              ${props.player.balance.toFixed(2)}
             </Text>
           </div>
           <Group justify="flex-end">
-            <Text fw="bold" size="lg">
-              {}
-              {hand ? hand.name : ""}
-            </Text>
-            {cards.map((card, i) => (
-              <PlayingCard
-                key={i}
-                card={card}
-                removeCard={removeCard}
-                openSetCardModal={(card: Card) => {
-                  setSelectedCardIndex(i);
-                  setSetCardRank("NONE");
-                  setSetCardSuit("NONE");
-                  openSetCard();
+            <Paper
+              style={{
+                width: "5rem",
+                height: "4.5rem",
+                backgroundColor: "transparent",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  height: "100%",
                 }}
-              />
-            ))}
+              >
+                <Stack gap={0} align="center">
+                  {playerHands.length > 0 &&
+                    (state.players.indexOf(props.player) ==
+                    playerHands.indexOf(
+                      playerHands.reduce((a, b) => {
+                        if (a.rank < b.rank) {
+                          return a;
+                        } else {
+                          return b;
+                        }
+                      })
+                    ) ? (
+                      <Badge mb="0.25rem" color="#22dd22" variant="light">
+                        Winner
+                      </Badge>
+                    ) : null)}
+                  <Text
+                    ta="center"
+                    fw="bold"
+                    size="lg"
+                    style={{ cursor: "pointer" }}
+                    onClick={openHandRankingModal}
+                  >
+                    {playerHands[
+                      state.players.indexOf(props.player)
+                    ]?.combination
+                      .split(/(?=[A-Z])/)
+                      .join(" ")
+                      .replace("Of", "of")
+                      .replace(" A ", " a ")
+                      .replace("Four of a Kind", "Quads")}
+                  </Text>
+                </Stack>
+              </div>
+            </Paper>
+            {state.players[state.players.indexOf(props.player)]?.cards.map(
+              (card, i) => (
+                <PlayingCard
+                  key={i}
+                  card={card}
+                  onClick={() => {
+                    setSelectedCardIndex(i);
+                    cardPickerOpenedHandlers.open();
+                  }}
+                />
+              )
+            )}
           </Group>
         </Group>
         <Divider my="xs" />
         <Group grow gap="xs" justify="center">
-          {isBetting ? (
+          {isCapturingBet ? (
             <>
               <Grid gutter="xs">
                 <Grid.Col span={{ base: 12, xs: 8 }}>
@@ -434,8 +415,8 @@ export default function PlayerCard(props: {
                     thousandSeparator=","
                     radius="md"
                     leftSection={<IconCurrencyDollar />}
-                    value={bet}
-                    onChange={(value) => setBet(parseFloat(`${value}`))}
+                    value={TEMP_bet}
+                    onChange={(value) => setTEMP_bet(parseFloat(`${value}`))}
                   />
                 </Grid.Col>
                 <Grid.Col span={{ base: 12, xs: 2 }}>
@@ -462,7 +443,7 @@ export default function PlayerCard(props: {
                 color="green"
                 disabled={!turn}
                 onClick={() => {
-                  setIsBetting(true);
+                  setIsCapturingBet(true);
                 }}
               >
                 Bet

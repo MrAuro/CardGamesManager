@@ -8,12 +8,11 @@ import {
   // useMantineTheme,
 } from "@mantine/core";
 import { IconMoon, IconSun } from "@tabler/icons-react";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { STATE, STATE_WATCHER, State } from "../App";
+import { useRecoilState } from "recoil";
+import { STATE } from "../App";
 
 export default function Settings() {
   const [state, setState] = useRecoilState(STATE);
-  const val = useRecoilValue<State>(STATE_WATCHER);
   // const theme = useMantineTheme();
   const { setColorScheme, colorScheme } = useMantineColorScheme();
 
@@ -21,7 +20,7 @@ export default function Settings() {
     <Container>
       <Input.Wrapper label="UI Scale" mb="xl">
         <Slider
-          defaultValue={val.scale * 100}
+          defaultValue={state.scale * 100}
           min={70}
           max={130}
           step={5}

@@ -718,6 +718,11 @@
     "@types/babel__core" "^7.20.5"
     react-refresh "^0.14.0"
 
+"@xpressit/winning-poker-hand-rank@^0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@xpressit/winning-poker-hand-rank/-/winning-poker-hand-rank-0.2.1.tgz#36fb1868fd8d790adfe271fb8dc717ab240846fb"
+  integrity sha512-OpnoiXb4/58eFYvbadxD4j6CUGpy3Z3WppFnMcV3ShL8+QYkZVlJJQLVtUyUB76bqswRsWFRy0jBCmrhKJ042A==
+
 ansi-styles@^3.2.1:
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-3.2.1.tgz#41fbb20243e50b12be0f04b8dedbf07520ce841d"
@@ -1090,11 +1095,6 @@ picomatch@^2.3.1:
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-2.3.1.tgz#3ba3833733646d9d3e4995946c1365a67fb07a42"
   integrity sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==
-
-pokersolver@^2.1.4:
-  version "2.1.4"
-  resolved "https://registry.yarnpkg.com/pokersolver/-/pokersolver-2.1.4.tgz#58934f3dad1dc597c44e80474bc82e9626790ccc"
-  integrity sha512-vmgZS+K8H8r1RePQykFM5YyvlKo1v3xVec8FMBjg9N6mR2Tj/n/X415w+lG67FWbrk71D/CADmKFinDgaQlAsw==
 
 postcss-js@^4.0.0:
   version "4.0.1"

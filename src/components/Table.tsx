@@ -4,34 +4,40 @@ import { useListState } from "@mantine/hooks";
 import cx from "clsx";
 
 import { notifications } from "@mantine/notifications";
-import { useEffect, useState } from "react";
-import { atom, useRecoilState, useRecoilValue } from "recoil";
-import { STATE, STATE_WATCHER, State } from "../App";
+import { useEffect } from "react";
+import { useRecoilState } from "recoil";
+import { STATE, State } from "../App";
 import classes from "../styles/Table.module.css";
-import PlayerCard from "./PlayerCard";
-import CommunityCards from "./CommunityCards";
-import { Card } from "../utils/Game";
+import { EMPTY_CARD, Player } from "../utils/Game";
+import ImprovedPlayerCard from "./ImprovedPlayerCard";
+import ImprovedCommunityCards from "./ImprovedCommunityCards";
 
 export function Table() {
   const [state, setState] = useRecoilState<State>(STATE);
-  const val = useRecoilValue<State>(STATE_WATCHER);
 
-  const [listState, handlers] = useListState(val.players);
+  const [listState, handlers] = useListState<string>(
+    state.players.map((p) => p.id)
+  );
 
   useEffect(() => {
-    const previousDealer = state.players[val.dealerIndex];
-    const dealerIndex = listState.indexOf(previousDealer);
+    // Instead of setting the state to listState, we reorder the players
+    // based on the listState order to ensure that the players have the
+    // correct data
+
+    let orderedPlayers = listState.map(
+      (id) => state.players.find((p) => p.id === id)!
+    );
+
+    orderedPlayers = orderedPlayers.filter((p) => p != undefined);
 
     setState({
       ...state,
-      // Not really sure what this is doing but it works
-      dealerIndex: dealerIndex == -1 ? val.dealerIndex : dealerIndex,
-      players: listState,
+      players: orderedPlayers,
     });
   }, [listState]);
 
-  const items = listState.map((item, index) => (
-    <Draggable key={item.id} index={index} draggableId={item.id}>
+  const players = listState.map((player, index) => (
+    <Draggable key={player} index={index} draggableId={player}>
       {(provided, snapshot) => (
         <div
           className={cx(classes.item, {
@@ -41,7 +47,12 @@ export function Table() {
           {...provided.dragHandleProps}
           ref={provided.innerRef}
         >
-          <PlayerCard player={item} handler={handlers} />
+          {state.players.find((p) => p.id === player) != undefined && (
+            <ImprovedPlayerCard
+              player={state.players.find((p) => p.id === player)!}
+              handler={handlers}
+            />
+          )}
         </div>
       )}
     </Draggable>
@@ -49,7 +60,7 @@ export function Table() {
 
   return (
     <>
-      <CommunityCards />
+      <ImprovedCommunityCards />
       <DragDropContext
         onDragEnd={({ destination, source }) => {
           handlers.reorder({ from: source.index, to: destination?.index || 0 });
@@ -58,7 +69,7 @@ export function Table() {
         <Droppable droppableId="dnd-list" direction="vertical">
           {(provided) => (
             <div {...provided.droppableProps} ref={provided.innerRef}>
-              {items}
+              {players}
               {provided.placeholder}
             </div>
           )}
@@ -68,15 +79,20 @@ export function Table() {
         variant="subtle"
         fullWidth
         onClick={() => {
-          handlers.append({
+          const newPlayer: Player = {
             balance: 0,
-            cards: [
-              { rank: "NONE", suit: "NONE" },
-              { rank: "NONE", suit: "NONE" },
-            ],
+            cards: [EMPTY_CARD, EMPTY_CARD],
             id: crypto.randomUUID(),
-            name: "Player " + (listState.length + 1),
+            name: "Player " + state.players.length,
+          };
+
+          handlers.append(newPlayer.id);
+
+          setState({
+            ...state,
+            players: [...state.players, newPlayer],
           });
+
           notifications.show({
             message: "Player Added",
             color: "green",
