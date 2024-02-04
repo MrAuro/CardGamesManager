@@ -20,7 +20,7 @@ type CardRank =
   | "7"
   | "8"
   | "9"
-  | "10"
+  | "T"
   | "J"
   | "Q"
   | "K"
@@ -69,7 +69,7 @@ const rankToName = (rank: CardRank) => {
       return "Eight";
     case "9":
       return "Nine";
-    case "10":
+    case "T":
       return "Ten";
     case "J":
       return "Jack";
@@ -82,6 +82,20 @@ const rankToName = (rank: CardRank) => {
     default:
       return "";
   }
+};
+
+type PlayerResult = {
+  handRank: string | null;
+  hand: string | null;
+  ties: number;
+  tiesPercentage: string;
+  win: number;
+  winPercentage: string;
+};
+
+type StoredPlayerResult = {
+  id: string;
+  result: PlayerResult;
 };
 
 const cardToString = (card: Card) => {
@@ -114,6 +128,69 @@ const suitToEmoji = (name: string): string => {
     .replace(/S/gi, "♠️");
 };
 
+// 2h7c to [{suit: "hearts", rank: "2"}, {suit: "clubs", rank: "7"}]
+const joinedStringToCards = (cards: string | null): Card[] => {
+  if (!cards) {
+    return [];
+  }
+
+  let result: Card[] = [];
+  for (let i = 0; i < cards.length; i += 2) {
+    result.push({
+      suit: suitAbbreviationToName(cards[i + 1]),
+      rank: cards[i] as CardRank,
+    });
+  }
+
+  return result;
+};
+
+const isCardEmpty = (card: Card) => {
+  return card.rank == "NONE" || card.suit == "NONE";
+};
+
+const suitAbbreviationToName = (abbr: string): CardSuit => {
+  switch (abbr) {
+    case "h":
+      return "hearts";
+    case "d":
+      return "diamonds";
+    case "c":
+      return "clubs";
+    case "s":
+      return "spades";
+    default:
+      return "NONE";
+  }
+};
+
+const rankingToName = (rank: string): string => {
+  switch (rank) {
+    case "ROYAL_FLUSH":
+      return "Royal Flush";
+    case "STRAIGHT_FLUSH":
+      return "Straight Flush";
+    case "QUADS":
+      return "Four of a Kind";
+    case "FULL_HOUSE":
+      return "Full House";
+    case "FLUSH":
+      return "Flush";
+    case "STRAIGHT":
+      return "Straight";
+    case "THREE_OF_A_KIND":
+      return "Three of a Kind";
+    case "TWO_PAIRS":
+      return "Two Pairs";
+    case "ONE_PAIR":
+      return "One Pair";
+    case "HIGH_CARDS":
+      return "High Cards";
+    default:
+      return "";
+  }
+};
+
 const EMPTY_CARD: Card = { suit: "NONE", rank: "NONE" };
 
 export {
@@ -122,6 +199,18 @@ export {
   cardToString,
   suitToIcon,
   suitToEmoji,
+  joinedStringToCards,
+  isCardEmpty,
+  suitAbbreviationToName,
+  rankingToName,
   EMPTY_CARD,
 };
-export type { Card, CardSuit, CardRank, Player, PlayerPosition };
+export type {
+  Card,
+  CardSuit,
+  CardRank,
+  Player,
+  PlayerPosition,
+  PlayerResult,
+  StoredPlayerResult,
+};

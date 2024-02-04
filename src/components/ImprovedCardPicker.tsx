@@ -63,7 +63,7 @@ export default function ImprovedCardPicker(props: {
             "7",
             "8",
             "9",
-            "10",
+            "T",
             "J",
             "Q",
             "K",

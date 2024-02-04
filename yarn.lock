@@ -616,6 +616,11 @@
     "@tauri-apps/cli-win32-ia32-msvc" "1.5.9"
     "@tauri-apps/cli-win32-x64-msvc" "1.5.9"
 
+"@types/argv@0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@types/argv/-/argv-0.0.4.tgz#3c2a4e85164f3acd17b9ede1099777070d47540e"
+  integrity sha512-Bqdk3j7vGqvygWXYTZxNo+iYT9yKvEZphCz5RNER35sKbF+3pHD9pKcIEtxaOsHYntH3St99kd+I+k433jsfIg==
+
 "@types/babel__core@^7.20.5":
   version "7.20.5"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.20.5.tgz#3df15f27ba85319caa07ba08d0721889bb39c017"
@@ -718,17 +723,17 @@
     "@types/babel__core" "^7.20.5"
     react-refresh "^0.14.0"
 
-"@xpressit/winning-poker-hand-rank@^0.2.1":
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/@xpressit/winning-poker-hand-rank/-/winning-poker-hand-rank-0.2.1.tgz#36fb1868fd8d790adfe271fb8dc717ab240846fb"
-  integrity sha512-OpnoiXb4/58eFYvbadxD4j6CUGpy3Z3WppFnMcV3ShL8+QYkZVlJJQLVtUyUB76bqswRsWFRy0jBCmrhKJ042A==
-
 ansi-styles@^3.2.1:
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-3.2.1.tgz#41fbb20243e50b12be0f04b8dedbf07520ce841d"
   integrity sha512-VT0ZI6kZRdTh8YyJw3SMbYm/u+NqfsAxEpWO0Pf9sq8/e94WxxOpPKx9FR1FlyCtOVDNOQ+8ntlqFxiRc+r5qA==
   dependencies:
     color-convert "^1.9.0"
+
+argv@0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/argv/-/argv-0.0.2.tgz#ecbd16f8949b157183711b1bda334f37840185ab"
+  integrity sha512-dEamhpPEwRUBpLNHeuCm/v+g0anFByHahxodVO/BbAarHVBBg2MccCwf9K+o1Pof+2btdnkJelYVUWjW/VrATw==
 
 aria-hidden@^1.2.3:
   version "1.2.3"
@@ -1034,6 +1039,11 @@ lodash.isequal@^4.5.0:
   resolved "https://registry.yarnpkg.com/lodash.isequal/-/lodash.isequal-4.5.0.tgz#415c4478f2bcc30120c22ce10ed3226f7d3e18e0"
   integrity sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==
 
+lodash@4.17.20:
+  version "4.17.20"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.20.tgz#b44a9b6297bcb698f1c51a3545a2b3b368d59c52"
+  integrity sha512-PlhdFcillOINfeV7Ni6oF1TAEayyZBoZ8bcshTHqOYJYlrqzRK5hagpagky5o4HfCzzd1TRkXPMFq6cKk9rGmA==
+
 loose-envify@^1.0.0, loose-envify@^1.1.0, loose-envify@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/loose-envify/-/loose-envify-1.4.0.tgz#71ee51fa7be4caec1a63839f7e682d8132d30caf"
@@ -1095,6 +1105,16 @@ picomatch@^2.3.1:
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-2.3.1.tgz#3ba3833733646d9d3e4995946c1365a67fb07a42"
   integrity sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==
+
+poker-variants-odds-calculator@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/poker-variants-odds-calculator/-/poker-variants-odds-calculator-0.0.3.tgz#77767e5c08e2587c13011448dcc73a781e694d3c"
+  integrity sha512-g2PV3p0RkwqJ8TQ/WDVAVh7Hy6l6S7kVQxHEMxt4BYIb2TreHSM2PE/O02HxZNiKMqP5K/UCh89jYZUZ/T++Rg==
+  dependencies:
+    "@types/argv" "0.0.4"
+    argv "0.0.2"
+    lodash "4.17.20"
+    typescript "4.0.3"
 
 postcss-js@^4.0.0:
   version "4.0.1"
@@ -1435,6 +1455,11 @@ type-fest@^3.13.1:
   version "3.13.1"
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-3.13.1.tgz#bb744c1f0678bea7543a2d1ec24e83e68e8c8706"
   integrity sha512-tLq3bSNx+xSpwvAJnzrK0Ep5CLNWjvFTOp71URMaAEWBfRb9nnJiBoUe0tF8bI4ZFO3omgBR6NvnbzVUT3Ly4g==
+
+typescript@4.0.3:
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.0.3.tgz#153bbd468ef07725c1df9c77e8b453f8d36abba5"
+  integrity sha512-tEu6DGxGgRJPb/mVPIZ48e69xCn2yRmCgYmDugAVwmJ6o+0u1RI18eO7E7WBTLYLaEVVOhwQmcdhQHweux/WPg==
 
 typescript@^5.0.2:
   version "5.3.3"

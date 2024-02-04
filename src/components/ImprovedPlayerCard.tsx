@@ -3,6 +3,8 @@ import {
   Badge,
   Box,
   Button,
+  Center,
+  Container,
   Divider,
   Grid,
   Group,
@@ -32,10 +34,12 @@ import {
 import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { PLAYER_HANDS, STATE, State } from "../App";
-import { Card, Player, suitToEmoji } from "../utils/Game";
+import { Card, Player, rankingToName, suitToEmoji } from "../utils/Game";
 import ImprovedCardPicker from "./ImprovedCardPicker";
 import PlayingCard from "./PlayingCard";
 import PositionBadge from "./PosititionBadge";
+
+const DEBUG_OUTLINE = {};
 
 export default function ImprovedPlayerCard(props: {
   player: Player;
@@ -88,7 +92,7 @@ export default function ImprovedPlayerCard(props: {
       }'s Hand`,
       children: (
         <>
-          <Text>
+          {/* <Text>
             <b>Combination:</b> {hand.combination}
           </Text>
           <Text>
@@ -99,7 +103,7 @@ export default function ImprovedPlayerCard(props: {
           </Text>
           <Text>
             <b>Rank:</b> #{hand.rank}
-          </Text>
+          </Text> */}
         </>
       ),
     });
@@ -335,7 +339,7 @@ export default function ImprovedPlayerCard(props: {
           <Group justify="flex-end">
             <Paper
               style={{
-                width: "5rem",
+                width: "6.5rem",
                 height: "4.5rem",
                 backgroundColor: "transparent",
               }}
@@ -346,9 +350,47 @@ export default function ImprovedPlayerCard(props: {
                   justifyContent: "center",
                   alignItems: "center",
                   height: "100%",
+                  flexDirection: "column",
                 }}
               >
-                <Stack gap={0} align="center">
+                {playerHands.length > 0 &&
+                  playerHands.find((res) => res.id === props.player.id) && (
+                    <>
+                      <Text size="" fw="bold" ta="center" style={{}}>
+                        {rankingToName(
+                          playerHands.find((res) => res.id === props.player.id)
+                            ?.result.handRank || ""
+                        )}
+                      </Text>
+                      <Text c="dimmed" size="sm" ta="center" style={{}}>
+                        <>
+                          {
+                            playerHands.find(
+                              (res) => res.id === props.player.id
+                            )?.result.winPercentage
+                          }
+                        </>
+                      </Text>
+                      {playerHands.find((res) => res.id === props.player.id)
+                        ?.result.win == 1 && (
+                        <Badge color="yellow">Winner</Badge>
+                      )}
+                      {playerHands.find((res) => res.id === props.player.id)
+                        ?.result.ties == 1 && (
+                        <Badge
+                          color="gray.7"
+                          styles={{
+                            label: {
+                              color: "white",
+                            },
+                          }}
+                        >
+                          Tie
+                        </Badge>
+                      )}
+                    </>
+                  )}
+                {/* <Stack gap={0} align="center">
                   {playerHands.length > 0 &&
                     (state.players.indexOf(props.player) ==
                     playerHands.indexOf(
@@ -380,7 +422,7 @@ export default function ImprovedPlayerCard(props: {
                       .replace(" A ", " a ")
                       .replace("Four of a Kind", "Quads")}
                   </Text>
-                </Stack>
+                </Stack> */}
               </div>
             </Paper>
             {state.players[state.players.indexOf(props.player)]?.cards.map(
