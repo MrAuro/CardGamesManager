@@ -14,7 +14,7 @@ export default function PositionBadge(props: {
 
   let playerIndex = state.players.indexOf(props.player);
   if (playerIndex == state.dealerIndex) position = "btn";
-  if (state.players.length >= 3) {
+  if (state.players.length >= 3 && state.forcedBetType == "BLINDS") {
     if (playerIndex == (state.dealerIndex + 1) % state.players.length)
       position = "sb";
     if (playerIndex == (state.dealerIndex + 2) % state.players.length)

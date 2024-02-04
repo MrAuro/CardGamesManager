@@ -3,8 +3,6 @@ import {
   Badge,
   Box,
   Button,
-  Center,
-  Container,
   Divider,
   Grid,
   Group,
@@ -12,7 +10,6 @@ import {
   Modal,
   NumberInput,
   Paper,
-  Stack,
   Text,
   TextInput,
   rem,
@@ -34,12 +31,10 @@ import {
 import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { PLAYER_HANDS, STATE, State } from "../App";
-import { Card, Player, rankingToName, suitToEmoji } from "../utils/Game";
+import { Card, Player, rankingToName } from "../utils/Game";
 import ImprovedCardPicker from "./ImprovedCardPicker";
 import PlayingCard from "./PlayingCard";
 import PositionBadge from "./PosititionBadge";
-
-const DEBUG_OUTLINE = {};
 
 export default function ImprovedPlayerCard(props: {
   player: Player;
@@ -179,7 +174,11 @@ export default function ImprovedPlayerCard(props: {
                   <PositionBadge
                     player={props.player}
                     nextDealer={() => {
-                      console.log("NEXT DEALER");
+                      setState({
+                        ...state,
+                        dealerIndex:
+                          (state.dealerIndex + 1) % state.players.length,
+                      });
                     }}
                   />
                 }
@@ -394,39 +393,6 @@ export default function ImprovedPlayerCard(props: {
                       )}
                     </>
                   )}
-                {/* <Stack gap={0} align="center">
-                  {playerHands.length > 0 &&
-                    (state.players.indexOf(props.player) ==
-                    playerHands.indexOf(
-                      playerHands.reduce((a, b) => {
-                        if (a.rank < b.rank) {
-                          return a;
-                        } else {
-                          return b;
-                        }
-                      })
-                    ) ? (
-                      <Badge mb="0.25rem" color="#22dd22" variant="light">
-                        Winner
-                      </Badge>
-                    ) : null)}
-                  <Text
-                    ta="center"
-                    fw="bold"
-                    size="lg"
-                    style={{ cursor: "pointer" }}
-                    onClick={openHandRankingModal}
-                  >
-                    {playerHands[
-                      state.players.indexOf(props.player)
-                    ]?.combination
-                      .split(/(?=[A-Z])/)
-                      .join(" ")
-                      .replace("Of", "of")
-                      .replace(" A ", " a ")
-                      .replace("Four of a Kind", "Quads")}
-                  </Text>
-                </Stack> */}
               </div>
             </Paper>
             {state.players[state.players.indexOf(props.player)]?.cards.map(

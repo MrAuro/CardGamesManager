@@ -29,6 +29,10 @@ export interface State {
   currentPlayerIndex: number;
   dealerIndex: number;
   inRound: boolean;
+  littleBlind: number;
+  bigBlind: number;
+  ante: number;
+  forcedBetType: "BLINDS" | "ANTE";
   usedCards: Card[];
 }
 
@@ -65,6 +69,10 @@ export const defaultState: State = {
   currentPlayerIndex: 0,
   dealerIndex: 0,
   inRound: false,
+  littleBlind: 0,
+  bigBlind: 0,
+  ante: 0,
+  forcedBetType: "BLINDS",
   usedCards: [],
 };
 
