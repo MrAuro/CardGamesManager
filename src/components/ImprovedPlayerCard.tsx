@@ -362,15 +362,19 @@ export default function ImprovedPlayerCard(props: {
                             ?.result.handRank || ""
                         )}
                       </Text>
-                      <Text c="dimmed" size="sm" ta="center" style={{}}>
-                        <>
-                          {
-                            playerHands.find(
-                              (res) => res.id === props.player.id
-                            )?.result.winPercentage
-                          }
-                        </>
-                      </Text>
+                      {state.communityCards.filter(
+                        (card) => card.rank !== "NONE" && card.suit !== "NONE"
+                      ).length != 5 && (
+                        <Text c="dimmed" size="sm" ta="center" style={{}}>
+                          <>
+                            {
+                              playerHands.find(
+                                (res) => res.id === props.player.id
+                              )?.result.winPercentage
+                            }
+                          </>
+                        </Text>
+                      )}
                       {playerHands.find((res) => res.id === props.player.id)
                         ?.result.win == 1 && (
                         <Badge color="yellow">Winner</Badge>
