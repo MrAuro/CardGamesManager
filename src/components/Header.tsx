@@ -1,15 +1,18 @@
 import { Container, Group, Tabs, Title, useMantineTheme } from "@mantine/core";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRecoilState } from "recoil";
 import { ROUTES, STATE } from "../App";
-import { useMediaQuery } from "@mantine/hooks";
+import { useElementSize, useViewportSize } from "@mantine/hooks";
 
 export default function Header() {
   const [state, setState] = useRecoilState(STATE);
   const [active, setActive] = useState(state.activeTab);
-  const theme = useMantineTheme();
 
-  const size = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
+  const tabsSize = useElementSize();
+  const titleSize = useElementSize();
+
+  const { width } = useViewportSize();
+  const showTitle = width < tabsSize.width + titleSize.width + 100;
 
   const items = ROUTES.map((link) => (
     <Tabs.Tab
@@ -31,13 +34,13 @@ export default function Header() {
   return (
     <header>
       <Container size="md" mt="sm">
-        <Group gap={5} justify={size ? "center" : "space-between"}>
-          {!size && (
-            <Title order={1}>
+        <Group gap={5} justify={showTitle ? "center" : "space-between"}>
+          {!showTitle && (
+            <Title order={1} ref={titleSize.ref}>
               {ROUTES.find((r) => r.link === active)?.label}
             </Title>
           )}
-          <Tabs variant="pills">
+          <Tabs variant="pills" ref={tabsSize.ref}>
             <Tabs.List>{items}</Tabs.List>
           </Tabs>
         </Group>
