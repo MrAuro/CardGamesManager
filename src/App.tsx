@@ -469,8 +469,10 @@ function App() {
         </Accordion>
       </Paper>
       <Container>
-        <div style={{ display: state.activeTab == "home" ? "block" : "none" }}>
-          <Home />
+        <div
+          style={{ display: state.activeTab == "players" ? "block" : "none" }}
+        >
+          <Players />
         </div>
         <div
           style={{ display: state.activeTab == "blackjack" ? "block" : "none" }}
