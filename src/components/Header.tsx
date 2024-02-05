@@ -1,18 +1,31 @@
-import { Container, Group, Tabs, Title, useMantineTheme } from "@mantine/core";
-import { useEffect, useRef, useState } from "react";
-import { useRecoilState } from "recoil";
+import { Container, Group, Tabs, Title } from "@mantine/core";
+import { useElementSize } from "@mantine/hooks";
+import { useState } from "react";
+import { atom, useRecoilState } from "recoil";
 import { ROUTES, STATE } from "../App";
-import { useElementSize, useViewportSize } from "@mantine/hooks";
+
+const FULL_TAB_WIDTH = atom({
+  key: "SIZE_STATE",
+  default: 0,
+});
 
 export default function Header() {
   const [state, setState] = useRecoilState(STATE);
   const [active, setActive] = useState(state.activeTab);
+  const [fullTabWidth, setfullTabWidth] = useRecoilState(FULL_TAB_WIDTH);
 
-  const tabsSize = useElementSize();
+  const fullTabsSize = useElementSize();
   const titleSize = useElementSize();
+  const containerSize = useElementSize();
 
-  const { width } = useViewportSize();
-  const showTitle = width < tabsSize.width + titleSize.width + 100;
+  if (fullTabWidth < fullTabsSize.width && fullTabsSize.width > 0) {
+    setfullTabWidth(fullTabsSize.width);
+  }
+
+  const showTitle =
+    containerSize.width - titleSize.width - fullTabWidth - 20 < 0;
+
+  const iconsOnly = containerSize.width < fullTabWidth;
 
   const items = ROUTES.map((link) => (
     <Tabs.Tab
@@ -27,20 +40,20 @@ export default function Header() {
         setActive(link.link);
       }}
     >
-      {link.label}
+      {iconsOnly ? null : link.label}
     </Tabs.Tab>
   ));
 
   return (
     <header>
-      <Container size="md" mt="sm">
+      <Container size="md" mt="sm" ref={containerSize.ref}>
         <Group gap={5} justify={showTitle ? "center" : "space-between"}>
           {!showTitle && (
             <Title order={1} ref={titleSize.ref}>
               {ROUTES.find((r) => r.link === active)?.label}
             </Title>
           )}
-          <Tabs variant="pills" ref={tabsSize.ref}>
+          <Tabs variant="pills" ref={fullTabsSize.ref}>
             <Tabs.List>{items}</Tabs.List>
           </Tabs>
         </Group>
