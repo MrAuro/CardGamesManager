@@ -12,6 +12,7 @@ import {
   Paper,
   Text,
   TextInput,
+  Tooltip,
   rem,
   useMantineColorScheme,
   useMantineTheme,
@@ -26,15 +27,18 @@ import {
   IconCurrencyDollar,
   IconPencil,
   IconTrash,
+  IconUserCheck,
   IconUserFilled,
+  IconUserOff,
 } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { PLAYER_HANDS, STATE, State } from "../App";
+import { GameState, PLAYER_HANDS, STATE, State } from "../App";
 import { Card, Player, rankingToName } from "../utils/Game";
 import ImprovedCardPicker from "./ImprovedCardPicker";
 import PlayingCard from "./PlayingCard";
 import PositionBadge from "./PosititionBadge";
+import PlayerButtons from "./PlayerButtons";
 
 export default function ImprovedPlayerCard(props: {
   player: Player;
@@ -169,19 +173,44 @@ export default function ImprovedPlayerCard(props: {
               tt="capitalize"
             >
               <div style={{ display: "flex", alignItems: "center" }}>
-                {props.player.name}
-                {
-                  <PositionBadge
-                    player={props.player}
-                    nextDealer={() => {
-                      setState({
-                        ...state,
-                        dealerIndex:
-                          (state.dealerIndex + 1) % state.players.length,
-                      });
-                    }}
-                  />
-                }
+                <Text
+                  td={props.player.isPlaying ? "" : "line-through"}
+                  fs={props.player.isPlaying ? "" : "italic"}
+                  style={{
+                    cursor:
+                      state.gameState == GameState.EDITING ? "pointer" : "",
+                  }}
+                  onClick={() => {
+                    if (state.gameState == GameState.EDITING) {
+                      if (props.player.isPlaying) {
+                        const _players = [...state.players];
+                        _players[_players.indexOf(props.player)] = {
+                          ...props.player,
+                          isPlaying: false,
+                        };
+                        setState({
+                          ...state,
+                          players: _players,
+                        });
+                      } else {
+                        if (props.player.balance >= state.bigBlind) {
+                          const _players = [...state.players];
+                          _players[_players.indexOf(props.player)] = {
+                            ...props.player,
+                            isPlaying: true,
+                          };
+                          setState({
+                            ...state,
+                            players: _players,
+                          });
+                        }
+                      }
+                    }
+                  }}
+                >
+                  {props.player.name}
+                </Text>
+                {<PositionBadge player={props.player} />}
 
                 <Menu position="bottom-start">
                   <Menu.Target>
@@ -287,6 +316,7 @@ export default function ImprovedPlayerCard(props: {
                       leftSection={
                         <IconBolt style={{ width: rem(20), height: rem(20) }} />
                       }
+                      disabled={!props.player.isPlaying}
                       fw={450}
                       onClick={() => {
                         setState({
@@ -306,6 +336,7 @@ export default function ImprovedPlayerCard(props: {
                         />
                       }
                       fw={450}
+                      disabled={!props.player.isPlaying}
                       onClick={() => {
                         setState({
                           ...state,
@@ -315,6 +346,60 @@ export default function ImprovedPlayerCard(props: {
                     >
                       Make Dealer
                     </Menu.Item>
+                    {props.player.isPlaying && (
+                      <Menu.Item
+                        leftSection={
+                          <IconUserOff
+                            style={{ width: rem(20), height: rem(20) }}
+                          />
+                        }
+                        fw={450}
+                        disabled={state.gameState !== GameState.EDITING}
+                        onClick={() => {
+                          const _players = [...state.players];
+                          _players[_players.indexOf(props.player)] = {
+                            ...props.player,
+                            isPlaying: false,
+                          };
+                          setState({
+                            ...state,
+                            players: _players,
+                          });
+                        }}
+                      >
+                        Sit Out
+                      </Menu.Item>
+                    )}
+                    {!props.player.isPlaying && (
+                      <Menu.Item
+                        leftSection={
+                          <IconUserCheck
+                            style={{ width: rem(20), height: rem(20) }}
+                          />
+                        }
+                        disabled={
+                          props.player.balance < state.bigBlind ||
+                          state.gameState !== GameState.EDITING
+                        }
+                        fw={450}
+                        onClick={() => {
+                          if (props.player.balance >= state.bigBlind) {
+                            const _players = [...state.players];
+                            _players[_players.indexOf(props.player)] = {
+                              ...props.player,
+                              isPlaying: true,
+                            };
+                            setState({
+                              ...state,
+                              players: _players,
+                            });
+                          }
+                        }}
+                      >
+                        Sit In
+                      </Menu.Item>
+                    )}
+
                     <Menu.Item
                       leftSection={
                         <IconTrash
@@ -400,6 +485,7 @@ export default function ImprovedPlayerCard(props: {
                 <PlayingCard
                   key={i}
                   card={card}
+                  disabled={!props.player.isPlaying}
                   onClick={() => {
                     setSelectedCardIndex(i);
                     cardPickerOpenedHandlers.open();
@@ -409,60 +495,21 @@ export default function ImprovedPlayerCard(props: {
             )}
           </Group>
         </Group>
-        <Divider my="xs" />
-        <Group grow gap="xs" justify="center">
-          {isCapturingBet ? (
-            <>
-              <Grid gutter="xs">
-                <Grid.Col span={{ base: 12, xs: 8 }}>
-                  <NumberInput
-                    allowNegative={false}
-                    autoFocus
-                    onKeyDown={getHotkeyHandler([
-                      ["Enter", () => placeBet()],
-                      ["Escape", () => cancelBet()],
-                    ])}
-                    decimalScale={2}
-                    fixedDecimalScale
-                    thousandSeparator=","
-                    radius="md"
-                    leftSection={<IconCurrencyDollar />}
-                    value={TEMP_bet}
-                    onChange={(value) => setTEMP_bet(parseFloat(`${value}`))}
-                  />
-                </Grid.Col>
-                <Grid.Col span={{ base: 12, xs: 2 }}>
-                  <Button fullWidth color="gray" onClick={cancelBet}>
-                    Back
-                  </Button>
-                </Grid.Col>
-                <Grid.Col span={{ base: 12, xs: 2 }}>
-                  <Button fullWidth color="green" onClick={placeBet}>
-                    Bet
-                  </Button>
-                </Grid.Col>
-              </Grid>
-            </>
-          ) : (
-            <>
-              <Button color="blue" disabled={!turn}>
-                Check
-              </Button>
-              <Button color="red" disabled={!turn}>
-                Fold
-              </Button>
-              <Button
-                color="green"
-                disabled={!turn}
-                onClick={() => {
-                  setIsCapturingBet(true);
-                }}
-              >
-                Bet
-              </Button>
-            </>
-          )}
-        </Group>
+        {props.player.isPlaying && (
+          <>
+            <Divider my="xs" />
+            <PlayerButtons
+              player={props.player}
+              turn={turn}
+              isCapturingBet={isCapturingBet}
+              setIsCapturingBet={setIsCapturingBet}
+              TEMP_bet={TEMP_bet}
+              setTEMP_bet={setTEMP_bet}
+              placeBet={placeBet}
+              cancelBet={cancelBet}
+            />
+          </>
+        )}
       </Box>
     </Paper>
   );

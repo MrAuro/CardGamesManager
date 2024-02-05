@@ -6,11 +6,14 @@ import {
   Input,
   InputWrapper,
   NumberInput,
+  Text,
   Slider,
   useMantineColorScheme,
+  Alert,
   // useMantineTheme,
 } from "@mantine/core";
 import {
+  IconAlertCircle,
   IconCurrencyDollar,
   IconDatabase,
   IconMoon,
@@ -18,7 +21,8 @@ import {
   IconSun,
 } from "@tabler/icons-react";
 import { useRecoilState } from "recoil";
-import { STATE, State } from "../App";
+import { GameState, STATE, State } from "../App";
+import { modals } from "@mantine/modals";
 
 export default function Settings() {
   const [state, setState] = useRecoilState<State>(STATE);
@@ -87,11 +91,23 @@ export default function Settings() {
         </Button.Group>
       </InputWrapper>
       <Divider my="sm" />
+      {state.gameState != GameState.EDITING && (
+        <Alert
+          variant="light"
+          color="red"
+          title="Game in progress"
+          icon={<IconAlertCircle />}
+          mb="sm"
+        >
+          You cannot change settings while the game is in progress.
+        </Alert>
+      )}
       <InputWrapper label="Forced Bet Type" mb="xs">
         <Button.Group>
           <Button
             variant={state.forcedBetType == "BLINDS" ? "filled" : "default"}
             leftSection={<IconDatabase />}
+            disabled={state.gameState != GameState.EDITING}
             onClick={() => {
               setState({ ...state, forcedBetType: "BLINDS" });
             }}
@@ -101,6 +117,7 @@ export default function Settings() {
           <Button
             variant={state.forcedBetType == "ANTE" ? "filled" : "default"}
             leftSection={<IconPokerChip />}
+            disabled={state.gameState != GameState.EDITING}
             onClick={() => {
               setState({ ...state, forcedBetType: "ANTE" });
             }}
@@ -122,9 +139,10 @@ export default function Settings() {
                 thousandSeparator=","
                 leftSection={<IconCurrencyDollar />}
                 placeholder="0.00"
+                disabled={state.gameState != GameState.EDITING}
                 value={state.bigBlind}
                 onChange={(value) => {
-                  setState({ ...state, bigBlind: parseInt(`${value}`) });
+                  setState({ ...state, bigBlind: parseFloat(`${value}`) });
                 }}
               />
             </Grid.Col>
@@ -138,9 +156,10 @@ export default function Settings() {
                 thousandSeparator=","
                 leftSection={<IconCurrencyDollar />}
                 placeholder="0.00"
-                value={state.littleBlind}
+                disabled={state.gameState != GameState.EDITING}
+                value={state.smallBlind}
                 onChange={(value) => {
-                  setState({ ...state, littleBlind: parseInt(`${value}`) });
+                  setState({ ...state, smallBlind: parseFloat(`${value}`) });
                 }}
               />
             </Grid.Col>
@@ -157,9 +176,10 @@ export default function Settings() {
                 thousandSeparator=","
                 leftSection={<IconCurrencyDollar />}
                 placeholder="0.00"
+                disabled={state.gameState != GameState.EDITING}
                 value={state.ante}
                 onChange={(value) => {
-                  setState({ ...state, ante: parseInt(`${value}`) });
+                  setState({ ...state, ante: parseFloat(`${value}`) });
                 }}
               />
             </Grid.Col>
@@ -170,11 +190,25 @@ export default function Settings() {
       <Button
         color="red"
         onClick={() => {
-          localStorage.clear();
-          window.location.reload();
+          modals.openConfirmModal({
+            title: "Reset everything",
+            children: (
+              <Text size="sm">
+                Are you sure you want to reset everything? This will clear all
+                games, settings, and player data.
+              </Text>
+            ),
+            labels: { confirm: "Reset everything", cancel: "Cancel" },
+            confirmProps: { color: "red" },
+            onCancel: () => {},
+            onConfirm: () => {
+              localStorage.clear();
+              window.location.reload();
+            },
+          });
         }}
       >
-        Reset Game
+        Reset Everything
       </Button>
     </Container>
   );

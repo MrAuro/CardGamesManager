@@ -10,6 +10,7 @@ import { Card, suitToIcon } from "../utils/Game";
 export default function PlayingCard(props: {
   card: Card;
   onClick: () => void;
+  disabled?: boolean;
 }) {
   const theme = useMantineTheme();
   const { colorScheme } = useMantineColorScheme();
@@ -29,9 +30,13 @@ export default function PlayingCard(props: {
             : colorScheme == "dark"
             ? theme.colors.gray[0]
             : theme.colors.gray[1],
-        cursor: "pointer",
+        cursor: props.disabled ? "not-allowed" : "pointer",
       }}
-      onClick={() => props.onClick()}
+      onClick={() => {
+        if (!props.disabled) {
+          props.onClick();
+        }
+      }}
     >
       {props.card.suit == "NONE" ? (
         <>

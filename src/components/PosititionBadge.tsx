@@ -3,22 +3,19 @@ import { useRecoilValue } from "recoil";
 import { STATE, State } from "../App";
 import { Player, PlayerPosition } from "../utils/Game";
 
-export default function PositionBadge(props: {
-  player: Player;
-  nextDealer: () => void;
-}) {
+export default function PositionBadge(props: { player: Player }) {
   const state = useRecoilValue<State>(STATE);
   const { colorScheme } = useMantineColorScheme();
 
   let position: PlayerPosition = "NONE";
 
   let playerIndex = state.players.indexOf(props.player);
-  if (playerIndex == state.dealerIndex) position = "btn";
-  if (state.players.length >= 3 && state.forcedBetType == "BLINDS") {
-    if (playerIndex == (state.dealerIndex + 1) % state.players.length)
-      position = "sb";
-    if (playerIndex == (state.dealerIndex + 2) % state.players.length)
-      position = "bb";
+
+  if (state.players[playerIndex].position == "btn") position = "btn";
+
+  if (state.forcedBetType == "BLINDS") {
+    if (state.players[playerIndex].position == "sb") position = "sb";
+    if (state.players[playerIndex].position == "bb") position = "bb";
   }
 
   let color: string = "gray";
@@ -45,10 +42,7 @@ export default function PositionBadge(props: {
         color={color}
         ml="0.5rem"
         style={{
-          cursor: position == "btn" ? "pointer" : "default",
-        }}
-        onClick={() => {
-          if (position == "btn") props.nextDealer();
+          cursor: "default",
         }}
       >
         {position.toUpperCase()}

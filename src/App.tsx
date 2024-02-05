@@ -1,4 +1,11 @@
-import { Container, Divider } from "@mantine/core";
+import {
+  Button,
+  Container,
+  Divider,
+  NumberInput,
+  Paper,
+  Title,
+} from "@mantine/core";
 import "@mantine/core/styles.css";
 import { IconCards, IconHome, IconSettings } from "@tabler/icons-react";
 import { atom, useRecoilState } from "recoil";
@@ -9,7 +16,9 @@ import Home from "./pages/Home";
 import Settings from "./pages/Settings";
 import {
   Card,
+  EMPTY_CARD,
   Player,
+  PlayerPosition,
   PlayerResult,
   StoredPlayerResult,
   isCardEmpty,
@@ -19,26 +28,15 @@ import { useEffect } from "react";
 import { TexasHoldem } from "poker-variants-odds-calculator";
 // import type { PlayingCard } from "@xpressit/winning-poker-hand-rank/src/types";
 
-export interface State {
-  activeTab: string;
-  scale: 1;
-
-  gameState: GameState;
-  players: Player[];
-  communityCards: Card[];
-  currentPlayerIndex: number;
-  dealerIndex: number;
-  inRound: boolean;
-  littleBlind: number;
-  bigBlind: number;
-  ante: number;
-  forcedBetType: "BLINDS" | "ANTE";
-  usedCards: Card[];
-}
-
 export enum GameState {
-  NONE,
-  CREATING,
+  PREROUND = 0,
+  PREFLOP = 1,
+  FLOP = 2,
+  TURN = 3,
+  RIVER = 4,
+  SHOWDOWN = 5,
+  POSTROUND = 6,
+  EDITING = 7,
 }
 
 export const ROUTES = [
@@ -63,18 +61,46 @@ export const defaultState: State = {
   activeTab: "home",
   scale: 1,
 
-  gameState: GameState.NONE,
+  gameState: GameState.PREROUND,
   players: [],
   communityCards: new Array(5).fill({ suit: "NONE", rank: "NONE" }),
   currentPlayerIndex: 0,
-  dealerIndex: 0,
+  dealerIndex: 7,
   inRound: false,
-  littleBlind: 0,
-  bigBlind: 0,
-  ante: 0,
+  pots: [],
+  smallBlind: 0.25,
+  sbPaid: false,
+  bigBlind: 0.5,
+  bbPaid: false,
+  ante: 0.1,
+  antesPaid: [],
   forcedBetType: "BLINDS",
   usedCards: [],
 };
+
+export interface State {
+  activeTab: string;
+  scale: 1;
+
+  gameState: GameState;
+  players: Player[];
+  communityCards: Card[];
+  currentPlayerIndex: number;
+  dealerIndex: number;
+  inRound: boolean;
+  pots: {
+    amount: number;
+    eligiblePlayerIds: string[];
+  }[];
+  smallBlind: number;
+  sbPaid: boolean;
+  bigBlind: number;
+  bbPaid: boolean;
+  ante: number;
+  antesPaid: string[]; // player ids
+  forcedBetType: "BLINDS" | "ANTE";
+  usedCards: Card[];
+}
 
 export const STATE = atom({
   key: "state",
@@ -112,7 +138,7 @@ function debounce(func: any, wait: any) {
 }
 
 function App() {
-  const [state] = useRecoilState<State>(STATE);
+  const [state, setState] = useRecoilState<State>(STATE);
   const [usedCards, setUsedCards] = useRecoilState<Card[]>(USED_CARDS);
   const [, setHands] = useRecoilState(PLAYER_HANDS);
 
@@ -304,6 +330,36 @@ function App() {
     }
   }, [usedCards]);
 
+  useEffect(() => {
+    if (state.forcedBetType == "BLINDS") {
+      if (state.sbPaid && state.bbPaid) {
+        console.log("Both paid");
+        setState({
+          ...state,
+          gameState: GameState.PREFLOP,
+          sbPaid: false,
+          bbPaid: false,
+        });
+      }
+    }
+  }, [state.sbPaid, state.bbPaid]);
+
+  useEffect(() => {
+    if (state.forcedBetType == "ANTE") {
+      console.log("Antes paid", state.antesPaid.length, state.players.length);
+      if (
+        state.antesPaid.length >=
+        state.players.filter((p) => p.isPlaying).length
+      ) {
+        setState({
+          ...state,
+          gameState: GameState.PREFLOP,
+          antesPaid: [],
+        });
+      }
+    }
+  }, [state.antesPaid]);
+
   // Mantine uses fontSize for scaling
   document.documentElement.style.fontSize = `${state.scale * 100}%`;
 
@@ -324,6 +380,19 @@ function App() {
     <>
       <Header />
       <Divider my="xs" />
+      <Paper withBorder m="sm" p="sm">
+        <Title order={3}>Debug Info</Title>
+        <Divider my="xs" />
+        Dealer: {state.dealerIndex} | Turn: {state.currentPlayerIndex}
+        <NumberInput
+          label="Game State"
+          value={state.gameState}
+          radius="md"
+          onChange={(val) => {
+            setState({ ...state, gameState: parseInt(`${val}`) as GameState });
+          }}
+        />
+      </Paper>
       <Container>
         <div style={{ display: state.activeTab == "home" ? "block" : "none" }}>
           <Home />

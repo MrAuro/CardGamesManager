@@ -6,7 +6,7 @@ import cx from "clsx";
 import { notifications } from "@mantine/notifications";
 import { useEffect } from "react";
 import { useRecoilState } from "recoil";
-import { STATE, State } from "../App";
+import { GameState, STATE, State } from "../App";
 import classes from "../styles/Table.module.css";
 import { EMPTY_CARD, Player } from "../utils/Game";
 import ImprovedPlayerCard from "./ImprovedPlayerCard";
@@ -76,14 +76,16 @@ export function Table() {
         </Droppable>
       </DragDropContext>
       <Button
-        variant="subtle"
         fullWidth
+        disabled={state.gameState !== GameState.EDITING}
         onClick={() => {
           const newPlayer: Player = {
-            balance: 0,
+            balance: 10,
             cards: [EMPTY_CARD, EMPTY_CARD],
             id: crypto.randomUUID(),
             name: "Player " + state.players.length,
+            position: "NONE",
+            isPlaying: false,
           };
 
           handlers.append(newPlayer.id);
