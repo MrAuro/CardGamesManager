@@ -10,10 +10,13 @@ import {
   Slider,
   useMantineColorScheme,
   Alert,
+  Title,
   // useMantineTheme,
 } from "@mantine/core";
 import {
   IconAlertCircle,
+  IconCode,
+  IconCodeOff,
   IconCurrencyDollar,
   IconDatabase,
   IconMoon,
@@ -31,6 +34,7 @@ export default function Settings() {
 
   return (
     <Container>
+      <Title order={2}>Interface</Title>
       <Input.Wrapper label="UI Scale" mb="xl">
         <Slider
           defaultValue={state.scale * 100}
@@ -71,7 +75,6 @@ export default function Settings() {
           }}
         />
       </Input.Wrapper>
-      <Divider my="sm" />
       <InputWrapper label="Color Scheme" mb="md">
         <Button.Group>
           <Button
@@ -90,8 +93,31 @@ export default function Settings() {
           </Button>
         </Button.Group>
       </InputWrapper>
+      <InputWrapper label="Show Debug Info" mb="md">
+        <Button.Group>
+          <Button
+            variant={state.showDebugInfo ? "filled" : "default"}
+            leftSection={<IconCode />}
+            onClick={() => {
+              setState({ ...state, showDebugInfo: true });
+            }}
+          >
+            On
+          </Button>
+          <Button
+            variant={!state.showDebugInfo ? "filled" : "default"}
+            leftSection={<IconCodeOff />}
+            onClick={() => {
+              setState({ ...state, showDebugInfo: false });
+            }}
+          >
+            Off
+          </Button>
+        </Button.Group>
+      </InputWrapper>
       <Divider my="sm" />
-      {state.gameState != GameState.EDITING && (
+      <Title order={2}>Poker</Title>
+      {state.currentGamePlaying != "NONE" && (
         <Alert
           variant="light"
           color="red"
@@ -99,35 +125,59 @@ export default function Settings() {
           icon={<IconAlertCircle />}
           mb="sm"
         >
-          You cannot change settings while the game is in progress.
+          You cannot change bet settings while a game is in progress.
         </Alert>
       )}
       <InputWrapper label="Forced Bet Type" mb="xs">
         <Button.Group>
           <Button
-            variant={state.forcedBetType == "BLINDS" ? "filled" : "default"}
+            variant={
+              state.poker.forcedBetType == "BLINDS" ? "filled" : "default"
+            }
             leftSection={<IconDatabase />}
-            disabled={state.gameState != GameState.EDITING}
+            disabled={state.currentGamePlaying != "NONE"}
             onClick={() => {
-              setState({ ...state, forcedBetType: "BLINDS" });
+              setState({
+                ...state,
+                poker: { ...state.poker, forcedBetType: "BLINDS" },
+              });
             }}
           >
             Blinds
           </Button>
           <Button
-            variant={state.forcedBetType == "ANTE" ? "filled" : "default"}
+            variant={state.poker.forcedBetType == "ANTE" ? "filled" : "default"}
             leftSection={<IconPokerChip />}
-            disabled={state.gameState != GameState.EDITING}
+            disabled={state.currentGamePlaying != "NONE"}
             onClick={() => {
-              setState({ ...state, forcedBetType: "ANTE" });
+              setState({
+                ...state,
+                poker: { ...state.poker, forcedBetType: "ANTE" },
+              });
             }}
           >
             Ante
           </Button>
+          <Button
+            variant={
+              state.poker.forcedBetType == "BLINDS+ANTE" ? "filled" : "default"
+            }
+            leftSection={<IconPokerChip />}
+            disabled={state.currentGamePlaying != "NONE"}
+            onClick={() => {
+              setState({
+                ...state,
+                poker: { ...state.poker, forcedBetType: "BLINDS+ANTE" },
+              });
+            }}
+          >
+            Blinds & Ante
+          </Button>
         </Button.Group>
       </InputWrapper>
       <Grid gutter="xs">
-        {state.forcedBetType == "BLINDS" ? (
+        {(state.poker.forcedBetType == "BLINDS" ||
+          state.poker.forcedBetType == "BLINDS+ANTE") && (
           <>
             <Grid.Col span={{ base: 12, sm: 2 }}>
               <NumberInput
@@ -139,10 +189,16 @@ export default function Settings() {
                 thousandSeparator=","
                 leftSection={<IconCurrencyDollar />}
                 placeholder="0.00"
-                disabled={state.gameState != GameState.EDITING}
-                value={state.bigBlind}
+                disabled={state.currentGamePlaying != "NONE"}
+                value={state.poker.bigBlind}
                 onChange={(value) => {
-                  setState({ ...state, bigBlind: parseFloat(`${value}`) });
+                  setState({
+                    ...state,
+                    poker: {
+                      ...state.poker,
+                      bigBlind: parseFloat(`${value}`),
+                    },
+                  });
                 }}
               />
             </Grid.Col>
@@ -156,15 +212,23 @@ export default function Settings() {
                 thousandSeparator=","
                 leftSection={<IconCurrencyDollar />}
                 placeholder="0.00"
-                disabled={state.gameState != GameState.EDITING}
-                value={state.smallBlind}
+                disabled={state.currentGamePlaying != "NONE"}
+                value={state.poker.smallBlind}
                 onChange={(value) => {
-                  setState({ ...state, smallBlind: parseFloat(`${value}`) });
+                  setState({
+                    ...state,
+                    poker: {
+                      ...state.poker,
+                      smallBlind: parseFloat(`${value}`),
+                    },
+                  });
                 }}
               />
             </Grid.Col>
           </>
-        ) : (
+        )}
+        {(state.poker.forcedBetType == "ANTE" ||
+          state.poker.forcedBetType == "BLINDS+ANTE") && (
           <>
             <Grid.Col span={{ base: 12, sm: 4 }}>
               <NumberInput
@@ -176,10 +240,13 @@ export default function Settings() {
                 thousandSeparator=","
                 leftSection={<IconCurrencyDollar />}
                 placeholder="0.00"
-                disabled={state.gameState != GameState.EDITING}
-                value={state.ante}
+                disabled={state.currentGamePlaying != "NONE"}
+                value={state.poker.ante}
                 onChange={(value) => {
-                  setState({ ...state, ante: parseFloat(`${value}`) });
+                  setState({
+                    ...state,
+                    poker: { ...state.poker, ante: parseFloat(`${value}`) },
+                  });
                 }}
               />
             </Grid.Col>
