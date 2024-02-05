@@ -3,41 +3,27 @@ import {
   Button,
   Container,
   Divider,
-  NumberInput,
   Paper,
   Textarea,
   Title,
 } from "@mantine/core";
 import "@mantine/core/styles.css";
+import { getHotkeyHandler } from "@mantine/hooks";
 import {
   IconCards,
   IconClubs,
-  IconHome,
   IconSettings,
   IconUsers,
 } from "@tabler/icons-react";
-import { atom, selector, useRecoilState } from "recoil";
+import { useEffect, useState } from "react";
+import { atom, useRecoilState } from "recoil";
 import "./App.css";
 import Header from "./components/Header";
-import Game from "./pages/Blackjack";
-import Home from "./pages/Players";
-import Settings from "./pages/Settings";
-import {
-  Card,
-  EMPTY_CARD,
-  Player,
-  PlayerPosition,
-  PlayerResult,
-  StoredPlayerResult,
-  isCardEmpty,
-  joinedStringToCards,
-} from "./utils/PokerHelper";
-import { useEffect, useState } from "react";
-import { TexasHoldem } from "poker-variants-odds-calculator";
-import { Poker } from "./pages/Poker";
 import Blackjack from "./pages/Blackjack";
-import { getHotkeyHandler } from "@mantine/hooks";
 import Players from "./pages/Players";
+import { Poker } from "./pages/Poker";
+import Settings from "./pages/Settings";
+import { Player } from "./types/Player";
 // import type { PlayingCard } from "@xpressit/winning-poker-hand-rank/src/types";
 
 export enum GameState {
@@ -77,10 +63,10 @@ export const ROUTES = [
 export const DEFAULT_STATE: State = {
   activeTab: "PLAYERS",
   scale: 1,
-
+  players: [],
   currentGamePlaying: "NONE",
-
   showDebugInfo: false,
+  fullTabWidth: 0,
 
   poker: {
     forcedBetType: "BLINDS",
@@ -95,11 +81,10 @@ export const DEFAULT_STATE: State = {
 export interface State {
   activeTab: "PLAYERS" | "POKER" | "BLACKJACK" | "SETTINGS";
   scale: 1;
-
+  players: Player[];
   currentGamePlaying: "NONE" | "POKER" | "BLACKJACK";
-
   showDebugInfo: boolean;
-
+  fullTabWidth: number; // Used to calculate if the tabs should be shown as icons or text in the header
   poker: {
     forcedBetType: "BLINDS" | "ANTE" | "BLINDS+ANTE";
     bigBlind: number;
