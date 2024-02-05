@@ -1,10 +1,9 @@
 import { useRecoilState } from "recoil";
 import { GameState, STATE } from "../App";
 import { Button } from "@mantine/core";
-import { Table } from "../components/Table";
 
-export default function Game() {
+export default function Blackjack() {
   const [state, setState] = useRecoilState(STATE);
 
-  return <Table />;
+  return <>bj</>;
 }

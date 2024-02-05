@@ -14,7 +14,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { ReactNode, useState } from "react";
 import { useRecoilState } from "recoil";
 import { GameState, STATE, State } from "../App";
-import { Card, EMPTY_CARD, Player, PlayerPosition } from "../utils/Game";
+import { Card, EMPTY_CARD, Player, PlayerPosition } from "../utils/PokerHelper";
 
 export default function ImprovedCommunityCards() {
   const theme = useMantineTheme();

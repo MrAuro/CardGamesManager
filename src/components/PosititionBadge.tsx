@@ -1,7 +1,7 @@
 import { Badge, useMantineColorScheme } from "@mantine/core";
 import { useRecoilValue } from "recoil";
 import { STATE, State } from "../App";
-import { Player, PlayerPosition } from "../utils/Game";
+import { Player, PlayerPosition } from "../utils/PokerHelper";
 
 export default function PositionBadge(props: { player: Player }) {
   const state = useRecoilValue<State>(STATE);

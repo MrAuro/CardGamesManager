@@ -5,7 +5,7 @@ import {
   useMantineColorScheme,
   useMantineTheme,
 } from "@mantine/core";
-import { Card, suitToIcon } from "../utils/Game";
+import { Card, suitToIcon } from "../utils/PokerHelper";
 
 export default function PlayingCard(props: {
   card: Card;

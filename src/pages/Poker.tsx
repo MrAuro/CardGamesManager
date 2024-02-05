@@ -8,11 +8,11 @@ import { useEffect } from "react";
 import { useRecoilState } from "recoil";
 import { GameState, STATE, State } from "../App";
 import classes from "../styles/Table.module.css";
-import { EMPTY_CARD, Player } from "../utils/Game";
-import ImprovedPlayerCard from "./ImprovedPlayerCard";
-import ImprovedCommunityCards from "./ImprovedCommunityCards";
+import { EMPTY_CARD, Player } from "../utils/PokerHelper";
+import ImprovedPlayerCard from "../components/ImprovedPlayerCard";
+import ImprovedCommunityCards from "../components/ImprovedCommunityCards";
 
-export function Table() {
+export function Poker() {
   const [state, setState] = useRecoilState<State>(STATE);
 
   const [listState, handlers] = useListState<string>(

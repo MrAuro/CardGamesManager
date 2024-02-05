@@ -1,6 +1,6 @@
 import { useRecoilState } from "recoil";
 import { GameState, STATE, State } from "../App";
-import { Player, getNextTurnIndex } from "../utils/Game";
+import { Player, getNextTurnIndex } from "../utils/PokerHelper";
 import { Button, Grid, Group, NumberInput } from "@mantine/core";
 import { getHotkeyHandler } from "@mantine/hooks";
 import { IconCurrencyDollar } from "@tabler/icons-react";

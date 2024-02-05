@@ -1,18 +1,25 @@
 import {
+  Accordion,
   Button,
   Container,
   Divider,
   NumberInput,
   Paper,
+  Textarea,
   Title,
 } from "@mantine/core";
 import "@mantine/core/styles.css";
-import { IconCards, IconHome, IconSettings } from "@tabler/icons-react";
+import {
+  IconCards,
+  IconHome,
+  IconSettings,
+  IconUsers,
+} from "@tabler/icons-react";
 import { atom, useRecoilState } from "recoil";
 import "./App.css";
 import Header from "./components/Header";
-import Game from "./pages/Game";
-import Home from "./pages/Home";
+import Game from "./pages/Blackjack";
+import Home from "./pages/Players";
 import Settings from "./pages/Settings";
 import {
   Card,
@@ -23,9 +30,12 @@ import {
   StoredPlayerResult,
   isCardEmpty,
   joinedStringToCards,
-} from "./utils/Game";
-import { useEffect } from "react";
+} from "./utils/PokerHelper";
+import { useEffect, useState } from "react";
 import { TexasHoldem } from "poker-variants-odds-calculator";
+import { Poker } from "./pages/Poker";
+import Blackjack from "./pages/Blackjack";
+import { getHotkeyHandler } from "@mantine/hooks";
 // import type { PlayingCard } from "@xpressit/winning-poker-hand-rank/src/types";
 
 export enum GameState {
@@ -41,13 +51,18 @@ export enum GameState {
 
 export const ROUTES = [
   {
-    label: "Home",
-    link: "home",
-    icon: <IconHome size="1.4rem" />,
+    label: "Players",
+    link: "players",
+    icon: <IconUsers size="1.4rem" />,
   },
   {
-    label: "Game",
-    link: "game",
+    label: "Blackjack",
+    link: "blackjack",
+    icon: <IconCards size="1.4rem" />,
+  },
+  {
+    label: "Poker",
+    link: "poker",
     icon: <IconCards size="1.4rem" />,
   },
   {
@@ -376,6 +391,10 @@ function App() {
   //     break;
   // }
 
+  const [TEMP_state, setTEMP_state] = useState<string>(
+    JSON.stringify(state, null, 2)
+  );
+
   return (
     <>
       <Header />
@@ -383,22 +402,82 @@ function App() {
       <Paper withBorder m="sm" p="sm">
         <Title order={3}>Debug Info</Title>
         <Divider my="xs" />
-        Dealer: {state.dealerIndex} | Turn: {state.currentPlayerIndex}
-        <NumberInput
-          label="Game State"
-          value={state.gameState}
-          radius="md"
-          onChange={(val) => {
-            setState({ ...state, gameState: parseInt(`${val}`) as GameState });
-          }}
-        />
+        <Accordion variant="separated" defaultValue="Apples">
+          <Accordion.Item key="state" value="state">
+            <Accordion.Control>State</Accordion.Control>
+            <Accordion.Panel>
+              <Textarea
+                value={TEMP_state}
+                onChange={(e) => {
+                  setTEMP_state(e.currentTarget.value);
+                }}
+                variant="filled"
+                radius="sm"
+                resize="vertical"
+                autosize
+                minRows={2}
+                maxRows={20}
+                onKeyDown={getHotkeyHandler([
+                  [
+                    "mod+S",
+                    () => {
+                      let parsed = null;
+                      try {
+                        parsed = JSON.parse(TEMP_state);
+                      } catch (e) {
+                        alert("Invalid JSON");
+                      }
+                      setState({
+                        ...parsed,
+                      });
+                    },
+                  ],
+                ])}
+              />
+              <Button
+                fullWidth
+                mt="xs"
+                variant="light"
+                color="red"
+                onClick={() => {
+                  setTEMP_state(JSON.stringify(state, null, 2));
+                }}
+              >
+                Reset changes
+              </Button>
+              <Button
+                fullWidth
+                mt="xs"
+                variant="light"
+                onClick={() => {
+                  let parsed = null;
+                  try {
+                    parsed = JSON.parse(TEMP_state);
+                  } catch (e) {
+                    alert("Invalid JSON");
+                  }
+                  setState({
+                    ...parsed,
+                  });
+                }}
+              >
+                Save
+              </Button>
+            </Accordion.Panel>
+          </Accordion.Item>
+        </Accordion>
       </Paper>
       <Container>
         <div style={{ display: state.activeTab == "home" ? "block" : "none" }}>
           <Home />
         </div>
-        <div style={{ display: state.activeTab == "game" ? "block" : "none" }}>
-          <Game />
+        <div
+          style={{ display: state.activeTab == "blackjack" ? "block" : "none" }}
+        >
+          <Blackjack />
+        </div>
+        <div style={{ display: state.activeTab == "poker" ? "block" : "none" }}>
+          <Poker />
         </div>
         <div
           style={{ display: state.activeTab == "settings" ? "block" : "none" }}

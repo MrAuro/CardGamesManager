@@ -17,7 +17,7 @@ import {
   CardSuit,
   EMPTY_CARD,
   suitToIcon,
-} from "../utils/Game";
+} from "../utils/PokerHelper";
 
 export default function ImprovedCardPicker(props: {
   opened: boolean;

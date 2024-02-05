@@ -34,7 +34,7 @@ import {
 import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { GameState, PLAYER_HANDS, STATE, State } from "../App";
-import { Card, Player, rankingToName } from "../utils/Game";
+import { Card, Player, rankingToName } from "../utils/PokerHelper";
 import ImprovedCardPicker from "./ImprovedCardPicker";
 import PlayingCard from "./PlayingCard";
 import PositionBadge from "./PosititionBadge";
