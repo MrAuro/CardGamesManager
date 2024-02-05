@@ -4,7 +4,7 @@
         {
             "type": "chrome",
             "request": "launch",
-            "name": "Launch Chrome",
+            "name": "Launch Chrome and Vite",
             "url": "http://localhost:1420",
             "webRoot": "${workspaceFolder}/src",
             "preLaunchTask": "yarn dev",
@@ -12,6 +12,18 @@
                 "${workspaceFolder}/**",
                 "!**/node_modules/**"
             ]
-        }
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Chrome",
+            "url": "http://localhost:1420",
+            "webRoot": "${workspaceFolder}/src",
+            // "preLaunchTask": "yarn dev",
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/**",
+                "!**/node_modules/**"
+            ]
+        },
     ]
 }
