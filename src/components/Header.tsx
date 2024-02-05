@@ -17,6 +17,7 @@ export default function Header() {
       data-active={active === link.link || undefined}
       leftSection={link.icon}
       key={link.link}
+      fw={active === link.link ? 500 : "normal"}
       onClick={(event) => {
         event.preventDefault();
         setState({ ...state, activeTab: link.link });

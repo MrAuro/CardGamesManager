@@ -11,6 +11,7 @@ import {
 import "@mantine/core/styles.css";
 import {
   IconCards,
+  IconClubs,
   IconHome,
   IconSettings,
   IconUsers,
@@ -63,7 +64,7 @@ export const ROUTES = [
   {
     label: "Poker",
     link: "poker",
-    icon: <IconCards size="1.4rem" />,
+    icon: <IconClubs size="1.4rem" />,
   },
   {
     label: "Settings",
