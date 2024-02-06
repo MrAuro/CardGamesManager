@@ -9,8 +9,14 @@ import {
 } from "@mantine/core";
 import { IconBan } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { Card, CardRank, CardSuit, EMPTY_CARD } from "../utils/Card";
-import { suitToIcon } from "../utils/PokerHelper";
+import {
+  Card,
+  CardRank,
+  CardSuit,
+  EMPTY_CARD,
+  suitToIcon,
+} from "../utils/Card";
+
 // import { USED_CARDS } from "../App";
 // import {
 //   Card,
@@ -22,6 +28,7 @@ import { suitToIcon } from "../utils/PokerHelper";
 
 export default function CardPicker(props: {
   opened: boolean;
+  setOpened: (opened: boolean) => void;
   handleClose: (card: Card) => void;
   hideSuit?: boolean;
 }) {
@@ -38,8 +45,6 @@ export default function CardPicker(props: {
 
   const handleClose = (card: Card) => {
     props.handleClose(card);
-    setSelectedCardRank("-");
-    setSelectedCardSuit("-");
   };
 
   return (
@@ -47,9 +52,9 @@ export default function CardPicker(props: {
       opened={props.opened}
       onClose={() => {
         if (selectedCardRank != "-" && selectedCardSuit != "-") {
-          props.handleClose(`${selectedCardRank}${selectedCardSuit}`);
+          handleClose(`${selectedCardRank}${selectedCardSuit}`);
         } else {
-          props.handleClose(EMPTY_CARD);
+          handleClose(EMPTY_CARD);
         }
       }}
       title="Select a card"
@@ -87,7 +92,7 @@ export default function CardPicker(props: {
             setSelectedCardRank={setSelectedCardRank}
             setSelectedCardSuit={setSelectedCardSuit}
             label={<IconBan size="1.25rem" stroke="0.2rem" />}
-            onClick={() => props.handleClose(EMPTY_CARD)}
+            onClick={() => handleClose(EMPTY_CARD)}
           />
         </SimpleGrid>
       </Group>
@@ -100,10 +105,10 @@ export default function CardPicker(props: {
               spacing="xs"
               verticalSpacing="xs"
             >
-              {["h", "d", "c", "s"].map((suit) => (
+              {(["s", "h", "c", "d"] as CardSuit[]).map((suit) => (
                 <SuitButton
                   key={suit}
-                  suit={suit as CardSuit}
+                  suit={suit}
                   selectedCardRank={selectedCardRank}
                   selectedCardSuit={selectedCardSuit}
                   setSelectedCardSuit={setSelectedCardSuit}

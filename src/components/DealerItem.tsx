@@ -15,29 +15,12 @@ import {
 import { IconGripVertical, IconPencil } from "@tabler/icons-react";
 import PlayingCard from "./PlayingCard";
 import classes from "../styles/PlayingList.module.css";
-import { getPlayer } from "../utils/Blackjack";
 import { useCustomRecoilState } from "../utils/Recoil";
-import { Card } from "../utils/Card";
 
-export default function PlayerListItem(props: {
-  player: Player;
-  editPlayer: ((player: Player) => void) | null;
-  my?: string;
-  disabled?: boolean;
-  showHandle?: boolean;
-  provided?: any;
-  showBlackjackCards?: boolean;
-  onCardClick?: (card: string, index: number) => void;
-  children?: React.ReactNode;
-}) {
+export default function DealerItem(props: { my?: string; disabled?: boolean }) {
   const { colorScheme } = useMantineColorScheme();
   const theme = useMantineTheme();
   const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
-
-  if (props?.player == null) {
-    console.warn("player is null", props);
-    return;
-  }
 
   return (
     <Paper
@@ -56,20 +39,11 @@ export default function PlayerListItem(props: {
               : !props.disabled
               ? theme.colors.gray[0]
               : theme.colors.gray[1],
-          cursor: props.editPlayer != null ? "pointer" : "default",
           display: "flex", // Add this line to make the container a flex container
           alignItems: "center", // Vertically center the items
         },
       }}
-      onClick={() => {
-        if (props.editPlayer != null) props.editPlayer(props.player);
-      }}
     >
-      {props.showHandle && (
-        <div {...props.provided.dragHandleProps} className={classes.dragHandle}>
-          <IconGripVertical style={{ width: "auto" }} />{" "}
-        </div>
-      )}
       <Container
         style={{
           flex: 1,
@@ -80,14 +54,11 @@ export default function PlayerListItem(props: {
         <Group justify="space-between">
           <Paper style={{ backgroundColor: "transparent" }}>
             <Text
-              size={!props.disabled ? "xl" : "lg"}
-              fw={!props.disabled ? "bold" : 500}
+              size="xl"
+              fw={!props.disabled ? "bolder" : "bold"}
               tt="capitalize"
             >
-              {props.player.name}
-            </Text>
-            <Text size="sm" c="dimmed">
-              ${props.player.balance.toFixed(2)}
+              Dealer
             </Text>
           </Paper>
 
@@ -99,25 +70,17 @@ export default function PlayerListItem(props: {
               justifyContent: "flex-end",
             }}
           >
-            {props.showBlackjackCards &&
-              state.blackjack.players.map((player) => {
-                if (player.id !== props.player.id) return;
-                return player.cards.map((card, index) => (
-                  <Box ml="xs" key={`${player.id}${card}${index}`}>
-                    <PlayingCard
-                      card={card}
-                      onClick={(card: Card) => {
-                        if (props.onCardClick != null)
-                          props.onCardClick(card, index);
-                      }}
-                      disabled={!props.disabled}
-                    />
-                  </Box>
-                ));
-              })}
+            {state.blackjack.dealerCards.map((card, index) => (
+              <Box ml="xs" key={`DEALER${card}${index}`}>
+                <PlayingCard
+                  card={card}
+                  onClick={() => {}}
+                  disabled={!props.disabled}
+                />
+              </Box>
+            ))}
           </Paper>
         </Group>
-        {props.children}
       </Container>
     </Paper>
   );

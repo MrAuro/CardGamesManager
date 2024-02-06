@@ -5,5 +5,5 @@ import { useCustomRecoilState } from "../utils/Recoil";
 export function Poker() {
   const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
 
-  return <p>Poker</p>;
+  return <div>Poker</div>;
 }

@@ -10,7 +10,7 @@ import { IconClick, IconHandFinger, IconPlus } from "@tabler/icons-react";
 
 export default function PlayingCard(props: {
   card: Card;
-  onClick: () => void;
+  onClick: (card: Card) => void;
   disabled?: boolean;
 }) {
   const theme = useMantineTheme();
@@ -22,6 +22,8 @@ export default function PlayingCard(props: {
       backgroundColor = theme.colors.dark[7];
     } else if (props.card == EMPTY_CARD) {
       backgroundColor = theme.colors.dark[6];
+    } else {
+      backgroundColor = theme.colors.gray[0];
     }
   } else {
     if (!props.disabled) {
@@ -49,7 +51,7 @@ export default function PlayingCard(props: {
 
         cursor: props.disabled ? "pointer" : "not-allowed",
       }}
-      onClick={() => props.onClick()}
+      onClick={() => props.onClick(props.card)}
     >
       {props.card == EMPTY_CARD ? (
         <>
@@ -83,18 +85,15 @@ export default function PlayingCard(props: {
                 ? theme.colors.red[6]
                 : theme.colors.dark[5]
             }
+            style={{
+              verticalAlign: "middle",
+              display: "flex",
+              alignContent: "center",
+              alignItems: "center",
+            }}
           >
-            <div
-              style={{
-                verticalAlign: "middle",
-                display: "flex",
-                alignContent: "center",
-                alignItems: "center",
-              }}
-            >
-              {suitToIcon(getSuit(props.card))}
-              {getRank(props.card)}
-            </div>
+            {suitToIcon(getSuit(props.card))}
+            {getRank(props.card)}
           </Text>
         </div>
       )}

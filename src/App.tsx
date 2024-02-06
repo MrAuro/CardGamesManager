@@ -26,6 +26,7 @@ import Settings from "./pages/Settings";
 import { DUMMY_PLAYER_NAMES, Player } from "./types/Player";
 import { BlackjackGameState, BlackjackPlayer } from "./utils/Blackjack";
 import { useCustomRecoilState } from "./utils/Recoil";
+import { Card } from "./utils/Card";
 // import type { PlayingCard } from "@xpressit/winning-poker-hand-rank/src/types";
 
 export const ROUTES = [
@@ -70,6 +71,7 @@ export const DEFAULT_STATE: State = {
     state: "NONE",
     players: [],
     turn: null,
+    dealerCards: [],
   },
 };
 
@@ -91,6 +93,7 @@ export interface State {
     state: BlackjackGameState;
     players: BlackjackPlayer[];
     turn: string | null;
+    dealerCards: Card[];
   };
 }
 

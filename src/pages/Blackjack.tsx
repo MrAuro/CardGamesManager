@@ -1,27 +1,43 @@
 import { Button, Divider, Group, Text, Title } from "@mantine/core";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import { STATE, State } from "../App";
 import PlayerListItem from "../components/PlayerListItem";
 import PlayerSelector from "../components/PlayingList";
 import { getPlayer } from "../utils/Blackjack";
 import { useCustomRecoilState } from "../utils/Recoil";
+import DealerItem from "../components/DealerItem";
+import { Card, EMPTY_CARD } from "../utils/Card";
+import CardPicker from "../components/CardPicker";
 
 export default function Blackjack() {
   const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
   const [betErrors, setBetErrors] = useState<(string | null)[]>([]);
 
+  const [showCardPicker, setShowCardPicker] = useState(false);
+  const [cardIndex, setCardIndex] = useState(0);
+  const [cardPlayer, setCardPlayer] = useState("");
+
   const nextTurn = () => {
     let players = state.blackjack.players;
     let turnIndex = players.findIndex((p) => p.id === state.blackjack.turn);
-    let nextTurnIndex = (turnIndex + 1) % players.length;
-    modifyState({
-      blackjack: {
-        turn: players[nextTurnIndex].id,
-      },
-    });
+
+    let nextTurnIndex = turnIndex + 1;
+    if (nextTurnIndex >= players.length) {
+      modifyState({
+        blackjack: {
+          turn: "DEALER",
+        },
+      });
+    } else {
+      modifyState({
+        blackjack: {
+          turn: players[nextTurnIndex].id,
+        },
+      });
+    }
   };
 
-  let content = null;
+  let content: ReactNode = "No content";
   switch (state.blackjack.state) {
     case "NONE":
       content = (
@@ -38,6 +54,13 @@ export default function Blackjack() {
                 blackjack: {
                   state: "PLAYING",
                   turn: state.blackjack.players[0].id,
+                  dealerCards: [EMPTY_CARD, EMPTY_CARD],
+                  players: state.blackjack.players.map((p) => {
+                    return {
+                      ...p,
+                      cards: [EMPTY_CARD, EMPTY_CARD],
+                    };
+                  }),
                 },
               });
             }}
@@ -66,6 +89,7 @@ export default function Blackjack() {
     case "PLAYING":
       content = (
         <>
+          <DealerItem disabled={state.blackjack.turn !== "DEALER"} />
           {state.blackjack.players.map((player) => {
             let isTurn = state.blackjack.turn === player.id;
 
@@ -76,6 +100,12 @@ export default function Blackjack() {
                 key={player.id}
                 my="xs"
                 disabled={!isTurn}
+                showBlackjackCards
+                onCardClick={(card, index) => {
+                  setShowCardPicker(true);
+                  setCardIndex(index);
+                  setCardPlayer(player.id);
+                }}
               >
                 <Divider my="xs" />
                 <Group grow>
@@ -106,5 +136,41 @@ export default function Blackjack() {
       break;
   }
 
-  return content;
+  return (
+    <>
+      <CardPicker
+        opened={showCardPicker}
+        setOpened={setShowCardPicker}
+        handleClose={(card) => {
+          if (card != null) {
+            let player = state.blackjack.players.find(
+              (p) => p.id === cardPlayer
+            );
+            if (player != null) {
+              console.log(player.cards, cardIndex, card);
+              let newCards: Card[] = [...player.cards];
+              newCards[cardIndex] = card;
+              modifyState({
+                blackjack: {
+                  players: state.blackjack.players.map((p) => {
+                    if (p.id === cardPlayer) {
+                      return {
+                        ...p,
+                        cards: newCards,
+                      };
+                    }
+                    return p;
+                  }),
+                },
+              });
+              setShowCardPicker(false);
+              setCardPlayer("");
+              setCardIndex(0);
+            }
+          }
+        }}
+      />
+      {content}
+    </>
+  );
 }
