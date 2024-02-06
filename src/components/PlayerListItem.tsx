@@ -3,6 +3,7 @@ import { STATE, State } from "../App";
 import { Player } from "../types/Player";
 import {
   ActionIcon,
+  Box,
   Container,
   Group,
   Paper,
@@ -11,12 +12,17 @@ import {
   useMantineColorScheme,
   useMantineTheme,
 } from "@mantine/core";
-import { IconPencil } from "@tabler/icons-react";
+import { IconGripVertical, IconPencil } from "@tabler/icons-react";
+import PlayingCard from "./PlayingCard";
+import classes from "../styles/PlayingList.module.css";
 
 export default function PlayerListItem(props: {
   player: Player;
   editPlayer: ((player: Player) => void) | null;
   my?: string;
+  disabled?: boolean;
+  showHandle?: boolean;
+  provided?: any;
   children?: React.ReactNode;
 }) {
   const { colorScheme } = useMantineColorScheme();
@@ -38,22 +44,64 @@ export default function PlayerListItem(props: {
           // height: "3rem",
           backgroundColor:
             colorScheme === "dark"
-              ? theme.colors.dark[6]
+              ? !props.disabled
+                ? theme.colors.dark[6]
+                : theme.colors.dark[7]
+              : !props.disabled
+              ? theme.colors.gray[0]
               : theme.colors.gray[1],
           cursor: props.editPlayer != null ? "pointer" : "default",
+          display: "flex", // Add this line to make the container a flex container
+          alignItems: "center", // Vertically center the items
         },
       }}
       onClick={() => {
         if (props.editPlayer != null) props.editPlayer(props.player);
       }}
     >
-      <Container pl="xs">
-        <Text size="xl" fw="bold" tt="capitalize">
-          {props.player.name}
-        </Text>
-        <Text size="sm" c="dimmed">
-          ${props.player.balance.toFixed(2)}
-        </Text>
+      {props.showHandle && (
+        <div {...props.provided.dragHandleProps} className={classes.dragHandle}>
+          <IconGripVertical style={{ width: "auto" }} />{" "}
+        </div>
+      )}
+      <Container
+        style={{
+          flex: 1,
+          justifyContent: "space-between",
+        }}
+        pl="sm"
+      >
+        <Group justify="space-between">
+          <Paper style={{ backgroundColor: "transparent" }}>
+            <Text
+              size={!props.disabled ? "xl" : "lg"}
+              fw={!props.disabled ? "bold" : 500}
+              tt="capitalize"
+            >
+              {props.player.name}
+            </Text>
+            <Text size="sm" c="dimmed">
+              ${props.player.balance.toFixed(2)}
+            </Text>
+          </Paper>
+
+          <Paper
+            style={{
+              backgroundColor: "transparent",
+
+              display: "flex",
+              justifyContent: "flex-end",
+            }}
+          >
+            {/* <Box ml="xs">
+              <PlayingCard
+              card="--"
+              onClick={() => {}}
+              disabled={!props.disabled}
+              />
+            </Box> */}
+          </Paper>
+        </Group>
         {props.children}
       </Container>
     </Paper>

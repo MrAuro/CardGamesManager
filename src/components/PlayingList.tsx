@@ -18,14 +18,19 @@ import classes from "../styles/PlayingList.module.css";
 import { useCustomRecoilState } from "../utils/Recoil";
 import PlayerListItem from "./PlayerListItem";
 
-export default function PlayerSelector() {
+export default function PlayerSelector({
+  betErrors,
+  setBetErrors,
+}: {
+  betErrors: (string | null)[];
+  setBetErrors: React.Dispatch<React.SetStateAction<(string | null)[]>>;
+}) {
   const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
   const theme = useMantineTheme();
 
   const [listState, handlers] = useListState<string>(
     state.blackjack.players.map((p) => p.id)
   );
-  const [betErrors, setBetErrors] = useState<(string | null)[]>([]);
 
   // From the Mantine Discord
   // https://discord.com/channels/854810300876062770/1202574436516237323/1202575107290304522
@@ -90,7 +95,6 @@ export default function PlayerSelector() {
                 [classes.dragging]: snapshot.isDragging,
               })}
               {...provided.draggableProps}
-              {...provided.dragHandleProps}
               ref={provided.innerRef}
             >
               {bjPlayer ? (
@@ -98,6 +102,8 @@ export default function PlayerSelector() {
                   player={_player!}
                   editPlayer={null}
                   key={_player!.id}
+                  showHandle
+                  provided={provided}
                 >
                   <Divider my="xs" />
                   {/* We don't use the label prop on NumberInput as it shifts the buttons */}
@@ -177,17 +183,37 @@ export default function PlayerSelector() {
                               : undefined,
                         }}
                         onClick={() => {
-                          modifyState({
-                            blackjack: {
-                              players: state.blackjack.players.map((p) => {
-                                if (bjPlayer)
-                                  if (p.id === bjPlayer.id) {
-                                    return { ...p, bet: p.bet + 1 };
-                                  }
-                                return p;
-                              }),
-                            },
-                          });
+                          if (betErrors[index]) {
+                            modifyState({
+                              blackjack: {
+                                players: state.blackjack.players.map((p) => {
+                                  if (bjPlayer)
+                                    if (p.id === bjPlayer.id) {
+                                      return { ...p, bet: 1 };
+                                    }
+                                  return p;
+                                }),
+                              },
+                            });
+
+                            setBetErrors((prev) => {
+                              let _prev = [...prev];
+                              _prev[index] = null;
+                              return _prev;
+                            });
+                          } else {
+                            modifyState({
+                              blackjack: {
+                                players: state.blackjack.players.map((p) => {
+                                  if (bjPlayer)
+                                    if (p.id === bjPlayer.id) {
+                                      return { ...p, bet: p.bet + 1 };
+                                    }
+                                  return p;
+                                }),
+                              },
+                            });
+                          }
                         }}
                       >
                         +1

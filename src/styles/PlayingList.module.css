@@ -1,6 +1,7 @@
 .item {
     margin-bottom: var(--mantine-spacing-sm);
     outline: "1px solid red";
+    
 }
 
 
@@ -8,3 +9,10 @@
    opacity: 0.75; 
    outline: "1px solid blue";
 }
+
+.dragHandle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+  }
