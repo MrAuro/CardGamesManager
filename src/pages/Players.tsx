@@ -10,9 +10,10 @@ import { useEffect, useState } from "react";
 import { getHotkeyHandler } from "@mantine/hooks";
 import { Player } from "../types/Player";
 import PlayerListItem from "../components/PlayerListItem";
+import { useCustomRecoilState } from "../utils/Recoil";
 
 export default function Players() {
-  const [state, setState] = useRecoilState<State>(STATE);
+  const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
 
   const [isAddingPlayer, setIsAddingPlayer] = useState(false);
   const [isEditingPlayer, setIsEditingPlayer] = useState(false);
@@ -42,6 +43,7 @@ export default function Players() {
           key={player.id}
           player={player}
           editPlayer={editPlayer}
+          my="xs"
         />
       ))}
       <Button
@@ -160,7 +162,7 @@ const EditPlayerModal = (props: {
   opened: boolean;
   setOpened: (value: boolean) => void;
 }) => {
-  const [state, setState] = useRecoilState<State>(STATE);
+  const [state, , modifyState] = useCustomRecoilState<State>(STATE);
 
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState("");
@@ -213,8 +215,7 @@ const EditPlayerModal = (props: {
       id: crypto.randomUUID(),
     };
 
-    setState({
-      ...state,
+    modifyState({
       players: state.players.map((p) => {
         if (p.id == props.playerId) {
           return newPlayer;

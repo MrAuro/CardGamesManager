@@ -23,19 +23,10 @@ import Blackjack from "./pages/Blackjack";
 import Players from "./pages/Players";
 import { Poker } from "./pages/Poker";
 import Settings from "./pages/Settings";
-import { Player } from "./types/Player";
+import { DUMMY_PLAYER_NAMES, Player } from "./types/Player";
+import { BlackjackGameState, BlackjackPlayer } from "./utils/Blackjack";
+import { useCustomRecoilState } from "./utils/Recoil";
 // import type { PlayingCard } from "@xpressit/winning-poker-hand-rank/src/types";
-
-export enum GameState {
-  PREROUND = 0,
-  PREFLOP = 1,
-  FLOP = 2,
-  TURN = 3,
-  RIVER = 4,
-  SHOWDOWN = 5,
-  POSTROUND = 6,
-  EDITING = 7,
-}
 
 export const ROUTES = [
   {
@@ -75,7 +66,10 @@ export const DEFAULT_STATE: State = {
     ante: 1,
   },
 
-  blackjack: {},
+  blackjack: {
+    state: "NONE",
+    players: [],
+  },
 };
 
 export interface State {
@@ -92,7 +86,10 @@ export interface State {
     ante: number;
   };
 
-  blackjack: {};
+  blackjack: {
+    state: BlackjackGameState;
+    players: BlackjackPlayer[];
+  };
 }
 
 export const STATE = atom({
@@ -121,7 +118,7 @@ function debounce(func: any, wait: any) {
 }
 
 function App() {
-  const [state, setState] = useRecoilState<State>(STATE);
+  const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
 
   useEffect(() => {
     debouncedStoreState("STATE", JSON.stringify(state));
@@ -206,6 +203,46 @@ function App() {
               </Accordion.Panel>
             </Accordion.Item>
           </Accordion>
+          <Button
+            mt="xs"
+            variant="light"
+            fullWidth
+            onClick={() => {
+              const players = DUMMY_PLAYER_NAMES.map((name) => {
+                return {
+                  name,
+                  id: crypto.randomUUID(),
+                  balance: Math.floor(Math.random() * 1000) / 100,
+                };
+              });
+
+              let playersToAdd = [];
+              for (let i = 0; i < 5; i++) {
+                let randomIndex = Math.floor(Math.random() * players.length);
+                playersToAdd.push(players[randomIndex]);
+                players.splice(randomIndex, 1);
+              }
+
+              modifyState({
+                players: playersToAdd,
+              });
+            }}
+          >
+            Populate Players
+          </Button>
+          <Button
+            mt="xs"
+            variant="light"
+            color="red"
+            fullWidth
+            onClick={() => {
+              modifyState({
+                showDebugInfo: false,
+              });
+            }}
+          >
+            Close
+          </Button>
         </Paper>
       )}
 

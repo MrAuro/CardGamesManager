@@ -24,11 +24,12 @@ import {
   IconSun,
 } from "@tabler/icons-react";
 import { useRecoilState } from "recoil";
-import { GameState, STATE, State } from "../App";
+import { STATE, State } from "../App";
 import { modals } from "@mantine/modals";
+import { useCustomRecoilState } from "../utils/Recoil";
 
 export default function Settings() {
-  const [state, setState] = useRecoilState<State>(STATE);
+  const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
   // const theme = useMantineTheme();
   const { setColorScheme, colorScheme } = useMantineColorScheme();
 
@@ -71,7 +72,7 @@ export default function Settings() {
             },
           ]}
           onChange={(value) => {
-            setState({ ...state, scale: (value / 100) as 1 });
+            modifyState({ scale: (value / 100) as 1 });
           }}
         />
       </Input.Wrapper>
@@ -99,7 +100,7 @@ export default function Settings() {
             variant={state.showDebugInfo ? "filled" : "default"}
             leftSection={<IconCode />}
             onClick={() => {
-              setState({ ...state, showDebugInfo: true });
+              modifyState({ showDebugInfo: true });
             }}
           >
             On
@@ -108,7 +109,7 @@ export default function Settings() {
             variant={!state.showDebugInfo ? "filled" : "default"}
             leftSection={<IconCodeOff />}
             onClick={() => {
-              setState({ ...state, showDebugInfo: false });
+              modifyState({ showDebugInfo: false });
             }}
           >
             Off
@@ -137,8 +138,7 @@ export default function Settings() {
             leftSection={<IconDatabase />}
             disabled={state.currentGamePlaying != "NONE"}
             onClick={() => {
-              setState({
-                ...state,
+              modifyState({
                 poker: { ...state.poker, forcedBetType: "BLINDS" },
               });
             }}
@@ -150,8 +150,7 @@ export default function Settings() {
             leftSection={<IconPokerChip />}
             disabled={state.currentGamePlaying != "NONE"}
             onClick={() => {
-              setState({
-                ...state,
+              modifyState({
                 poker: { ...state.poker, forcedBetType: "ANTE" },
               });
             }}
@@ -165,8 +164,7 @@ export default function Settings() {
             leftSection={<IconPokerChip />}
             disabled={state.currentGamePlaying != "NONE"}
             onClick={() => {
-              setState({
-                ...state,
+              modifyState({
                 poker: { ...state.poker, forcedBetType: "BLINDS+ANTE" },
               });
             }}
@@ -192,10 +190,8 @@ export default function Settings() {
                 disabled={state.currentGamePlaying != "NONE"}
                 value={state.poker.bigBlind}
                 onChange={(value) => {
-                  setState({
-                    ...state,
+                  modifyState({
                     poker: {
-                      ...state.poker,
                       bigBlind: parseFloat(`${value}`),
                     },
                   });
@@ -215,10 +211,8 @@ export default function Settings() {
                 disabled={state.currentGamePlaying != "NONE"}
                 value={state.poker.smallBlind}
                 onChange={(value) => {
-                  setState({
-                    ...state,
+                  modifyState({
                     poker: {
-                      ...state.poker,
                       smallBlind: parseFloat(`${value}`),
                     },
                   });
@@ -243,10 +237,7 @@ export default function Settings() {
                 disabled={state.currentGamePlaying != "NONE"}
                 value={state.poker.ante}
                 onChange={(value) => {
-                  setState({
-                    ...state,
-                    poker: { ...state.poker, ante: parseFloat(`${value}`) },
-                  });
+                  modifyState({ poker: { ante: parseFloat(`${value}`) } });
                 }}
               />
             </Grid.Col>

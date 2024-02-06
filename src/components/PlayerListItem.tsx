@@ -15,16 +15,23 @@ import { IconPencil } from "@tabler/icons-react";
 
 export default function PlayerListItem(props: {
   player: Player;
-  editPlayer: (player: Player) => void;
+  editPlayer: ((player: Player) => void) | null;
+  my?: string;
+  children?: React.ReactNode;
 }) {
   const { colorScheme } = useMantineColorScheme();
   const theme = useMantineTheme();
+
+  if (props?.player == null) {
+    console.warn("player is null", props);
+    return;
+  }
 
   return (
     <Paper
       withBorder
       radius="md"
-      my="xs"
+      my={props.my ?? undefined}
       p="xs"
       styles={{
         root: {
@@ -33,40 +40,22 @@ export default function PlayerListItem(props: {
             colorScheme === "dark"
               ? theme.colors.dark[6]
               : theme.colors.gray[1],
+          cursor: props.editPlayer != null ? "pointer" : "default",
         },
       }}
+      onClick={() => {
+        if (props.editPlayer != null) props.editPlayer(props.player);
+      }}
     >
-      <Group grow>
-        <Container>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              height: "100%",
-            }}
-          >
-            <Text size={rem(22)} pt="0.4rem" fw="bold" tt="capitalize">
-              {props.player.name}
-            </Text>
-            <ActionIcon
-              variant="transparent"
-              ml="0.2rem"
-              radius="xs"
-              onClick={() => {
-                props.editPlayer(props.player);
-              }}
-            >
-              <IconPencil
-                size="1.3rem"
-                color={colorScheme == "dark" ? theme.colors.dark[0] : "black"}
-              />
-            </ActionIcon>
-          </div>
-          <Text size="md" c="dimmed" mt={rem(4)} mb={rem(4)}>
-            ${props.player.balance.toFixed(2)}
-          </Text>
-        </Container>
-      </Group>
+      <Container pl="xs">
+        <Text size="xl" fw="bold" tt="capitalize">
+          {props.player.name}
+        </Text>
+        <Text size="sm" c="dimmed">
+          ${props.player.balance.toFixed(2)}
+        </Text>
+        {props.children}
+      </Container>
     </Paper>
   );
 }

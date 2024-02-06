@@ -1,11 +1,11 @@
 import { Container, Group, Tabs, Title } from "@mantine/core";
 import { useElementSize } from "@mantine/hooks";
 import { useState } from "react";
-import { useRecoilState } from "recoil";
 import { ROUTES, STATE, State } from "../App";
+import { useCustomRecoilState } from "../utils/Recoil";
 
 export default function Header() {
-  const [state, setState] = useRecoilState<State>(STATE);
+  const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
   const [active, setActive] = useState(state.activeTab);
 
   const fullTabsSize = useElementSize();
@@ -13,7 +13,7 @@ export default function Header() {
   const containerSize = useElementSize();
 
   if (state.fullTabWidth < fullTabsSize.width && fullTabsSize.width > 0) {
-    setState({ ...state, fullTabWidth: fullTabsSize.width });
+    modifyState({ fullTabWidth: fullTabsSize.width });
   }
 
   const showTitle =
@@ -30,7 +30,7 @@ export default function Header() {
       fw={active === link.link ? 500 : "normal"}
       onClick={(event) => {
         event.preventDefault();
-        setState({ ...state, activeTab: link.link as any });
+        modifyState({ activeTab: link.link as any });
         setActive(link.link as any);
       }}
     >
@@ -47,7 +47,7 @@ export default function Header() {
       fw={active === link.link ? 500 : "normal"}
       onClick={(event) => {
         event.preventDefault();
-        setState({ ...state, activeTab: link.link as any });
+        modifyState({ activeTab: link.link as any });
         setActive(link.link as any);
       }}
     />
