@@ -162,13 +162,15 @@ const EditPlayerModal = (props: {
   opened: boolean;
   setOpened: (value: boolean) => void;
 }) => {
-  const [state, , modifyState] = useCustomRecoilState<State>(STATE);
+  const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
 
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState("");
 
   const [balance, setBalance] = useState(0);
   const [balanceError, setBalanceError] = useState("");
+
+  const [reallyDelete, setReallyDelete] = useState(false);
 
   useEffect(() => {
     let player = state.players.find((p) => p.id == props.playerId);
@@ -227,6 +229,25 @@ const EditPlayerModal = (props: {
     props.setOpened(false);
   };
 
+  const deletePlayer = () => {
+    if (reallyDelete) {
+      setState({
+        ...state,
+        players: state.players.filter((p) => p.id != props.playerId),
+        blackjack: {
+          ...state.blackjack,
+          players: state.blackjack.players.filter(
+            (p) => p.id != props.playerId
+          ),
+        },
+      });
+      props.setOpened(false);
+      setReallyDelete(false);
+    } else {
+      setReallyDelete(true);
+    }
+  };
+
   return (
     <Modal
       opened={props.opened}
@@ -264,7 +285,10 @@ const EditPlayerModal = (props: {
         value={balance}
         onChange={(value) => setBalance(parseFloat(`${value}`))}
       />
-      <Button fullWidth mt="md" onClick={editPlayer}>
+      <Button fullWidth mt="md" onClick={deletePlayer} color="red">
+        {reallyDelete ? "Are you sure?" : "Delete"}
+      </Button>
+      <Button fullWidth mt="xs" onClick={editPlayer}>
         Save
       </Button>
     </Modal>
