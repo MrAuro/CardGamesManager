@@ -60,6 +60,7 @@ export const DEFAULT_STATE: State = {
     players: [],
     turn: null,
     dealerCards: [],
+    firstRound: false,
   },
 };
 
@@ -83,6 +84,7 @@ export interface State {
     players: BlackjackPlayer[];
     turn: string | null;
     dealerCards: Card[];
+    firstRound: boolean;
   };
 }
 

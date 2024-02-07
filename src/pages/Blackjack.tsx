@@ -17,13 +17,14 @@ import PlayerSelector from "../components/PlayingList";
 import { BlackjackPlayer, getCardTotal, getPlayer } from "../utils/BlackjackHelper";
 import { useCustomRecoilState } from "../utils/RecoilHelper";
 import DealerItem from "../components/DealerItem";
-import { Card, CardSuit, EMPTY_CARD, getRank } from "../utils/CardHelper";
+import { Card, CardSuit, EMPTY_CARD, getRank, getRankInt } from "../utils/CardHelper";
 import CardPicker from "../components/CardPicker";
 import { CardRank } from "../utils/PokerHelper";
 import { useRecoilState } from "recoil";
 import { IconBolt, IconMobiledataOff } from "@tabler/icons-react";
 import { Player } from "../types/Player";
 import { modals } from "@mantine/modals";
+import { GetRecommendedPlayerAction } from "blackjack-strategy";
 
 export default function Blackjack() {
   const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
@@ -83,6 +84,15 @@ export default function Blackjack() {
           if (state.blackjack.state == "PLAYING") {
             // Stands
             if (state.blackjack.turn !== "DEALER") nextTurn();
+
+            if (state.blackjack.turn === "DEALER" && state.blackjack.firstRound) {
+              modifyState({
+                blackjack: {
+                  turn: state.blackjack.players[0].id,
+                  firstRound: false,
+                },
+              });
+            }
           } else if (state.blackjack.state === "NONE") {
             let newBasePlayers = [...state.players];
             for (let player of state.blackjack.players) {
@@ -104,8 +114,9 @@ export default function Blackjack() {
               players: newBasePlayers,
               blackjack: {
                 state: "PLAYING",
-                turn: state.blackjack.players[0].id,
+                turn: "Dealer",
                 dealerCards: [EMPTY_CARD, EMPTY_CARD],
+                firstRound: true,
                 players: state.blackjack.players.map((p) => {
                   return {
                     ...p,
@@ -377,7 +388,7 @@ export default function Blackjack() {
                 players: newBasePlayers,
                 blackjack: {
                   state: "PLAYING",
-                  turn: state.blackjack.players[0].id,
+                  turn: "DEALER",
                   dealerCards: [EMPTY_CARD, EMPTY_CARD],
                   players: state.blackjack.players.map((p) => {
                     return {
@@ -475,6 +486,32 @@ export default function Blackjack() {
                             <div>
                               <Text size={rem(30)} fw="bold">
                                 {cardTotal.total}
+                              </Text>
+                            </div>
+                            <div>
+                              <Text size="xs" fs="italic" c="dimmed">
+                                {GetRecommendedPlayerAction(
+                                  player.cards.map((c) => getRankInt(c)),
+                                  getRankInt(state.blackjack.dealerCards[0]),
+                                  1,
+                                  false,
+                                  {
+                                    hitSoft17: true,
+                                    surrender: "none",
+                                    double: "any",
+                                    doubleRange: [0, 21],
+                                    doubleAfterSplit: true,
+                                    resplitAces: true,
+                                    offerInsurance: false,
+                                    numberOfDecks: 2,
+                                    maxSplitHands: 1,
+                                    count: {
+                                      system: "HiLo",
+                                      trueCount: null,
+                                    },
+                                    strategyComplexity: "advanced",
+                                  }
+                                )}
                               </Text>
                             </div>
                           </div>
@@ -636,6 +673,14 @@ export default function Blackjack() {
 
       let dealerTotal = getCardTotal(state.blackjack.dealerCards);
 
+      let dealerAction: "hit" | "stand" = "stand";
+      // Dealer hits on soft 17, stands on hard 17
+      if (dealerTotal.ace == "SOFT" && dealerTotal.total <= 17) {
+        dealerAction = "hit";
+      } else if (dealerTotal.total < 17) {
+        dealerAction = "hit";
+      }
+
       content = (
         <>
           <DealerItem
@@ -693,6 +738,12 @@ export default function Blackjack() {
                             {dealerTotal.total}
                           </Text>
                         </div>
+
+                        <div>
+                          <Text size="xs" fs="italic" c="dimmed">
+                            {dealerAction}
+                          </Text>
+                        </div>
                       </div>
                     </div>
                   </Paper>
@@ -702,21 +753,40 @@ export default function Blackjack() {
           >
             <Divider my="xs" />
             <Group grow>
-              <Button
-                fullWidth
-                size="sm"
-                color="blue"
-                disabled={state.blackjack.turn !== "DEALER"}
-                onClick={() => {
-                  modifyState({
-                    blackjack: {
-                      dealerCards: [...state.blackjack.dealerCards, EMPTY_CARD],
-                    },
-                  });
-                }}
-              >
-                Add Card
-              </Button>
+              {state.blackjack.firstRound ? (
+                <Button
+                  fullWidth
+                  size="sm"
+                  color="blue"
+                  onClick={() => {
+                    modifyState({
+                      blackjack: {
+                        turn: state.blackjack.players[0].id,
+                        firstRound: false,
+                      },
+                    });
+                  }}
+                >
+                  Next Turn
+                </Button>
+              ) : (
+                <Button
+                  fullWidth
+                  size="sm"
+                  color="blue"
+                  disabled={state.blackjack.turn !== "DEALER"}
+                  onClick={() => {
+                    modifyState({
+                      blackjack: {
+                        dealerCards: [...state.blackjack.dealerCards, EMPTY_CARD],
+                      },
+                    });
+                  }}
+                >
+                  Add Card
+                </Button>
+              )}
+
               <Button
                 fullWidth
                 size="sm"
@@ -812,6 +882,7 @@ export default function Blackjack() {
                       state: "NONE",
                       turn: "",
                       dealerCards: [EMPTY_CARD, EMPTY_CARD],
+                      firstRound: true,
                       players: state.blackjack.players
                         .filter((p) => p.splitFrom == null)
                         .map((p) => {
