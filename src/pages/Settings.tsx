@@ -3,6 +3,7 @@ import {
   Button,
   Container,
   Divider,
+  Fieldset,
   Grid,
   Input,
   InputWrapper,
@@ -15,6 +16,7 @@ import {
 import { modals } from "@mantine/modals";
 import {
   IconAlertCircle,
+  IconArrowsShuffle,
   IconCode,
   IconCodeOff,
   IconCurrencyDollar,
@@ -23,13 +25,14 @@ import {
   IconKeyboardOff,
   IconMoon,
   IconPokerChip,
+  IconStack2,
   IconSun,
 } from "@tabler/icons-react";
 import { STATE, State } from "../App";
 import { useCustomRecoilState } from "../utils/RecoilHelper";
 
 export default function Settings() {
-  const [state, , modifyState] = useCustomRecoilState<State>(STATE);
+  const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
   // const theme = useMantineTheme();
   const { setColorScheme, colorScheme } = useMantineColorScheme();
 
@@ -260,6 +263,59 @@ export default function Settings() {
           </>
         )}
       </Grid>
+      <Divider my="sm" />
+      <Title order={2}>Blackjack</Title>
+      <Fieldset legend="Card Counting" mt="xs">
+        <Grid>
+          <Grid.Col span={{ base: 12, sm: 4 }}>
+            <InputWrapper label="Deck Count" mb="xs">
+              <NumberInput
+                radius="md"
+                allowNegative={false}
+                decimalScale={0}
+                fixedDecimalScale
+                leftSection={<IconStack2 />}
+                placeholder="0"
+                disabled={state.currentGamePlaying != "NONE"}
+                value={state.blackjack.deckCount}
+                onChange={(value) => {
+                  modifyState({
+                    blackjack: {
+                      deckCount: parseInt(`${value}`),
+                    },
+                  });
+                }}
+              />
+            </InputWrapper>
+          </Grid.Col>
+        </Grid>
+        <Grid>
+          <Grid.Col span={{ base: 12, sm: 4 }} pt={0}>
+            <Button
+              leftSection={<IconArrowsShuffle />}
+              disabled={
+                state.blackjack.state != "NONE" ||
+                (state.blackjack.seenCards.length == 0 &&
+                  state.blackjack.pastGameSeenCards.length == 0)
+              }
+              onClick={() => {
+                setState({
+                  ...state,
+                  blackjack: {
+                    ...state.blackjack,
+                    runningCount: 0,
+                    seenCards: [],
+                    pastGameSeenCards: [],
+                  },
+                });
+              }}
+            >
+              Shuffle Deck
+            </Button>
+          </Grid.Col>
+        </Grid>
+      </Fieldset>
+
       <Divider my="sm" />
       <Button
         color="red"

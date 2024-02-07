@@ -1,4 +1,13 @@
-import { Accordion, Button, Container, Divider, Paper, Textarea, Title } from "@mantine/core";
+import {
+  Accordion,
+  Button,
+  Container,
+  Divider,
+  JsonInput,
+  Paper,
+  Textarea,
+  Title,
+} from "@mantine/core";
 import "@mantine/core/styles.css";
 import { getHotkeyHandler } from "@mantine/hooks";
 import { IconCards, IconClubs, IconSettings, IconUsers } from "@tabler/icons-react";
@@ -61,6 +70,10 @@ export const DEFAULT_STATE: State = {
     turn: null,
     dealerCards: [],
     firstRound: false,
+    pastGameSeenCards: [],
+    seenCards: [],
+    deckCount: 2,
+    runningCount: 0,
   },
 };
 
@@ -85,6 +98,11 @@ export interface State {
     turn: string | null;
     dealerCards: Card[];
     firstRound: boolean;
+
+    seenCards: Card[];
+    pastGameSeenCards: Card[];
+    deckCount: number;
+    runningCount: number; // Hi-Lo count
   };
 }
 
@@ -137,11 +155,13 @@ function App() {
             <Accordion.Item key="state" value="state">
               <Accordion.Control>State</Accordion.Control>
               <Accordion.Panel>
-                <Textarea
+                <JsonInput
                   value={TEMP_state}
                   onChange={(e) => {
-                    setTEMP_state(e.currentTarget.value);
+                    setTEMP_state(e);
                   }}
+                  formatOnBlur
+                  validationError="Invalid JSON"
                   variant="filled"
                   radius="sm"
                   resize="vertical"

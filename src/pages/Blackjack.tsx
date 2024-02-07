@@ -13,13 +13,18 @@ import { BlackjackPlayer, getCardTotal, getPlayer } from "../utils/BlackjackHelp
 import { Card, CardSuit, EMPTY_CARD, getRank, getRankInt } from "../utils/CardHelper";
 import { CardRank } from "../utils/PokerHelper";
 import { useCustomRecoilState } from "../utils/RecoilHelper";
-import { useScrollIntoView } from "@mantine/hooks";
+import { usePrevious, useScrollIntoView } from "@mantine/hooks";
 
 export default function Blackjack() {
   const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
   const [betErrors, setBetErrors] = useState<(string | null)[]>([]);
 
   const [modalOpen, setModalOpen] = useState(false);
+
+  const previousSeenCards = usePrevious(state.blackjack.seenCards);
+  const previousGameSeenCards = usePrevious(state.blackjack.pastGameSeenCards);
+  const previousPlayerCards = usePrevious(state.blackjack.players.map((p) => p.cards));
+  const previousDealerCards = usePrevious(state.blackjack.dealerCards);
 
   useKeyPress((event) => {
     if (!state.useKeybindings || modalOpen) return;
@@ -316,6 +321,11 @@ export default function Blackjack() {
       ),
     });
 
+    let newPastSeenCards = [...state.blackjack.pastGameSeenCards];
+    for (let card of state.blackjack.seenCards) {
+      newPastSeenCards.push(card);
+    }
+
     setState({
       ...state,
       players: newBasePlayers,
@@ -336,6 +346,10 @@ export default function Blackjack() {
               handResult: undefined,
             };
           }),
+        deckCount: state.blackjack.deckCount,
+        runningCount: state.blackjack.runningCount,
+        seenCards: [],
+        pastGameSeenCards: newPastSeenCards,
       },
     });
   };
@@ -396,6 +410,11 @@ export default function Blackjack() {
       ),
     });
 
+    let newPastSeenCards = [...state.blackjack.pastGameSeenCards];
+    for (let card of state.blackjack.seenCards) {
+      newPastSeenCards.push(card);
+    }
+
     setState({
       ...state,
       players: newBasePlayers,
@@ -416,6 +435,10 @@ export default function Blackjack() {
               handResult: undefined,
             };
           }),
+        deckCount: state.blackjack.deckCount,
+        runningCount: state.blackjack.runningCount,
+        seenCards: [],
+        pastGameSeenCards: newPastSeenCards,
       },
     });
   };
@@ -625,6 +648,152 @@ export default function Blackjack() {
       }
     }
   }, [state.blackjack.players]);
+
+  // useEffect(() => {
+  //   let shouldUpdate = false;
+
+  //   // We need to sort and join the arrays to compare them since they are not primitives
+  //   if (
+  //     state.blackjack.seenCards == null ||
+  //     state.blackjack.seenCards.filter((c) => {
+  //       return c !== EMPTY_CARD;
+  //     }).length <= 0
+  //   ) {
+  //     console.log(
+  //       "seen cards are null or empty",
+  //       state.blackjack.seenCards,
+  //       state.blackjack.pastGameSeenCards
+  //     );
+  //     return;
+  //   }
+  //   if (
+  //     previousSeenCards
+  //       ?.filter((c) => {
+  //         return c !== EMPTY_CARD;
+  //       })
+  //       .sort()
+  //       .join("") !==
+  //     state.blackjack.seenCards
+  //       .filter((c) => {
+  //         return c !== EMPTY_CARD;
+  //       })
+  //       .sort()
+  //       .join("")
+  //   ) {
+  //     console.log("seen cards changed", state.blackjack.seenCards, previousSeenCards);
+  //     shouldUpdate = true;
+  //   } else {
+  //     console.log("seen cards did not change", state.blackjack.seenCards, previousSeenCards);
+  //   }
+
+  //   if (
+  //     previousGameSeenCards?.sort().join("") !== state.blackjack.pastGameSeenCards.sort().join("")
+  //   ) {
+  //     console.log(
+  //       "Game seen cards changed",
+  //       state.blackjack.pastGameSeenCards,
+  //       previousGameSeenCards
+  //     );
+  //     shouldUpdate = true;
+  //   } else {
+  //     console.log(
+  //       "Game seen cards did not change",
+  //       state.blackjack.pastGameSeenCards,
+  //       previousGameSeenCards
+  //     );
+  //   }
+
+  //   if (!shouldUpdate) {
+  //     console.log("No update needed");
+  //     return;
+  //   }
+
+  //   let runningCount = 0;
+  //   let allSeenCards = [...state.blackjack.seenCards, ...state.blackjack.pastGameSeenCards].filter(
+  //     (c) => c !== EMPTY_CARD
+  //   );
+
+  //   console.log("tallying", allSeenCards);
+
+  //   for (let card of allSeenCards) {
+  //     let rank = getRankInt(card);
+  //     if (rank >= 2 && rank <= 6) {
+  //       runningCount++;
+  //     } else if (rank >= 10) {
+  //       runningCount--;
+  //     }
+  //   }
+
+  //   modifyState({
+  //     blackjack: {
+  //       runningCount,
+  //     },
+  //   });
+  // }, [state.blackjack.seenCards, state.blackjack.pastGameSeenCards]);
+
+  useEffect(() => {
+    let allPlayerCards = state.blackjack.players.map((p) => p.cards);
+    allPlayerCards = [...allPlayerCards, state.blackjack.dealerCards];
+
+    console.log(allPlayerCards, "apl");
+
+    let seenCards: Card[] = [];
+    for (let cards of allPlayerCards) {
+      for (let card of cards) {
+        if (card !== EMPTY_CARD) seenCards.push(card);
+      }
+    }
+
+    seenCards = seenCards.sort();
+
+    if (seenCards.join("") !== state.blackjack.seenCards.join("")) {
+      console.log("Seen cards changed", seenCards, state.blackjack.seenCards);
+      let runningCount = 0;
+      // Hi Lo
+      for (let card of seenCards) {
+        let rank = getRankInt(card);
+        if (rank >= 2 && rank <= 6) {
+          runningCount++;
+        } else if (rank >= 10) {
+          runningCount--;
+        }
+      }
+
+      setState({
+        ...state,
+        blackjack: {
+          ...state.blackjack,
+          seenCards,
+          runningCount,
+        },
+      });
+    }
+  }, [state.blackjack.players, state.blackjack.dealerCards]);
+
+  // useEffect(() => {
+  //   if (state.blackjack.state === "PLAYING") {
+  //     if (previousPlayerCards?.join("") !== state.blackjack.players.map((p) => p.cards).join("")) {
+  //       let seenCards: Card[] = [];
+  //       for (let player of state.blackjack.players) {
+  //         for (let card of player.cards) {
+  //           if (card !== EMPTY_CARD) seenCards.push(card);
+  //         }
+  //       }
+
+  //       for (let card of state.blackjack.dealerCards) {
+  //         if (card !== EMPTY_CARD) seenCards.push(card);
+  //       }
+
+  //       console.log("Seen cards changed", seenCards, state.blackjack.seenCards, previousSeenCards);
+
+  //       modifyState({
+  //         blackjack: {
+  //           seenCards,
+  //         },
+  //       });
+  //     }
+  //   }
+  // }, [state.blackjack.players, state.blackjack.dealerCards]);
 
   let content: ReactNode = "No content";
 
@@ -1068,11 +1237,3 @@ function useKeyPress(callback: (event: KeyboardEvent) => void) {
     };
   }, [state]);
 }
-
-export const usePrevious = <T extends unknown>(value: T): T | undefined => {
-  const ref = useRef<T>();
-  useEffect(() => {
-    ref.current = value;
-  });
-  return ref.current;
-};
