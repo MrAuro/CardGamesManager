@@ -228,6 +228,54 @@ export default function Blackjack() {
           },
         });
       }
+
+      if (playerTotal.total == 21 && player.handPartialResult !== "BLACKJACK") {
+        console.log(`Player ${player.id} has blackjack`);
+        let players: BlackjackPlayer[] = state.blackjack.players.map((p) => {
+          if (p.id === player.id) {
+            return {
+              ...p,
+              handPartialResult: "BLACKJACK",
+            };
+          }
+          return p;
+        });
+
+        setState({
+          ...state,
+          blackjack: {
+            ...state.blackjack,
+            players,
+            turn:
+              state.blackjack.turn === player.id
+                ? state.blackjack.players.indexOf(player) + 1 < state.blackjack.players.length
+                  ? state.blackjack.players[state.blackjack.players.indexOf(player) + 1].id
+                  : "DEALER"
+                : state.blackjack.turn,
+          },
+        });
+      }
+
+      if (playerTotal.total < 21 && player.handPartialResult == "BLACKJACK") {
+        console.log(`Player ${player.id} has unblackjacked`);
+        let players: BlackjackPlayer[] = state.blackjack.players.map((p) => {
+          if (p.id === player.id) {
+            return {
+              ...p,
+              handPartialResult: undefined,
+            };
+          }
+          return p;
+        });
+
+        setState({
+          ...state,
+          blackjack: {
+            ...state.blackjack,
+            players,
+          },
+        });
+      }
     }
   }, [state.blackjack.players]);
 
@@ -382,7 +430,7 @@ export default function Blackjack() {
                     fullWidth
                     size="sm"
                     color="blue"
-                    disabled={!isTurn || player.doubledDown}
+                    disabled={!isTurn || player.doubledDown || player.handPartialResult == "BUST"}
                     onClick={() => {
                       modifyState({
                         blackjack: {
