@@ -166,6 +166,17 @@ export default function Blackjack() {
 
       case "*":
         {
+          if (
+            currentTurnPlayer != null &&
+            !(
+              currentTurnPlayer.cards.length > 2 ||
+              currentTurnPlayer.doubledDown ||
+              getPlayer(currentTurnPlayer.id, state.players).balance < currentTurnPlayer.bet
+            )
+          ) {
+            console.log("KBD Playing can double down, doubling down");
+            doubleDown(currentTurnPlayer);
+          }
         }
         break;
     }
@@ -325,6 +336,25 @@ export default function Blackjack() {
               handResult: undefined,
             };
           }),
+      },
+    });
+  };
+
+  const doubleDown = (player: BlackjackPlayer) => {
+    modifyState({
+      blackjack: {
+        players: state.blackjack.players.map((p) => {
+          if (p.id === player.id) {
+            let cards = [...p.cards];
+            cards.push(EMPTY_CARD);
+            return {
+              ...p,
+              cards,
+              doubledDown: true,
+            };
+          }
+          return p;
+        }),
       },
     });
   };
@@ -777,22 +807,7 @@ export default function Blackjack() {
                       getPlayer(player.id, state.players).balance < player.bet
                     }
                     onClick={() => {
-                      modifyState({
-                        blackjack: {
-                          players: state.blackjack.players.map((p) => {
-                            if (p.id === player.id) {
-                              let cards = [...p.cards];
-                              cards.push(EMPTY_CARD);
-                              return {
-                                ...p,
-                                cards,
-                                doubledDown: true,
-                              };
-                            }
-                            return p;
-                          }),
-                        },
-                      });
+                      doubleDown(player);
                     }}
                   >
                     Double {state.useKeybindings && " (*)"}
