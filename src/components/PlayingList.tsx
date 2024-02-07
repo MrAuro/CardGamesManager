@@ -323,7 +323,7 @@ export default function PlayerSelector({
                             }
                           }}
                         >
-                          Sit Out
+                          Remove
                         </Button>
                       </Button.Group>
                     </Grid.Col>
