@@ -903,7 +903,7 @@ export default function Blackjack() {
                                   player.cards.map((c) => getRankInt(c)),
                                   getRankInt(state.blackjack.dealerCards[0]),
                                   1,
-                                  false,
+                                  true,
                                   {
                                     hitSoft17: true,
                                     surrender: "none",

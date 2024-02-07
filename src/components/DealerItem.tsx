@@ -2,6 +2,7 @@ import {
   Box,
   Container,
   Group,
+  HoverCard,
   Paper,
   Text,
   useMantineColorScheme,
@@ -74,20 +75,29 @@ export default function DealerItem(props: {
             <Text size="xl" fw={!props.disabled ? "bolder" : "bold"} tt="capitalize">
               Dealer
             </Text>
-            <Text>
-              Seen Cards:{" "}
-              {[...state.blackjack.seenCards, ...state.blackjack.pastGameSeenCards].length}/
-              {state.blackjack.deckCount * 52}
-            </Text>
-            <Text>
-              True Count:{" "}
-              {(
-                state.blackjack.runningCount /
-                ((state.blackjack.deckCount * 52 -
-                  [...state.blackjack.seenCards, ...state.blackjack.pastGameSeenCards].length) /
-                  52)
-              ).toFixed(1)}
-            </Text>
+            <HoverCard>
+              <HoverCard.Target>
+                <Text c="dimmed" size="sm" mt="xs">
+                  Hover for card count
+                </Text>
+              </HoverCard.Target>
+              <HoverCard.Dropdown>
+                <Text>
+                  Seen Cards:{" "}
+                  {[...state.blackjack.seenCards, ...state.blackjack.pastGameSeenCards].length}/
+                  {state.blackjack.deckCount * 52}
+                </Text>
+                <Text>
+                  True Count:{" "}
+                  {(
+                    state.blackjack.runningCount /
+                    ((state.blackjack.deckCount * 52 -
+                      [...state.blackjack.seenCards, ...state.blackjack.pastGameSeenCards].length) /
+                      52)
+                  ).toFixed(1)}
+                </Text>
+              </HoverCard.Dropdown>
+            </HoverCard>
           </Paper>
 
           <Paper
