@@ -26,6 +26,10 @@ export type CardSuit = "h" | "d" | "c" | "s" | "-";
 export type Card = `${CardRank}${CardSuit}`;
 export const EMPTY_CARD: Card = "--";
 
+export const isAnyEmpty = (card: Card): boolean => {
+  return getSuit(card) === "-" || getRank(card) === "-";
+};
+
 export const suitToIcon = (suit: CardSuit): ReactNode => {
   let size = "1.7rem";
 

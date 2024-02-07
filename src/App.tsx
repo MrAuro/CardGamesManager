@@ -1,20 +1,7 @@
-import {
-  Accordion,
-  Button,
-  Container,
-  Divider,
-  Paper,
-  Textarea,
-  Title,
-} from "@mantine/core";
+import { Accordion, Button, Container, Divider, Paper, Textarea, Title } from "@mantine/core";
 import "@mantine/core/styles.css";
 import { getHotkeyHandler } from "@mantine/hooks";
-import {
-  IconCards,
-  IconClubs,
-  IconSettings,
-  IconUsers,
-} from "@tabler/icons-react";
+import { IconCards, IconClubs, IconSettings, IconUsers } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { atom, useRecoilState } from "recoil";
 import "./App.css";
@@ -24,9 +11,9 @@ import Players from "./pages/Players";
 import { Poker } from "./pages/Poker";
 import Settings from "./pages/Settings";
 import { DUMMY_PLAYER_NAMES, Player } from "./types/Player";
-import { BlackjackGameState, BlackjackPlayer } from "./utils/Blackjack";
-import { useCustomRecoilState } from "./utils/Recoil";
-import { Card } from "./utils/Card";
+import { BlackjackGameState, BlackjackPlayer } from "./utils/BlackjackHelper";
+import { useCustomRecoilState } from "./utils/RecoilHelper";
+import { Card } from "./utils/CardHelper";
 // import type { PlayingCard } from "@xpressit/winning-poker-hand-rank/src/types";
 
 export const ROUTES = [
@@ -59,6 +46,7 @@ export const DEFAULT_STATE: State = {
   currentGamePlaying: "NONE",
   showDebugInfo: false,
   fullTabWidth: 0,
+  useKeybindings: false,
 
   poker: {
     forcedBetType: "BLINDS",
@@ -82,6 +70,7 @@ export interface State {
   currentGamePlaying: "NONE" | "POKER" | "BLACKJACK";
   showDebugInfo: boolean;
   fullTabWidth: number; // Used to calculate if the tabs should be shown as icons or text in the header
+  useKeybindings: boolean;
   poker: {
     forcedBetType: "BLINDS" | "ANTE" | "BLINDS+ANTE";
     bigBlind: number;
@@ -132,9 +121,7 @@ function App() {
   // Mantine uses fontSize for scaling
   document.documentElement.style.fontSize = `${state.scale * 100}%`;
 
-  const [TEMP_state, setTEMP_state] = useState<string>(
-    JSON.stringify(state, null, 2)
-  );
+  const [TEMP_state, setTEMP_state] = useState<string>(JSON.stringify(state, null, 2));
 
   return (
     <>
@@ -252,22 +239,16 @@ function App() {
       )}
 
       <Container>
-        <div
-          style={{ display: state.activeTab == "PLAYERS" ? "block" : "none" }}
-        >
+        <div style={{ display: state.activeTab == "PLAYERS" ? "block" : "none" }}>
           <Players />
         </div>
-        <div
-          style={{ display: state.activeTab == "BLACKJACK" ? "block" : "none" }}
-        >
+        <div style={{ display: state.activeTab == "BLACKJACK" ? "block" : "none" }}>
           <Blackjack />
         </div>
         <div style={{ display: state.activeTab == "POKER" ? "block" : "none" }}>
           <Poker />
         </div>
-        <div
-          style={{ display: state.activeTab == "SETTINGS" ? "block" : "none" }}
-        >
+        <div style={{ display: state.activeTab == "SETTINGS" ? "block" : "none" }}>
           <Settings />
         </div>
       </Container>

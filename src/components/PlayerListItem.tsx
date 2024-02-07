@@ -15,9 +15,9 @@ import {
 import { IconGripVertical, IconPencil } from "@tabler/icons-react";
 import PlayingCard from "./PlayingCard";
 import classes from "../styles/PlayingList.module.css";
-import { getPlayer } from "../utils/Blackjack";
-import { useCustomRecoilState } from "../utils/Recoil";
-import { Card } from "../utils/Card";
+import { getPlayer } from "../utils/BlackjackHelper";
+import { useCustomRecoilState } from "../utils/RecoilHelper";
+import { Card } from "../utils/CardHelper";
 
 export default function PlayerListItem(props: {
   player: Player;
@@ -26,7 +26,9 @@ export default function PlayerListItem(props: {
   disabled?: boolean;
   showHandle?: boolean;
   provided?: any;
-  showBlackjackCards?: boolean;
+  blackjackCardsFrom?: string;
+  nameOverride?: string;
+  leftCardItem?: React.ReactNode;
   onCardClick?: (card: string, index: number) => void;
   children?: React.ReactNode;
 }) {
@@ -84,7 +86,7 @@ export default function PlayerListItem(props: {
               fw={!props.disabled ? "bold" : 500}
               tt="capitalize"
             >
-              {props.player.name}
+              {props.nameOverride ?? props.player.name}
             </Text>
             <Text size="sm" c="dimmed">
               ${props.player.balance.toFixed(2)}
@@ -99,21 +101,22 @@ export default function PlayerListItem(props: {
               justifyContent: "flex-end",
             }}
           >
-            {props.showBlackjackCards &&
+            <Box ml="xs">{props.leftCardItem}</Box>
+            {props.blackjackCardsFrom &&
               state.blackjack.players.map((player) => {
-                if (player.id !== props.player.id) return;
-                return player.cards.map((card, index) => (
-                  <Box ml="xs" key={`${player.id}${card}${index}`}>
-                    <PlayingCard
-                      card={card}
-                      onClick={(card: Card) => {
-                        if (props.onCardClick != null)
-                          props.onCardClick(card, index);
-                      }}
-                      disabled={!props.disabled}
-                    />
-                  </Box>
-                ));
+                if (player.id === props.blackjackCardsFrom) {
+                  return player.cards.map((card, index) => (
+                    <Box ml="xs" key={`${player.id}${card}${index}`}>
+                      <PlayingCard
+                        card={card}
+                        onClick={(card: Card) => {
+                          if (props.onCardClick != null) props.onCardClick(card, index);
+                        }}
+                        disabled={!props.disabled}
+                      />
+                    </Box>
+                  ));
+                }
               })}
           </Paper>
         </Group>

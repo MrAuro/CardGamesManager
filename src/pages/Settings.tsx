@@ -19,6 +19,8 @@ import {
   IconCodeOff,
   IconCurrencyDollar,
   IconDatabase,
+  IconKeyboard,
+  IconKeyboardOff,
   IconMoon,
   IconPokerChip,
   IconSun,
@@ -26,7 +28,7 @@ import {
 import { useRecoilState } from "recoil";
 import { STATE, State } from "../App";
 import { modals } from "@mantine/modals";
-import { useCustomRecoilState } from "../utils/Recoil";
+import { useCustomRecoilState } from "../utils/RecoilHelper";
 
 export default function Settings() {
   const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
@@ -116,6 +118,28 @@ export default function Settings() {
           </Button>
         </Button.Group>
       </InputWrapper>
+      <InputWrapper label="Use Keyboard Shortcuts" mb="md">
+        <Button.Group>
+          <Button
+            variant={state.useKeybindings ? "filled" : "default"}
+            leftSection={<IconKeyboard />}
+            onClick={() => {
+              modifyState({ useKeybindings: true });
+            }}
+          >
+            On
+          </Button>
+          <Button
+            variant={!state.useKeybindings ? "filled" : "default"}
+            leftSection={<IconKeyboardOff />}
+            onClick={() => {
+              modifyState({ useKeybindings: false });
+            }}
+          >
+            Off
+          </Button>
+        </Button.Group>
+      </InputWrapper>
       <Divider my="sm" />
       <Title order={2}>Poker</Title>
       {state.currentGamePlaying != "NONE" && (
@@ -132,9 +156,7 @@ export default function Settings() {
       <InputWrapper label="Forced Bet Type" mb="xs">
         <Button.Group>
           <Button
-            variant={
-              state.poker.forcedBetType == "BLINDS" ? "filled" : "default"
-            }
+            variant={state.poker.forcedBetType == "BLINDS" ? "filled" : "default"}
             leftSection={<IconDatabase />}
             disabled={state.currentGamePlaying != "NONE"}
             onClick={() => {
@@ -158,9 +180,7 @@ export default function Settings() {
             Ante
           </Button>
           <Button
-            variant={
-              state.poker.forcedBetType == "BLINDS+ANTE" ? "filled" : "default"
-            }
+            variant={state.poker.forcedBetType == "BLINDS+ANTE" ? "filled" : "default"}
             leftSection={<IconPokerChip />}
             disabled={state.currentGamePlaying != "NONE"}
             onClick={() => {
@@ -174,8 +194,7 @@ export default function Settings() {
         </Button.Group>
       </InputWrapper>
       <Grid gutter="xs">
-        {(state.poker.forcedBetType == "BLINDS" ||
-          state.poker.forcedBetType == "BLINDS+ANTE") && (
+        {(state.poker.forcedBetType == "BLINDS" || state.poker.forcedBetType == "BLINDS+ANTE") && (
           <>
             <Grid.Col span={{ base: 12, sm: 2 }}>
               <NumberInput
@@ -221,8 +240,7 @@ export default function Settings() {
             </Grid.Col>
           </>
         )}
-        {(state.poker.forcedBetType == "ANTE" ||
-          state.poker.forcedBetType == "BLINDS+ANTE") && (
+        {(state.poker.forcedBetType == "ANTE" || state.poker.forcedBetType == "BLINDS+ANTE") && (
           <>
             <Grid.Col span={{ base: 12, sm: 4 }}>
               <NumberInput
@@ -252,8 +270,8 @@ export default function Settings() {
             title: "Reset everything",
             children: (
               <Text size="sm">
-                Are you sure you want to reset everything? This will clear all
-                games, settings, and player data.
+                Are you sure you want to reset everything? This will clear all games, settings, and
+                player data.
               </Text>
             ),
             labels: { confirm: "Reset everything", cancel: "Cancel" },

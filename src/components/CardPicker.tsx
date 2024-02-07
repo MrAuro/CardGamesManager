@@ -9,13 +9,7 @@ import {
 } from "@mantine/core";
 import { IconBan } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import {
-  Card,
-  CardRank,
-  CardSuit,
-  EMPTY_CARD,
-  suitToIcon,
-} from "../utils/Card";
+import { Card, CardRank, CardSuit, EMPTY_CARD, suitToIcon } from "../utils/CardHelper";
 
 // import { USED_CARDS } from "../App";
 // import {
@@ -41,6 +35,15 @@ export default function CardPicker(props: {
       setSelectedCardRank("-");
       setSelectedCardSuit("-");
     }
+
+    if (selectedCardRank != "-" && props.hideSuit) {
+      // If hideSuit, then we are playing blackjack where suits dont matter
+      // We use a random suit to make the card unique
+      let randomSuit = (["h", "s", "d", "c"] as CardSuit[])[Math.floor(Math.random() * 4)];
+      props.handleClose(`${selectedCardRank}${randomSuit}`);
+      setSelectedCardRank("-");
+      setSelectedCardRank("-");
+    }
   }, [selectedCardRank, selectedCardSuit]);
 
   const handleClose = (card: Card) => {
@@ -61,21 +64,7 @@ export default function CardPicker(props: {
     >
       <Group grow>
         <SimpleGrid cols={{ sm: 7, xs: 2 }} spacing="xs" verticalSpacing="xs">
-          {[
-            "2",
-            "3",
-            "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "9",
-            "T",
-            "J",
-            "Q",
-            "K",
-            "A",
-          ].map((rank) => (
+          {["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"].map((rank) => (
             <RankButton
               key={rank}
               rank={rank as CardRank}
@@ -100,12 +89,8 @@ export default function CardPicker(props: {
         <>
           <Divider my="md" />
           <Group justify="center" grow>
-            <SimpleGrid
-              cols={{ sm: 4, xs: 2 }}
-              spacing="xs"
-              verticalSpacing="xs"
-            >
-              {(["s", "h", "c", "d"] as CardSuit[]).map((suit) => (
+            <SimpleGrid cols={{ sm: 4, xs: 2 }} spacing="xs" verticalSpacing="xs">
+              {(["h", "s", "d", "c"] as CardSuit[]).map((suit) => (
                 <SuitButton
                   key={suit}
                   suit={suit}
@@ -204,8 +189,7 @@ function SuitButton(props: {
     // );
   }, [props.selectedCardSuit, props.selectedCardRank /*usedCards*/]);
 
-  let color: "red" | "gray" =
-    props.suit == "h" || props.suit == "d" ? "red" : "gray";
+  let color: "red" | "gray" = props.suit == "h" || props.suit == "d" ? "red" : "gray";
 
   let iconColor;
   if (color == "red") {

@@ -1,16 +1,12 @@
 import { Button, Modal, NumberInput, TextInput } from "@mantine/core";
 import { useRecoilState } from "recoil";
 import { STATE, State } from "../App";
-import {
-  IconCurrencyDollar,
-  IconUserFilled,
-  IconUserPlus,
-} from "@tabler/icons-react";
+import { IconCurrencyDollar, IconUserFilled, IconUserPlus } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { getHotkeyHandler } from "@mantine/hooks";
 import { Player } from "../types/Player";
 import PlayerListItem from "../components/PlayerListItem";
-import { useCustomRecoilState } from "../utils/Recoil";
+import { useCustomRecoilState } from "../utils/RecoilHelper";
 
 export default function Players() {
   const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
@@ -39,12 +35,7 @@ export default function Players() {
         />
       )}
       {state.players.map((player) => (
-        <PlayerListItem
-          key={player.id}
-          player={player}
-          editPlayer={editPlayer}
-          my="xs"
-        />
+        <PlayerListItem key={player.id} player={player} editPlayer={editPlayer} my="xs" />
       ))}
       <Button
         fullWidth
@@ -58,10 +49,7 @@ export default function Players() {
   );
 }
 
-const AddPlayerModal = (props: {
-  opened: boolean;
-  setOpened: (value: boolean) => void;
-}) => {
+const AddPlayerModal = (props: { opened: boolean; setOpened: (value: boolean) => void }) => {
   const [state, setState] = useRecoilState<State>(STATE);
 
   const [name, setName] = useState("");
@@ -236,9 +224,7 @@ const EditPlayerModal = (props: {
         players: state.players.filter((p) => p.id != props.playerId),
         blackjack: {
           ...state.blackjack,
-          players: state.blackjack.players.filter(
-            (p) => p.id != props.playerId
-          ),
+          players: state.blackjack.players.filter((p) => p.id != props.playerId),
         },
       });
       props.setOpened(false);

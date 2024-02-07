@@ -1,11 +1,5 @@
-import {
-  Center,
-  Paper,
-  Text,
-  useMantineColorScheme,
-  useMantineTheme,
-} from "@mantine/core";
-import { Card, EMPTY_CARD, getRank, getSuit, suitToIcon } from "../utils/Card";
+import { Center, Paper, Text, useMantineColorScheme, useMantineTheme } from "@mantine/core";
+import { Card, EMPTY_CARD, getRank, getSuit, suitToIcon } from "../utils/CardHelper";
 import { IconClick, IconHandFinger, IconPlus } from "@tabler/icons-react";
 
 export default function PlayingCard(props: {
@@ -19,7 +13,11 @@ export default function PlayingCard(props: {
   let backgroundColor;
   if (colorScheme == "dark") {
     if (!props.disabled) {
-      backgroundColor = theme.colors.dark[7];
+      if (props.card == EMPTY_CARD) {
+        backgroundColor = theme.colors.dark[7];
+      } else {
+        backgroundColor = theme.colors.gray[0];
+      }
     } else if (props.card == EMPTY_CARD) {
       backgroundColor = theme.colors.dark[6];
     } else {
@@ -51,7 +49,11 @@ export default function PlayingCard(props: {
 
         cursor: props.disabled ? "pointer" : "not-allowed",
       }}
-      onClick={() => props.onClick(props.card)}
+      onClick={() => {
+        if (props.disabled) {
+          props.onClick(props.card);
+        }
+      }}
     >
       {props.card == EMPTY_CARD ? (
         <>

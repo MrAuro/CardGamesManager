@@ -15,8 +15,9 @@ import cx from "clsx";
 import { useEffect, useState } from "react";
 import { STATE, State } from "../App";
 import classes from "../styles/PlayingList.module.css";
-import { useCustomRecoilState } from "../utils/Recoil";
+import { useCustomRecoilState } from "../utils/RecoilHelper";
 import PlayerListItem from "./PlayerListItem";
+import { BlackjackPlayer } from "../utils/BlackjackHelper";
 
 export default function PlayerSelector({
   betErrors,
@@ -28,9 +29,7 @@ export default function PlayerSelector({
   const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
   const theme = useMantineTheme();
 
-  const [listState, handlers] = useListState<string>(
-    state.blackjack.players.map((p) => p.id)
-  );
+  const [listState, handlers] = useListState<string>(state.blackjack.players.map((p) => p.id));
 
   // From the Mantine Discord
   // https://discord.com/channels/854810300876062770/1202574436516237323/1202575107290304522
@@ -40,9 +39,7 @@ export default function PlayerSelector({
   }, [selectedPlayer]);
 
   useEffect(() => {
-    let orderedPlayers = listState.map(
-      (id) => state.blackjack.players.find((p) => p.id === id)!
-    );
+    let orderedPlayers = listState.map((id) => state.blackjack.players.find((p) => p.id === id)!);
 
     orderedPlayers = orderedPlayers.filter((p) => p != undefined);
 
@@ -178,9 +175,7 @@ export default function PlayerSelector({
                         disabled={bjPlayer.bet + 1 > _player!.balance}
                         style={{
                           backgroundColor:
-                            bjPlayer.bet + 1 > _player!.balance
-                              ? theme.colors.dark[5]
-                              : undefined,
+                            bjPlayer.bet + 1 > _player!.balance ? theme.colors.dark[5] : undefined,
                         }}
                         onClick={() => {
                           if (betErrors[index]) {
@@ -221,14 +216,10 @@ export default function PlayerSelector({
                       <Button
                         variant="light"
                         fullWidth
-                        disabled={
-                          bjPlayer.bet * 2 > _player!.balance ||
-                          bjPlayer.bet * 2 == 0
-                        }
+                        disabled={bjPlayer.bet * 2 > _player!.balance || bjPlayer.bet * 2 == 0}
                         style={{
                           backgroundColor:
-                            bjPlayer.bet * 2 > _player!.balance ||
-                            bjPlayer.bet * 2 == 0
+                            bjPlayer.bet * 2 > _player!.balance || bjPlayer.bet * 2 == 0
                               ? theme.colors.dark[5]
                               : undefined,
                         }}
@@ -253,10 +244,7 @@ export default function PlayerSelector({
                         fullWidth
                         disabled={bjPlayer.bet / 2 == 0}
                         style={{
-                          backgroundColor:
-                            bjPlayer.bet / 2 == 0
-                              ? theme.colors.dark[5]
-                              : undefined,
+                          backgroundColor: bjPlayer.bet / 2 == 0 ? theme.colors.dark[5] : undefined,
                         }}
                         onClick={() => {
                           modifyState({
@@ -344,7 +332,13 @@ export default function PlayerSelector({
             blackjack: {
               players: [
                 ...state.blackjack.players,
-                { id: option.value, bet: 0 },
+                {
+                  id: option.value,
+                  bet: 0,
+                  cards: [],
+                  doubledDown: false,
+                  split: false,
+                } as BlackjackPlayer,
               ],
             },
           });

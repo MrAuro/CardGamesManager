@@ -15,7 +15,7 @@ import {
 import { IconGripVertical, IconPencil } from "@tabler/icons-react";
 import PlayingCard from "./PlayingCard";
 import classes from "../styles/PlayingList.module.css";
-import { useCustomRecoilState } from "../utils/Recoil";
+import { useCustomRecoilState } from "../utils/RecoilHelper";
 
 export default function DealerItem(props: { my?: string; disabled?: boolean }) {
   const { colorScheme } = useMantineColorScheme();
@@ -53,11 +53,7 @@ export default function DealerItem(props: { my?: string; disabled?: boolean }) {
       >
         <Group justify="space-between">
           <Paper style={{ backgroundColor: "transparent" }}>
-            <Text
-              size="xl"
-              fw={!props.disabled ? "bolder" : "bold"}
-              tt="capitalize"
-            >
+            <Text size="xl" fw={!props.disabled ? "bolder" : "bold"} tt="capitalize">
               Dealer
             </Text>
           </Paper>
@@ -72,11 +68,7 @@ export default function DealerItem(props: { my?: string; disabled?: boolean }) {
           >
             {state.blackjack.dealerCards.map((card, index) => (
               <Box ml="xs" key={`DEALER${card}${index}`}>
-                <PlayingCard
-                  card={card}
-                  onClick={() => {}}
-                  disabled={!props.disabled}
-                />
+                <PlayingCard card={card} onClick={() => {}} disabled={!props.disabled} />
               </Box>
             ))}
           </Paper>
