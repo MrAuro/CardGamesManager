@@ -742,40 +742,43 @@ export default function Blackjack() {
                       result = "LOSE";
                     } else if (dealerTotal.total == playerTotal.total) {
                       result = "PUSH";
-                    } else if (dealerTotal.total > 21) {
-                      result = "WIN";
                     } else if (playerTotal.total == 21) {
                       result = "BLACKJACK";
+                    } else if (dealerTotal.total > 21) {
+                      result = "WIN";
                     } else if (dealerTotal.total > playerTotal.total) {
                       result = "LOSE";
                     } else if (dealerTotal.total < playerTotal.total) {
                       result = "WIN";
                     }
 
+                    let bet = player.doubledDown ? player.bet * 2 : player.bet;
                     if (result == "BLACKJACK") {
-                      payout = player.bet + player.bet * 1.5;
+                      payout = bet * 1.5;
                     } else if (result == "WIN") {
-                      payout = player.bet + player.bet;
+                      payout = bet;
                     } else if (result == "PUSH") {
-                      payout = player.bet;
+                      payout = bet;
                     }
 
-                    if ((result == "BLACKJACK" || result == "WIN") && player.doubledDown) {
-                      payout *= 2;
+                    if (result == "WIN" || result == "BLACKJACK") {
+                      basePlayer.balance += payout; // Add the bet back
                     }
 
                     basePlayer.balance += payout;
                     switch (result) {
                       case "BLACKJACK":
-                        resultStrings.push(`${basePlayer.name} got blackjack and won ${payout}`);
+                        resultStrings.push(
+                          `${basePlayer.name} got blackjack and won $${payout.toFixed(2)}`
+                        );
                         break;
 
                       case "WIN":
-                        resultStrings.push(`${basePlayer.name} won ${payout}`);
+                        resultStrings.push(`${basePlayer.name} won $${payout.toFixed(2)}`);
                         break;
 
                       case "LOSE":
-                        resultStrings.push(`${basePlayer.name} lost ${player.bet}`);
+                        resultStrings.push(`${basePlayer.name} lost $${bet.toFixed(2)}`);
                         break;
 
                       case "PUSH":
