@@ -1,23 +1,19 @@
-import { useRecoilState } from "recoil";
-import { STATE, State } from "../App";
-import { Player } from "../types/Player";
 import {
-  ActionIcon,
   Box,
   Container,
   Group,
   Paper,
   Text,
-  rem,
   useMantineColorScheme,
   useMantineTheme,
 } from "@mantine/core";
-import { IconGripVertical, IconPencil } from "@tabler/icons-react";
-import PlayingCard from "./PlayingCard";
+import { IconGripVertical } from "@tabler/icons-react";
+import { STATE, State } from "../App";
 import classes from "../styles/PlayingList.module.css";
-import { getPlayer } from "../utils/BlackjackHelper";
-import { useCustomRecoilState } from "../utils/RecoilHelper";
+import { Player } from "../types/Player";
 import { Card } from "../utils/CardHelper";
+import { useCustomRecoilState } from "../utils/RecoilHelper";
+import PlayingCard from "./PlayingCard";
 
 export default function PlayerListItem(props: {
   player: Player;
@@ -34,7 +30,7 @@ export default function PlayerListItem(props: {
 }) {
   const { colorScheme } = useMantineColorScheme();
   const theme = useMantineTheme();
-  const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
+  const [state] = useCustomRecoilState<State>(STATE);
 
   if (props?.player == null) {
     console.warn("player is null", props);

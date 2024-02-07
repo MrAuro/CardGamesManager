@@ -1,36 +1,22 @@
-import {
-  Box,
-  Button,
-  Divider,
-  Group,
-  Paper,
-  Text,
-  Title,
-  darken,
-  rem,
-  useMantineTheme,
-} from "@mantine/core";
-import React, { ReactNode, useEffect, useState } from "react";
-import { STATE, State } from "../App";
-import PlayerListItem from "../components/PlayerListItem";
-import PlayerSelector from "../components/PlayingList";
-import { BlackjackPlayer, getCardTotal, getPlayer } from "../utils/BlackjackHelper";
-import { useCustomRecoilState } from "../utils/RecoilHelper";
-import DealerItem from "../components/DealerItem";
-import { Card, CardSuit, EMPTY_CARD, getRank, getRankInt } from "../utils/CardHelper";
-import CardPicker from "../components/CardPicker";
-import { CardRank } from "../utils/PokerHelper";
-import { useRecoilState } from "recoil";
-import { IconBolt, IconMobiledataOff } from "@tabler/icons-react";
-import { Player } from "../types/Player";
+import { Box, Button, Divider, Group, Paper, Text, Title, rem } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { GetRecommendedPlayerAction } from "blackjack-strategy";
+import { ReactNode, useEffect, useState } from "react";
+import { useRecoilState } from "recoil";
+import { STATE, State } from "../App";
+import CardPicker from "../components/CardPicker";
+import DealerItem from "../components/DealerItem";
+import PlayerListItem from "../components/PlayerListItem";
+import PlayerSelector from "../components/PlayingList";
+import { Player } from "../types/Player";
+import { BlackjackPlayer, getCardTotal, getPlayer } from "../utils/BlackjackHelper";
+import { Card, CardSuit, EMPTY_CARD, getRank, getRankInt } from "../utils/CardHelper";
+import { CardRank } from "../utils/PokerHelper";
+import { useCustomRecoilState } from "../utils/RecoilHelper";
 
 export default function Blackjack() {
   const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
   const [betErrors, setBetErrors] = useState<(string | null)[]>([]);
-
-  const theme = useMantineTheme();
 
   useKeyPress((event) => {
     if (!state.useKeybindings) return;
@@ -520,7 +506,7 @@ export default function Blackjack() {
                     </Box>
                   </>
                 }
-                onCardClick={(card, index) => {
+                onCardClick={(_, index) => {
                   setShowCardPicker(true);
                   setCardIndex(index);
                   setCardPlayer(player.id);

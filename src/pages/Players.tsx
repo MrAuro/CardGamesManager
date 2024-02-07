@@ -1,15 +1,15 @@
 import { Button, Modal, NumberInput, TextInput } from "@mantine/core";
-import { useRecoilState } from "recoil";
-import { STATE, State } from "../App";
+import { getHotkeyHandler } from "@mantine/hooks";
 import { IconCurrencyDollar, IconUserFilled, IconUserPlus } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { getHotkeyHandler } from "@mantine/hooks";
-import { Player } from "../types/Player";
+import { useRecoilState } from "recoil";
+import { STATE, State } from "../App";
 import PlayerListItem from "../components/PlayerListItem";
+import { Player } from "../types/Player";
 import { useCustomRecoilState } from "../utils/RecoilHelper";
 
 export default function Players() {
-  const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
+  const [state] = useCustomRecoilState<State>(STATE);
 
   const [isAddingPlayer, setIsAddingPlayer] = useState(false);
   const [isEditingPlayer, setIsEditingPlayer] = useState(false);

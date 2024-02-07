@@ -3,7 +3,7 @@ import "@mantine/core/styles.css";
 import { getHotkeyHandler } from "@mantine/hooks";
 import { IconCards, IconClubs, IconSettings, IconUsers } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { atom, useRecoilState } from "recoil";
+import { atom } from "recoil";
 import "./App.css";
 import Header from "./components/Header";
 import Blackjack from "./pages/Blackjack";

@@ -1,6 +1,4 @@
-import { useRecoilValue } from "recoil";
 import { Card, getRank, isAnyEmpty } from "./CardHelper";
-import { STATE } from "../App";
 import { Player } from "../types/Player";
 
 export type BlackjackGameState = "NONE" | "PLAYING" | "GAME_OVER";

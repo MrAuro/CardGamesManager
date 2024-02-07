@@ -15,9 +15,9 @@ import cx from "clsx";
 import { useEffect, useState } from "react";
 import { STATE, State } from "../App";
 import classes from "../styles/PlayingList.module.css";
+import { BlackjackPlayer } from "../utils/BlackjackHelper";
 import { useCustomRecoilState } from "../utils/RecoilHelper";
 import PlayerListItem from "./PlayerListItem";
-import { BlackjackPlayer } from "../utils/BlackjackHelper";
 
 export default function PlayerSelector({
   betErrors,

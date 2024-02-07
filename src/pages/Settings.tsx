@@ -1,4 +1,5 @@
 import {
+  Alert,
   Button,
   Container,
   Divider,
@@ -6,13 +7,12 @@ import {
   Input,
   InputWrapper,
   NumberInput,
-  Text,
   Slider,
-  useMantineColorScheme,
-  Alert,
+  Text,
   Title,
-  // useMantineTheme,
+  useMantineColorScheme,
 } from "@mantine/core";
+import { modals } from "@mantine/modals";
 import {
   IconAlertCircle,
   IconCode,
@@ -25,13 +25,11 @@ import {
   IconPokerChip,
   IconSun,
 } from "@tabler/icons-react";
-import { useRecoilState } from "recoil";
 import { STATE, State } from "../App";
-import { modals } from "@mantine/modals";
 import { useCustomRecoilState } from "../utils/RecoilHelper";
 
 export default function Settings() {
-  const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
+  const [state, , modifyState] = useCustomRecoilState<State>(STATE);
   // const theme = useMantineTheme();
   const { setColorScheme, colorScheme } = useMantineColorScheme();
 

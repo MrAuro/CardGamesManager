@@ -1,5 +1,4 @@
 import { RecoilState, useRecoilState } from "recoil";
-import { State } from "../App";
 import _ from "lodash";
 
 // https://stackoverflow.com/a/47914631

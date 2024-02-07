@@ -120,7 +120,7 @@ function RankButton(props: {
   const theme = useMantineTheme();
 
   const [selected, setSelected] = useState(false);
-  const [disabled, setDisabled] = useState(
+  const [disabled] = useState(
     false
     // usedCards.some(
     //   (card) => card.rank == props.rank && card.suit == props.selectedCardSuit
@@ -174,7 +174,7 @@ function SuitButton(props: {
   const theme = useMantineTheme();
 
   const [selected, setSelected] = useState(false);
-  const [disabled, setDisabled] = useState(
+  const [disabled] = useState(
     false
     /*usedCards.some(
       (card) => card.rank == props.selectedCardRank && card.suit == props.suit

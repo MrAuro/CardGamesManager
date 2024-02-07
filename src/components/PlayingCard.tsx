@@ -1,6 +1,6 @@
-import { Center, Paper, Text, useMantineColorScheme, useMantineTheme } from "@mantine/core";
+import { Paper, Text, useMantineColorScheme, useMantineTheme } from "@mantine/core";
+import { IconPlus } from "@tabler/icons-react";
 import { Card, EMPTY_CARD, getRank, getSuit, suitToIcon } from "../utils/CardHelper";
-import { IconClick, IconHandFinger, IconPlus } from "@tabler/icons-react";
 
 export default function PlayingCard(props: {
   card: Card;

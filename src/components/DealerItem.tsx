@@ -1,21 +1,15 @@
-import { useRecoilState } from "recoil";
-import { STATE, State } from "../App";
-import { Player } from "../types/Player";
 import {
-  ActionIcon,
   Box,
   Container,
   Group,
   Paper,
   Text,
-  rem,
   useMantineColorScheme,
   useMantineTheme,
 } from "@mantine/core";
-import { IconGripVertical, IconPencil } from "@tabler/icons-react";
-import PlayingCard from "./PlayingCard";
-import classes from "../styles/PlayingList.module.css";
+import { STATE, State } from "../App";
 import { useCustomRecoilState } from "../utils/RecoilHelper";
+import PlayingCard from "./PlayingCard";
 
 export default function DealerItem(props: {
   my?: string;
@@ -25,7 +19,7 @@ export default function DealerItem(props: {
 }) {
   const { colorScheme } = useMantineColorScheme();
   const theme = useMantineTheme();
-  const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
+  const [state] = useCustomRecoilState<State>(STATE);
 
   return (
     <Paper
