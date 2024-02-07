@@ -9,66 +9,62 @@ import {
 } from "@mantine/core";
 import { IconBan } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { useRecoilValue } from "recoil";
-import { USED_CARDS } from "../App";
-import {
-  Card,
-  CardRank,
-  CardSuit,
-  EMPTY_CARD,
-  suitToIcon,
-} from "../utils/Game";
+import { Card, CardRank, CardSuit, EMPTY_CARD, suitToIcon } from "../utils/CardHelper";
 
-export default function ImprovedCardPicker(props: {
+// import { USED_CARDS } from "../App";
+// import {
+//   Card,
+//   CardRank,
+//   CardSuit,
+//   EMPTY_CARD,
+//   suitToIcon,
+// } from "../utils/Game";
+
+export default function CardPicker(props: {
   opened: boolean;
+  setOpened: (opened: boolean) => void;
   handleClose: (card: Card) => void;
+  hideSuit?: boolean;
 }) {
-  const [selectedCardRank, setSelectedCardRank] = useState<CardRank>("NONE");
-  const [selectedCardSuit, setSelectedCardSuit] = useState<CardSuit>("NONE");
+  const [selectedCardRank, setSelectedCardRank] = useState<CardRank>("-");
+  const [selectedCardSuit, setSelectedCardSuit] = useState<CardSuit>("-");
 
   useEffect(() => {
-    if (selectedCardRank != "NONE" && selectedCardSuit != "NONE") {
-      props.handleClose({ rank: selectedCardRank, suit: selectedCardSuit });
-      setSelectedCardRank("NONE");
-      setSelectedCardSuit("NONE");
+    if (selectedCardRank != "-" && selectedCardSuit != "-") {
+      props.handleClose(`${selectedCardRank}${selectedCardSuit}`);
+      setSelectedCardRank("-");
+      setSelectedCardSuit("-");
+    }
+
+    if (selectedCardRank != "-" && props.hideSuit) {
+      // If hideSuit, then we are playing blackjack where suits dont matter
+      // We use a random suit to make the card unique
+      let randomSuit = (["h", "s", "d", "c"] as CardSuit[])[Math.floor(Math.random() * 4)];
+      props.handleClose(`${selectedCardRank}${randomSuit}`);
+      setSelectedCardRank("-");
+      setSelectedCardRank("-");
     }
   }, [selectedCardRank, selectedCardSuit]);
 
   const handleClose = (card: Card) => {
     props.handleClose(card);
-    setSelectedCardRank("NONE");
-    setSelectedCardSuit("NONE");
   };
 
   return (
     <Modal
       opened={props.opened}
       onClose={() => {
-        if (selectedCardRank != "NONE" && selectedCardSuit != "NONE") {
-          props.handleClose({ rank: selectedCardRank, suit: selectedCardSuit });
+        if (selectedCardRank != "-" && selectedCardSuit != "-") {
+          handleClose(`${selectedCardRank}${selectedCardSuit}`);
         } else {
-          props.handleClose(EMPTY_CARD);
+          handleClose(EMPTY_CARD);
         }
       }}
       title="Select a card"
     >
       <Group grow>
         <SimpleGrid cols={{ sm: 7, xs: 2 }} spacing="xs" verticalSpacing="xs">
-          {[
-            "2",
-            "3",
-            "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "9",
-            "T",
-            "J",
-            "Q",
-            "K",
-            "A",
-          ].map((rank) => (
+          {["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"].map((rank) => (
             <RankButton
               key={rank}
               rank={rank as CardRank}
@@ -79,30 +75,34 @@ export default function ImprovedCardPicker(props: {
             />
           ))}
           <RankButton
-            rank="NONE"
+            rank="-"
             selectedCardRank={selectedCardRank}
             selectedCardSuit={selectedCardSuit}
             setSelectedCardRank={setSelectedCardRank}
             setSelectedCardSuit={setSelectedCardSuit}
             label={<IconBan size="1.25rem" stroke="0.2rem" />}
-            onClick={() => props.handleClose(EMPTY_CARD)}
+            onClick={() => handleClose(EMPTY_CARD)}
           />
         </SimpleGrid>
       </Group>
-      <Divider my="md" />
-      <Group justify="center" grow>
-        <SimpleGrid cols={{ sm: 4, xs: 2 }} spacing="xs" verticalSpacing="xs">
-          {["hearts", "diamonds", "clubs", "spades"].map((suit) => (
-            <SuitButton
-              key={suit}
-              suit={suit as CardSuit}
-              selectedCardRank={selectedCardRank}
-              selectedCardSuit={selectedCardSuit}
-              setSelectedCardSuit={setSelectedCardSuit}
-            />
-          ))}
-        </SimpleGrid>
-      </Group>
+      {props.hideSuit ? null : (
+        <>
+          <Divider my="md" />
+          <Group justify="center" grow>
+            <SimpleGrid cols={{ sm: 4, xs: 2 }} spacing="xs" verticalSpacing="xs">
+              {(["h", "s", "d", "c"] as CardSuit[]).map((suit) => (
+                <SuitButton
+                  key={suit}
+                  suit={suit}
+                  selectedCardRank={selectedCardRank}
+                  selectedCardSuit={selectedCardSuit}
+                  setSelectedCardSuit={setSelectedCardSuit}
+                />
+              ))}
+            </SimpleGrid>
+          </Group>
+        </>
+      )}
     </Modal>
   );
 }
@@ -116,23 +116,24 @@ function RankButton(props: {
   label?: React.ReactNode;
   onClick?: () => void;
 }) {
-  const usedCards = useRecoilValue(USED_CARDS);
+  //   const usedCards = useRecoilValue(USED_CARDS);
   const theme = useMantineTheme();
 
   const [selected, setSelected] = useState(false);
   const [disabled, setDisabled] = useState(
-    usedCards.some(
-      (card) => card.rank == props.rank && card.suit == props.selectedCardSuit
-    )
+    false
+    // usedCards.some(
+    //   (card) => card.rank == props.rank && card.suit == props.selectedCardSuit
+    // )
   );
   useEffect(() => {
     setSelected(props.selectedCardRank == props.rank);
-    setDisabled(
-      usedCards.some(
-        (card) => card.rank == props.rank && card.suit == props.selectedCardSuit
-      )
-    );
-  }, [props.selectedCardSuit, props.selectedCardRank, usedCards]);
+    // setDisabled(
+    //   usedCards.some(
+    //     (card) => card.rank == props.rank && card.suit == props.selectedCardSuit
+    //   )
+    // );
+  }, [props.selectedCardSuit, props.selectedCardRank /* usedCards */]);
 
   return (
     <Button
@@ -169,26 +170,26 @@ function SuitButton(props: {
   selectedCardSuit: CardSuit;
   setSelectedCardSuit: (suit: CardSuit) => void;
 }) {
-  const usedCards = useRecoilValue(USED_CARDS);
+  //   const usedCards = useRecoilValue(USED_CARDS);
   const theme = useMantineTheme();
 
   const [selected, setSelected] = useState(false);
   const [disabled, setDisabled] = useState(
-    usedCards.some(
+    false
+    /*usedCards.some(
       (card) => card.rank == props.selectedCardRank && card.suit == props.suit
-    )
+    )*/
   );
   useEffect(() => {
     setSelected(props.selectedCardSuit == props.suit);
-    setDisabled(
-      usedCards.some(
-        (card) => card.rank == props.selectedCardRank && card.suit == props.suit
-      )
-    );
-  }, [props.selectedCardSuit, props.selectedCardRank, usedCards]);
+    // setDisabled(
+    //   usedCards.some(
+    //     (card) => card.rank == props.selectedCardRank && card.suit == props.suit
+    //   )
+    // );
+  }, [props.selectedCardSuit, props.selectedCardRank /*usedCards*/]);
 
-  let color: "red" | "gray" =
-    props.suit == "hearts" || props.suit == "diamonds" ? "red" : "gray";
+  let color: "red" | "gray" = props.suit == "h" || props.suit == "d" ? "red" : "gray";
 
   let iconColor;
   if (color == "red") {
@@ -218,11 +219,7 @@ function SuitButton(props: {
       onClick={() => {
         props.setSelectedCardSuit(props.suit);
       }}
-      color={
-        props.suit == "hearts" || props.suit == "diamonds"
-          ? "#ff2626"
-          : "gray.0"
-      }
+      color={props.suit == "h" || props.suit == "d" ? "#ff2626" : "gray.0"}
       styles={{
         icon: {
           color: `${iconColor}`,

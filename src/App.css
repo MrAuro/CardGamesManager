@@ -6,4 +6,5 @@ img.twemoji {
 
 body {
   overflow-y: scroll; /* Show scrollbars */
+  min-width: 661px;
 }

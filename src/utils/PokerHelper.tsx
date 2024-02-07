@@ -32,6 +32,8 @@ type Player = {
   name: string;
   cards: [Card, Card];
   balance: number;
+  position: PlayerPosition;
+  isPlaying: boolean;
 };
 
 type PlayerPosition = "sb" | "bb" | "btn" | "NONE";
@@ -191,6 +193,30 @@ const rankingToName = (rank: string): string => {
   }
 };
 
+const getNextTurnIndex = (
+  players: Player[],
+  currentPlayerIndex: number,
+  dealerIndex: number,
+  excludePlayers: Player[] = []
+): number => {
+  let res = -1;
+  for (
+    let i = currentPlayerIndex + 1;
+    i < players.length * 2 + dealerIndex + 1;
+    i++
+  ) {
+    let index = i % players.length;
+    if (players[index].isPlaying && !excludePlayers.includes(players[index])) {
+      res = index;
+      break;
+    }
+  }
+
+  console.log("getNextTurnIndex", res);
+
+  return res;
+};
+
 const EMPTY_CARD: Card = { suit: "NONE", rank: "NONE" };
 
 export {
@@ -203,6 +229,7 @@ export {
   isCardEmpty,
   suitAbbreviationToName,
   rankingToName,
+  getNextTurnIndex,
   EMPTY_CARD,
 };
 export type {

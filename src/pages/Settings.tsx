@@ -6,27 +6,38 @@ import {
   Input,
   InputWrapper,
   NumberInput,
+  Text,
   Slider,
   useMantineColorScheme,
+  Alert,
+  Title,
   // useMantineTheme,
 } from "@mantine/core";
 import {
+  IconAlertCircle,
+  IconCode,
+  IconCodeOff,
   IconCurrencyDollar,
   IconDatabase,
+  IconKeyboard,
+  IconKeyboardOff,
   IconMoon,
   IconPokerChip,
   IconSun,
 } from "@tabler/icons-react";
 import { useRecoilState } from "recoil";
 import { STATE, State } from "../App";
+import { modals } from "@mantine/modals";
+import { useCustomRecoilState } from "../utils/RecoilHelper";
 
 export default function Settings() {
-  const [state, setState] = useRecoilState<State>(STATE);
+  const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
   // const theme = useMantineTheme();
   const { setColorScheme, colorScheme } = useMantineColorScheme();
 
   return (
     <Container>
+      <Title order={2}>Interface</Title>
       <Input.Wrapper label="UI Scale" mb="xl">
         <Slider
           defaultValue={state.scale * 100}
@@ -63,11 +74,10 @@ export default function Settings() {
             },
           ]}
           onChange={(value) => {
-            setState({ ...state, scale: (value / 100) as 1 });
+            modifyState({ scale: (value / 100) as 1 });
           }}
         />
       </Input.Wrapper>
-      <Divider my="sm" />
       <InputWrapper label="Color Scheme" mb="md">
         <Button.Group>
           <Button
@@ -86,31 +96,105 @@ export default function Settings() {
           </Button>
         </Button.Group>
       </InputWrapper>
+      <InputWrapper label="Show Debug Info" mb="md">
+        <Button.Group>
+          <Button
+            variant={state.showDebugInfo ? "filled" : "default"}
+            leftSection={<IconCode />}
+            onClick={() => {
+              modifyState({ showDebugInfo: true });
+            }}
+          >
+            On
+          </Button>
+          <Button
+            variant={!state.showDebugInfo ? "filled" : "default"}
+            leftSection={<IconCodeOff />}
+            onClick={() => {
+              modifyState({ showDebugInfo: false });
+            }}
+          >
+            Off
+          </Button>
+        </Button.Group>
+      </InputWrapper>
+      <InputWrapper label="Use Keyboard Shortcuts" mb="md">
+        <Button.Group>
+          <Button
+            variant={state.useKeybindings ? "filled" : "default"}
+            leftSection={<IconKeyboard />}
+            onClick={() => {
+              modifyState({ useKeybindings: true });
+            }}
+          >
+            On
+          </Button>
+          <Button
+            variant={!state.useKeybindings ? "filled" : "default"}
+            leftSection={<IconKeyboardOff />}
+            onClick={() => {
+              modifyState({ useKeybindings: false });
+            }}
+          >
+            Off
+          </Button>
+        </Button.Group>
+      </InputWrapper>
       <Divider my="sm" />
+      <Title order={2}>Poker</Title>
+      {state.currentGamePlaying != "NONE" && (
+        <Alert
+          variant="light"
+          color="red"
+          title="Game in progress"
+          icon={<IconAlertCircle />}
+          mb="sm"
+        >
+          You cannot change bet settings while a game is in progress.
+        </Alert>
+      )}
       <InputWrapper label="Forced Bet Type" mb="xs">
         <Button.Group>
           <Button
-            variant={state.forcedBetType == "BLINDS" ? "filled" : "default"}
+            variant={state.poker.forcedBetType == "BLINDS" ? "filled" : "default"}
             leftSection={<IconDatabase />}
+            disabled={state.currentGamePlaying != "NONE"}
             onClick={() => {
-              setState({ ...state, forcedBetType: "BLINDS" });
+              modifyState({
+                poker: { ...state.poker, forcedBetType: "BLINDS" },
+              });
             }}
           >
             Blinds
           </Button>
           <Button
-            variant={state.forcedBetType == "ANTE" ? "filled" : "default"}
+            variant={state.poker.forcedBetType == "ANTE" ? "filled" : "default"}
             leftSection={<IconPokerChip />}
+            disabled={state.currentGamePlaying != "NONE"}
             onClick={() => {
-              setState({ ...state, forcedBetType: "ANTE" });
+              modifyState({
+                poker: { ...state.poker, forcedBetType: "ANTE" },
+              });
             }}
           >
             Ante
           </Button>
+          <Button
+            variant={state.poker.forcedBetType == "BLINDS+ANTE" ? "filled" : "default"}
+            leftSection={<IconPokerChip />}
+            disabled={state.currentGamePlaying != "NONE"}
+            onClick={() => {
+              modifyState({
+                poker: { ...state.poker, forcedBetType: "BLINDS+ANTE" },
+              });
+            }}
+          >
+            Blinds & Ante
+          </Button>
         </Button.Group>
       </InputWrapper>
       <Grid gutter="xs">
-        {state.forcedBetType == "BLINDS" ? (
+        {(state.poker.forcedBetType == "BLINDS" || state.poker.forcedBetType == "BLINDS+ANTE") && (
           <>
             <Grid.Col span={{ base: 12, sm: 2 }}>
               <NumberInput
@@ -122,9 +206,14 @@ export default function Settings() {
                 thousandSeparator=","
                 leftSection={<IconCurrencyDollar />}
                 placeholder="0.00"
-                value={state.bigBlind}
+                disabled={state.currentGamePlaying != "NONE"}
+                value={state.poker.bigBlind}
                 onChange={(value) => {
-                  setState({ ...state, bigBlind: parseInt(`${value}`) });
+                  modifyState({
+                    poker: {
+                      bigBlind: parseFloat(`${value}`),
+                    },
+                  });
                 }}
               />
             </Grid.Col>
@@ -138,14 +227,20 @@ export default function Settings() {
                 thousandSeparator=","
                 leftSection={<IconCurrencyDollar />}
                 placeholder="0.00"
-                value={state.littleBlind}
+                disabled={state.currentGamePlaying != "NONE"}
+                value={state.poker.smallBlind}
                 onChange={(value) => {
-                  setState({ ...state, littleBlind: parseInt(`${value}`) });
+                  modifyState({
+                    poker: {
+                      smallBlind: parseFloat(`${value}`),
+                    },
+                  });
                 }}
               />
             </Grid.Col>
           </>
-        ) : (
+        )}
+        {(state.poker.forcedBetType == "ANTE" || state.poker.forcedBetType == "BLINDS+ANTE") && (
           <>
             <Grid.Col span={{ base: 12, sm: 4 }}>
               <NumberInput
@@ -157,9 +252,10 @@ export default function Settings() {
                 thousandSeparator=","
                 leftSection={<IconCurrencyDollar />}
                 placeholder="0.00"
-                value={state.ante}
+                disabled={state.currentGamePlaying != "NONE"}
+                value={state.poker.ante}
                 onChange={(value) => {
-                  setState({ ...state, ante: parseInt(`${value}`) });
+                  modifyState({ poker: { ante: parseFloat(`${value}`) } });
                 }}
               />
             </Grid.Col>
@@ -170,11 +266,25 @@ export default function Settings() {
       <Button
         color="red"
         onClick={() => {
-          localStorage.clear();
-          window.location.reload();
+          modals.openConfirmModal({
+            title: "Reset everything",
+            children: (
+              <Text size="sm">
+                Are you sure you want to reset everything? This will clear all games, settings, and
+                player data.
+              </Text>
+            ),
+            labels: { confirm: "Reset everything", cancel: "Cancel" },
+            confirmProps: { color: "red" },
+            onCancel: () => {},
+            onConfirm: () => {
+              localStorage.clear();
+              window.location.reload();
+            },
+          });
         }}
       >
-        Reset Game
+        Reset Everything
       </Button>
     </Container>
   );

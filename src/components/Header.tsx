@@ -1,43 +1,54 @@
-import { Container, Group, Tabs, Title, useMantineTheme } from "@mantine/core";
+import { Container, Group, Tabs, Text, rem } from "@mantine/core";
+import { useElementSize } from "@mantine/hooks";
 import { useState } from "react";
-import { useRecoilState } from "recoil";
-import { ROUTES, STATE } from "../App";
-import { useMediaQuery } from "@mantine/hooks";
+import { ROUTES, STATE, State } from "../App";
+import { useCustomRecoilState } from "../utils/RecoilHelper";
 
 export default function Header() {
-  const [state, setState] = useRecoilState(STATE);
+  const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
   const [active, setActive] = useState(state.activeTab);
-  const theme = useMantineTheme();
 
-  const size = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
-
-  const items = ROUTES.map((link) => (
+  const itemsLabel = ROUTES.map((link) => (
     <Tabs.Tab
       value={link.link}
       data-active={active === link.link || undefined}
       leftSection={link.icon}
       key={link.link}
+      fw={active === link.link ? 500 : "normal"}
       onClick={(event) => {
         event.preventDefault();
-        setState({ ...state, activeTab: link.link });
-        setActive(link.link);
+        modifyState({ activeTab: link.link as any });
+        setActive(link.link as any);
       }}
     >
       {link.label}
     </Tabs.Tab>
   ));
 
+  const itemsIcon = ROUTES.map((link) => (
+    <Tabs.Tab
+      value={link.link}
+      data-active={active === link.link || undefined}
+      leftSection={link.icon}
+      key={link.link}
+      fw={active === link.link ? 500 : "normal"}
+      onClick={(event) => {
+        event.preventDefault();
+        modifyState({ activeTab: link.link as any });
+        setActive(link.link as any);
+      }}
+    />
+  ));
+
   return (
     <header>
       <Container size="md" mt="sm">
-        <Group gap={5} justify={size ? "center" : "space-between"}>
-          {!size && (
-            <Title order={1}>
-              {ROUTES.find((r) => r.link === active)?.label}
-            </Title>
-          )}
-          <Tabs variant="pills">
-            <Tabs.List>{items}</Tabs.List>
+        <Group gap={5} justify={false ? "center" : "space-between"}>
+          <Text size={rem(26)} fw="bold">
+            {ROUTES.find((r) => r.link === active)?.label}
+          </Text>
+          <Tabs variant="pills" radius="xl">
+            <Tabs.List>{false ? itemsIcon : itemsLabel}</Tabs.List>
           </Tabs>
         </Group>
       </Container>
