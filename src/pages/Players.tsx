@@ -202,7 +202,7 @@ const EditPlayerModal = (props: {
     let newPlayer: Player = {
       name: name,
       balance: balance,
-      id: crypto.randomUUID(),
+      id: props.playerId,
     };
 
     modifyState({
