@@ -14,6 +14,8 @@ import { Player } from "../types/Player";
 import { Card } from "../utils/CardHelper";
 import { useCustomRecoilState } from "../utils/RecoilHelper";
 import PlayingCard from "./PlayingCard";
+import { usePrevious, useScrollIntoView } from "@mantine/hooks";
+import { useEffect } from "react";
 
 export default function PlayerListItem(props: {
   player: Player;
@@ -37,10 +39,27 @@ export default function PlayerListItem(props: {
     return;
   }
 
+  const { scrollIntoView, targetRef } = useScrollIntoView<HTMLDivElement>({
+    offset: 60,
+    duration: 200,
+    easing: (t) => t * (2 - t),
+  });
+
+  const previousTurn = usePrevious(state.blackjack.turn);
+  useEffect(() => {
+    if (previousTurn !== state.blackjack.turn && state.blackjack.turn == props.player.id) {
+      console.log("Turn changed to", state.blackjack.turn);
+      scrollIntoView({
+        alignment: "end",
+      });
+    }
+  }, [state.blackjack.turn]);
+
   return (
     <Paper
       withBorder
       radius="md"
+      ref={targetRef}
       my={props.my ?? undefined}
       p="xs"
       styles={{

@@ -10,6 +10,8 @@ import {
 import { STATE, State } from "../App";
 import { useCustomRecoilState } from "../utils/RecoilHelper";
 import PlayingCard from "./PlayingCard";
+import { useScrollIntoView, usePrevious } from "@mantine/hooks";
+import { useEffect } from "react";
 
 export default function DealerItem(props: {
   my?: string;
@@ -21,12 +23,29 @@ export default function DealerItem(props: {
   const theme = useMantineTheme();
   const [state] = useCustomRecoilState<State>(STATE);
 
+  const { scrollIntoView, targetRef } = useScrollIntoView<HTMLDivElement>({
+    offset: 60,
+    duration: 200,
+    easing: (t) => t * (2 - t),
+  });
+
+  const previousTurn = usePrevious(state.blackjack.turn);
+  useEffect(() => {
+    if (previousTurn !== state.blackjack.turn && state.blackjack.turn == "DEALER") {
+      console.log("Turn changed to", state.blackjack.turn);
+      scrollIntoView({
+        alignment: "start",
+      });
+    }
+  }, [state.blackjack.turn]);
+
   return (
     <Paper
       withBorder
       radius="md"
       my={props.my ?? undefined}
       p="xs"
+      ref={targetRef}
       styles={{
         root: {
           // height: "3rem",
