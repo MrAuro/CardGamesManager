@@ -4,6 +4,7 @@ import {
   Group,
   Paper,
   Text,
+  rem,
   useMantineColorScheme,
   useMantineTheme,
 } from "@mantine/core";
@@ -55,6 +56,17 @@ export default function PlayerListItem(props: {
     }
   }, [state.blackjack.turn]);
 
+  let bjBet: string | null = null;
+  if (state.blackjack.state === "PLAYING") {
+    state.blackjack.players.forEach((player) => {
+      if (player.id === props.player.id) {
+        bjBet = (player.bet * (player.doubledDown ? 2 : 1)).toFixed(2);
+      }
+    });
+  } else {
+    bjBet = null;
+  }
+
   return (
     <Paper
       withBorder
@@ -103,6 +115,11 @@ export default function PlayerListItem(props: {
             >
               {props.nameOverride ?? props.player.name}
             </Text>
+            {bjBet && (
+              <Text size={rem(16)} fw={500}>
+                ${bjBet}
+              </Text>
+            )}
             <Text size="sm" c="dimmed">
               ${props.player.balance.toFixed(2)}
             </Text>

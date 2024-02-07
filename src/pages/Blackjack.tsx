@@ -14,6 +14,7 @@ import { Card, CardSuit, EMPTY_CARD, getRank, getRankInt } from "../utils/CardHe
 import { CardRank } from "../utils/PokerHelper";
 import { useCustomRecoilState } from "../utils/RecoilHelper";
 import { usePrevious, useScrollIntoView } from "@mantine/hooks";
+import { IconArrowsShuffle, IconPlayerPlay } from "@tabler/icons-react";
 
 export default function Blackjack() {
   const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
@@ -810,6 +811,30 @@ export default function Blackjack() {
             onClick={startGame}
           >
             Start Game {state.useKeybindings && " (Enter)"}
+          </Button>
+          <Button
+            mt="sm"
+            variant="light"
+            fullWidth
+            leftSection={<IconArrowsShuffle />}
+            disabled={
+              state.blackjack.state != "NONE" ||
+              (state.blackjack.seenCards.length == 0 &&
+                state.blackjack.pastGameSeenCards.length == 0)
+            }
+            onClick={() => {
+              setState({
+                ...state,
+                blackjack: {
+                  ...state.blackjack,
+                  runningCount: 0,
+                  seenCards: [],
+                  pastGameSeenCards: [],
+                },
+              });
+            }}
+          >
+            Shuffle Deck
           </Button>
           {state.blackjack.players.length <= 0 ? (
             <Text ta="center" c="red" size="sm" mt="xs">
