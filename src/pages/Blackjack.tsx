@@ -1,7 +1,7 @@
 import { Box, Button, Divider, Group, Paper, Text, Title, rem } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { GetRecommendedPlayerAction } from "blackjack-strategy";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { useRecoilState } from "recoil";
 import { STATE, State } from "../App";
 import CardPicker from "../components/CardPicker";
@@ -13,13 +13,16 @@ import { BlackjackPlayer, getCardTotal, getPlayer } from "../utils/BlackjackHelp
 import { Card, CardSuit, EMPTY_CARD, getRank, getRankInt } from "../utils/CardHelper";
 import { CardRank } from "../utils/PokerHelper";
 import { useCustomRecoilState } from "../utils/RecoilHelper";
+import { useScrollIntoView } from "@mantine/hooks";
 
 export default function Blackjack() {
   const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
   const [betErrors, setBetErrors] = useState<(string | null)[]>([]);
 
+  const [modalOpen, setModalOpen] = useState(false);
+
   useKeyPress((event) => {
-    if (!state.useKeybindings) return;
+    if (!state.useKeybindings || modalOpen) return;
 
     let currentTurnPlayer = state.blackjack.players.find((p) => p.id === state.blackjack.turn);
     let val;
@@ -67,50 +70,24 @@ export default function Blackjack() {
 
       case "Enter":
         {
-          if (state.blackjack.state == "PLAYING") {
+          if (state.blackjack.state == "PLAYING" && state.activeTab == "BLACKJACK") {
             // Stands
             if (state.blackjack.turn !== "DEALER") nextTurn();
 
-            if (state.blackjack.turn === "DEALER" && state.blackjack.firstRound) {
-              modifyState({
-                blackjack: {
-                  turn: state.blackjack.players[0].id,
-                  firstRound: false,
-                },
-              });
+            if (state.blackjack.turn === "DEALER") {
+              if (state.blackjack.firstRound) {
+                modifyState({
+                  blackjack: {
+                    turn: state.blackjack.players[0].id,
+                    firstRound: false,
+                  },
+                });
+              } else {
+                payoutPlayers();
+              }
             }
           } else if (state.blackjack.state === "NONE") {
-            let newBasePlayers = [...state.players];
-            for (let player of state.blackjack.players) {
-              let basePlayer: Player = { ...getPlayer(player.id, newBasePlayers) };
-              if (basePlayer != null) {
-                console.log("interfacing with", basePlayer, player.bet);
-                basePlayer.balance -= player.bet;
-              }
-
-              newBasePlayers = newBasePlayers.map((p) => {
-                if (p.id === basePlayer.id) {
-                  return basePlayer;
-                }
-                return p;
-              });
-            }
-
-            modifyState({
-              players: newBasePlayers,
-              blackjack: {
-                state: "PLAYING",
-                turn: "Dealer",
-                dealerCards: [EMPTY_CARD, EMPTY_CARD],
-                firstRound: true,
-                players: state.blackjack.players.map((p) => {
-                  return {
-                    ...p,
-                    cards: [EMPTY_CARD, EMPTY_CARD],
-                  };
-                }),
-              },
-            });
+            startGame();
           }
         }
         break;
@@ -168,6 +145,29 @@ export default function Blackjack() {
           }
         }
         break;
+
+      case "-":
+        {
+          if (
+            currentTurnPlayer != null &&
+            !(
+              currentTurnPlayer.doubledDown ||
+              currentTurnPlayer.cards.filter((card) => card !== EMPTY_CARD).length !== 2 ||
+              getRank(currentTurnPlayer.cards[0]) !== getRank(currentTurnPlayer.cards[1]) ||
+              currentTurnPlayer.split ||
+              currentTurnPlayer.bet > getPlayer(currentTurnPlayer.id, state.players).balance
+            )
+          ) {
+            console.log("KBD Playing can split, splitting");
+            playerSplit(currentTurnPlayer);
+          }
+        }
+        break;
+
+      case "*":
+        {
+        }
+        break;
     }
 
     if (val != null) {
@@ -209,6 +209,8 @@ export default function Blackjack() {
         modifyState({
           blackjack: {
             dealerCards: dealerCards,
+            turn: state.blackjack.firstRound ? state.blackjack.players[0].id : "DEALER",
+            firstRound: false,
           },
         });
       }
@@ -218,6 +220,259 @@ export default function Blackjack() {
   const [showCardPicker, setShowCardPicker] = useState(false);
   const [cardIndex, setCardIndex] = useState(0);
   const [cardPlayer, setCardPlayer] = useState("");
+
+  const payoutPlayers = () => {
+    let dealerTotal = getCardTotal(state.blackjack.dealerCards);
+    let players = state.blackjack.players;
+    let newBasePlayers = [...state.players];
+
+    let resultStrings: string[] = [];
+
+    for (let player of players) {
+      let playerTotal = getCardTotal(player.cards);
+      let basePlayer: Player = {
+        ...getPlayer(player.splitFrom || player.id, newBasePlayers),
+      };
+      let payout = 0;
+      let result: "BLACKJACK" | "WIN" | "LOSE" | "PUSH" = "LOSE";
+
+      if (playerTotal.total > 21) {
+        result = "LOSE";
+      } else if (dealerTotal.total == playerTotal.total) {
+        result = "PUSH";
+      } else if (playerTotal.total == 21) {
+        result = "BLACKJACK";
+      } else if (dealerTotal.total > 21) {
+        result = "WIN";
+      } else if (dealerTotal.total > playerTotal.total) {
+        result = "LOSE";
+      } else if (dealerTotal.total < playerTotal.total) {
+        result = "WIN";
+      }
+
+      let bet = player.doubledDown ? player.bet * 2 : player.bet;
+      if (result == "BLACKJACK") {
+        payout = bet * 1.5;
+      } else if (result == "WIN") {
+        payout = bet;
+      } else if (result == "PUSH") {
+        payout = bet;
+      }
+
+      if (result == "WIN" || result == "BLACKJACK") {
+        basePlayer.balance += payout; // Add the bet back
+      }
+
+      basePlayer.balance += payout;
+      switch (result) {
+        case "BLACKJACK":
+          resultStrings.push(`${basePlayer.name} got blackjack and won $${payout.toFixed(2)}`);
+          break;
+
+        case "WIN":
+          resultStrings.push(`${basePlayer.name} won $${payout.toFixed(2)}`);
+          break;
+
+        case "LOSE":
+          resultStrings.push(`${basePlayer.name} lost $${bet.toFixed(2)}`);
+          break;
+
+        case "PUSH":
+          resultStrings.push(`${basePlayer.name} pushed`);
+          break;
+      }
+
+      newBasePlayers = newBasePlayers.map((p) => {
+        if (p.id === basePlayer.id) {
+          return basePlayer;
+        }
+        return p;
+      });
+    }
+
+    setModalOpen(true);
+    modals.open({
+      title: "Payouts",
+      onClose: () => {
+        setModalOpen(false);
+      },
+      children: (
+        <>
+          {resultStrings.map((str) => {
+            return <Text>{str}</Text>;
+          })}
+        </>
+      ),
+    });
+
+    setState({
+      ...state,
+      players: newBasePlayers,
+      blackjack: {
+        state: "NONE",
+        turn: "",
+        dealerCards: [EMPTY_CARD, EMPTY_CARD],
+        firstRound: true,
+        players: state.blackjack.players
+          .filter((p) => p.splitFrom == null)
+          .map((p) => {
+            return {
+              ...p,
+              cards: [EMPTY_CARD, EMPTY_CARD],
+              doubledDown: false,
+              split: false,
+              handPartialResult: undefined,
+              handResult: undefined,
+            };
+          }),
+      },
+    });
+  };
+
+  const refundAndEndGame = () => {
+    // Game has been canceled. Refund players all their bets
+    let players = state.blackjack.players;
+    let newBasePlayers = [...state.players];
+
+    let resultStrings: string[] = [];
+
+    for (let player of players) {
+      let basePlayer: Player = {
+        ...getPlayer(player.splitFrom || player.id, newBasePlayers),
+      };
+      basePlayer.balance += player.bet;
+      resultStrings.push(`${basePlayer.name} was refunded $${player.bet.toFixed(2)}`);
+
+      newBasePlayers = newBasePlayers.map((p) => {
+        if (p.id === basePlayer.id) {
+          return basePlayer;
+        }
+        return p;
+      });
+    }
+
+    setModalOpen(true);
+    modals.open({
+      title: "Refunds",
+      onClose: () => {
+        setModalOpen(false);
+      },
+      children: (
+        <>
+          {resultStrings.map((str) => {
+            return <Text>{str}</Text>;
+          })}
+        </>
+      ),
+    });
+
+    setState({
+      ...state,
+      players: newBasePlayers,
+      blackjack: {
+        state: "NONE",
+        turn: "",
+        dealerCards: [EMPTY_CARD, EMPTY_CARD],
+        firstRound: true,
+        players: state.blackjack.players
+          .filter((p) => p.splitFrom == null)
+          .map((p) => {
+            return {
+              ...p,
+              cards: [EMPTY_CARD, EMPTY_CARD],
+              doubledDown: false,
+              split: false,
+              handPartialResult: undefined,
+              handResult: undefined,
+            };
+          }),
+      },
+    });
+  };
+
+  const startGame = () => {
+    let newBasePlayers = [...state.players];
+    for (let player of state.blackjack.players) {
+      let basePlayer: Player = { ...getPlayer(player.id, newBasePlayers) };
+      if (basePlayer != null) {
+        console.log("interfacing with", basePlayer, player.bet);
+        basePlayer.balance -= player.bet;
+      }
+
+      newBasePlayers = newBasePlayers.map((p) => {
+        if (p.id === basePlayer.id) {
+          return basePlayer;
+        }
+        return p;
+      });
+    }
+
+    modifyState({
+      players: newBasePlayers,
+      blackjack: {
+        state: "PLAYING",
+        turn: "DEALER",
+        dealerCards: [EMPTY_CARD, EMPTY_CARD],
+        firstRound: true,
+        players: state.blackjack.players.map((p) => {
+          return {
+            ...p,
+            cards: [EMPTY_CARD, EMPTY_CARD],
+          };
+        }),
+      },
+    });
+  };
+
+  const playerSplit = (player: BlackjackPlayer) => {
+    let newPlayer: BlackjackPlayer = {
+      displayName: (state.players.find((p) => p.id === player.id)?.name || "Unknown") + " (split)",
+      id: crypto.randomUUID(),
+      bet: player.bet,
+      cards: [player.cards[1], EMPTY_CARD],
+      split: true, // We dont allow splitting twice because I don't want to program that
+      doubledDown: false,
+      splitFrom: player.id,
+    };
+
+    // the new player goes after the current player
+    let newPlayers = [...state.blackjack.players];
+
+    // remove the other card from the original player
+    newPlayers = newPlayers.map((p) => {
+      if (p.id === player.id) {
+        return {
+          ...p,
+          cards: [player.cards[0], EMPTY_CARD],
+          split: true,
+        };
+      }
+      return p;
+    });
+
+    newPlayers.splice(newPlayers.findIndex((p) => p.id === player.id) + 1, 0, newPlayer);
+
+    let newBasePlayers = [...state.players];
+    let basePlayer: Player = { ...getPlayer(player.id, newBasePlayers) };
+    if (basePlayer != null) {
+      basePlayer.balance -= player.bet;
+    }
+
+    newBasePlayers = newBasePlayers.map((p) => {
+      if (p.id === basePlayer.id) {
+        return basePlayer;
+      }
+      return p;
+    });
+
+    console.log("splitting", player.id, "into", player.id, "and", newPlayer.id);
+    modifyState({
+      players: newBasePlayers,
+      blackjack: {
+        players: newPlayers,
+      },
+    });
+  };
 
   const nextTurn = () => {
     let players = state.blackjack.players;
@@ -353,40 +608,9 @@ export default function Blackjack() {
             disabled={
               state.blackjack.players.length <= 0 || betErrors.filter((p) => p !== null).length > 0
             }
-            onClick={() => {
-              let newBasePlayers = [...state.players];
-              for (let player of state.blackjack.players) {
-                let basePlayer: Player = { ...getPlayer(player.id, newBasePlayers) };
-                if (basePlayer != null) {
-                  console.log("interfacing with", basePlayer, player.bet);
-                  basePlayer.balance -= player.bet;
-                }
-
-                newBasePlayers = newBasePlayers.map((p) => {
-                  if (p.id === basePlayer.id) {
-                    return basePlayer;
-                  }
-                  return p;
-                });
-              }
-
-              modifyState({
-                players: newBasePlayers,
-                blackjack: {
-                  state: "PLAYING",
-                  turn: "DEALER",
-                  dealerCards: [EMPTY_CARD, EMPTY_CARD],
-                  players: state.blackjack.players.map((p) => {
-                    return {
-                      ...p,
-                      cards: [EMPTY_CARD, EMPTY_CARD],
-                    };
-                  }),
-                },
-              });
-            }}
+            onClick={startGame}
           >
-            Start Game
+            Start Game {state.useKeybindings && " (Enter)"}
           </Button>
           {state.blackjack.players.length <= 0 ? (
             <Text ta="center" c="red" size="sm" mt="xs">
@@ -536,9 +760,11 @@ export default function Blackjack() {
                     }}
                   >
                     Hit
+                    {state.useKeybindings && " (0-9)"}
                   </Button>
                   <Button fullWidth size="sm" color="green" disabled={!isTurn} onClick={nextTurn}>
                     Stand
+                    {state.useKeybindings && " (Enter)"}
                   </Button>
                   <Button
                     fullWidth
@@ -564,7 +790,7 @@ export default function Blackjack() {
                       });
                     }}
                   >
-                    Double
+                    Double {state.useKeybindings && " (*)"}
                   </Button>
                   <Button
                     fullWidth
@@ -579,61 +805,10 @@ export default function Blackjack() {
                       player.bet > getPlayer(player.id, state.players).balance
                     }
                     onClick={() => {
-                      let newPlayer: BlackjackPlayer = {
-                        displayName:
-                          (state.players.find((p) => p.id === player.id)?.name || "Unknown") +
-                          " (split)",
-                        id: crypto.randomUUID(),
-                        bet: player.bet,
-                        cards: [player.cards[1], EMPTY_CARD],
-                        split: true, // We dont allow splitting twice because I don't want to program that
-                        doubledDown: false,
-                        splitFrom: player.id,
-                      };
-
-                      // the new player goes after the current player
-                      let newPlayers = [...state.blackjack.players];
-
-                      // remove the other card from the original player
-                      newPlayers = newPlayers.map((p) => {
-                        if (p.id === player.id) {
-                          return {
-                            ...p,
-                            cards: [player.cards[0], EMPTY_CARD],
-                            split: true,
-                          };
-                        }
-                        return p;
-                      });
-
-                      newPlayers.splice(
-                        newPlayers.findIndex((p) => p.id === player.id) + 1,
-                        0,
-                        newPlayer
-                      );
-
-                      let newBasePlayers = [...state.players];
-                      let basePlayer: Player = { ...getPlayer(player.id, newBasePlayers) };
-                      if (basePlayer != null) {
-                        basePlayer.balance -= player.bet;
-                      }
-
-                      newBasePlayers = newBasePlayers.map((p) => {
-                        if (p.id === basePlayer.id) {
-                          return basePlayer;
-                        }
-                        return p;
-                      });
-
-                      modifyState({
-                        players: newBasePlayers,
-                        blackjack: {
-                          players: newPlayers,
-                        },
-                      });
+                      playerSplit(player);
                     }}
                   >
-                    Split
+                    Split {state.useKeybindings && " (-)"}
                   </Button>
                   <Button
                     fullWidth
@@ -644,6 +819,7 @@ export default function Blackjack() {
                       modifyState({
                         blackjack: {
                           turn: player.id,
+                          firstRound: false,
                         },
                       });
                     }}
@@ -744,6 +920,7 @@ export default function Blackjack() {
                   fullWidth
                   size="sm"
                   color="blue"
+                  disabled={state.blackjack.turn !== "DEALER"}
                   onClick={() => {
                     modifyState({
                       blackjack: {
@@ -753,7 +930,7 @@ export default function Blackjack() {
                     });
                   }}
                 >
-                  Next Turn
+                  Next Turn {state.useKeybindings && " (0-9 or Enter)"}
                 </Button>
               ) : (
                 <Button
@@ -769,124 +946,35 @@ export default function Blackjack() {
                     });
                   }}
                 >
-                  Add Card
+                  Add Card {state.useKeybindings && " (0-9)"}
                 </Button>
               )}
 
               <Button
                 fullWidth
                 size="sm"
-                color="green"
-                disabled={state.blackjack.turn !== "DEALER"}
+                color="red"
+                variant={state.blackjack.turn === "DEALER" ? "filled" : "light"}
                 onClick={() => {
-                  // Payouts
-                  let dealerTotal = getCardTotal(state.blackjack.dealerCards);
-                  let players = state.blackjack.players;
-                  let newBasePlayers = [...state.players];
-
-                  let resultStrings: string[] = [];
-
-                  for (let player of players) {
-                    let playerTotal = getCardTotal(player.cards);
-                    let basePlayer: Player = {
-                      ...getPlayer(player.splitFrom || player.id, newBasePlayers),
-                    };
-                    let payout = 0;
-                    let result: "BLACKJACK" | "WIN" | "LOSE" | "PUSH" = "LOSE";
-
-                    if (playerTotal.total > 21) {
-                      result = "LOSE";
-                    } else if (dealerTotal.total == playerTotal.total) {
-                      result = "PUSH";
-                    } else if (playerTotal.total == 21) {
-                      result = "BLACKJACK";
-                    } else if (dealerTotal.total > 21) {
-                      result = "WIN";
-                    } else if (dealerTotal.total > playerTotal.total) {
-                      result = "LOSE";
-                    } else if (dealerTotal.total < playerTotal.total) {
-                      result = "WIN";
-                    }
-
-                    let bet = player.doubledDown ? player.bet * 2 : player.bet;
-                    if (result == "BLACKJACK") {
-                      payout = bet * 1.5;
-                    } else if (result == "WIN") {
-                      payout = bet;
-                    } else if (result == "PUSH") {
-                      payout = bet;
-                    }
-
-                    if (result == "WIN" || result == "BLACKJACK") {
-                      basePlayer.balance += payout; // Add the bet back
-                    }
-
-                    basePlayer.balance += payout;
-                    switch (result) {
-                      case "BLACKJACK":
-                        resultStrings.push(
-                          `${basePlayer.name} got blackjack and won $${payout.toFixed(2)}`
-                        );
-                        break;
-
-                      case "WIN":
-                        resultStrings.push(`${basePlayer.name} won $${payout.toFixed(2)}`);
-                        break;
-
-                      case "LOSE":
-                        resultStrings.push(`${basePlayer.name} lost $${bet.toFixed(2)}`);
-                        break;
-
-                      case "PUSH":
-                        resultStrings.push(`${basePlayer.name} pushed`);
-                        break;
-                    }
-
-                    newBasePlayers = newBasePlayers.map((p) => {
-                      if (p.id === basePlayer.id) {
-                        return basePlayer;
-                      }
-                      return p;
-                    });
-                  }
-
-                  modals.open({
-                    title: "Payouts",
-                    children: (
-                      <>
-                        {resultStrings.map((str) => {
-                          return <Text>{str}</Text>;
-                        })}
-                      </>
-                    ),
-                  });
-
-                  setState({
-                    ...state,
-                    players: newBasePlayers,
-                    blackjack: {
-                      state: "NONE",
-                      turn: "",
-                      dealerCards: [EMPTY_CARD, EMPTY_CARD],
-                      firstRound: true,
-                      players: state.blackjack.players
-                        .filter((p) => p.splitFrom == null)
-                        .map((p) => {
-                          return {
-                            ...p,
-                            cards: [EMPTY_CARD, EMPTY_CARD],
-                            doubledDown: false,
-                            split: false,
-                            handPartialResult: undefined,
-                            handResult: undefined,
-                          };
-                        }),
-                    },
-                  });
+                  refundAndEndGame();
                 }}
               >
-                Payout and End Game
+                Refund & Cancel
               </Button>
+              {state.blackjack.turn === "DEALER" && !state.blackjack.firstRound && (
+                <Button
+                  fullWidth
+                  size="sm"
+                  color="green"
+                  disabled={state.blackjack.turn !== "DEALER"}
+                  onClick={() => {
+                    // Payouts
+                    payoutPlayers();
+                  }}
+                >
+                  Payout {state.useKeybindings && " (Enter)"}
+                </Button>
+              )}
               <Button
                 fullWidth
                 size="sm"
@@ -960,3 +1048,11 @@ function useKeyPress(callback: (event: KeyboardEvent) => void) {
     };
   }, [state]);
 }
+
+export const usePrevious = <T extends unknown>(value: T): T | undefined => {
+  const ref = useRef<T>();
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
+};

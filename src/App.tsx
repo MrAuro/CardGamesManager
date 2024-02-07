@@ -211,7 +211,7 @@ function App() {
               });
 
               let playersToAdd = [];
-              for (let i = 0; i < 5; i++) {
+              for (let i = 0; i < 10; i++) {
                 let randomIndex = Math.floor(Math.random() * players.length);
                 playersToAdd.push(players[randomIndex]);
                 players.splice(randomIndex, 1);
