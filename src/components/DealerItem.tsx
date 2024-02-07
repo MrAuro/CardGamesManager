@@ -84,7 +84,7 @@ export default function DealerItem(props: {
               <HoverCard.Dropdown>
                 <Text>
                   Seen Cards:{" "}
-                  {[...state.blackjack.seenCards, ...state.blackjack.pastGameSeenCards].length}/
+                  {[...state?.blackjack?.seenCards, ...state?.blackjack?.pastGameSeenCards].length}/
                   {state.blackjack.deckCount * 52}
                 </Text>
                 <Text>
@@ -92,7 +92,8 @@ export default function DealerItem(props: {
                   {(
                     state.blackjack.runningCount /
                     ((state.blackjack.deckCount * 52 -
-                      [...state.blackjack.seenCards, ...state.blackjack.pastGameSeenCards].length) /
+                      [...state?.blackjack?.seenCards, ...state?.blackjack?.pastGameSeenCards]
+                        .length) /
                       52)
                   ).toFixed(1)}
                 </Text>

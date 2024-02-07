@@ -28,7 +28,8 @@
     "react-dom": "^18.2.0",
     "react-grid-layout": "^1.4.4",
     "react-twemoji": "^0.5.0",
-    "recoil": "^0.7.7"
+    "recoil": "^0.7.7",
+    "tauri-plugin-sql-api": "https://github.com/tauri-apps/tauri-plugin-sql#v1"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.5.8",
