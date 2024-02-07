@@ -23,6 +23,7 @@ import { CardRank } from "../utils/PokerHelper";
 import { useRecoilState } from "recoil";
 import { IconBolt, IconMobiledataOff } from "@tabler/icons-react";
 import { Player } from "../types/Player";
+import { modals } from "@mantine/modals";
 
 export default function Blackjack() {
   const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
@@ -79,8 +80,41 @@ export default function Blackjack() {
 
       case "Enter":
         {
-          // Stands
-          nextTurn();
+          if (state.blackjack.state == "PLAYING") {
+            // Stands
+            if (state.blackjack.turn !== "DEALER") nextTurn();
+          } else if (state.blackjack.state === "NONE") {
+            let newBasePlayers = [...state.players];
+            for (let player of state.blackjack.players) {
+              let basePlayer: Player = { ...getPlayer(player.id, newBasePlayers) };
+              if (basePlayer != null) {
+                console.log("interfacing with", basePlayer, player.bet);
+                basePlayer.balance -= player.bet;
+              }
+
+              newBasePlayers = newBasePlayers.map((p) => {
+                if (p.id === basePlayer.id) {
+                  return basePlayer;
+                }
+                return p;
+              });
+            }
+
+            modifyState({
+              players: newBasePlayers,
+              blackjack: {
+                state: "PLAYING",
+                turn: state.blackjack.players[0].id,
+                dealerCards: [EMPTY_CARD, EMPTY_CARD],
+                players: state.blackjack.players.map((p) => {
+                  return {
+                    ...p,
+                    cards: [EMPTY_CARD, EMPTY_CARD],
+                  };
+                }),
+              },
+            });
+          }
         }
         break;
 
@@ -689,7 +723,106 @@ export default function Blackjack() {
                 color="green"
                 disabled={state.blackjack.turn !== "DEALER"}
                 onClick={() => {
-                  //
+                  // Payouts
+                  let dealerTotal = getCardTotal(state.blackjack.dealerCards);
+                  let players = state.blackjack.players;
+                  let newBasePlayers = [...state.players];
+
+                  let resultStrings: string[] = [];
+
+                  for (let player of players) {
+                    let playerTotal = getCardTotal(player.cards);
+                    let basePlayer: Player = {
+                      ...getPlayer(player.splitFrom || player.id, newBasePlayers),
+                    };
+                    let payout = 0;
+                    let result: "BLACKJACK" | "WIN" | "LOSE" | "PUSH" = "LOSE";
+
+                    if (playerTotal.total > 21) {
+                      result = "LOSE";
+                    } else if (dealerTotal.total == playerTotal.total) {
+                      result = "PUSH";
+                    } else if (dealerTotal.total > 21) {
+                      result = "WIN";
+                    } else if (playerTotal.total == 21) {
+                      result = "BLACKJACK";
+                    } else if (dealerTotal.total > playerTotal.total) {
+                      result = "LOSE";
+                    } else if (dealerTotal.total < playerTotal.total) {
+                      result = "WIN";
+                    }
+
+                    if (result == "BLACKJACK") {
+                      payout = player.bet + player.bet * 1.5;
+                    } else if (result == "WIN") {
+                      payout = player.bet + player.bet;
+                    } else if (result == "PUSH") {
+                      payout = player.bet;
+                    }
+
+                    if ((result == "BLACKJACK" || result == "WIN") && player.doubledDown) {
+                      payout *= 2;
+                    }
+
+                    basePlayer.balance += payout;
+                    switch (result) {
+                      case "BLACKJACK":
+                        resultStrings.push(`${basePlayer.name} got blackjack and won ${payout}`);
+                        break;
+
+                      case "WIN":
+                        resultStrings.push(`${basePlayer.name} won ${payout}`);
+                        break;
+
+                      case "LOSE":
+                        resultStrings.push(`${basePlayer.name} lost ${player.bet}`);
+                        break;
+
+                      case "PUSH":
+                        resultStrings.push(`${basePlayer.name} pushed`);
+                        break;
+                    }
+
+                    newBasePlayers = newBasePlayers.map((p) => {
+                      if (p.id === basePlayer.id) {
+                        return basePlayer;
+                      }
+                      return p;
+                    });
+                  }
+
+                  modals.open({
+                    title: "Payouts",
+                    children: (
+                      <>
+                        {resultStrings.map((str) => {
+                          return <Text>{str}</Text>;
+                        })}
+                      </>
+                    ),
+                  });
+
+                  setState({
+                    ...state,
+                    players: newBasePlayers,
+                    blackjack: {
+                      state: "NONE",
+                      turn: "",
+                      dealerCards: [EMPTY_CARD, EMPTY_CARD],
+                      players: state.blackjack.players
+                        .filter((p) => p.splitFrom == null)
+                        .map((p) => {
+                          return {
+                            ...p,
+                            cards: [EMPTY_CARD, EMPTY_CARD],
+                            doubledDown: false,
+                            split: false,
+                            handPartialResult: undefined,
+                            handResult: undefined,
+                          };
+                        }),
+                    },
+                  });
                 }}
               >
                 Payout and End Game
@@ -721,7 +854,6 @@ export default function Blackjack() {
 
   return (
     <>
-      {state.blackjack.turn}
       <CardPicker
         opened={showCardPicker}
         setOpened={setShowCardPicker}
