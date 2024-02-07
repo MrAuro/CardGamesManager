@@ -2,6 +2,7 @@ import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import {
   Button,
   Divider,
+  Grid,
   Group,
   NumberInput,
   Select,
@@ -15,7 +16,7 @@ import cx from "clsx";
 import { useEffect, useState } from "react";
 import { STATE, State } from "../App";
 import classes from "../styles/PlayingList.module.css";
-import { BlackjackPlayer } from "../utils/BlackjackHelper";
+import { BlackjackPlayer, getPlayer } from "../utils/BlackjackHelper";
 import { useCustomRecoilState } from "../utils/RecoilHelper";
 import PlayerListItem from "./PlayerListItem";
 
@@ -107,192 +108,226 @@ export default function PlayerSelector({
                   <Text size="sm" fw={500} mb={rem(2)} ml={rem(2)}>
                     Bet Amount
                   </Text>
-                  <Group grow>
-                    <NumberInput
-                      radius="md"
-                      decimalScale={2}
-                      fixedDecimalScale
-                      thousandSeparator=","
-                      value={bjPlayer.bet}
-                      error={betErrors[index]}
-                      onChange={(value) => {
-                        if (_player == null) return;
+                  <Grid>
+                    <Grid.Col span={3}>
+                      <NumberInput
+                        radius="md"
+                        decimalScale={2}
+                        fixedDecimalScale
+                        thousandSeparator=","
+                        value={bjPlayer.bet}
+                        error={betErrors[index]}
+                        onChange={(value) => {
+                          if (_player == null) return;
 
-                        let bet = parseFloat(`${value}`);
-                        if (isNaN(bet)) {
-                          setBetErrors((prev) => {
-                            let _prev = [...prev];
-                            _prev[index] = "Invalid number";
-                            return _prev;
-                          });
-                          return;
-                        }
-
-                        if (bet < 0) {
-                          setBetErrors((prev) => {
-                            let _prev = [...prev];
-                            _prev[index] = "Bet cannot be negative";
-                            return _prev;
-                          });
-                          return;
-                        }
-
-                        if (bet > _player.balance) {
-                          setBetErrors((prev) => {
-                            let _prev = [...prev];
-                            _prev[index] = "Bet cannot exceed balance";
-                            return _prev;
-                          });
-                          return;
-                        }
-
-                        // We allow 0 bets in case the player doesnt want to bet but still wants to play
-
-                        setBetErrors((prev) => {
-                          let _prev = [...prev];
-                          _prev[index] = null;
-                          return _prev;
-                        });
-
-                        modifyState({
-                          blackjack: {
-                            players: state.blackjack.players.map((p) => {
-                              if (bjPlayer)
-                                if (p.id === bjPlayer.id) {
-                                  return { ...p, bet };
-                                }
-                              return p;
-                            }),
-                          },
-                        });
-                      }}
-                      leftSection={<IconCurrencyDollar />}
-                    />
-                    <Button.Group>
-                      <Button
-                        variant="light"
-                        fullWidth
-                        disabled={bjPlayer.bet + 1 > _player!.balance}
-                        style={{
-                          backgroundColor:
-                            bjPlayer.bet + 1 > _player!.balance ? theme.colors.dark[5] : undefined,
-                        }}
-                        onClick={() => {
-                          if (betErrors[index]) {
-                            modifyState({
-                              blackjack: {
-                                players: state.blackjack.players.map((p) => {
-                                  if (bjPlayer)
-                                    if (p.id === bjPlayer.id) {
-                                      return { ...p, bet: 1 };
-                                    }
-                                  return p;
-                                }),
-                              },
-                            });
-
+                          let bet = parseFloat(`${value}`);
+                          if (isNaN(bet)) {
                             setBetErrors((prev) => {
                               let _prev = [...prev];
-                              _prev[index] = null;
+                              _prev[index] = "Invalid number";
                               return _prev;
                             });
-                          } else {
+                            return;
+                          }
+
+                          if (bet < 0) {
+                            setBetErrors((prev) => {
+                              let _prev = [...prev];
+                              _prev[index] = "Bet cannot be negative";
+                              return _prev;
+                            });
+                            return;
+                          }
+
+                          if (bet > _player.balance) {
+                            setBetErrors((prev) => {
+                              let _prev = [...prev];
+                              _prev[index] = "Bet cannot exceed balance";
+                              return _prev;
+                            });
+                            return;
+                          }
+
+                          // We allow 0 bets in case the player doesnt want to bet but still wants to play
+
+                          setBetErrors((prev) => {
+                            let _prev = [...prev];
+                            _prev[index] = null;
+                            return _prev;
+                          });
+
+                          modifyState({
+                            blackjack: {
+                              players: state.blackjack.players.map((p) => {
+                                if (bjPlayer)
+                                  if (p.id === bjPlayer.id) {
+                                    return { ...p, bet };
+                                  }
+                                return p;
+                              }),
+                            },
+                          });
+                        }}
+                        leftSection={<IconCurrencyDollar />}
+                      />
+                    </Grid.Col>
+                    <Grid.Col span={9}>
+                      <Button.Group>
+                        <Button
+                          variant="light"
+                          fullWidth
+                          disabled={bjPlayer.bet + 5 > _player!.balance}
+                          style={{
+                            backgroundColor:
+                              bjPlayer.bet + 5 > _player!.balance
+                                ? theme.colors.dark[5]
+                                : undefined,
+                          }}
+                          onClick={() => {
+                            if (betErrors[index]) {
+                              modifyState({
+                                blackjack: {
+                                  players: state.blackjack.players.map((p) => {
+                                    if (bjPlayer)
+                                      if (p.id === bjPlayer.id) {
+                                        return { ...p, bet: 5 };
+                                      }
+                                    return p;
+                                  }),
+                                },
+                              });
+
+                              setBetErrors((prev) => {
+                                let _prev = [...prev];
+                                _prev[index] = null;
+                                return _prev;
+                              });
+                            } else {
+                              modifyState({
+                                blackjack: {
+                                  players: state.blackjack.players.map((p) => {
+                                    if (bjPlayer)
+                                      if (p.id === bjPlayer.id) {
+                                        return { ...p, bet: p.bet + 5 };
+                                      }
+                                    return p;
+                                  }),
+                                },
+                              });
+                            }
+                          }}
+                        >
+                          +5
+                        </Button>
+                        <Button
+                          variant="light"
+                          fullWidth
+                          disabled={bjPlayer.bet * 2 > _player!.balance || bjPlayer.bet * 2 == 0}
+                          style={{
+                            backgroundColor:
+                              bjPlayer.bet * 2 > _player!.balance || bjPlayer.bet * 2 == 0
+                                ? theme.colors.dark[5]
+                                : undefined,
+                          }}
+                          onClick={() => {
                             modifyState({
                               blackjack: {
                                 players: state.blackjack.players.map((p) => {
                                   if (bjPlayer)
                                     if (p.id === bjPlayer.id) {
-                                      return { ...p, bet: p.bet + 1 };
+                                      return { ...p, bet: p.bet * 2 };
                                     }
                                   return p;
                                 }),
                               },
                             });
-                          }
-                        }}
-                      >
-                        +1
-                      </Button>
-                      <Button
-                        variant="light"
-                        fullWidth
-                        disabled={bjPlayer.bet * 2 > _player!.balance || bjPlayer.bet * 2 == 0}
-                        style={{
-                          backgroundColor:
-                            bjPlayer.bet * 2 > _player!.balance || bjPlayer.bet * 2 == 0
-                              ? theme.colors.dark[5]
-                              : undefined,
-                        }}
-                        onClick={() => {
-                          modifyState({
-                            blackjack: {
-                              players: state.blackjack.players.map((p) => {
-                                if (bjPlayer)
-                                  if (p.id === bjPlayer.id) {
-                                    return { ...p, bet: p.bet * 2 };
-                                  }
-                                return p;
-                              }),
-                            },
-                          });
-                        }}
-                      >
-                        X2
-                      </Button>
-                      <Button
-                        variant="light"
-                        fullWidth
-                        disabled={bjPlayer.bet / 2 == 0}
-                        style={{
-                          backgroundColor: bjPlayer.bet / 2 == 0 ? theme.colors.dark[5] : undefined,
-                        }}
-                        onClick={() => {
-                          modifyState({
-                            blackjack: {
-                              players: state.blackjack.players.map((p) => {
-                                if (bjPlayer)
-                                  if (p.id === bjPlayer.id) {
-                                    return {
-                                      ...p,
-                                      bet: Math.floor((p.bet / 2) * 100) / 100,
-                                    };
-                                  }
-                                return p;
-                              }),
-                            },
-                          });
-                        }}
-                      >
-                        1/2
-                      </Button>
-                      <Button
-                        fullWidth
-                        variant="light"
-                        color="red"
-                        onClick={() => {
-                          // modifyState doesn't work here for some reason
-                          if (bjPlayer) {
-                            setState({
-                              ...state,
+                          }}
+                        >
+                          X2
+                        </Button>
+                        <Button
+                          variant="light"
+                          fullWidth
+                          disabled={bjPlayer.bet / 2 == 0}
+                          style={{
+                            backgroundColor:
+                              bjPlayer.bet / 2 == 0 ? theme.colors.dark[5] : undefined,
+                          }}
+                          onClick={() => {
+                            modifyState({
                               blackjack: {
-                                ...state.blackjack,
-                                players: state.blackjack.players.filter(
-                                  (p) => p.id !== bjPlayer?.id
-                                ),
+                                players: state.blackjack.players.map((p) => {
+                                  if (bjPlayer)
+                                    if (p.id === bjPlayer.id) {
+                                      return {
+                                        ...p,
+                                        bet: Math.floor((p.bet / 2) * 100) / 100,
+                                      };
+                                    }
+                                  return p;
+                                }),
                               },
                             });
+                          }}
+                        >
+                          1/2
+                        </Button>
+                        <Button
+                          variant="light"
+                          fullWidth
+                          disabled={bjPlayer.bet == _player!.balance}
+                          style={{
+                            backgroundColor:
+                              bjPlayer.bet / 2 == 0 ? theme.colors.dark[5] : undefined,
+                          }}
+                          onClick={() => {
+                            modifyState({
+                              blackjack: {
+                                players: state.blackjack.players.map((p) => {
+                                  if (bjPlayer)
+                                    if (p.id === bjPlayer.id) {
+                                      return {
+                                        ...p,
+                                        bet: getPlayer(p.id, state.players).balance,
+                                      };
+                                    }
+                                  return p;
+                                }),
+                              },
+                            });
+                          }}
+                        >
+                          Max
+                        </Button>
+                        <Button
+                          fullWidth
+                          variant="light"
+                          color="red"
+                          onClick={() => {
+                            // modifyState doesn't work here for some reason
+                            if (bjPlayer) {
+                              setState({
+                                ...state,
+                                blackjack: {
+                                  ...state.blackjack,
+                                  players: state.blackjack.players.filter(
+                                    (p) => p.id !== bjPlayer?.id
+                                  ),
+                                },
+                              });
 
-                            let index = listState.indexOf(bjPlayer.id);
-                            if (index != -1) {
-                              handlers.remove(index);
+                              let index = listState.indexOf(bjPlayer.id);
+                              if (index != -1) {
+                                handlers.remove(index);
+                              }
                             }
-                          }
-                        }}
-                      >
-                        Sit Out
-                      </Button>
-                    </Button.Group>
-                  </Group>
+                          }}
+                        >
+                          Sit Out
+                        </Button>
+                      </Button.Group>
+                    </Grid.Col>
+                  </Grid>
                 </PlayerListItem>
               ) : (
                 "Edge case"
