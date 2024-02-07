@@ -770,7 +770,12 @@ export default function Blackjack() {
                     fullWidth
                     size="sm"
                     color="red"
-                    disabled={!isTurn || player.cards.length > 2}
+                    disabled={
+                      !isTurn ||
+                      player.cards.length > 2 ||
+                      player.doubledDown ||
+                      getPlayer(player.id, state.players).balance < player.bet
+                    }
                     onClick={() => {
                       modifyState({
                         blackjack: {
@@ -930,7 +935,7 @@ export default function Blackjack() {
                     });
                   }}
                 >
-                  Next Turn {state.useKeybindings && " (0-9 or Enter)"}
+                  Next Turn {state.useKeybindings && " (0-9 or  Enter)"}
                 </Button>
               ) : (
                 <Button
