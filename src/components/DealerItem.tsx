@@ -17,7 +17,12 @@ import PlayingCard from "./PlayingCard";
 import classes from "../styles/PlayingList.module.css";
 import { useCustomRecoilState } from "../utils/RecoilHelper";
 
-export default function DealerItem(props: { my?: string; disabled?: boolean }) {
+export default function DealerItem(props: {
+  my?: string;
+  disabled?: boolean;
+  leftCardItem?: React.ReactNode;
+  children?: React.ReactNode;
+}) {
   const { colorScheme } = useMantineColorScheme();
   const theme = useMantineTheme();
   const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
@@ -66,6 +71,7 @@ export default function DealerItem(props: { my?: string; disabled?: boolean }) {
               justifyContent: "flex-end",
             }}
           >
+            <Box ml="xs">{props.leftCardItem}</Box>
             {state.blackjack.dealerCards.map((card, index) => (
               <Box ml="xs" key={`DEALER${card}${index}`}>
                 <PlayingCard card={card} onClick={() => {}} disabled={!props.disabled} />
@@ -73,6 +79,7 @@ export default function DealerItem(props: { my?: string; disabled?: boolean }) {
             ))}
           </Paper>
         </Group>
+        {props.children}
       </Container>
     </Paper>
   );

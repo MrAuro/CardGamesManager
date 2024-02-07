@@ -115,6 +115,25 @@ export default function Blackjack() {
                 }),
               },
             });
+          } else if (state.blackjack.turn === "DEALER") {
+            let dealerCards = [...state.blackjack.dealerCards];
+            if (state.blackjack.dealerCards.length <= 2) {
+              if (dealerCards[1] == EMPTY_CARD) {
+                dealerCards[0] = EMPTY_CARD;
+              } else {
+                dealerCards[1] = EMPTY_CARD;
+              }
+            } else {
+              dealerCards.pop();
+            }
+
+            setState({
+              ...state,
+              blackjack: {
+                ...state.blackjack,
+                dealerCards: dealerCards,
+              },
+            });
           }
         }
         break;
@@ -147,6 +166,18 @@ export default function Blackjack() {
                 console.warn("currentTurnPlayer is null - this should never happen");
               }
             }),
+          },
+        });
+      } else if (state.blackjack.turn === "DEALER") {
+        let dealerCards = [...state.blackjack.dealerCards];
+        if (!dealerCards.includes(EMPTY_CARD)) {
+          dealerCards.push(EMPTY_CARD);
+        }
+        let index = dealerCards.indexOf(EMPTY_CARD);
+        dealerCards[index] = card;
+        modifyState({
+          blackjack: {
+            dealerCards: dealerCards,
           },
         });
       }
@@ -569,9 +600,117 @@ export default function Blackjack() {
         });
       }
 
+      let dealerTotal = getCardTotal(state.blackjack.dealerCards);
+
       content = (
         <>
-          <DealerItem disabled={state.blackjack.turn !== "DEALER"} />
+          <DealerItem
+            disabled={state.blackjack.turn !== "DEALER"}
+            leftCardItem={
+              <>
+                <Box>
+                  <Paper
+                    style={{
+                      width: "4.5rem",
+                      height: "4.5rem",
+                      backgroundColor: "transparent",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        height: "100%",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                        }}
+                      >
+                        {dealerTotal.ace != "NONE" && (
+                          <div>
+                            <Text size="sm" mb={0} fw="bold" tt="capitalize">
+                              {dealerTotal.ace}
+                            </Text>
+                          </div>
+                        )}
+                        {dealerTotal.total == 21 && (
+                          <div>
+                            <Text size="sm" mb={0} fw="bold" tt="capitalize">
+                              BLACKJACK
+                            </Text>
+                          </div>
+                        )}
+
+                        {dealerTotal.total > 21 && (
+                          <div>
+                            <Text size="sm" mb={0} fw="bold" tt="capitalize">
+                              BUST
+                            </Text>
+                          </div>
+                        )}
+
+                        <div>
+                          <Text size={rem(30)} fw="bold">
+                            {dealerTotal.total}
+                          </Text>
+                        </div>
+                      </div>
+                    </div>
+                  </Paper>
+                </Box>
+              </>
+            }
+          >
+            <Divider my="xs" />
+            <Group grow>
+              <Button
+                fullWidth
+                size="sm"
+                color="blue"
+                disabled={state.blackjack.turn !== "DEALER"}
+                onClick={() => {
+                  modifyState({
+                    blackjack: {
+                      dealerCards: [...state.blackjack.dealerCards, EMPTY_CARD],
+                    },
+                  });
+                }}
+              >
+                Add Card
+              </Button>
+              <Button
+                fullWidth
+                size="sm"
+                color="green"
+                disabled={state.blackjack.turn !== "DEALER"}
+                onClick={() => {
+                  //
+                }}
+              >
+                Payout and End Game
+              </Button>
+              <Button
+                fullWidth
+                size="sm"
+                color="gray"
+                disabled={state.blackjack.turn === "DEALER"}
+                onClick={() => {
+                  modifyState({
+                    blackjack: {
+                      turn: "DEALER",
+                    },
+                  });
+                }}
+              >
+                Force Turn
+              </Button>
+            </Group>
+          </DealerItem>
           {playerListItems.map((item) => (
             <div key={item.id}>{item.node}</div>
           ))}
