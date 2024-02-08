@@ -15,7 +15,7 @@ import cx from "clsx";
 import { useEffect, useState } from "react";
 import { STATE, State } from "../App";
 import classes from "../styles/PlayingList.module.css";
-import { BlackjackPlayer, getPlayer } from "../utils/BlackjackHelper";
+import { BlackjackPlayer } from "../utils/BlackjackHelper";
 import { useCustomRecoilState } from "../utils/RecoilHelper";
 import PlayerListItem from "./PlayerListItem";
 
@@ -158,9 +158,6 @@ export default function PlayerSelector({
 
                           // We allow 0 bets in case the player doesnt want to bet but still wants to play
 
-                          // clear err
-
-                          // setBetErrors(betErrors.filter((e) => e.id !== _player!.id));
                           if (!foundErrs) {
                             setBetErrors(betErrors.filter((e) => e.id !== _player!.id));
                           }
@@ -277,7 +274,7 @@ export default function PlayerSelector({
                                     if (p.id === bjPlayer.id) {
                                       return {
                                         ...p,
-                                        bet: getPlayer(p.id, state.players).balance,
+                                        bet: _player!.balance,
                                       };
                                     }
                                   return p;

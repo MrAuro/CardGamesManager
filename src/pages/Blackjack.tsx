@@ -29,11 +29,27 @@ export default function Blackjack() {
       }
     }
 
-    setBetErrors(newBetErrors);
+    // setBetErrors(newBetErrors);
+    // check if the newBetErrors are different from the old ones
+    let identical = true;
+    if (newBetErrors.length !== betErrors.length) {
+      identical = false;
+    } else {
+      for (let i = 0; i < newBetErrors.length; i++) {
+        if (newBetErrors[i].id !== betErrors[i].id || newBetErrors[i].msg !== betErrors[i].msg) {
+          identical = false;
+          break;
+        }
+      }
+    }
+
+    if (!identical) {
+      setBetErrors(newBetErrors);
+    }
   }, [betErrors]);
 
   useKeyPress((event) => {
-    if (!state.useKeybindings || modalOpen) return;
+    if (!state.useKeybindings || modalOpen || state.activeTab !== "BLACKJACK") return;
 
     let currentTurnPlayer = state.blackjack.players.find((p) => p.id === state.blackjack.turn);
     let val;
@@ -321,7 +337,7 @@ export default function Blackjack() {
       children: (
         <>
           {resultStrings.map((str) => {
-            return <Text>{str}</Text>;
+            return <Text key={str}>{str}</Text>;
           })}
         </>
       ),
@@ -382,6 +398,61 @@ export default function Blackjack() {
     });
   };
 
+  const checkForBetErrors = (player: Player) => {
+    if (player == null) return;
+
+    console.log("Checking for bet errors", player.id, player.balance);
+
+    let foundErrs = false;
+    let bet = state.blackjack.players.find((p) => p.id === player.id)?.bet;
+    if (bet == null) return;
+
+    if (isNaN(bet)) {
+      foundErrs = true;
+      setBetErrors([
+        ...betErrors,
+        {
+          id: player.id,
+          msg: "Invalid bet amount",
+        },
+      ]);
+    }
+
+    // We allow 0 bets in case the player doesnt want to bet but still wants to play
+    if (bet == 0) {
+      setBetErrors(betErrors.filter((e) => e.id !== player!.id));
+      return;
+    }
+
+    if (bet < 0) {
+      foundErrs = true;
+
+      setBetErrors([
+        ...betErrors,
+        {
+          id: player.id,
+          msg: "Bet amount cannot be negative",
+        },
+      ]);
+    }
+
+    if (bet > player.balance) {
+      foundErrs = true;
+
+      setBetErrors([
+        ...betErrors,
+        {
+          id: player.id,
+          msg: "Insufficient funds",
+        },
+      ]);
+    }
+
+    if (!foundErrs) {
+      setBetErrors(betErrors.filter((e) => e.id !== player!.id));
+    }
+  };
+
   const refundAndEndGame = () => {
     // Game has been canceled. Refund players all their bets
     let players = state.blackjack.players;
@@ -413,7 +484,7 @@ export default function Blackjack() {
       children: (
         <>
           {resultStrings.map((str) => {
-            return <Text>{str}</Text>;
+            return <Text key={str}>{str}</Text>;
           })}
         </>
       ),
@@ -694,6 +765,14 @@ export default function Blackjack() {
       });
     }
   }, [state.blackjack.players, state.blackjack.dealerCards]);
+
+  useEffect(() => {
+    if (state.blackjack.state == "NONE") {
+      for (let player of state.blackjack.players) {
+        checkForBetErrors(getPlayer(player.id, state.players));
+      }
+    }
+  }, [state.blackjack.state]);
 
   let content: ReactNode = "No content";
 
