@@ -886,7 +886,7 @@ export default function Blackjack() {
                       !isTurn ||
                       player.cards.length > 2 ||
                       player.doubledDown ||
-                      getPlayer(player.id, state.players).balance < player.bet
+                      getPlayer(player.splitFrom || player.id, state.players).balance < player.bet
                     }
                     onClick={() => {
                       doubleDown(player);
