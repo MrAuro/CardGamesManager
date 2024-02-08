@@ -23,8 +23,8 @@ export default function PlayerSelector({
   betErrors,
   setBetErrors,
 }: {
-  betErrors: (string | null)[];
-  setBetErrors: React.Dispatch<React.SetStateAction<(string | null)[]>>;
+  betErrors: { id: string; msg: string }[];
+  setBetErrors: (betErrors: { id: string; msg: string }[]) => void;
 }) {
   const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
   const theme = useMantineTheme();
@@ -115,45 +115,55 @@ export default function PlayerSelector({
                         fixedDecimalScale
                         thousandSeparator=","
                         value={bjPlayer.bet}
-                        error={betErrors[index]}
+                        error={betErrors.find((e) => e.id === _player!.id)?.msg}
                         onChange={(value) => {
                           if (_player == null) return;
 
+                          let foundErrs = false;
                           let bet = parseFloat(`${value}`);
                           if (isNaN(bet)) {
-                            setBetErrors((prev) => {
-                              let _prev = [...prev];
-                              _prev[index] = "Invalid number";
-                              return _prev;
-                            });
-                            return;
+                            foundErrs = true;
+                            setBetErrors([
+                              ...betErrors,
+                              {
+                                id: _player.id,
+                                msg: "Invalid bet amount",
+                              },
+                            ]);
                           }
 
                           if (bet < 0) {
-                            setBetErrors((prev) => {
-                              let _prev = [...prev];
-                              _prev[index] = "Bet cannot be negative";
-                              return _prev;
-                            });
-                            return;
+                            foundErrs = true;
+
+                            setBetErrors([
+                              ...betErrors,
+                              {
+                                id: _player.id,
+                                msg: "Bet amount cannot be negative",
+                              },
+                            ]);
                           }
 
                           if (bet > _player.balance) {
-                            setBetErrors((prev) => {
-                              let _prev = [...prev];
-                              _prev[index] = "Bet cannot exceed balance";
-                              return _prev;
-                            });
-                            return;
+                            foundErrs = true;
+
+                            setBetErrors([
+                              ...betErrors,
+                              {
+                                id: _player.id,
+                                msg: "Insufficient funds",
+                              },
+                            ]);
                           }
 
                           // We allow 0 bets in case the player doesnt want to bet but still wants to play
 
-                          setBetErrors((prev) => {
-                            let _prev = [...prev];
-                            _prev[index] = null;
-                            return _prev;
-                          });
+                          // clear err
+
+                          // setBetErrors(betErrors.filter((e) => e.id !== _player!.id));
+                          if (!foundErrs) {
+                            setBetErrors(betErrors.filter((e) => e.id !== _player!.id));
+                          }
 
                           modifyState({
                             blackjack: {
@@ -183,37 +193,17 @@ export default function PlayerSelector({
                                 : undefined,
                           }}
                           onClick={() => {
-                            if (betErrors[index]) {
-                              modifyState({
-                                blackjack: {
-                                  players: state.blackjack.players.map((p) => {
-                                    if (bjPlayer)
-                                      if (p.id === bjPlayer.id) {
-                                        return { ...p, bet: 5 };
-                                      }
-                                    return p;
-                                  }),
-                                },
-                              });
-
-                              setBetErrors((prev) => {
-                                let _prev = [...prev];
-                                _prev[index] = null;
-                                return _prev;
-                              });
-                            } else {
-                              modifyState({
-                                blackjack: {
-                                  players: state.blackjack.players.map((p) => {
-                                    if (bjPlayer)
-                                      if (p.id === bjPlayer.id) {
-                                        return { ...p, bet: p.bet + 5 };
-                                      }
-                                    return p;
-                                  }),
-                                },
-                              });
-                            }
+                            modifyState({
+                              blackjack: {
+                                players: state.blackjack.players.map((p) => {
+                                  if (bjPlayer)
+                                    if (p.id === bjPlayer.id) {
+                                      return { ...p, bet: p.bet + 5 };
+                                    }
+                                  return p;
+                                }),
+                              },
+                            });
                           }}
                         >
                           +5

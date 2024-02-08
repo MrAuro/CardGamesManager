@@ -17,9 +17,20 @@ import { useCustomRecoilState } from "../utils/RecoilHelper";
 
 export default function Blackjack() {
   const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
-  const [betErrors, setBetErrors] = useState<(string | null)[]>([]);
+  const [betErrors, setBetErrors] = useState<{ id: string; msg: string }[]>([]);
 
   const [modalOpen, setModalOpen] = useState(false);
+
+  useEffect(() => {
+    let newBetErrors: { id: string; msg: string }[] = [];
+    for (let error of betErrors) {
+      if (state.blackjack.players.find((p) => p.id === error.id)) {
+        newBetErrors.push(error);
+      }
+    }
+
+    setBetErrors(newBetErrors);
+  }, [betErrors]);
 
   useKeyPress((event) => {
     if (!state.useKeybindings || modalOpen) return;
