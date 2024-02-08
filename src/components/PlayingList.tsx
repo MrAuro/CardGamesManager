@@ -57,32 +57,10 @@ export default function PlayerSelector({
     let _playerNodes: React.ReactNode[] = [];
     listState.map((id, index) => {
       let _player = state.players.find((p) => p.id === id);
-      if (!_player) {
-        console.warn("Player not found - removed", id);
-        // remove the player from the list
-        setState({
-          ...state,
-          blackjack: {
-            ...state.blackjack,
-            players: state.blackjack.players.filter((p) => p.id !== id),
-          },
-        });
-        return;
-      }
+      if (!_player) return;
 
       let bjPlayer = state.blackjack.players.find((p) => p.id === id);
-      if (!bjPlayer) {
-        console.warn("Blackjack player not found - removed", id);
-        // remove the player from the list
-        setState({
-          ...state,
-          blackjack: {
-            ...state.blackjack,
-            players: state.blackjack.players.filter((p) => p.id !== id),
-          },
-        });
-        return;
-      }
+      if (!bjPlayer) return;
 
       _playerNodes.push(
         <Draggable key={id} index={index} draggableId={id}>

@@ -271,7 +271,13 @@ const EditPlayerModal = (props: {
         value={balance}
         onChange={(value) => setBalance(parseFloat(`${value}`))}
       />
-      <Button fullWidth mt="md" onClick={deletePlayer} color="red">
+      <Button
+        fullWidth
+        mt="md"
+        onClick={deletePlayer}
+        color="red"
+        disabled={state.blackjack.state != "NONE"}
+      >
         {reallyDelete ? "Are you sure?" : "Delete"}
       </Button>
       <Button fullWidth mt="xs" onClick={editPlayer}>
