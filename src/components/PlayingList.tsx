@@ -277,7 +277,7 @@ export default function PlayerSelector({
                           disabled={bjPlayer.bet == _player!.balance}
                           style={{
                             backgroundColor:
-                              bjPlayer.bet / 2 == 0 ? theme.colors.dark[5] : undefined,
+                              bjPlayer.bet == _player!.balance ? theme.colors.dark[5] : undefined,
                           }}
                           onClick={() => {
                             modifyState({
