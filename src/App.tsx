@@ -99,15 +99,15 @@ export interface State {
 
 import Database from "tauri-plugin-sql-api";
 
-const db = await Database.load("sqlite:data.db");
+export const DB = await Database.load("sqlite:data.db");
 console.log(Date.now());
-let initialData = (await db.select("SELECT * FROM data WHERE id = 1")) as any[];
+let initialData = (await DB.select("SELECT * FROM data WHERE id = 1")) as any[];
 console.log(`Initial data`, initialData);
 
 if (initialData.length == 0 || initialData[0].data == null) {
   console.log("No data found, inserting default data");
-  db.execute("INSERT INTO data (id, data) VALUES (?, ?)", [1, JSON.stringify(DEFAULT_STATE)]);
-  initialData = (await db.select("SELECT * FROM data WHERE id = 1")) as any[];
+  DB.execute("INSERT INTO data (id, data) VALUES (?, ?)", [1, JSON.stringify(DEFAULT_STATE)]);
+  initialData = (await DB.select("SELECT * FROM data WHERE id = 1")) as any[];
 }
 
 export const STATE = atom({
@@ -121,7 +121,7 @@ export const STATE = atom({
 const debouncedStoreState = debounce((key: any, value: any) => {
   console.log("Saved", { key, value: JSON.parse(value) });
   // localStorage.setItem(key, value);
-  db.execute("UPDATE data SET data = ? WHERE id = 1", [value]);
+  DB.execute("UPDATE data SET data = ? WHERE id = 1", [value]);
 }, 300);
 
 function debounce(func: any, wait: any) {
