@@ -1,7 +1,29 @@
-# Tauri + React + Typescript
+# Card Games Manager
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+Manage your various card games with this app (in development).
 
-## Recommended IDE Setup
+---
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+## Blackjack
+
+![Example](./resources/example.gif)
+
+---
+
+## Poker
+
+Coming soon...
+
+---
+
+## Installation
+
+Builds are currently only available for Windows. You can download the latest release [here](https://github.com/MrAuro/CardGamesManager/releases).
+
+## Development
+
+To run the app locally, you will need Node.js and Rust installed. Run `yarn` in the project directory to install the required packages. Then run `yarn tauri dev` to start the app.
+
+---
+
+This README is in development. More information will be added soon. Please submit a pull request if you would like to contribute.
