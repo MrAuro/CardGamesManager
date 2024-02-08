@@ -110,7 +110,7 @@ export default function Blackjack() {
                   },
                 });
               } else {
-                payoutPlayers();
+                payoutAndEndGame();
               }
             }
           } else if (state.blackjack.state === "NONE") {
@@ -259,7 +259,7 @@ export default function Blackjack() {
   const [cardIndex, setCardIndex] = useState(0);
   const [cardPlayer, setCardPlayer] = useState("");
 
-  const payoutPlayers = () => {
+  const payoutAndEndGame = () => {
     let dealerTotal = getCardTotal(state.blackjack.dealerCards);
     let players = state.blackjack.players;
     let newBasePlayers = [...state.players];
@@ -349,6 +349,8 @@ export default function Blackjack() {
       for (let card of state.blackjack.seenCards) {
         newPastSeenCards.push(card);
       }
+    } else {
+      newPastSeenCards = [...state.blackjack.seenCards];
     }
 
     setState({
@@ -1161,7 +1163,7 @@ export default function Blackjack() {
                   disabled={state.blackjack.turn !== "DEALER"}
                   onClick={() => {
                     // Payouts
-                    payoutPlayers();
+                    payoutAndEndGame();
                   }}
                 >
                   Payout {state.useKeybindings && " (Enter)"}
