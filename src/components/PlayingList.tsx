@@ -317,6 +317,30 @@ export default function PlayerSelector({
                               fixedDecimalScale
                               thousandSeparator=","
                               leftSection={<IconCurrencyDollar />}
+                              allowNegative={false}
+                              value={bjPlayer.sidebets.perfectPairs}
+                              onChange={(value) => {
+                                setState({
+                                  ...state,
+                                  blackjack: {
+                                    ...state.blackjack,
+                                    players: state.blackjack.players.map((p) => {
+                                      if (bjPlayer)
+                                        if (p.id === bjPlayer.id) {
+                                          return {
+                                            ...p,
+                                            sidebets: {
+                                              ...p.sidebets,
+                                              perfectPairs: parseFloat(`${value}`),
+                                            },
+                                          };
+                                        }
+
+                                      return p;
+                                    }),
+                                  },
+                                });
+                              }}
                             />
                           </Grid.Col>
                         )}
@@ -340,6 +364,30 @@ export default function PlayerSelector({
                               fixedDecimalScale
                               thousandSeparator=","
                               leftSection={<IconCurrencyDollar />}
+                              allowNegative={false}
+                              value={bjPlayer.sidebets.twentyOnePlusThree}
+                              onChange={(value) => {
+                                setState({
+                                  ...state,
+                                  blackjack: {
+                                    ...state.blackjack,
+                                    players: state.blackjack.players.map((p) => {
+                                      if (bjPlayer)
+                                        if (p.id === bjPlayer.id) {
+                                          return {
+                                            ...p,
+                                            sidebets: {
+                                              ...p.sidebets,
+                                              twentyOnePlusThree: parseFloat(`${value}`),
+                                            },
+                                          };
+                                        }
+
+                                      return p;
+                                    }),
+                                  },
+                                });
+                              }}
                             />
                           </Grid.Col>
                         )}
@@ -363,7 +411,39 @@ export default function PlayerSelector({
                                 decimalScale={2}
                                 fixedDecimalScale
                                 thousandSeparator=","
+                                allowNegative={false}
                                 leftSection={<IconCurrencyDollar />}
+                                value={bjPlayer.sidebets.betBehind.bet}
+                                onChange={(value) => {
+                                  setState({
+                                    ...state,
+                                    blackjack: {
+                                      ...state.blackjack,
+                                      players: state.blackjack.players.map((p) => {
+                                        if (bjPlayer)
+                                          if (p.id === bjPlayer.id) {
+                                            let bet = parseFloat(`${value}`);
+                                            let target = p.sidebets.betBehind.target;
+                                            if (bet == 0) {
+                                              target = null;
+                                            }
+                                            return {
+                                              ...p,
+                                              sidebets: {
+                                                ...p.sidebets,
+                                                betBehind: {
+                                                  bet,
+                                                  target,
+                                                },
+                                              },
+                                            };
+                                          }
+
+                                        return p;
+                                      }),
+                                    },
+                                  });
+                                }}
                               />
                               <Select
                                 label="Bet Behind Player"
@@ -372,6 +452,38 @@ export default function PlayerSelector({
                                 leftSectionPointerEvents="none"
                                 clearable
                                 searchable
+                                value={bjPlayer.sidebets.betBehind.target}
+                                placeholder="Select player"
+                                onChange={(_, option) => {
+                                  if (bjPlayer) {
+                                    setState({
+                                      ...state,
+                                      blackjack: {
+                                        ...state.blackjack,
+                                        players: state.blackjack.players.map((p) => {
+                                          if (bjPlayer)
+                                            if (p.id === bjPlayer.id) {
+                                              let bet = p.sidebets.betBehind.bet;
+                                              if (!option?.value) {
+                                                bet = 0;
+                                              }
+                                              return {
+                                                ...p,
+                                                sidebets: {
+                                                  ...p.sidebets,
+                                                  betBehind: {
+                                                    bet,
+                                                    target: option?.value || null,
+                                                  },
+                                                },
+                                              };
+                                            }
+                                          return p;
+                                        }),
+                                      },
+                                    });
+                                  }
+                                }}
                                 data={state.blackjack.players
                                   .filter((p) => p.id !== bjPlayer!.id)
                                   .map((p) => ({
@@ -430,6 +542,14 @@ export default function PlayerSelector({
                   cards: [],
                   doubledDown: false,
                   split: false,
+                  sidebets: {
+                    twentyOnePlusThree: 0,
+                    perfectPairs: 0,
+                    betBehind: {
+                      bet: 0,
+                      target: null,
+                    },
+                  },
                 } as BlackjackPlayer,
               ],
             },

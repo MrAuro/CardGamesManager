@@ -13,6 +13,15 @@ export type BlackjackPlayer = {
   splitFrom?: string; // For split hands, the id of the original hand
   handPartialResult?: "BUST" | "BLACKJACK";
   handResult?: "WIN" | "LOSE" | "PUSH";
+  sidebets: {
+    // 0 means no bet
+    twentyOnePlusThree: number;
+    perfectPairs: number;
+    betBehind: {
+      bet: number;
+      target: string | null; // Target player id
+    };
+  };
 };
 
 export const getPlayer = (idOrPlayer: string | BlackjackPlayer, players: Player[]): Player => {

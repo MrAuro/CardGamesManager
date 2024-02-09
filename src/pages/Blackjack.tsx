@@ -371,12 +371,23 @@ export default function Blackjack() {
               split: false,
               handPartialResult: undefined,
               handResult: undefined,
+              sidebets: {
+                twentyOnePlusThree: p.sidebets.twentyOnePlusThree,
+                perfectPairs: p.sidebets.perfectPairs,
+                betBehind: {
+                  bet: p.sidebets.betBehind.bet,
+                  target: p.sidebets.betBehind.target,
+                },
+              },
             };
           }),
         deckCount: state.blackjack.deckCount,
         runningCount: state.blackjack.runningCount,
         seenCards: [],
         pastGameSeenCards: newPastSeenCards,
+        sideBets: {
+          ...state.blackjack.sideBets,
+        },
       },
     });
   };
@@ -515,12 +526,23 @@ export default function Blackjack() {
               split: false,
               handPartialResult: undefined,
               handResult: undefined,
+              sidebets: {
+                twentyOnePlusThree: p.sidebets.twentyOnePlusThree,
+                perfectPairs: p.sidebets.perfectPairs,
+                betBehind: {
+                  bet: p.sidebets.betBehind.bet,
+                  target: p.sidebets.betBehind.target,
+                },
+              },
             };
           }),
         deckCount: state.blackjack.deckCount,
         runningCount: state.blackjack.runningCount,
         seenCards: [],
         pastGameSeenCards: newPastSeenCards,
+        sideBets: {
+          ...state.blackjack.sideBets,
+        },
       },
     });
   };
@@ -568,6 +590,14 @@ export default function Blackjack() {
       split: true, // We dont allow splitting twice because I don't want to program that
       doubledDown: false,
       splitFrom: player.id,
+      sidebets: {
+        twentyOnePlusThree: 0,
+        perfectPairs: 0,
+        betBehind: {
+          bet: 0,
+          target: null,
+        },
+      },
     };
 
     // the new player goes after the current player
