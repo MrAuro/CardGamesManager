@@ -33,6 +33,7 @@ fn main() {
                 .add_migrations("sqlite:data.db", migrations)
                 .build(),
         )
+        .plugin(tauri_plugin_window_state::Builder::default().build())
         .invoke_handler(tauri::generate_handler![greet])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
