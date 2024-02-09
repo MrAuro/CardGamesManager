@@ -1,4 +1,14 @@
-import { Accordion, Button, Container, Divider, JsonInput, Paper, Title } from "@mantine/core";
+import {
+  Accordion,
+  Button,
+  Checkbox,
+  Container,
+  Divider,
+  JsonInput,
+  Paper,
+  Title,
+  rem,
+} from "@mantine/core";
 import "@mantine/core/styles.css";
 import { getHotkeyHandler } from "@mantine/hooks";
 import { IconCards, IconClubs, IconSettings, IconUsers } from "@tabler/icons-react";
@@ -261,6 +271,94 @@ function App() {
           >
             Populate Players
           </Button>
+          Side Bets
+          <Checkbox
+            radius="sm"
+            label="21+3"
+            labelPosition="right"
+            checked={state.blackjack.sideBets.twentyOnePlusThree}
+            onChange={(event) => {
+              modifyState({
+                blackjack: {
+                  sideBets: {
+                    ...state.blackjack.sideBets,
+                    twentyOnePlusThree: event.currentTarget.checked,
+                  },
+                },
+              });
+            }}
+            styles={{
+              input: {
+                cursor: "pointer",
+              },
+            }}
+          />
+          <Checkbox
+            mt={rem(5)}
+            radius="sm"
+            label="Perfect Pairs"
+            labelPosition="right"
+            checked={state.blackjack.sideBets.perfectPairs}
+            onChange={(event) => {
+              modifyState({
+                blackjack: {
+                  sideBets: {
+                    ...state.blackjack.sideBets,
+                    perfectPairs: event.currentTarget.checked,
+                  },
+                },
+              });
+            }}
+            styles={{
+              input: {
+                cursor: "pointer",
+              },
+            }}
+          />
+          <Checkbox
+            mt={rem(5)}
+            radius="sm"
+            label="Insurance"
+            labelPosition="right"
+            checked={state.blackjack.sideBets.insurance}
+            onChange={(event) => {
+              modifyState({
+                blackjack: {
+                  sideBets: {
+                    ...state.blackjack.sideBets,
+                    insurance: event.currentTarget.checked,
+                  },
+                },
+              });
+            }}
+            styles={{
+              input: {
+                cursor: "pointer",
+              },
+            }}
+          />
+          <Checkbox
+            mt={rem(5)}
+            radius="sm"
+            label="Bet Behind"
+            labelPosition="right"
+            checked={state.blackjack.sideBets.betBehind}
+            onChange={(event) => {
+              modifyState({
+                blackjack: {
+                  sideBets: {
+                    ...state.blackjack.sideBets,
+                    betBehind: event.currentTarget.checked,
+                  },
+                },
+              });
+            }}
+            styles={{
+              input: {
+                cursor: "pointer",
+              },
+            }}
+          />
           <Button
             mt="xs"
             variant="light"

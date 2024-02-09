@@ -3,6 +3,7 @@ import {
   Button,
   Divider,
   Grid,
+  Group,
   NumberInput,
   Select,
   Text,
@@ -10,12 +11,12 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { useListState } from "@mantine/hooks";
-import { IconCurrencyDollar, IconSearch } from "@tabler/icons-react";
+import { IconCurrencyDollar, IconSearch, IconUserSearch } from "@tabler/icons-react";
 import cx from "clsx";
 import { useEffect, useState } from "react";
 import { STATE, State } from "../App";
 import classes from "../styles/PlayingList.module.css";
-import { BlackjackPlayer } from "../utils/BlackjackHelper";
+import { BlackjackPlayer, getPlayer } from "../utils/BlackjackHelper";
 import { useCustomRecoilState } from "../utils/RecoilHelper";
 import PlayerListItem from "./PlayerListItem";
 
@@ -292,6 +293,98 @@ export default function PlayerSelector({
                       </Button.Group>
                     </Grid.Col>
                   </Grid>
+                  {amountOfSideBetsEnabled(state) > 0 && (
+                    <>
+                      <Divider my="xs" />
+                      <Grid columns={amountOfSideBetsEnabled(state) * 12}>
+                        {state.blackjack.sideBets.perfectPairs && (
+                          <Grid.Col
+                            span={
+                              amountOfSideBetsEnabled(state) *
+                              12 *
+                              (state.blackjack.sideBets.betBehind
+                                ? state.blackjack.sideBets.twentyOnePlusThree
+                                  ? 0.2
+                                  : 0.4
+                                : 1 / amountOfSideBetsEnabled(state))
+                            }
+                          >
+                            {" "}
+                            <NumberInput
+                              label="Perfect Pairs"
+                              radius="md"
+                              decimalScale={2}
+                              fixedDecimalScale
+                              thousandSeparator=","
+                              leftSection={<IconCurrencyDollar />}
+                            />
+                          </Grid.Col>
+                        )}
+                        {state.blackjack.sideBets.twentyOnePlusThree && (
+                          <Grid.Col
+                            span={
+                              amountOfSideBetsEnabled(state) *
+                              12 *
+                              (state.blackjack.sideBets.betBehind
+                                ? state.blackjack.sideBets.perfectPairs
+                                  ? 0.2
+                                  : 0.4
+                                : 1 / amountOfSideBetsEnabled(state))
+                            }
+                          >
+                            {" "}
+                            <NumberInput
+                              label="21+3"
+                              radius="md"
+                              decimalScale={2}
+                              fixedDecimalScale
+                              thousandSeparator=","
+                              leftSection={<IconCurrencyDollar />}
+                            />
+                          </Grid.Col>
+                        )}
+                        {state.blackjack.sideBets.betBehind && (
+                          <Grid.Col
+                            span={
+                              amountOfSideBetsEnabled(state) *
+                              12 *
+                              (state.blackjack.sideBets.twentyOnePlusThree &&
+                              state.blackjack.sideBets.perfectPairs
+                                ? 0.6
+                                : amountOfSideBetsEnabled(state) == 1
+                                ? 1
+                                : 0.6)
+                            }
+                          >
+                            <Group grow>
+                              <NumberInput
+                                label="Bet Behind Amount"
+                                radius="md"
+                                decimalScale={2}
+                                fixedDecimalScale
+                                thousandSeparator=","
+                                leftSection={<IconCurrencyDollar />}
+                              />
+                              <Select
+                                label="Bet Behind Player"
+                                radius="md"
+                                leftSection={<IconUserSearch />}
+                                leftSectionPointerEvents="none"
+                                clearable
+                                searchable
+                                data={state.blackjack.players
+                                  .filter((p) => p.id !== bjPlayer!.id)
+                                  .map((p) => ({
+                                    label: getPlayer(p.id, state.players)?.name,
+                                    value: p.id,
+                                  }))}
+                              />
+                            </Group>
+                          </Grid.Col>
+                        )}
+                      </Grid>
+                    </>
+                  )}
                 </PlayerListItem>
               ) : (
                 "Edge case"
@@ -371,3 +464,11 @@ export default function PlayerSelector({
     </>
   );
 }
+
+const amountOfSideBetsEnabled = (state: State) => {
+  let amount = 0;
+  if (state.blackjack.sideBets.perfectPairs) amount++;
+  if (state.blackjack.sideBets.twentyOnePlusThree) amount++;
+  if (state.blackjack.sideBets.betBehind) amount++;
+  return amount;
+};

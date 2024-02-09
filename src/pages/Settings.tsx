@@ -4,7 +4,6 @@ import {
   Checkbox,
   Container,
   Divider,
-  Fieldset,
   Grid,
   Input,
   InputWrapper,
@@ -18,7 +17,6 @@ import {
 import { modals } from "@mantine/modals";
 import {
   IconAlertCircle,
-  IconArrowsShuffle,
   IconCode,
   IconCodeOff,
   IconCurrencyDollar,
@@ -34,7 +32,7 @@ import { STATE, State } from "../App";
 import { useCustomRecoilState } from "../utils/RecoilHelper";
 
 export default function Settings() {
-  const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
+  const [state, , modifyState] = useCustomRecoilState<State>(STATE);
   // const theme = useMantineTheme();
   const { setColorScheme, colorScheme } = useMantineColorScheme();
 
