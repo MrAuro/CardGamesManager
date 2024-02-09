@@ -61,6 +61,12 @@ export const DEFAULT_STATE: State = {
     turn: null,
     dealerCards: [],
     firstRound: false,
+    sideBets: {
+      twentyOnePlusThree: false,
+      betBehind: false,
+      perfectPairs: false,
+      insurance: false,
+    },
     pastGameSeenCards: [],
     seenCards: [],
     deckCount: 2,
@@ -89,6 +95,12 @@ export interface State {
     turn: string | null;
     dealerCards: Card[];
     firstRound: boolean;
+    sideBets: {
+      twentyOnePlusThree: boolean;
+      betBehind: boolean;
+      perfectPairs: boolean;
+      insurance: boolean;
+    };
 
     seenCards: Card[];
     pastGameSeenCards: Card[];

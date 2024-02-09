@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
-import App, { DB, STATE, State } from "./App";
+import App, { DB, DEFAULT_STATE, STATE, State } from "./App";
 import { MantineProvider, Container, Title, Divider, Button, JsonInput } from "@mantine/core";
 import { ModalsProvider } from "@mantine/modals";
 import { RecoilRoot, useRecoilState } from "recoil";
@@ -88,6 +88,7 @@ function RecoveryEditor() {
       <Button
         fullWidth
         variant="light"
+        my="sm"
         onClick={() => {
           let parsed = null;
           try {
@@ -99,6 +100,18 @@ function RecoveryEditor() {
         }}
       >
         Save to Disk
+      </Button>
+      <Button
+        fullWidth
+        color="red"
+        variant="light"
+        onClick={async () => {
+          setState({ ...DEFAULT_STATE });
+          DB.execute("UPDATE data SET data = ? WHERE id = 1", [JSON.stringify(DEFAULT_STATE)]);
+          window.location.reload();
+        }}
+      >
+        Reset to default
       </Button>
     </>
   );
