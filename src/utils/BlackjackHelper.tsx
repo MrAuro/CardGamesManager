@@ -14,11 +14,11 @@ export type BlackjackPlayer = {
   handPartialResult?: "BUST" | "BLACKJACK";
   handResult?: "WIN" | "LOSE" | "PUSH";
   sidebets: {
-    // 0 means no bet
-    twentyOnePlusThree: number;
-    perfectPairs: number;
+    // 0/null means no bet
+    twentyOnePlusThree: number | null;
+    perfectPairs: number | null;
     betBehind: {
-      bet: number;
+      bet: number | null;
       target: string | null; // Target player id
     };
   };

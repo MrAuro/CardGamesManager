@@ -2,7 +2,7 @@ import { Box, Button, Divider, Group, Paper, Text, Title, rem } from "@mantine/c
 import { modals } from "@mantine/modals";
 import { IconArrowsShuffle } from "@tabler/icons-react";
 import { GetRecommendedPlayerAction } from "blackjack-strategy";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { useRecoilState } from "recoil";
 import { STATE, State } from "../App";
 import CardPicker from "../components/CardPicker";
@@ -14,13 +14,28 @@ import { BlackjackPlayer, getCardTotal, getPlayer } from "../utils/BlackjackHelp
 import { Card, CardSuit, EMPTY_CARD, getRank, getRankInt } from "../utils/CardHelper";
 import { CardRank } from "../utils/PokerHelper";
 import { useCustomRecoilState } from "../utils/RecoilHelper";
+import _ from "lodash";
 
 export default function Blackjack() {
   const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
   const [betErrors, setBetErrors] = useState<{ id: string; msg: string }[]>([]);
+  const [sideBetErrors, setSideBetErrors] = useState<
+    { id: string; msg: string; sideBet: string }[]
+  >([]);
+  const [playerTotalBetErrors, setPlayerTotalBetErrors] = useState<{ id: string; msg: string }[]>(
+    []
+  );
 
   const [modalOpen, setModalOpen] = useState(false);
 
+  const [firstRender, setFirstRender] = useState(true);
+  useMemo(() => {
+    if (firstRender) {
+      setFirstRender(false);
+    }
+  }, []);
+
+  // Removes bet errors when a player is removed
   useEffect(() => {
     let newBetErrors: { id: string; msg: string }[] = [];
     for (let error of betErrors) {
@@ -47,6 +62,53 @@ export default function Blackjack() {
       setBetErrors(newBetErrors);
     }
   }, [betErrors]);
+
+  // Removes side bet errors when a player is removed or a side bet is disabled
+  useEffect(() => {
+    let newSideBetErrors: { id: string; msg: string; sideBet: string }[] = [];
+    for (let error of sideBetErrors) {
+      if (state.blackjack.players.find((p) => p.id === error.id)) {
+        if (error.sideBet === "21+3" && !state.blackjack.sideBets.twentyOnePlusThree) {
+          console.log("21+3 side bet is disabled, removing error");
+          continue;
+        }
+
+        if (error.sideBet === "perfectPairs" && !state.blackjack.sideBets.perfectPairs) {
+          console.log("Perfect pairs side bet is disabled, removing error");
+          continue;
+        }
+
+        if (error.sideBet === "betBehind" && !state.blackjack.sideBets.betBehind) {
+          console.log("Bet behind side bet is disabled, removing error");
+          continue;
+        }
+
+        newSideBetErrors.push(error);
+      }
+    }
+
+    // setBetErrors(newBetErrors);
+    // check if the newBetErrors are different from the old ones
+    let identical = true;
+    if (newSideBetErrors.length !== sideBetErrors.length) {
+      identical = false;
+    } else {
+      for (let i = 0; i < newSideBetErrors.length; i++) {
+        if (
+          newSideBetErrors[i].id !== sideBetErrors[i].id ||
+          newSideBetErrors[i].msg !== sideBetErrors[i].msg
+        ) {
+          identical = false;
+          break;
+        }
+      }
+    }
+
+    if (!identical) {
+      console.log(`Modifying side bet errors`);
+      setBetErrors(newSideBetErrors);
+    }
+  }, [sideBetErrors, state.blackjack.sideBets]);
 
   useKeyPress((event) => {
     if (!state.useKeybindings || modalOpen || state.activeTab !== "BLACKJACK") return;
@@ -114,7 +176,16 @@ export default function Blackjack() {
               }
             }
           } else if (state.blackjack.state === "NONE") {
-            startGame();
+            if (
+              state.blackjack.players.length <= 0 ||
+              betErrors.filter((p) => p !== null).length > 0 ||
+              sideBetErrors.length > 0 ||
+              playerTotalBetErrors.length > 0
+            ) {
+              alert("There are errors in the game, please fix them before starting");
+            } else {
+              startGame();
+            }
           }
         }
         break;
@@ -466,6 +537,184 @@ export default function Blackjack() {
     }
   };
 
+  const checkForSideBetErrors = (
+    player: BlackjackPlayer,
+    sideBets: string[] = ["Perfect Pairs", "21+3", "Bet Behind"],
+    value: number,
+    returnErrors: boolean = false
+  ): void | any[] => {
+    let _player = getPlayer(player.id, state.players);
+    let fakeState: any[] = [];
+    for (let sideBet of sideBets) {
+      let foundErrs = false;
+      let prevErr = false;
+      sideBetErrors.forEach((e) => {
+        if (e.id === _player!.id && e.sideBet === sideBet) {
+          prevErr = true;
+        }
+      });
+
+      let bet = parseFloat(`${value}`);
+      if (isNaN(bet)) {
+        foundErrs = true;
+
+        if (!prevErr) {
+          if (returnErrors) {
+            fakeState.push({
+              id: _player!.id,
+              msg: "Invalid bet amount",
+              sideBet: sideBet,
+            });
+          }
+          setSideBetErrors([
+            ...sideBetErrors,
+            {
+              id: _player!.id,
+              msg: "Invalid bet amount",
+              sideBet: sideBet,
+            },
+          ]);
+        }
+      }
+
+      if (bet < 0) {
+        foundErrs = true;
+
+        if (!prevErr) {
+          if (returnErrors) {
+            fakeState.push({
+              id: _player!.id,
+              msg: "Bet amount cannot be negative",
+              sideBet: sideBet,
+            });
+          } else {
+            setSideBetErrors([
+              ...sideBetErrors,
+              {
+                id: _player!.id,
+                msg: "Bet amount cannot be negative",
+                sideBet: sideBet,
+              },
+            ]);
+          }
+        }
+      }
+
+      if (bet > _player.balance) {
+        foundErrs = true;
+
+        if (!prevErr) {
+          if (returnErrors) {
+            fakeState.push({
+              id: _player!.id,
+              msg: "Insufficient funds",
+              sideBet: sideBet,
+            });
+          }
+        } else {
+          setSideBetErrors([
+            ...sideBetErrors,
+            {
+              id: _player!.id,
+              msg: "Insufficient funds",
+              sideBet: sideBet,
+            },
+          ]);
+        }
+      }
+
+      if (!foundErrs) {
+        if (returnErrors) {
+          fakeState = fakeState.filter((e) => e.id !== _player!.id || e.sideBet !== sideBet);
+        } else {
+          const filteredBetErrors = sideBetErrors.filter(
+            (sideBetError) => sideBetError.id !== _player!.id || sideBetError.sideBet !== sideBet
+          );
+
+          setSideBetErrors(filteredBetErrors);
+        }
+      }
+    }
+
+    if (returnErrors) {
+      return fakeState;
+    }
+  };
+
+  if (firstRender) {
+    if (state.blackjack.state == "NONE") {
+      /*
+        This is kind of hacky, but it works. Instead of updating the state directly, 
+        we push the errors to an array and then set the state at the end. This is done 
+        because otherwise the state would be overwritten by the next iteration of the loop
+      */
+      let _sideBetErrors = [];
+      let _totalBetErrors = [];
+
+      for (let i = state.blackjack.players.length - 1; i >= 0; i--) {
+        let total = state.blackjack.players[i].bet;
+
+        let player = state.blackjack.players[i];
+        checkForBetErrors(getPlayer(player.id, state.players));
+
+        if (state.blackjack.sideBets.perfectPairs) {
+          let perfectPairs = checkForSideBetErrors(
+            player,
+            ["Perfect Pairs"],
+            player.sidebets.perfectPairs || 0,
+            true
+          );
+
+          for (let err of perfectPairs as any[]) {
+            _sideBetErrors.push(err);
+          }
+
+          total += player.sidebets.perfectPairs || 0;
+        }
+
+        if (state.blackjack.sideBets.twentyOnePlusThree) {
+          let twentyOnePlusThree = checkForSideBetErrors(
+            player,
+            ["21+3"],
+            player.sidebets.twentyOnePlusThree || 0,
+            true
+          );
+
+          for (let err of twentyOnePlusThree as any[]) {
+            _sideBetErrors.push(err);
+          }
+
+          total += player.sidebets.twentyOnePlusThree || 0;
+        }
+
+        if (state.blackjack.sideBets.betBehind) {
+          let betBehind = checkForSideBetErrors(
+            player,
+            ["Bet Behind"],
+            player.sidebets.betBehind.bet || 0,
+            true
+          );
+
+          for (let err of betBehind as any[]) {
+            _sideBetErrors.push(err);
+          }
+
+          total += player.sidebets.betBehind.bet || 0;
+        }
+
+        if (total > getPlayer(player.id, state.players).balance) {
+          _totalBetErrors.push({
+            id: player.id,
+            msg: "Total bet exceeds balance",
+          });
+        }
+      }
+
+      setSideBetErrors(_sideBetErrors);
+      setPlayerTotalBetErrors(_totalBetErrors);
+    }
+  }
+
   const refundAndEndGame = () => {
     // Game has been canceled. Refund players all their bets
     let players = state.blackjack.players;
@@ -816,7 +1065,10 @@ export default function Blackjack() {
             fullWidth
             mt="sm"
             disabled={
-              state.blackjack.players.length <= 0 || betErrors.filter((p) => p !== null).length > 0
+              state.blackjack.players.length <= 0 ||
+              betErrors.filter((p) => p !== null).length > 0 ||
+              sideBetErrors.length > 0 ||
+              playerTotalBetErrors.length > 0
             }
             onClick={startGame}
           >
@@ -861,7 +1113,14 @@ export default function Blackjack() {
           <Title order={2} mb="sm">
             Players
           </Title>
-          <PlayerSelector betErrors={betErrors} setBetErrors={setBetErrors} />
+          <PlayerSelector
+            betErrors={betErrors}
+            setBetErrors={setBetErrors}
+            sideBetErrors={sideBetErrors}
+            playerBetErrors={playerTotalBetErrors}
+            setPlayerBetErrors={setPlayerTotalBetErrors}
+            checkForSideBetErrors={checkForSideBetErrors}
+          />
         </>
       );
       break;
