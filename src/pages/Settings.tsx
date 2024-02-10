@@ -337,28 +337,6 @@ export default function Settings() {
       <Checkbox
         mt={rem(5)}
         radius="sm"
-        label="Insurance"
-        labelPosition="right"
-        checked={state.blackjack.sideBets.insurance}
-        onChange={(event) => {
-          modifyState({
-            blackjack: {
-              sideBets: {
-                ...state.blackjack.sideBets,
-                insurance: event.currentTarget.checked,
-              },
-            },
-          });
-        }}
-        styles={{
-          input: {
-            cursor: "pointer",
-          },
-        }}
-      />
-      <Checkbox
-        mt={rem(5)}
-        radius="sm"
         label="Bet Behind"
         labelPosition="right"
         checked={state.blackjack.sideBets.betBehind}

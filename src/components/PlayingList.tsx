@@ -19,7 +19,6 @@ import classes from "../styles/PlayingList.module.css";
 import { BlackjackPlayer, getPlayer } from "../utils/BlackjackHelper";
 import { useCustomRecoilState } from "../utils/RecoilHelper";
 import PlayerListItem from "./PlayerListItem";
-import { Player } from "../types/Player";
 
 export default function PlayerSelector({
   betErrors,

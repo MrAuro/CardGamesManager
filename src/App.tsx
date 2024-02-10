@@ -75,7 +75,6 @@ export const DEFAULT_STATE: State = {
       twentyOnePlusThree: false,
       betBehind: false,
       perfectPairs: false,
-      insurance: false,
     },
     pastGameSeenCards: [],
     seenCards: [],
@@ -109,7 +108,6 @@ export interface State {
       twentyOnePlusThree: boolean;
       betBehind: boolean;
       perfectPairs: boolean;
-      insurance: boolean;
     };
 
     seenCards: Card[];
@@ -305,28 +303,6 @@ function App() {
                   sideBets: {
                     ...state.blackjack.sideBets,
                     perfectPairs: event.currentTarget.checked,
-                  },
-                },
-              });
-            }}
-            styles={{
-              input: {
-                cursor: "pointer",
-              },
-            }}
-          />
-          <Checkbox
-            mt={rem(5)}
-            radius="sm"
-            label="Insurance"
-            labelPosition="right"
-            checked={state.blackjack.sideBets.insurance}
-            onChange={(event) => {
-              modifyState({
-                blackjack: {
-                  sideBets: {
-                    ...state.blackjack.sideBets,
-                    insurance: event.currentTarget.checked,
                   },
                 },
               });

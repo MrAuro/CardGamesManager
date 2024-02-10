@@ -2,7 +2,7 @@ import { Box, Button, Divider, Group, Paper, Text, Title, rem } from "@mantine/c
 import { modals } from "@mantine/modals";
 import { IconArrowsShuffle } from "@tabler/icons-react";
 import { GetRecommendedPlayerAction } from "blackjack-strategy";
-import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import { useRecoilState } from "recoil";
 import { STATE, State } from "../App";
 import CardPicker from "../components/CardPicker";
@@ -157,6 +157,105 @@ export default function Blackjack() {
         val = "T";
         break;
 
+      case "Tab":
+        {
+          if (state.blackjack.state == "PLAYING") {
+            // Goes to the next suit
+            let suits = ["h", "d", "s", "c"] as CardSuit[];
+
+            if (currentTurnPlayer != null) {
+              let cards = [...currentTurnPlayer.cards];
+              let activeCard: Card;
+              let activeCardIndex;
+              if (currentTurnPlayer.cards.length <= 2) {
+                if (cards[1] == EMPTY_CARD) {
+                  activeCard = cards[0];
+                  activeCardIndex = 0;
+                } else {
+                  activeCard = cards[1];
+                  activeCardIndex = 1;
+                }
+              } else {
+                activeCard = cards[cards.length - 1];
+                activeCardIndex = cards.length - 1;
+              }
+
+              if (activeCard == EMPTY_CARD) {
+                event.preventDefault();
+                return;
+              }
+
+              let activeSuit = activeCard.slice(-1) as CardSuit;
+              let nextSuitIndex = suits.indexOf(activeSuit) + 1;
+              if (nextSuitIndex >= suits.length) {
+                nextSuitIndex = 0;
+              }
+
+              let newCard = activeCard.slice(0, -1) + suits[nextSuitIndex];
+
+              cards[activeCardIndex] = newCard as Card;
+
+              // modifyState does not work here for some reason
+              setState({
+                ...state,
+                blackjack: {
+                  ...state.blackjack,
+                  players: state.blackjack.players.map((p) => {
+                    if (p.id === currentTurnPlayer!.id) {
+                      return {
+                        ...p,
+                        cards: cards,
+                        doubledDown: false,
+                      };
+                    }
+                    return p;
+                  }),
+                },
+              });
+            } else if (state.blackjack.turn === "DEALER") {
+              let dealerCards = [...state.blackjack.dealerCards];
+              let activeCard: Card;
+              let activeCardIndex;
+              if (state.blackjack.dealerCards.length <= 2) {
+                if (dealerCards[1] == EMPTY_CARD) {
+                  activeCard = dealerCards[0];
+                  activeCardIndex = 0;
+                } else {
+                  activeCard = dealerCards[1];
+                  activeCardIndex = 1;
+                }
+              } else {
+                activeCard = dealerCards[dealerCards.length - 1];
+                activeCardIndex = dealerCards.length - 1;
+              }
+
+              if (activeCard == EMPTY_CARD) {
+                event.preventDefault();
+                return;
+              }
+
+              let activeSuit = activeCard.slice(-1) as CardSuit;
+              let nextSuitIndex = suits.indexOf(activeSuit) + 1;
+              if (nextSuitIndex >= suits.length) {
+                nextSuitIndex = 0;
+              }
+
+              let newCard = activeCard.slice(0, -1) + suits[nextSuitIndex];
+              dealerCards[activeCardIndex] = newCard as Card;
+
+              setState({
+                ...state,
+                blackjack: {
+                  ...state.blackjack,
+                  dealerCards: dealerCards,
+                },
+              });
+            }
+            event.preventDefault(); // Prevents tabbing to the next focusable element
+          }
+        }
+        break;
+
       case "Enter":
         {
           if (state.blackjack.state == "PLAYING" && state.activeTab == "BLACKJACK") {
@@ -280,9 +379,9 @@ export default function Blackjack() {
     }
 
     if (val != null) {
-      let randomSuit = (["h", "s", "d", "c"] as CardSuit[])[Math.floor(Math.random() * 4)];
+      // let randomSuit = (["h", "s", "d", "c"] as CardSuit[])[Math.floor(Math.random() * 4)];
       let rank: CardRank = val as CardRank;
-      let card: Card = `${rank}${randomSuit}` as Card;
+      let card: Card = `${rank}-` as Card;
 
       if (currentTurnPlayer != null) {
         let cards = [...currentTurnPlayer.cards];
@@ -727,6 +826,18 @@ export default function Blackjack() {
         ...getPlayer(player.splitFrom || player.id, newBasePlayers),
       };
       basePlayer.balance += player.bet;
+      if (state.blackjack.sideBets.perfectPairs) {
+        basePlayer.balance += player.sidebets.perfectPairs || 0;
+      }
+
+      if (state.blackjack.sideBets.twentyOnePlusThree) {
+        basePlayer.balance += player.sidebets.twentyOnePlusThree || 0;
+      }
+
+      if (state.blackjack.sideBets.betBehind) {
+        basePlayer.balance += player.sidebets.betBehind.bet || 0;
+      }
+
       resultStrings.push(`${basePlayer.name} was refunded $${player.bet.toFixed(2)}`);
 
       newBasePlayers = newBasePlayers.map((p) => {
@@ -803,6 +914,17 @@ export default function Blackjack() {
       if (basePlayer != null) {
         console.log("interfacing with", basePlayer, player.bet);
         basePlayer.balance -= player.bet;
+        if (state.blackjack.sideBets.perfectPairs) {
+          basePlayer.balance -= player.sidebets.perfectPairs || 0;
+        }
+
+        if (state.blackjack.sideBets.twentyOnePlusThree) {
+          basePlayer.balance -= player.sidebets.twentyOnePlusThree || 0;
+        }
+
+        if (state.blackjack.sideBets.betBehind) {
+          basePlayer.balance -= player.sidebets.betBehind.bet || 0;
+        }
       }
 
       newBasePlayers = newBasePlayers.map((p) => {
