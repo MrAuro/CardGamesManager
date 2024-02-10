@@ -747,6 +747,12 @@ export default function PlayerSelector({
                                 leftSectionPointerEvents="none"
                                 clearable
                                 searchable
+                                error={
+                                  bjPlayer.sidebets.betBehind.bet != 0 &&
+                                  !bjPlayer.sidebets.betBehind.target
+                                    ? "Select a player"
+                                    : undefined
+                                }
                                 value={bjPlayer.sidebets.betBehind.target}
                                 placeholder="Select player"
                                 onChange={(_, option) => {
