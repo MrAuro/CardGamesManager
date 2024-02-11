@@ -18,6 +18,9 @@ export default function DealerItem(props: {
   my?: string;
   disabled?: boolean;
   leftCardItem?: React.ReactNode;
+  setShowCardPicker?: (show: boolean) => void;
+  setCardPlayer?: (id: string) => void;
+  setCardIndex?: (index: number) => void;
   children?: React.ReactNode;
 }) {
   const { colorScheme } = useMantineColorScheme();
@@ -112,7 +115,15 @@ export default function DealerItem(props: {
             <Box ml="xs">{props.leftCardItem}</Box>
             {state.blackjack.dealerCards.map((card, index) => (
               <Box ml="xs" key={`DEALER${card}${index}`}>
-                <PlayingCard card={card} onClick={() => {}} disabled={!props.disabled} />
+                <PlayingCard
+                  card={card}
+                  onClick={() => {
+                    if (props.setShowCardPicker) props.setShowCardPicker(true);
+                    if (props.setCardPlayer) props.setCardPlayer("DEALER");
+                    if (props.setCardIndex) props.setCardIndex(index);
+                  }}
+                  disabled={!props.disabled}
+                />
               </Box>
             ))}
           </Paper>

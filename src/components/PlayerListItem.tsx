@@ -28,6 +28,7 @@ export default function PlayerListItem(props: {
   blackjackCardsFrom?: string;
   nameOverride?: string;
   leftCardItem?: React.ReactNode;
+  lefterCardItem?: React.ReactNode;
   onCardClick?: (card: string, index: number) => void;
   children?: React.ReactNode;
 }) {
@@ -133,6 +134,7 @@ export default function PlayerListItem(props: {
               justifyContent: "flex-end",
             }}
           >
+            {props.lefterCardItem}
             <Box ml="xs">{props.leftCardItem}</Box>
             {props.blackjackCardsFrom &&
               state.blackjack.players.map((player) => {

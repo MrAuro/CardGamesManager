@@ -2,6 +2,7 @@ import { Box, Button, Divider, Group, Paper, Text, Title, rem } from "@mantine/c
 import { modals } from "@mantine/modals";
 import { IconArrowsShuffle } from "@tabler/icons-react";
 import { GetRecommendedPlayerAction } from "blackjack-strategy";
+import _ from "lodash";
 import { ReactNode, useEffect, useMemo, useState } from "react";
 import { useRecoilState } from "recoil";
 import { STATE, State } from "../App";
@@ -10,11 +11,16 @@ import DealerItem from "../components/DealerItem";
 import PlayerListItem from "../components/PlayerListItem";
 import PlayerSelector from "../components/PlayingList";
 import { Player } from "../types/Player";
-import { BlackjackPlayer, getCardTotal, getPlayer } from "../utils/BlackjackHelper";
+import {
+  BlackjackPlayer,
+  findPerfectPairs,
+  findTwentyOnePlusThree,
+  getCardTotal,
+  getPlayer,
+} from "../utils/BlackjackHelper";
 import { Card, CardSuit, EMPTY_CARD, getRank, getRankInt } from "../utils/CardHelper";
 import { CardRank } from "../utils/PokerHelper";
 import { useCustomRecoilState } from "../utils/RecoilHelper";
-import _ from "lodash";
 
 export default function Blackjack() {
   const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
@@ -1261,6 +1267,15 @@ export default function Blackjack() {
 
           // console.log(`PLAYER ${player.id} SPLIT FROM ${player.splitFrom} (${player.split})`);
 
+          let perfectPair = findPerfectPairs(player.cards);
+
+          // We use the dealer's first card for the 21+3 side bet
+          let twentyOnePlusThree = findTwentyOnePlusThree([
+            player.cards[0],
+            player.cards[1],
+            state.blackjack.dealerCards[0],
+          ]);
+
           playerListItems.push({
             id: player.id,
             node: (
@@ -1355,6 +1370,80 @@ export default function Blackjack() {
                         </div>
                       </Paper>
                     </Box>
+                  </>
+                }
+                lefterCardItem={
+                  <>
+                    {state.blackjack.sideBets.perfectPairs && (
+                      <Box ml="xs">
+                        <Paper
+                          style={{
+                            width: "4.5rem",
+                            height: "4.5rem",
+                            backgroundColor: "transparent",
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              height: "100%",
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                              }}
+                            >
+                              <Text size="xs" ta="center" mb={0} c="dimmed" tt="capitalize">
+                                Perfect Pairs
+                              </Text>
+                              <Text size="sm" ta="center" mb={0} fw="bold" tt="capitalize">
+                                {perfectPair}
+                              </Text>
+                            </div>
+                          </div>
+                        </Paper>
+                      </Box>
+                    )}
+                    {state.blackjack.sideBets.twentyOnePlusThree && (
+                      <Box ml="xs">
+                        <Paper
+                          style={{
+                            width: "4.5rem",
+                            height: "4.5rem",
+                            backgroundColor: "transparent",
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              height: "100%",
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                              }}
+                            >
+                              <Text size="xs" ta="center" mb={0} c="dimmed">
+                                21+3
+                              </Text>
+                              <Text size="sm" ta="center" mb={0} fw="bold">
+                                {twentyOnePlusThree}
+                              </Text>
+                            </div>
+                          </div>
+                        </Paper>
+                      </Box>
+                    )}
                   </>
                 }
                 onCardClick={(_, index) => {
@@ -1464,6 +1553,9 @@ export default function Blackjack() {
         <>
           <DealerItem
             disabled={state.blackjack.turn !== "DEALER"}
+            setShowCardPicker={setShowCardPicker}
+            setCardPlayer={setCardPlayer}
+            setCardIndex={setCardIndex}
             leftCardItem={
               <>
                 <Box>
@@ -1622,30 +1714,42 @@ export default function Blackjack() {
       <CardPicker
         opened={showCardPicker}
         setOpened={setShowCardPicker}
-        hideSuit
         handleClose={(card) => {
           if (card != null) {
-            let player = state.blackjack.players.find((p) => p.id === cardPlayer);
-            if (player != null) {
-              console.log(player.cards, cardIndex, card);
-              let newCards: Card[] = [...player.cards];
-              newCards[cardIndex] = card;
+            if (cardPlayer === "DEALER") {
+              let newDealerCards: Card[] = [...state.blackjack.dealerCards];
+              newDealerCards[cardIndex] = card;
               modifyState({
                 blackjack: {
-                  players: state.blackjack.players.map((p) => {
-                    if (p.id === cardPlayer) {
-                      return {
-                        ...p,
-                        cards: newCards,
-                      };
-                    }
-                    return p;
-                  }),
+                  dealerCards: newDealerCards,
                 },
               });
               setShowCardPicker(false);
               setCardPlayer("");
               setCardIndex(0);
+            } else {
+              let player = state.blackjack.players.find((p) => p.id === cardPlayer);
+              if (player != null) {
+                console.log(player.cards, cardIndex, card);
+                let newCards: Card[] = [...player.cards];
+                newCards[cardIndex] = card;
+                modifyState({
+                  blackjack: {
+                    players: state.blackjack.players.map((p) => {
+                      if (p.id === cardPlayer) {
+                        return {
+                          ...p,
+                          cards: newCards,
+                        };
+                      }
+                      return p;
+                    }),
+                  },
+                });
+                setShowCardPicker(false);
+                setCardPlayer("");
+                setCardIndex(0);
+              }
             }
           }
         }}
