@@ -1610,76 +1610,128 @@ export default function Blackjack() {
                 }
                 lefterCardItem={
                   <>
-                    {state.blackjack.sideBets.perfectPairs && (
-                      <Box ml="xs">
-                        <Paper
-                          style={{
-                            width: "4.5rem",
-                            height: "4.5rem",
-                            backgroundColor: "transparent",
-                          }}
-                        >
-                          <div
+                    {state.blackjack.sideBets.betBehind &&
+                      player.sidebets.betBehind != null &&
+                      player.sidebets.betBehind.bet != null &&
+                      player.sidebets.betBehind.target != null &&
+                      player.sidebets.betBehind.bet > 0 && (
+                        <Box ml="xs">
+                          <Paper
                             style={{
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              height: "100%",
+                              width: "4.5rem",
+                              height: "4.5rem",
+                              backgroundColor: "transparent",
                             }}
                           >
                             <div
                               style={{
                                 display: "flex",
-                                flexDirection: "column",
+                                justifyContent: "center",
                                 alignItems: "center",
+                                height: "100%",
                               }}
                             >
-                              <Text size="xs" ta="center" mb={0} c="dimmed" tt="capitalize">
-                                Perfect Pairs
-                              </Text>
-                              <Text size="sm" ta="center" mb={0} fw="bold" tt="capitalize">
-                                {perfectPair}
-                              </Text>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <Text size="xs" ta="center" mb={0} c="dimmed">
+                                  Bet Behind
+                                </Text>
+                                <Text size="xs" ta="center" mb={0} mt={0} fw={500} tt="capitalize">
+                                  ${player.sidebets.betBehind.bet.toFixed(2)}
+                                </Text>
+                                <Text size="sm" ta="center" mb={0} fw="bold">
+                                  {getPlayer(player.sidebets.betBehind.target!, state.players).name}
+                                </Text>
+                              </div>
                             </div>
-                          </div>
-                        </Paper>
-                      </Box>
-                    )}
-                    {state.blackjack.sideBets.twentyOnePlusThree && (
-                      <Box ml="xs">
-                        <Paper
-                          style={{
-                            width: "4.5rem",
-                            height: "4.5rem",
-                            backgroundColor: "transparent",
-                          }}
-                        >
-                          <div
+                          </Paper>
+                        </Box>
+                      )}
+                    {state.blackjack.sideBets.perfectPairs &&
+                      player.sidebets.perfectPairs != null &&
+                      player.sidebets.perfectPairs > 0 && (
+                        <Box ml="xs">
+                          <Paper
                             style={{
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              height: "100%",
+                              width: "4.5rem",
+                              height: "4.5rem",
+                              backgroundColor: "transparent",
                             }}
                           >
                             <div
                               style={{
                                 display: "flex",
-                                flexDirection: "column",
+                                justifyContent: "center",
                                 alignItems: "center",
+                                height: "100%",
                               }}
                             >
-                              <Text size="xs" ta="center" mb={0} c="dimmed">
-                                21+3
-                              </Text>
-                              <Text size="sm" ta="center" mb={0} fw="bold">
-                                {twentyOnePlusThree}
-                              </Text>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <Text size="xs" ta="center" mb={0} c="dimmed" tt="capitalize">
+                                  Perfect Pairs
+                                </Text>
+                                <Text size="xs" ta="center" mb={0} mt={0} fw={500} tt="capitalize">
+                                  ${player.sidebets.perfectPairs.toFixed(2)}
+                                </Text>
+                                <Text size="sm" ta="center" mb={0} fw="bold" tt="capitalize">
+                                  {perfectPair}
+                                </Text>
+                              </div>
                             </div>
-                          </div>
-                        </Paper>
-                      </Box>
-                    )}
+                          </Paper>
+                        </Box>
+                      )}
+                    {state.blackjack.sideBets.twentyOnePlusThree &&
+                      player.sidebets.twentyOnePlusThree != null &&
+                      player.sidebets.twentyOnePlusThree > 0 && (
+                        <Box ml="xs">
+                          <Paper
+                            style={{
+                              width: "4.5rem",
+                              height: "4.5rem",
+                              backgroundColor: "transparent",
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                height: "100%",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <Text size="xs" ta="center" mb={0} c="dimmed">
+                                  21+3
+                                </Text>
+                                <Text size="xs" ta="center" mb={0} mt={0} fw={500} tt="capitalize">
+                                  ${player.sidebets.twentyOnePlusThree.toFixed(2)}
+                                </Text>
+                                <Text size="sm" ta="center" mb={0} fw="bold">
+                                  {twentyOnePlusThree}
+                                </Text>
+                              </div>
+                            </div>
+                          </Paper>
+                        </Box>
+                      )}
                   </>
                 }
                 onCardClick={(_, index) => {
