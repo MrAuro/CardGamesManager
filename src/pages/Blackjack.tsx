@@ -196,14 +196,10 @@ export default function Blackjack() {
                     activeCardIndex = cards.length - 1;
                   }
 
-                  console.log("Active card", activeCard, "Index", activeCardIndex);
-
                   if (activeCard == EMPTY_CARD) {
                     event.preventDefault();
                     return;
                   }
-
-                  console.log("Active card", activeCard);
 
                   let activeRank = getRank(activeCard);
                   let nextRankIndex = ranks.indexOf(activeRank) + 1;
@@ -213,8 +209,6 @@ export default function Blackjack() {
 
                   let newCard = ranks[nextRankIndex] + activeCard.slice(-1);
                   cards[activeCardIndex] = newCard as Card;
-
-                  console.log("New card", newCard);
 
                   setState({
                     ...state,
@@ -603,6 +597,120 @@ export default function Blackjack() {
 
       if (result == "WIN" || result == "BLACKJACK") {
         basePlayer.balance += payout; // Add the bet back
+      }
+
+      if (
+        state.blackjack.sideBets.perfectPairs &&
+        player.sidebets.perfectPairs != null &&
+        player.sidebets.perfectPairs > 0
+      ) {
+        let _payout = 0;
+        let perfectPairsPayout = findPerfectPairs(player.cards);
+        switch (perfectPairsPayout) {
+          case "None":
+            break;
+
+          case "Mixed":
+            _payout = player.sidebets.perfectPairs * 5;
+            break;
+
+          case "Colored":
+            _payout = player.sidebets.perfectPairs * 10;
+            break;
+
+          case "Perfect":
+            _payout = player.sidebets.perfectPairs * 30;
+            break;
+        }
+
+        basePlayer.balance += _payout;
+        resultStrings.push(`${basePlayer.name} won $${_payout.toFixed(2)} from Perfect Pairs`);
+      }
+
+      if (
+        state.blackjack.sideBets.twentyOnePlusThree &&
+        player.sidebets.twentyOnePlusThree != null &&
+        player.sidebets.twentyOnePlusThree > 0
+      ) {
+        let _payout = 0;
+        let twentyOnePlusThreePayout = findTwentyOnePlusThree([
+          player.cards[0],
+          player.cards[1],
+          state.blackjack.dealerCards[0],
+        ]);
+        switch (twentyOnePlusThreePayout) {
+          case "None":
+            break;
+
+          case "Flush":
+            _payout = player.sidebets.twentyOnePlusThree * 5;
+            break;
+
+          case "Straight":
+            _payout = player.sidebets.twentyOnePlusThree * 10;
+            break;
+
+          case "Three of a Kind":
+            _payout = player.sidebets.twentyOnePlusThree * 30;
+            break;
+
+          case "Straight Flush":
+            _payout = player.sidebets.twentyOnePlusThree * 40;
+            break;
+
+          case "Suited Three of a Kind":
+            _payout = player.sidebets.twentyOnePlusThree * 100;
+            break;
+        }
+
+        basePlayer.balance += _payout;
+        resultStrings.push(`${basePlayer.name} won $${_payout.toFixed(2)} from 21+3`);
+      }
+
+      if (
+        state.blackjack.sideBets.betBehind &&
+        player.sidebets.betBehind != null &&
+        player.sidebets.betBehind.bet != null &&
+        player.sidebets.betBehind.bet > 0 &&
+        player.sidebets.betBehind.target != null
+      ) {
+        let betBehindPayout = 0;
+        let betBehindPlayerResult: "BLACKJACK" | "WIN" | "LOSE" | "PUSH" = "LOSE";
+
+        if (playerTotal.total > 21) {
+          betBehindPlayerResult = "LOSE";
+        } else if (dealerTotal.total == playerTotal.total) {
+          betBehindPlayerResult = "PUSH";
+        } else if (playerTotal.total == 21) {
+          betBehindPlayerResult = "BLACKJACK";
+        } else if (dealerTotal.total > 21) {
+          betBehindPlayerResult = "WIN";
+        } else if (dealerTotal.total > playerTotal.total) {
+          betBehindPlayerResult = "LOSE";
+        } else if (dealerTotal.total < playerTotal.total) {
+          betBehindPlayerResult = "WIN";
+        }
+
+        let betBehindBet = player.sidebets.betBehind.bet;
+        if (betBehindPlayerResult == "BLACKJACK") {
+          betBehindPayout = betBehindBet * 1.5;
+        } else if (betBehindPlayerResult == "WIN") {
+          betBehindPayout = betBehindBet;
+        } else if (betBehindPlayerResult == "PUSH") {
+          betBehindPayout = betBehindBet;
+        }
+
+        if (betBehindPlayerResult == "WIN" || betBehindPlayerResult == "BLACKJACK") {
+          basePlayer.balance += betBehindPayout; // Add the bet back
+        }
+
+        if (betBehindPlayerResult == "WIN" || betBehindPlayerResult == "BLACKJACK") {
+          resultStrings.push(
+            `${basePlayer.name} won $${betBehindPayout.toFixed(2)} from bet behind ${
+              getPlayer(player.sidebets.betBehind.target!, state.players).name
+            }`
+          );
+        }
       }
 
       basePlayer.balance += payout;
