@@ -609,16 +609,23 @@ export default function Blackjack() {
             break;
 
           case "Mixed":
-            _payout = player.sidebets.perfectPairs * 5;
+            _payout =
+              player.sidebets.perfectPairs * state.blackjack.sideBets.perfectPairsPayouts.mixed;
             break;
 
           case "Colored":
-            _payout = player.sidebets.perfectPairs * 10;
+            _payout =
+              player.sidebets.perfectPairs * state.blackjack.sideBets.perfectPairsPayouts.colored;
             break;
 
           case "Perfect":
-            _payout = player.sidebets.perfectPairs * 30;
+            _payout =
+              player.sidebets.perfectPairs * state.blackjack.sideBets.perfectPairsPayouts.perfect;
             break;
+        }
+
+        if (_payout > 0) {
+          _payout += player.sidebets.perfectPairs;
         }
 
         basePlayer.balance += _payout;
@@ -641,24 +648,38 @@ export default function Blackjack() {
             break;
 
           case "Flush":
-            _payout = player.sidebets.twentyOnePlusThree * 5;
+            _payout =
+              player.sidebets.twentyOnePlusThree *
+              state.blackjack.sideBets.twentyOnePlusThreePayouts.flush;
             break;
 
           case "Straight":
-            _payout = player.sidebets.twentyOnePlusThree * 10;
+            _payout =
+              player.sidebets.twentyOnePlusThree *
+              state.blackjack.sideBets.twentyOnePlusThreePayouts.straight;
             break;
 
           case "Three of a Kind":
-            _payout = player.sidebets.twentyOnePlusThree * 30;
+            _payout =
+              player.sidebets.twentyOnePlusThree *
+              state.blackjack.sideBets.twentyOnePlusThreePayouts.threeOfAKind;
             break;
 
           case "Straight Flush":
-            _payout = player.sidebets.twentyOnePlusThree * 40;
+            _payout =
+              player.sidebets.twentyOnePlusThree *
+              state.blackjack.sideBets.twentyOnePlusThreePayouts.straightFlush;
             break;
 
           case "Suited Three of a Kind":
-            _payout = player.sidebets.twentyOnePlusThree * 100;
+            _payout =
+              player.sidebets.twentyOnePlusThree *
+              state.blackjack.sideBets.twentyOnePlusThreePayouts.suitedThreeOfAKind;
             break;
+        }
+
+        if (_payout > 0) {
+          _payout += player.sidebets.twentyOnePlusThree;
         }
 
         basePlayer.balance += _payout;
