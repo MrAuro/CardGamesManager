@@ -31,7 +31,9 @@ export default function Blackjack() {
     []
   );
 
-  const [zeroHeld, setZeroHeld] = useState(false);
+  // Equals held is no longer used, however in the future it may
+  // be used as another modifier key for keybindings
+  // const [equalsHeld, setEqualsHeld] = useState(false);
 
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -119,9 +121,9 @@ export default function Blackjack() {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "0") {
-        setZeroHeld(true);
-      }
+      // if (event.key === "=") {
+      //   setEqualsHeld(true);
+      // }
 
       if (!state.useKeybindings || modalOpen || state.activeTab !== "BLACKJACK") return;
 
@@ -172,10 +174,10 @@ export default function Blackjack() {
           val = "T";
           break;
 
-        case "Tab":
+        case "=":
           {
             if (state.blackjack.state == "PLAYING") {
-              if (zeroHeld) {
+              {
                 // Tab through T, J, Q, K
                 let ranks = ["T", "J", "Q", "K"] as CardRank[];
 
@@ -266,100 +268,106 @@ export default function Blackjack() {
                   });
                 }
                 event.preventDefault();
-              } else {
-                // Goes to the next suit
-                let suits = ["h", "d", "s", "c"] as CardSuit[];
-
-                if (currentTurnPlayer != null) {
-                  let cards = [...currentTurnPlayer.cards];
-                  let activeCard: Card;
-                  let activeCardIndex;
-                  if (currentTurnPlayer.cards.length <= 2) {
-                    if (cards[1] == EMPTY_CARD) {
-                      activeCard = cards[0];
-                      activeCardIndex = 0;
-                    } else {
-                      activeCard = cards[1];
-                      activeCardIndex = 1;
-                    }
-                  } else {
-                    activeCard = cards[cards.length - 1];
-                    activeCardIndex = cards.length - 1;
-                  }
-
-                  if (activeCard == EMPTY_CARD) {
-                    event.preventDefault();
-                    return;
-                  }
-
-                  let activeSuit = activeCard.slice(-1) as CardSuit;
-                  let nextSuitIndex = suits.indexOf(activeSuit) + 1;
-                  if (nextSuitIndex >= suits.length) {
-                    nextSuitIndex = 0;
-                  }
-
-                  let newCard = activeCard.slice(0, -1) + suits[nextSuitIndex];
-
-                  cards[activeCardIndex] = newCard as Card;
-
-                  // modifyState does not work here for some reason
-                  setState({
-                    ...state,
-                    blackjack: {
-                      ...state.blackjack,
-                      players: state.blackjack.players.map((p) => {
-                        if (p.id === currentTurnPlayer!.id) {
-                          return {
-                            ...p,
-                            cards: cards,
-                            doubledDown: false,
-                          };
-                        }
-                        return p;
-                      }),
-                    },
-                  });
-                } else if (state.blackjack.turn === "DEALER") {
-                  let dealerCards = [...state.blackjack.dealerCards];
-                  let activeCard: Card;
-                  let activeCardIndex;
-                  if (state.blackjack.dealerCards.length <= 2) {
-                    if (dealerCards[1] == EMPTY_CARD) {
-                      activeCard = dealerCards[0];
-                      activeCardIndex = 0;
-                    } else {
-                      activeCard = dealerCards[1];
-                      activeCardIndex = 1;
-                    }
-                  } else {
-                    activeCard = dealerCards[dealerCards.length - 1];
-                    activeCardIndex = dealerCards.length - 1;
-                  }
-
-                  if (activeCard == EMPTY_CARD) {
-                    event.preventDefault();
-                    return;
-                  }
-
-                  let activeSuit = activeCard.slice(-1) as CardSuit;
-                  let nextSuitIndex = suits.indexOf(activeSuit) + 1;
-                  if (nextSuitIndex >= suits.length) {
-                    nextSuitIndex = 0;
-                  }
-
-                  let newCard = activeCard.slice(0, -1) + suits[nextSuitIndex];
-                  dealerCards[activeCardIndex] = newCard as Card;
-
-                  setState({
-                    ...state,
-                    blackjack: {
-                      ...state.blackjack,
-                      dealerCards: dealerCards,
-                    },
-                  });
-                }
-                event.preventDefault(); // Prevents tabbing to the next focusable element
               }
+            }
+          }
+          break;
+
+        case "Tab":
+          {
+            if (state.blackjack.state == "PLAYING") {
+              // Goes to the next suit
+              let suits = ["h", "d", "s", "c"] as CardSuit[];
+
+              if (currentTurnPlayer != null) {
+                let cards = [...currentTurnPlayer.cards];
+                let activeCard: Card;
+                let activeCardIndex;
+                if (currentTurnPlayer.cards.length <= 2) {
+                  if (cards[1] == EMPTY_CARD) {
+                    activeCard = cards[0];
+                    activeCardIndex = 0;
+                  } else {
+                    activeCard = cards[1];
+                    activeCardIndex = 1;
+                  }
+                } else {
+                  activeCard = cards[cards.length - 1];
+                  activeCardIndex = cards.length - 1;
+                }
+
+                if (activeCard == EMPTY_CARD) {
+                  event.preventDefault();
+                  return;
+                }
+
+                let activeSuit = activeCard.slice(-1) as CardSuit;
+                let nextSuitIndex = suits.indexOf(activeSuit) + 1;
+                if (nextSuitIndex >= suits.length) {
+                  nextSuitIndex = 0;
+                }
+
+                let newCard = activeCard.slice(0, -1) + suits[nextSuitIndex];
+
+                cards[activeCardIndex] = newCard as Card;
+
+                // modifyState does not work here for some reason
+                setState({
+                  ...state,
+                  blackjack: {
+                    ...state.blackjack,
+                    players: state.blackjack.players.map((p) => {
+                      if (p.id === currentTurnPlayer!.id) {
+                        return {
+                          ...p,
+                          cards: cards,
+                          doubledDown: false,
+                        };
+                      }
+                      return p;
+                    }),
+                  },
+                });
+              } else if (state.blackjack.turn === "DEALER") {
+                let dealerCards = [...state.blackjack.dealerCards];
+                let activeCard: Card;
+                let activeCardIndex;
+                if (state.blackjack.dealerCards.length <= 2) {
+                  if (dealerCards[1] == EMPTY_CARD) {
+                    activeCard = dealerCards[0];
+                    activeCardIndex = 0;
+                  } else {
+                    activeCard = dealerCards[1];
+                    activeCardIndex = 1;
+                  }
+                } else {
+                  activeCard = dealerCards[dealerCards.length - 1];
+                  activeCardIndex = dealerCards.length - 1;
+                }
+
+                if (activeCard == EMPTY_CARD) {
+                  event.preventDefault();
+                  return;
+                }
+
+                let activeSuit = activeCard.slice(-1) as CardSuit;
+                let nextSuitIndex = suits.indexOf(activeSuit) + 1;
+                if (nextSuitIndex >= suits.length) {
+                  nextSuitIndex = 0;
+                }
+
+                let newCard = activeCard.slice(0, -1) + suits[nextSuitIndex];
+                dealerCards[activeCardIndex] = newCard as Card;
+
+                setState({
+                  ...state,
+                  blackjack: {
+                    ...state.blackjack,
+                    dealerCards: dealerCards,
+                  },
+                });
+              }
+              event.preventDefault(); // Prevents tabbing to the next focusable element
             }
           }
           break;
@@ -531,25 +539,20 @@ export default function Blackjack() {
       }
     };
 
+    /*
     const handleKeyUp = (event: KeyboardEvent) => {
-      if (event.key === "0") {
-        setZeroHeld(false);
-      }
+      setEqualsHeld(false);
     };
+    */
 
     window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
+    // window.addEventListener("keyup", handleKeyUp);
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
+      // window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [state, modalOpen, zeroHeld]);
-
-  useKeyPress((event) => {
-    console.log(event.key);
-    //
-  });
+  }, [state, modalOpen]);
 
   const [showCardPicker, setShowCardPicker] = useState(false);
   const [cardIndex, setCardIndex] = useState(0);
