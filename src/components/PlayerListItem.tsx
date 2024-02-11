@@ -95,67 +95,84 @@ export default function PlayerListItem(props: {
         if (props.editPlayer != null) props.editPlayer(props.player);
       }}
     >
-      {props.showHandle && (
-        <div {...props.provided.dragHandleProps} className={classes.dragHandle}>
-          <IconGripVertical style={{ width: "auto" }} />{" "}
-        </div>
-      )}
-      <Container
+      <div
         style={{
-          flex: 1,
+          display: "flex",
+          width: "100%",
           justifyContent: "space-between",
+          height: "100%",
         }}
-        pl="sm"
       >
-        <Group justify="space-between">
-          <Paper style={{ backgroundColor: "transparent" }}>
-            <Text
-              size={!props.disabled ? "xl" : "lg"}
-              fw={!props.disabled ? "bold" : 500}
-              tt="capitalize"
-            >
-              {props.nameOverride ?? props.player.name}
-            </Text>
-            {bjBet && (
-              <Text size={rem(16)} fw={500}>
-                ${bjBet}
-              </Text>
-            )}
-            <Text size="sm" c="dimmed">
-              ${props.player.balance.toFixed(2)}
-            </Text>
-          </Paper>
-
-          <Paper
+        {props.showHandle && (
+          <div
+            {...props.provided.dragHandleProps}
             style={{
-              backgroundColor: "transparent",
-
               display: "flex",
-              justifyContent: "flex-end",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "grab",
             }}
           >
-            {props.lefterCardItem}
-            <Box ml="xs">{props.leftCardItem}</Box>
-            {props.blackjackCardsFrom &&
-              state.blackjack.players.map((player) => {
-                if (player.id === props.blackjackCardsFrom) {
-                  return player.cards.map((card, index) => (
-                    <Box ml="xs" key={`${player.id}${card}${index}`}>
-                      <PlayingCard
-                        card={card}
-                        onClick={(card: Card) => {
-                          if (props.onCardClick != null) props.onCardClick(card, index);
-                        }}
-                        disabled={!props.disabled}
-                      />
-                    </Box>
-                  ));
-                }
-              })}
-          </Paper>
-        </Group>
-        {props.children}
-      </Container>
+            <IconGripVertical style={{ width: "auto" }} />{" "}
+          </div>
+        )}
+        <Container
+          style={{
+            flex: 1,
+            justifyContent: "space-between",
+          }}
+          pl="sm"
+        >
+          <Group justify="space-between">
+            <Paper style={{ backgroundColor: "transparent" }}>
+              <Text
+                size={!props.disabled ? "xl" : "lg"}
+                fw={!props.disabled ? "bold" : 500}
+                tt="capitalize"
+              >
+                {props.nameOverride ?? props.player.name}
+              </Text>
+              {bjBet && (
+                <Text size={rem(16)} fw={500}>
+                  ${bjBet}
+                </Text>
+              )}
+              <Text size="sm" c="dimmed">
+                ${props.player.balance.toFixed(2)}
+              </Text>
+            </Paper>
+
+            <Paper
+              style={{
+                backgroundColor: "transparent",
+
+                display: "flex",
+                justifyContent: "flex-end",
+              }}
+            >
+              {props.lefterCardItem}
+              <Box ml="xs">{props.leftCardItem}</Box>
+              {props.blackjackCardsFrom &&
+                state.blackjack.players.map((player) => {
+                  if (player.id === props.blackjackCardsFrom) {
+                    return player.cards.map((card, index) => (
+                      <Box ml="xs" key={`${player.id}${card}${index}`}>
+                        <PlayingCard
+                          card={card}
+                          onClick={(card: Card) => {
+                            if (props.onCardClick != null) props.onCardClick(card, index);
+                          }}
+                          disabled={!props.disabled}
+                        />
+                      </Box>
+                    ));
+                  }
+                })}
+            </Paper>
+          </Group>
+          {props.children}
+        </Container>
+      </div>
     </Paper>
   );
 }
