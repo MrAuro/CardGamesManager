@@ -4,7 +4,6 @@ import { IconArrowsShuffle } from "@tabler/icons-react";
 import { GetRecommendedPlayerAction } from "blackjack-strategy";
 import _ from "lodash";
 import { ReactNode, useEffect, useMemo, useState } from "react";
-import { useRecoilState } from "recoil";
 import { STATE, State } from "../App";
 import CardPicker from "../components/CardPicker";
 import DealerItem from "../components/DealerItem";
@@ -2067,15 +2066,4 @@ export default function Blackjack() {
       {content}
     </>
   );
-}
-
-function useKeyPress(callback: (event: KeyboardEvent) => void) {
-  const state = useRecoilState(STATE);
-
-  useEffect(() => {
-    window.addEventListener("keydown", callback);
-    return () => {
-      window.removeEventListener("keydown", callback);
-    };
-  }, [state]);
 }
