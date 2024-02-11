@@ -525,8 +525,6 @@ export default function Blackjack() {
           modifyState({
             blackjack: {
               dealerCards: dealerCards,
-              turn: state.blackjack.firstRound ? state.blackjack.players[0].id : "DEALER",
-              firstRound: false,
             },
           });
         }
