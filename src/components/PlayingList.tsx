@@ -3,6 +3,7 @@ import {
   Button,
   Divider,
   Grid,
+  Group,
   NumberInput,
   Select,
   Text,
@@ -10,21 +11,29 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { useListState } from "@mantine/hooks";
-import { IconCurrencyDollar, IconSearch } from "@tabler/icons-react";
+import { IconCurrencyDollar, IconSearch, IconUserSearch } from "@tabler/icons-react";
 import cx from "clsx";
 import { useEffect, useState } from "react";
 import { STATE, State } from "../App";
 import classes from "../styles/PlayingList.module.css";
-import { BlackjackPlayer } from "../utils/BlackjackHelper";
+import { BlackjackPlayer, getPlayer } from "../utils/BlackjackHelper";
 import { useCustomRecoilState } from "../utils/RecoilHelper";
 import PlayerListItem from "./PlayerListItem";
 
 export default function PlayerSelector({
   betErrors,
   setBetErrors,
+  sideBetErrors,
+  playerBetErrors,
+  setPlayerBetErrors,
+  checkForSideBetErrors,
 }: {
   betErrors: { id: string; msg: string }[];
   setBetErrors: (betErrors: { id: string; msg: string }[]) => void;
+  sideBetErrors: { id: string; msg: string; sideBet: string }[];
+  playerBetErrors: { id: string; msg: string }[];
+  setPlayerBetErrors: (playerBetErrors: { id: string; msg: string }[]) => void;
+  checkForSideBetErrors: (player: BlackjackPlayer, sideBets: string[], value: number) => void;
 }) {
   const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
   const theme = useMantineTheme();
@@ -80,7 +89,7 @@ export default function PlayerSelector({
                   showHandle
                   provided={provided}
                 >
-                  <Divider my="xs" />
+                  <Divider mb="xs" />
                   {/* We don't use the label prop on NumberInput as it shifts the buttons */}
                   <Text size="sm" fw={500} mb={rem(2)} ml={rem(2)}>
                     Bet Amount
@@ -93,7 +102,10 @@ export default function PlayerSelector({
                         fixedDecimalScale
                         thousandSeparator=","
                         value={bjPlayer.bet}
-                        error={betErrors.find((e) => e.id === _player!.id)?.msg}
+                        error={
+                          betErrors.find((e) => e.id === _player!.id)?.msg ||
+                          playerBetErrors.find((e) => e.id === _player!.id)?.msg
+                        }
                         onChange={(value) => {
                           if (_player == null) return;
 
@@ -151,6 +163,32 @@ export default function PlayerSelector({
                               }),
                             },
                           });
+
+                          let totalBet = bet;
+                          if (state.blackjack.sideBets.perfectPairs) {
+                            totalBet += bjPlayer!.sidebets.perfectPairs || 0;
+                          }
+                          if (state.blackjack.sideBets.twentyOnePlusThree) {
+                            totalBet += bjPlayer!.sidebets.twentyOnePlusThree || 0;
+                          }
+                          if (state.blackjack.sideBets.betBehind) {
+                            totalBet += bjPlayer!.sidebets.betBehind.bet || 0;
+                          }
+
+                          console.log(
+                            `Total bet for ${_player.name} is ${totalBet} (${bet}) (balance: ${_player.balance})`
+                          );
+                          if (totalBet > _player.balance) {
+                            setPlayerBetErrors([
+                              ...playerBetErrors.filter((e) => e.id !== _player!.id),
+                              {
+                                id: _player.id,
+                                msg: "Total bets exceeds balance",
+                              },
+                            ]);
+                          } else {
+                            setPlayerBetErrors(playerBetErrors.filter((e) => e.id !== _player!.id));
+                          }
                         }}
                         leftSection={<IconCurrencyDollar />}
                       />
@@ -179,6 +217,38 @@ export default function PlayerSelector({
                                 }),
                               },
                             });
+
+                            let bet = bjPlayer!.bet + 5;
+
+                            let totalBet = bet;
+                            if (state.blackjack.sideBets.perfectPairs) {
+                              totalBet += bjPlayer!.sidebets.perfectPairs || 0;
+                            }
+                            if (state.blackjack.sideBets.twentyOnePlusThree) {
+                              totalBet += bjPlayer!.sidebets.twentyOnePlusThree || 0;
+                            }
+                            if (state.blackjack.sideBets.betBehind) {
+                              totalBet += bjPlayer!.sidebets.betBehind.bet || 0;
+                            }
+
+                            console.log(
+                              `Total bet for ${_player!.name} is ${totalBet} (${bet}) (balance: ${
+                                _player!.balance
+                              })`
+                            );
+                            if (totalBet > _player!.balance) {
+                              setPlayerBetErrors([
+                                ...playerBetErrors.filter((e) => e.id !== _player!.id),
+                                {
+                                  id: _player!.id,
+                                  msg: "Total bets exceeds balance",
+                                },
+                              ]);
+                            } else {
+                              setPlayerBetErrors(
+                                playerBetErrors.filter((e) => e.id !== _player!.id)
+                              );
+                            }
                           }}
                         >
                           +5
@@ -205,6 +275,38 @@ export default function PlayerSelector({
                                 }),
                               },
                             });
+
+                            let bet = bjPlayer!.bet * 2;
+
+                            let totalBet = bet;
+                            if (state.blackjack.sideBets.perfectPairs) {
+                              totalBet += bjPlayer!.sidebets.perfectPairs || 0;
+                            }
+                            if (state.blackjack.sideBets.twentyOnePlusThree) {
+                              totalBet += bjPlayer!.sidebets.twentyOnePlusThree || 0;
+                            }
+                            if (state.blackjack.sideBets.betBehind) {
+                              totalBet += bjPlayer!.sidebets.betBehind.bet || 0;
+                            }
+
+                            console.log(
+                              `Total bet for ${_player!.name} is ${totalBet} (${bet}) (balance: ${
+                                _player!.balance
+                              })`
+                            );
+                            if (totalBet > _player!.balance) {
+                              setPlayerBetErrors([
+                                ...playerBetErrors.filter((e) => e.id !== _player!.id),
+                                {
+                                  id: _player!.id,
+                                  msg: "Total bets exceeds balance",
+                                },
+                              ]);
+                            } else {
+                              setPlayerBetErrors(
+                                playerBetErrors.filter((e) => e.id !== _player!.id)
+                              );
+                            }
                           }}
                         >
                           X2
@@ -232,6 +334,38 @@ export default function PlayerSelector({
                                 }),
                               },
                             });
+
+                            let bet = bjPlayer!.bet * 0.5;
+
+                            let totalBet = bet;
+                            if (state.blackjack.sideBets.perfectPairs) {
+                              totalBet += bjPlayer!.sidebets.perfectPairs || 0;
+                            }
+                            if (state.blackjack.sideBets.twentyOnePlusThree) {
+                              totalBet += bjPlayer!.sidebets.twentyOnePlusThree || 0;
+                            }
+                            if (state.blackjack.sideBets.betBehind) {
+                              totalBet += bjPlayer!.sidebets.betBehind.bet || 0;
+                            }
+
+                            console.log(
+                              `Total bet for ${_player!.name} is ${totalBet} (${bet}) (balance: ${
+                                _player!.balance
+                              })`
+                            );
+                            if (totalBet > _player!.balance) {
+                              setPlayerBetErrors([
+                                ...playerBetErrors.filter((e) => e.id !== _player!.id),
+                                {
+                                  id: _player!.id,
+                                  msg: "Total bets exceeds balance",
+                                },
+                              ]);
+                            } else {
+                              setPlayerBetErrors(
+                                playerBetErrors.filter((e) => e.id !== _player!.id)
+                              );
+                            }
                           }}
                         >
                           1/2
@@ -259,6 +393,38 @@ export default function PlayerSelector({
                                 }),
                               },
                             });
+
+                            let bet = _player!.balance;
+
+                            let totalBet = bet;
+                            if (state.blackjack.sideBets.perfectPairs) {
+                              totalBet += bjPlayer!.sidebets.perfectPairs || 0;
+                            }
+                            if (state.blackjack.sideBets.twentyOnePlusThree) {
+                              totalBet += bjPlayer!.sidebets.twentyOnePlusThree || 0;
+                            }
+                            if (state.blackjack.sideBets.betBehind) {
+                              totalBet += bjPlayer!.sidebets.betBehind.bet || 0;
+                            }
+
+                            console.log(
+                              `Total bet for ${_player!.name} is ${totalBet} (${bet}) (balance: ${
+                                _player!.balance
+                              })`
+                            );
+                            if (totalBet > _player!.balance) {
+                              setPlayerBetErrors([
+                                ...playerBetErrors.filter((e) => e.id !== _player!.id),
+                                {
+                                  id: _player!.id,
+                                  msg: "Total bets exceeds balance",
+                                },
+                              ]);
+                            } else {
+                              setPlayerBetErrors(
+                                playerBetErrors.filter((e) => e.id !== _player!.id)
+                              );
+                            }
                           }}
                         >
                           Max
@@ -284,6 +450,10 @@ export default function PlayerSelector({
                               if (index != -1) {
                                 handlers.remove(index);
                               }
+
+                              setPlayerBetErrors(
+                                playerBetErrors.filter((e) => e.id !== _player!.id)
+                              );
                             }
                           }}
                         >
@@ -292,6 +462,340 @@ export default function PlayerSelector({
                       </Button.Group>
                     </Grid.Col>
                   </Grid>
+                  {amountOfSideBetsEnabled(state) > 0 && (
+                    <>
+                      <Divider my="xs" />
+                      <Grid columns={amountOfSideBetsEnabled(state) * 12}>
+                        {state.blackjack.sideBets.perfectPairs && (
+                          <Grid.Col
+                            span={
+                              amountOfSideBetsEnabled(state) *
+                              12 *
+                              (state.blackjack.sideBets.betBehind
+                                ? state.blackjack.sideBets.twentyOnePlusThree
+                                  ? 0.2
+                                  : 0.4
+                                : 1 / amountOfSideBetsEnabled(state))
+                            }
+                          >
+                            {" "}
+                            <NumberInput
+                              label="Perfect Pairs"
+                              radius="md"
+                              decimalScale={2}
+                              fixedDecimalScale
+                              thousandSeparator=","
+                              leftSection={<IconCurrencyDollar />}
+                              allowNegative={false}
+                              error={
+                                sideBetErrors.find(
+                                  (e) => e.id === _player!.id && e.sideBet === "Perfect Pairs"
+                                )?.msg || playerBetErrors.find((e) => e.id === _player!.id)?.msg
+                              }
+                              value={bjPlayer.sidebets.perfectPairs || 0}
+                              onChange={(value) => {
+                                if (bjPlayer == null) return;
+
+                                checkForSideBetErrors(
+                                  bjPlayer,
+                                  ["Perfect Pairs"],
+                                  parseFloat(`${value}`)
+                                );
+
+                                setState({
+                                  ...state,
+                                  blackjack: {
+                                    ...state.blackjack,
+                                    players: state.blackjack.players.map((p) => {
+                                      if (bjPlayer)
+                                        if (p.id === bjPlayer.id) {
+                                          return {
+                                            ...p,
+                                            sidebets: {
+                                              ...p.sidebets,
+                                              perfectPairs: parseFloat(`${value}`),
+                                            },
+                                          };
+                                        }
+
+                                      return p;
+                                    }),
+                                  },
+                                });
+
+                                let bet = parseFloat(`${value}`);
+
+                                let totalBet = bet + bjPlayer!.bet;
+
+                                if (state.blackjack.sideBets.twentyOnePlusThree) {
+                                  totalBet += bjPlayer!.sidebets.twentyOnePlusThree || 0;
+                                }
+                                if (state.blackjack.sideBets.betBehind) {
+                                  totalBet += bjPlayer!.sidebets.betBehind.bet || 0;
+                                }
+
+                                console.log(
+                                  `Total bet for ${
+                                    _player!.name
+                                  } is ${totalBet} (${bet}) (balance: ${_player!.balance})`
+                                );
+                                if (totalBet > _player!.balance) {
+                                  setPlayerBetErrors([
+                                    ...playerBetErrors.filter((e) => e.id !== _player!.id),
+                                    {
+                                      id: _player!.id,
+                                      msg: "Total bets exceeds balance",
+                                    },
+                                  ]);
+                                } else {
+                                  setPlayerBetErrors(
+                                    playerBetErrors.filter((e) => e.id !== _player!.id)
+                                  );
+                                }
+                              }}
+                            />
+                          </Grid.Col>
+                        )}
+                        {state.blackjack.sideBets.twentyOnePlusThree && (
+                          <Grid.Col
+                            span={
+                              amountOfSideBetsEnabled(state) *
+                              12 *
+                              (state.blackjack.sideBets.betBehind
+                                ? state.blackjack.sideBets.perfectPairs
+                                  ? 0.2
+                                  : 0.4
+                                : 1 / amountOfSideBetsEnabled(state))
+                            }
+                          >
+                            {" "}
+                            <NumberInput
+                              label="21+3"
+                              radius="md"
+                              decimalScale={2}
+                              fixedDecimalScale
+                              thousandSeparator=","
+                              leftSection={<IconCurrencyDollar />}
+                              allowNegative={false}
+                              error={
+                                sideBetErrors.find(
+                                  (e) => e.id === _player!.id && e.sideBet === "21+3"
+                                )?.msg || playerBetErrors.find((e) => e.id === _player!.id)?.msg
+                              }
+                              value={bjPlayer.sidebets.twentyOnePlusThree || 0}
+                              onChange={(value) => {
+                                if (bjPlayer == null) return;
+
+                                checkForSideBetErrors(bjPlayer, ["21+3"], parseFloat(`${value}`));
+
+                                setState({
+                                  ...state,
+                                  blackjack: {
+                                    ...state.blackjack,
+                                    players: state.blackjack.players.map((p) => {
+                                      if (bjPlayer)
+                                        if (p.id === bjPlayer.id) {
+                                          return {
+                                            ...p,
+                                            sidebets: {
+                                              ...p.sidebets,
+                                              twentyOnePlusThree: parseFloat(`${value}`),
+                                            },
+                                          };
+                                        }
+
+                                      return p;
+                                    }),
+                                  },
+                                });
+
+                                let bet = parseFloat(`${value}`);
+
+                                let totalBet = bet + bjPlayer!.bet;
+
+                                if (state.blackjack.sideBets.perfectPairs) {
+                                  totalBet += bjPlayer!.sidebets.perfectPairs || 0;
+                                }
+                                if (state.blackjack.sideBets.betBehind) {
+                                  totalBet += bjPlayer!.sidebets.betBehind.bet || 0;
+                                }
+
+                                console.log(
+                                  `Total bet for ${
+                                    _player!.name
+                                  } is ${totalBet} (${bet}) (balance: ${_player!.balance})`
+                                );
+                                if (totalBet > _player!.balance) {
+                                  setPlayerBetErrors([
+                                    ...playerBetErrors.filter((e) => e.id !== _player!.id),
+                                    {
+                                      id: _player!.id,
+                                      msg: "Total bets exceeds balance",
+                                    },
+                                  ]);
+                                } else {
+                                  setPlayerBetErrors(
+                                    playerBetErrors.filter((e) => e.id !== _player!.id)
+                                  );
+                                }
+                              }}
+                            />
+                          </Grid.Col>
+                        )}
+                        {state.blackjack.sideBets.betBehind && (
+                          <Grid.Col
+                            span={
+                              amountOfSideBetsEnabled(state) *
+                              12 *
+                              (state.blackjack.sideBets.twentyOnePlusThree &&
+                              state.blackjack.sideBets.perfectPairs
+                                ? 0.6
+                                : amountOfSideBetsEnabled(state) == 1
+                                ? 1
+                                : 0.6)
+                            }
+                          >
+                            <Group grow>
+                              <NumberInput
+                                label="Bet Behind Amount"
+                                radius="md"
+                                decimalScale={2}
+                                fixedDecimalScale
+                                thousandSeparator=","
+                                allowNegative={false}
+                                leftSection={<IconCurrencyDollar />}
+                                error={
+                                  sideBetErrors.find(
+                                    (e) => e.id === _player!.id && e.sideBet === "Bet Behind"
+                                  )?.msg || playerBetErrors.find((e) => e.id === _player!.id)?.msg
+                                }
+                                value={bjPlayer.sidebets.betBehind.bet || 0}
+                                onChange={(value) => {
+                                  if (bjPlayer == null) return;
+
+                                  checkForSideBetErrors(
+                                    bjPlayer,
+                                    ["Bet Behind"],
+                                    parseFloat(`${value}`)
+                                  );
+
+                                  setState({
+                                    ...state,
+                                    blackjack: {
+                                      ...state.blackjack,
+                                      players: state.blackjack.players.map((p) => {
+                                        if (bjPlayer)
+                                          if (p.id === bjPlayer.id) {
+                                            let bet = parseFloat(`${value}`);
+                                            let target = p.sidebets.betBehind.target;
+                                            if (bet == 0) {
+                                              target = null;
+                                            }
+                                            return {
+                                              ...p,
+                                              sidebets: {
+                                                ...p.sidebets,
+                                                betBehind: {
+                                                  bet,
+                                                  target,
+                                                },
+                                              },
+                                            };
+                                          }
+
+                                        return p;
+                                      }),
+                                    },
+                                  });
+
+                                  let bet = parseFloat(`${value}`);
+
+                                  let totalBet = bet + bjPlayer!.bet;
+
+                                  if (state.blackjack.sideBets.perfectPairs) {
+                                    totalBet += bjPlayer!.sidebets.perfectPairs || 0;
+                                  }
+                                  if (state.blackjack.sideBets.twentyOnePlusThree) {
+                                    totalBet += bjPlayer!.sidebets.twentyOnePlusThree || 0;
+                                  }
+
+                                  console.log(
+                                    `Total bet for ${
+                                      _player!.name
+                                    } is ${totalBet} (${bet}) (balance: ${_player!.balance})`
+                                  );
+                                  if (totalBet > _player!.balance) {
+                                    setPlayerBetErrors([
+                                      ...playerBetErrors.filter((e) => e.id !== _player!.id),
+                                      {
+                                        id: _player!.id,
+                                        msg: "Total bets exceeds balance",
+                                      },
+                                    ]);
+                                  } else {
+                                    setPlayerBetErrors(
+                                      playerBetErrors.filter((e) => e.id !== _player!.id)
+                                    );
+                                  }
+                                }}
+                              />
+                              <Select
+                                label="Bet Behind Player"
+                                radius="md"
+                                leftSection={<IconUserSearch />}
+                                leftSectionPointerEvents="none"
+                                searchable
+                                error={
+                                  bjPlayer.sidebets.betBehind.bet != 0 &&
+                                  !bjPlayer.sidebets.betBehind.target
+                                    ? "Select a player"
+                                    : undefined
+                                }
+                                value={bjPlayer.sidebets.betBehind.target}
+                                placeholder="Select player"
+                                onChange={(_, option) => {
+                                  if (bjPlayer) {
+                                    setState({
+                                      ...state,
+                                      blackjack: {
+                                        ...state.blackjack,
+                                        players: state.blackjack.players.map((p) => {
+                                          if (bjPlayer)
+                                            if (p.id === bjPlayer.id) {
+                                              let bet = p.sidebets.betBehind.bet;
+                                              if (!option?.value) {
+                                                bet = 0;
+                                              }
+                                              return {
+                                                ...p,
+                                                sidebets: {
+                                                  ...p.sidebets,
+                                                  betBehind: {
+                                                    bet,
+                                                    target: option?.value || null,
+                                                  },
+                                                },
+                                              };
+                                            }
+                                          return p;
+                                        }),
+                                      },
+                                    });
+                                  }
+                                }}
+                                data={state.blackjack.players
+                                  .filter((p) => p.id !== bjPlayer!.id)
+                                  .map((p) => ({
+                                    label: getPlayer(p.id, state.players)?.name,
+                                    value: p.id,
+                                  }))}
+                              />
+                            </Group>
+                          </Grid.Col>
+                        )}
+                      </Grid>
+                    </>
+                  )}
                 </PlayerListItem>
               ) : (
                 "Edge case"
@@ -337,6 +841,14 @@ export default function PlayerSelector({
                   cards: [],
                   doubledDown: false,
                   split: false,
+                  sidebets: {
+                    twentyOnePlusThree: 0,
+                    perfectPairs: 0,
+                    betBehind: {
+                      bet: 0,
+                      target: null,
+                    },
+                  },
                 } as BlackjackPlayer,
               ],
             },
@@ -371,3 +883,11 @@ export default function PlayerSelector({
     </>
   );
 }
+
+const amountOfSideBetsEnabled = (state: State) => {
+  let amount = 0;
+  if (state.blackjack.sideBets.perfectPairs) amount++;
+  if (state.blackjack.sideBets.twentyOnePlusThree) amount++;
+  if (state.blackjack.sideBets.betBehind) amount++;
+  return amount;
+};

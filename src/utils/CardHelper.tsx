@@ -42,6 +42,8 @@ export const suitToIcon = (suit: CardSuit): ReactNode => {
       return <IconClubsFilled size={size} />;
     case "s":
       return <IconSpadeFilled size={size} />;
+    case "-":
+      return null;
   }
 };
 

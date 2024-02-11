@@ -1,9 +1,9 @@
 import {
   Alert,
   Button,
+  Checkbox,
   Container,
   Divider,
-  Fieldset,
   Grid,
   Input,
   InputWrapper,
@@ -11,12 +11,12 @@ import {
   Slider,
   Text,
   Title,
+  rem,
   useMantineColorScheme,
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import {
   IconAlertCircle,
-  IconArrowsShuffle,
   IconCode,
   IconCodeOff,
   IconCurrencyDollar,
@@ -32,7 +32,7 @@ import { STATE, State } from "../App";
 import { useCustomRecoilState } from "../utils/RecoilHelper";
 
 export default function Settings() {
-  const [state, setState, modifyState] = useCustomRecoilState<State>(STATE);
+  const [state, , modifyState] = useCustomRecoilState<State>(STATE);
   // const theme = useMantineTheme();
   const { setColorScheme, colorScheme } = useMantineColorScheme();
 
@@ -265,56 +265,97 @@ export default function Settings() {
       </Grid>
       <Divider my="sm" />
       <Title order={2}>Blackjack</Title>
-      <Fieldset legend="Card Counting" mt="xs">
-        <Grid>
-          <Grid.Col span={{ base: 12, sm: 4 }}>
-            <InputWrapper label="Deck Count" mb="xs">
-              <NumberInput
-                radius="md"
-                allowNegative={false}
-                decimalScale={0}
-                fixedDecimalScale
-                leftSection={<IconStack2 />}
-                placeholder="0"
-                disabled={state.currentGamePlaying != "NONE"}
-                value={state.blackjack.deckCount}
-                onChange={(value) => {
-                  modifyState({
-                    blackjack: {
-                      deckCount: parseInt(`${value}`),
-                    },
-                  });
-                }}
-              />
-            </InputWrapper>
-          </Grid.Col>
-        </Grid>
-        <Grid>
-          <Grid.Col span={{ base: 12, sm: 4 }} pt={0}>
-            <Button
-              leftSection={<IconArrowsShuffle />}
-              disabled={
-                state.blackjack.state != "NONE" ||
-                (state.blackjack.seenCards.length == 0 &&
-                  state.blackjack.pastGameSeenCards.length == 0)
-              }
-              onClick={() => {
-                setState({
-                  ...state,
+      <Grid>
+        <Grid.Col span={{ base: 12, sm: 4 }}>
+          <InputWrapper label="Deck Count" mb="xs">
+            <NumberInput
+              radius="md"
+              allowNegative={false}
+              decimalScale={0}
+              fixedDecimalScale
+              leftSection={<IconStack2 />}
+              placeholder="0"
+              disabled={state.currentGamePlaying != "NONE"}
+              value={state.blackjack.deckCount}
+              onChange={(value) => {
+                modifyState({
                   blackjack: {
-                    ...state.blackjack,
-                    runningCount: 0,
-                    seenCards: [],
-                    pastGameSeenCards: [],
+                    deckCount: parseInt(`${value}`),
                   },
                 });
               }}
-            >
-              Shuffle Deck
-            </Button>
-          </Grid.Col>
-        </Grid>
-      </Fieldset>
+            />
+          </InputWrapper>
+        </Grid.Col>
+      </Grid>
+      <Text size="lg" fw={500}>
+        Side Bets
+      </Text>
+      <Checkbox
+        radius="sm"
+        label="21+3"
+        labelPosition="right"
+        checked={state.blackjack.sideBets.twentyOnePlusThree}
+        onChange={(event) => {
+          modifyState({
+            blackjack: {
+              sideBets: {
+                ...state.blackjack.sideBets,
+                twentyOnePlusThree: event.currentTarget.checked,
+              },
+            },
+          });
+        }}
+        styles={{
+          input: {
+            cursor: "pointer",
+          },
+        }}
+      />
+      <Checkbox
+        mt={rem(5)}
+        radius="sm"
+        label="Perfect Pairs"
+        labelPosition="right"
+        checked={state.blackjack.sideBets.perfectPairs}
+        onChange={(event) => {
+          modifyState({
+            blackjack: {
+              sideBets: {
+                ...state.blackjack.sideBets,
+                perfectPairs: event.currentTarget.checked,
+              },
+            },
+          });
+        }}
+        styles={{
+          input: {
+            cursor: "pointer",
+          },
+        }}
+      />
+      <Checkbox
+        mt={rem(5)}
+        radius="sm"
+        label="Bet Behind"
+        labelPosition="right"
+        checked={state.blackjack.sideBets.betBehind}
+        onChange={(event) => {
+          modifyState({
+            blackjack: {
+              sideBets: {
+                ...state.blackjack.sideBets,
+                betBehind: event.currentTarget.checked,
+              },
+            },
+          });
+        }}
+        styles={{
+          input: {
+            cursor: "pointer",
+          },
+        }}
+      />
 
       <Divider my="sm" />
       <Button
