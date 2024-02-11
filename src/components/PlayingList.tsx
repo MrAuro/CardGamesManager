@@ -744,7 +744,6 @@ export default function PlayerSelector({
                                 radius="md"
                                 leftSection={<IconUserSearch />}
                                 leftSectionPointerEvents="none"
-                                clearable
                                 searchable
                                 error={
                                   bjPlayer.sidebets.betBehind.bet != 0 &&

@@ -3,7 +3,7 @@ import { modals } from "@mantine/modals";
 import { IconArrowsShuffle } from "@tabler/icons-react";
 import { GetRecommendedPlayerAction } from "blackjack-strategy";
 import _ from "lodash";
-import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import { useRecoilState } from "recoil";
 import { STATE, State } from "../App";
 import CardPicker from "../components/CardPicker";
