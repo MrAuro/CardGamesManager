@@ -27,6 +27,7 @@ import {
   IconPokerChip,
   IconStack2,
   IconSun,
+  IconX,
 } from "@tabler/icons-react";
 import { STATE, State } from "../App";
 import { useCustomRecoilState } from "../utils/RecoilHelper";
@@ -288,34 +289,16 @@ export default function Settings() {
           </InputWrapper>
         </Grid.Col>
       </Grid>
-      <Text size="lg" fw={500}>
+      {/* <Text size="lg" fw={500}>
         Side Bets
+      </Text> */}
+
+      <Text fw="bold" size="lg">
+        Perfect Pairs
       </Text>
       <Checkbox
         radius="sm"
-        label="21+3"
-        labelPosition="right"
-        checked={state.blackjack.sideBets.twentyOnePlusThree}
-        onChange={(event) => {
-          modifyState({
-            blackjack: {
-              sideBets: {
-                ...state.blackjack.sideBets,
-                twentyOnePlusThree: event.currentTarget.checked,
-              },
-            },
-          });
-        }}
-        styles={{
-          input: {
-            cursor: "pointer",
-          },
-        }}
-      />
-      <Checkbox
-        mt={rem(5)}
-        radius="sm"
-        label="Perfect Pairs"
+        label="Enabled"
         labelPosition="right"
         checked={state.blackjack.sideBets.perfectPairs}
         onChange={(event) => {
@@ -334,10 +317,248 @@ export default function Settings() {
           },
         }}
       />
+      {state.blackjack.sideBets.perfectPairs && (
+        <>
+          <Grid>
+            <Grid.Col span={{ base: 12, sm: 2 }}>
+              <NumberInput
+                label="Mixed"
+                radius="md"
+                allowNegative={false}
+                thousandSeparator=","
+                leftSection={<IconX />}
+                placeholder="0"
+                disabled={state.blackjack.state != "NONE"}
+                value={state.blackjack.sideBets.perfectPairsPayouts.mixed}
+                onChange={(value) => {
+                  modifyState({
+                    blackjack: {
+                      sideBets: {
+                        perfectPairsPayouts: {
+                          ...state.blackjack.sideBets.perfectPairsPayouts,
+                          mixed: parseFloat(`${value}`),
+                        },
+                      },
+                    },
+                  });
+                }}
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, sm: 2 }}>
+              <NumberInput
+                label="Colored"
+                radius="md"
+                allowNegative={false}
+                thousandSeparator=","
+                leftSection={<IconX />}
+                placeholder="0"
+                disabled={state.blackjack.state != "NONE"}
+                value={state.blackjack.sideBets.perfectPairsPayouts.colored}
+                onChange={(value) => {
+                  modifyState({
+                    blackjack: {
+                      sideBets: {
+                        perfectPairsPayouts: {
+                          ...state.blackjack.sideBets.perfectPairsPayouts,
+                          colored: parseFloat(`${value}`),
+                        },
+                      },
+                    },
+                  });
+                }}
+              />
+            </Grid.Col>
+          </Grid>
+          <Grid>
+            <Grid.Col span={{ base: 12, sm: 4 }}>
+              <NumberInput
+                label="Perfect"
+                radius="md"
+                allowNegative={false}
+                thousandSeparator=","
+                leftSection={<IconX />}
+                placeholder="0"
+                disabled={state.blackjack.state != "NONE"}
+                value={state.blackjack.sideBets.perfectPairsPayouts.perfect}
+                onChange={(value) => {
+                  modifyState({
+                    blackjack: {
+                      sideBets: {
+                        perfectPairsPayouts: {
+                          ...state.blackjack.sideBets.perfectPairsPayouts,
+                          perfect: parseFloat(`${value}`),
+                        },
+                      },
+                    },
+                  });
+                }}
+              />
+            </Grid.Col>
+          </Grid>
+        </>
+      )}
+
+      <Text fw="bold" size="lg" mt="md">
+        21+3
+      </Text>
+      <Checkbox
+        radius="sm"
+        label="Enabled"
+        labelPosition="right"
+        checked={state.blackjack.sideBets.twentyOnePlusThree}
+        onChange={(event) => {
+          modifyState({
+            blackjack: {
+              sideBets: {
+                ...state.blackjack.sideBets,
+                twentyOnePlusThree: event.currentTarget.checked,
+              },
+            },
+          });
+        }}
+        styles={{
+          input: {
+            cursor: "pointer",
+          },
+        }}
+      />
+      {state.blackjack.sideBets.twentyOnePlusThree && (
+        <>
+          <Grid>
+            <Grid.Col span={{ base: 12, sm: 2 }}>
+              <NumberInput
+                label="Flush"
+                radius="md"
+                allowNegative={false}
+                thousandSeparator=","
+                leftSection={<IconX />}
+                placeholder="0"
+                disabled={state.blackjack.state != "NONE"}
+                value={state.blackjack.sideBets.twentyOnePlusThreePayouts.flush}
+                onChange={(value) => {
+                  modifyState({
+                    blackjack: {
+                      sideBets: {
+                        twentyOnePlusThreePayouts: {
+                          ...state.blackjack.sideBets.twentyOnePlusThreePayouts,
+                          flush: parseFloat(`${value}`),
+                        },
+                      },
+                    },
+                  });
+                }}
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, sm: 2 }}>
+              <NumberInput
+                label="Straight"
+                radius="md"
+                allowNegative={false}
+                thousandSeparator=","
+                leftSection={<IconX />}
+                placeholder="0"
+                disabled={state.blackjack.state != "NONE"}
+                value={state.blackjack.sideBets.twentyOnePlusThreePayouts.straight}
+                onChange={(value) => {
+                  modifyState({
+                    blackjack: {
+                      sideBets: {
+                        twentyOnePlusThreePayouts: {
+                          ...state.blackjack.sideBets.twentyOnePlusThreePayouts,
+                          straight: parseFloat(`${value}`),
+                        },
+                      },
+                    },
+                  });
+                }}
+              />
+            </Grid.Col>
+          </Grid>
+          <Grid>
+            <Grid.Col span={{ base: 12, sm: 2 }}>
+              <NumberInput
+                label="Three of a Kind"
+                radius="md"
+                allowNegative={false}
+                thousandSeparator=","
+                leftSection={<IconX />}
+                placeholder="0"
+                disabled={state.blackjack.state != "NONE"}
+                value={state.blackjack.sideBets.twentyOnePlusThreePayouts.threeOfAKind}
+                onChange={(value) => {
+                  modifyState({
+                    blackjack: {
+                      sideBets: {
+                        twentyOnePlusThreePayouts: {
+                          ...state.blackjack.sideBets.twentyOnePlusThreePayouts,
+                          threeOfAKind: parseFloat(`${value}`),
+                        },
+                      },
+                    },
+                  });
+                }}
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, sm: 2 }}>
+              <NumberInput
+                label="Straight Flush"
+                radius="md"
+                allowNegative={false}
+                thousandSeparator=","
+                leftSection={<IconX />}
+                placeholder="0"
+                disabled={state.blackjack.state != "NONE"}
+                value={state.blackjack.sideBets.twentyOnePlusThreePayouts.straightFlush}
+                onChange={(value) => {
+                  modifyState({
+                    blackjack: {
+                      sideBets: {
+                        twentyOnePlusThreePayouts: {
+                          ...state.blackjack.sideBets.twentyOnePlusThreePayouts,
+                          straightFlush: parseFloat(`${value}`),
+                        },
+                      },
+                    },
+                  });
+                }}
+              />
+            </Grid.Col>
+          </Grid>
+          <Grid>
+            <Grid.Col span={{ base: 12, sm: 4 }}>
+              <NumberInput
+                label="Suited Three of a Kind"
+                radius="md"
+                allowNegative={false}
+                thousandSeparator=","
+                leftSection={<IconX />}
+                placeholder="0"
+                disabled={state.blackjack.state != "NONE"}
+                value={state.blackjack.sideBets.twentyOnePlusThreePayouts.suitedThreeOfAKind}
+                onChange={(value) => {
+                  modifyState({
+                    blackjack: {
+                      sideBets: {
+                        twentyOnePlusThreePayouts: {
+                          ...state.blackjack.sideBets.twentyOnePlusThreePayouts,
+                          suitedThreeOfAKind: parseFloat(`${value}`),
+                        },
+                      },
+                    },
+                  });
+                }}
+              />
+            </Grid.Col>
+          </Grid>
+        </>
+      )}
+      <Text fw="bold" size="lg" mt="md">
+        Bet Behind
+      </Text>
       <Checkbox
         mt={rem(5)}
         radius="sm"
-        label="Bet Behind"
+        label="Enabled"
         labelPosition="right"
         checked={state.blackjack.sideBets.betBehind}
         onChange={(event) => {

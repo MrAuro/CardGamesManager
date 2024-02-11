@@ -8,15 +8,14 @@ import {
   useMantineColorScheme,
   useMantineTheme,
 } from "@mantine/core";
+import { usePrevious, useScrollIntoView } from "@mantine/hooks";
 import { IconGripVertical } from "@tabler/icons-react";
+import { useEffect } from "react";
 import { STATE, State } from "../App";
-import classes from "../styles/PlayingList.module.css";
 import { Player } from "../types/Player";
 import { Card } from "../utils/CardHelper";
 import { useCustomRecoilState } from "../utils/RecoilHelper";
 import PlayingCard from "./PlayingCard";
-import { usePrevious, useScrollIntoView } from "@mantine/hooks";
-import { useEffect } from "react";
 
 export default function PlayerListItem(props: {
   player: Player;

@@ -73,8 +73,20 @@ export const DEFAULT_STATE: State = {
     firstRound: false,
     sideBets: {
       twentyOnePlusThree: false,
+      twentyOnePlusThreePayouts: {
+        flush: 5,
+        straight: 10,
+        threeOfAKind: 30,
+        straightFlush: 40,
+        suitedThreeOfAKind: 100,
+      },
       betBehind: false,
       perfectPairs: false,
+      perfectPairsPayouts: {
+        mixed: 5,
+        colored: 10,
+        perfect: 30,
+      },
     },
     pastGameSeenCards: [],
     seenCards: [],
@@ -106,8 +118,21 @@ export interface State {
     firstRound: boolean;
     sideBets: {
       twentyOnePlusThree: boolean;
+      twentyOnePlusThreePayouts: {
+        flush: number;
+        straight: number;
+        threeOfAKind: number;
+        straightFlush: number;
+        suitedThreeOfAKind: number;
+      };
       betBehind: boolean;
+
       perfectPairs: boolean;
+      perfectPairsPayouts: {
+        mixed: number;
+        colored: number;
+        perfect: number;
+      };
     };
 
     seenCards: Card[];
