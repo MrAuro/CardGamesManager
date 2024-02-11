@@ -1,4 +1,4 @@
-import { Card, getRank, isAnyEmpty } from "./CardHelper";
+import { Card, getRank, getSuit, isAnyEmpty } from "./CardHelper";
 import { Player } from "../types/Player";
 
 export type BlackjackGameState = "NONE" | "PLAYING" | "GAME_OVER";
@@ -44,7 +44,7 @@ export const getCardTotal = (cards: Card[]): GetCardTotalResponse => {
   let total = 0;
   let aceCount = 0;
   for (let card of cards) {
-    if (isAnyEmpty(card)) continue;
+    if (getRank(card) === "-") continue;
     if (getRank(card) === "A") {
       aceCount++;
       total += 11;

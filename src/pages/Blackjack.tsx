@@ -1031,104 +1031,108 @@ export default function Blackjack() {
   };
 
   useEffect(() => {
-    for (let player of state.blackjack.players) {
+    let tempPlayers: BlackjackPlayer[] = [];
+    let tempTurn = state.blackjack.turn;
+    for (let i = state.blackjack.players.length - 1; i >= 0; i--) {
+      let player = state.blackjack.players[i];
       let playerTotal = getCardTotal(player.cards);
       console.log(`Player ${player.id} has ${playerTotal.total} (${player.handPartialResult})`);
       if (playerTotal.total > 21 && player.handPartialResult !== "BUST") {
         console.log(`Player ${player.id} has busted`);
-        let players: BlackjackPlayer[] = state.blackjack.players.map((p) => {
+
+        for (let p of state.blackjack.players) {
           if (p.id === player.id) {
-            return {
+            tempPlayers.push({
               ...p,
               handPartialResult: "BUST",
-            };
+            });
           }
-          return p;
-        });
+        }
 
-        setState({
-          ...state,
-          blackjack: {
-            ...state.blackjack,
-            players,
-            turn:
-              state.blackjack.turn === player.id
-                ? state.blackjack.players.indexOf(player) + 1 < state.blackjack.players.length
-                  ? state.blackjack.players[state.blackjack.players.indexOf(player) + 1].id
-                  : "DEALER"
-                : state.blackjack.turn,
-          },
-        });
+        tempTurn =
+          state.blackjack.turn === player.id
+            ? state.blackjack.players.indexOf(player) + 1 < state.blackjack.players.length
+              ? state.blackjack.players[state.blackjack.players.indexOf(player) + 1].id
+              : "DEALER"
+            : state.blackjack.turn;
       }
 
       if (playerTotal.total <= 21 && player.handPartialResult == "BUST") {
         console.log(`Player ${player.id} has unbusted`);
-        let players: BlackjackPlayer[] = state.blackjack.players.map((p) => {
+
+        for (let p of state.blackjack.players) {
           if (p.id === player.id) {
-            return {
+            tempPlayers.push({
               ...p,
               handPartialResult: undefined,
-            };
+            });
           }
-          return p;
-        });
-
-        setState({
-          ...state,
-          blackjack: {
-            ...state.blackjack,
-            players,
-          },
-        });
+        }
       }
 
       if (playerTotal.total == 21 && player.handPartialResult !== "BLACKJACK") {
         console.log(`Player ${player.id} has blackjack`);
-        let players: BlackjackPlayer[] = state.blackjack.players.map((p) => {
+
+        for (let p of state.blackjack.players) {
           if (p.id === player.id) {
-            return {
+            tempPlayers.push({
               ...p,
               handPartialResult: "BLACKJACK",
-            };
+            });
           }
-          return p;
-        });
+        }
 
-        setState({
-          ...state,
-          blackjack: {
-            ...state.blackjack,
-            players,
-            turn:
-              state.blackjack.turn === player.id
-                ? state.blackjack.players.indexOf(player) + 1 < state.blackjack.players.length
-                  ? state.blackjack.players[state.blackjack.players.indexOf(player) + 1].id
-                  : "DEALER"
-                : state.blackjack.turn,
-          },
-        });
+        tempTurn =
+          state.blackjack.turn === player.id
+            ? state.blackjack.players.indexOf(player) + 1 < state.blackjack.players.length
+              ? state.blackjack.players[state.blackjack.players.indexOf(player) + 1].id
+              : "DEALER"
+            : state.blackjack.turn;
       }
 
       if (playerTotal.total < 21 && player.handPartialResult == "BLACKJACK") {
         console.log(`Player ${player.id} has unblackjacked`);
-        let players: BlackjackPlayer[] = state.blackjack.players.map((p) => {
+
+        for (let p of state.blackjack.players) {
           if (p.id === player.id) {
-            return {
+            tempPlayers.push({
               ...p,
               handPartialResult: undefined,
-            };
+            });
           }
-          return p;
-        });
-
-        setState({
-          ...state,
-          blackjack: {
-            ...state.blackjack,
-            players,
-          },
-        });
+        }
       }
+    }
+
+    // add other players
+    for (let player of state.blackjack.players) {
+      if (!tempPlayers.find((p) => p.id === player.id)) {
+        tempPlayers.push(player);
+      }
+    }
+
+    // dont set the state if nothing has changed
+    let identical = true;
+    for (let i = 0; i < tempPlayers.length; i++) {
+      if (_.isEqual(tempPlayers[i], state.blackjack.players[i]) === false) {
+        identical = false;
+        break;
+      }
+    }
+
+    if (tempTurn !== state.blackjack.turn) {
+      identical = false;
+    }
+
+    if (!identical) {
+      setState({
+        ...state,
+        blackjack: {
+          ...state.blackjack,
+          players: tempPlayers,
+          turn: tempTurn,
+        },
+      });
     }
   }, [state.blackjack.players]);
 
@@ -1300,10 +1304,18 @@ export default function Blackjack() {
                                 </Text>
                               </div>
                             )}
-                            {player.handPartialResult && (
+                            {cardTotal.total == 21 && (
                               <div>
                                 <Text size="sm" mb={0} fw="bold" tt="capitalize">
-                                  {player.handPartialResult}
+                                  BLACKJACK
+                                </Text>
+                              </div>
+                            )}
+
+                            {cardTotal.total > 21 && (
+                              <div>
+                                <Text size="sm" mb={0} fw="bold" tt="capitalize">
+                                  BUST
                                 </Text>
                               </div>
                             )}
