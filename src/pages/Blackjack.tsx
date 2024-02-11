@@ -3,7 +3,7 @@ import { modals } from "@mantine/modals";
 import { IconArrowsShuffle } from "@tabler/icons-react";
 import { GetRecommendedPlayerAction } from "blackjack-strategy";
 import _ from "lodash";
-import { ReactNode, useEffect, useMemo, useState } from "react";
+import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { useRecoilState } from "recoil";
 import { STATE, State } from "../App";
 import CardPicker from "../components/CardPicker";
@@ -18,8 +18,7 @@ import {
   getCardTotal,
   getPlayer,
 } from "../utils/BlackjackHelper";
-import { Card, CardSuit, EMPTY_CARD, getRank, getRankInt } from "../utils/CardHelper";
-import { CardRank } from "../utils/PokerHelper";
+import { Card, CardRank, CardSuit, EMPTY_CARD, getRank, getRankInt } from "../utils/CardHelper";
 import { useCustomRecoilState } from "../utils/RecoilHelper";
 
 export default function Blackjack() {
@@ -31,6 +30,8 @@ export default function Blackjack() {
   const [playerTotalBetErrors, setPlayerTotalBetErrors] = useState<{ id: string; msg: string }[]>(
     []
   );
+
+  const [zeroHeld, setZeroHeld] = useState(false);
 
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -116,90 +117,305 @@ export default function Blackjack() {
     }
   }, [sideBetErrors, state.blackjack.sideBets]);
 
-  useKeyPress((event) => {
-    if (!state.useKeybindings || modalOpen || state.activeTab !== "BLACKJACK") return;
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "0") {
+        setZeroHeld(true);
+      }
 
-    let currentTurnPlayer = state.blackjack.players.find((p) => p.id === state.blackjack.turn);
-    let val;
-    switch (event.key) {
-      case "1":
-      case ".":
-        val = "A";
-        break;
+      if (!state.useKeybindings || modalOpen || state.activeTab !== "BLACKJACK") return;
 
-      case "2":
-        val = "2";
-        break;
+      if (event.repeat) return;
 
-      case "3":
-        val = "3";
-        break;
+      let currentTurnPlayer = state.blackjack.players.find((p) => p.id === state.blackjack.turn);
+      let val;
+      switch (event.key) {
+        case "1":
+        case ".":
+          val = "A";
+          break;
 
-      case "4":
-        val = "4";
-        break;
+        case "2":
+          val = "2";
+          break;
 
-      case "5":
-        val = "5";
-        break;
+        case "3":
+          val = "3";
+          break;
 
-      case "6":
-        val = "6";
-        break;
+        case "4":
+          val = "4";
+          break;
 
-      case "7":
-        val = "7";
-        break;
+        case "5":
+          val = "5";
+          break;
 
-      case "8":
-        val = "8";
-        break;
+        case "6":
+          val = "6";
+          break;
 
-      case "9":
-        val = "9";
-        break;
+        case "7":
+          val = "7";
+          break;
 
-      case "0":
-        val = "T";
-        break;
+        case "8":
+          val = "8";
+          break;
 
-      case "Tab":
-        {
-          if (state.blackjack.state == "PLAYING") {
-            // Goes to the next suit
-            let suits = ["h", "d", "s", "c"] as CardSuit[];
+        case "9":
+          console.log("9 pressed");
+          val = "9";
+          break;
 
+        case "0":
+          val = "T";
+          break;
+
+        case "Tab":
+          {
+            if (state.blackjack.state == "PLAYING") {
+              if (zeroHeld) {
+                // Tab through T, J, Q, K
+                let ranks = ["T", "J", "Q", "K"] as CardRank[];
+
+                if (currentTurnPlayer != null) {
+                  let cards = [...currentTurnPlayer.cards];
+                  let activeCard: Card;
+                  let activeCardIndex;
+                  if (currentTurnPlayer.cards.length <= 2) {
+                    if (cards[1] == EMPTY_CARD) {
+                      activeCard = cards[0];
+                      activeCardIndex = 0;
+                    } else {
+                      activeCard = cards[1];
+                      activeCardIndex = 1;
+                    }
+                  } else {
+                    activeCard = cards[cards.length - 1];
+                    activeCardIndex = cards.length - 1;
+                  }
+
+                  console.log("Active card", activeCard, "Index", activeCardIndex);
+
+                  if (activeCard == EMPTY_CARD) {
+                    event.preventDefault();
+                    return;
+                  }
+
+                  console.log("Active card", activeCard);
+
+                  let activeRank = getRank(activeCard);
+                  let nextRankIndex = ranks.indexOf(activeRank) + 1;
+                  if (nextRankIndex >= ranks.length) {
+                    nextRankIndex = 0;
+                  }
+
+                  let newCard = ranks[nextRankIndex] + activeCard.slice(-1);
+                  cards[activeCardIndex] = newCard as Card;
+
+                  console.log("New card", newCard);
+
+                  setState({
+                    ...state,
+                    blackjack: {
+                      ...state.blackjack,
+                      players: state.blackjack.players.map((p) => {
+                        if (p.id === currentTurnPlayer!.id) {
+                          return {
+                            ...p,
+                            cards: cards,
+                            doubledDown: false,
+                          };
+                        }
+                        return p;
+                      }),
+                    },
+                  });
+                } else if (state.blackjack.turn === "DEALER") {
+                  let dealerCards = [...state.blackjack.dealerCards];
+                  let activeCard: Card;
+                  let activeCardIndex;
+                  if (state.blackjack.dealerCards.length <= 2) {
+                    if (dealerCards[1] == EMPTY_CARD) {
+                      activeCard = dealerCards[0];
+                      activeCardIndex = 0;
+                    } else {
+                      activeCard = dealerCards[1];
+                      activeCardIndex = 1;
+                    }
+                  } else {
+                    activeCard = dealerCards[dealerCards.length - 1];
+                    activeCardIndex = dealerCards.length - 1;
+                  }
+
+                  if (activeCard == EMPTY_CARD) {
+                    event.preventDefault();
+                    return;
+                  }
+
+                  let activeRank = getRank(activeCard);
+                  let nextRankIndex = ranks.indexOf(activeRank) + 1;
+                  if (nextRankIndex >= ranks.length) {
+                    nextRankIndex = 0;
+                  }
+
+                  let newCard = ranks[nextRankIndex] + activeCard.slice(-1);
+                  dealerCards[activeCardIndex] = newCard as Card;
+
+                  setState({
+                    ...state,
+                    blackjack: {
+                      ...state.blackjack,
+                      dealerCards: dealerCards,
+                    },
+                  });
+                }
+                event.preventDefault();
+              } else {
+                // Goes to the next suit
+                let suits = ["h", "d", "s", "c"] as CardSuit[];
+
+                if (currentTurnPlayer != null) {
+                  let cards = [...currentTurnPlayer.cards];
+                  let activeCard: Card;
+                  let activeCardIndex;
+                  if (currentTurnPlayer.cards.length <= 2) {
+                    if (cards[1] == EMPTY_CARD) {
+                      activeCard = cards[0];
+                      activeCardIndex = 0;
+                    } else {
+                      activeCard = cards[1];
+                      activeCardIndex = 1;
+                    }
+                  } else {
+                    activeCard = cards[cards.length - 1];
+                    activeCardIndex = cards.length - 1;
+                  }
+
+                  if (activeCard == EMPTY_CARD) {
+                    event.preventDefault();
+                    return;
+                  }
+
+                  let activeSuit = activeCard.slice(-1) as CardSuit;
+                  let nextSuitIndex = suits.indexOf(activeSuit) + 1;
+                  if (nextSuitIndex >= suits.length) {
+                    nextSuitIndex = 0;
+                  }
+
+                  let newCard = activeCard.slice(0, -1) + suits[nextSuitIndex];
+
+                  cards[activeCardIndex] = newCard as Card;
+
+                  // modifyState does not work here for some reason
+                  setState({
+                    ...state,
+                    blackjack: {
+                      ...state.blackjack,
+                      players: state.blackjack.players.map((p) => {
+                        if (p.id === currentTurnPlayer!.id) {
+                          return {
+                            ...p,
+                            cards: cards,
+                            doubledDown: false,
+                          };
+                        }
+                        return p;
+                      }),
+                    },
+                  });
+                } else if (state.blackjack.turn === "DEALER") {
+                  let dealerCards = [...state.blackjack.dealerCards];
+                  let activeCard: Card;
+                  let activeCardIndex;
+                  if (state.blackjack.dealerCards.length <= 2) {
+                    if (dealerCards[1] == EMPTY_CARD) {
+                      activeCard = dealerCards[0];
+                      activeCardIndex = 0;
+                    } else {
+                      activeCard = dealerCards[1];
+                      activeCardIndex = 1;
+                    }
+                  } else {
+                    activeCard = dealerCards[dealerCards.length - 1];
+                    activeCardIndex = dealerCards.length - 1;
+                  }
+
+                  if (activeCard == EMPTY_CARD) {
+                    event.preventDefault();
+                    return;
+                  }
+
+                  let activeSuit = activeCard.slice(-1) as CardSuit;
+                  let nextSuitIndex = suits.indexOf(activeSuit) + 1;
+                  if (nextSuitIndex >= suits.length) {
+                    nextSuitIndex = 0;
+                  }
+
+                  let newCard = activeCard.slice(0, -1) + suits[nextSuitIndex];
+                  dealerCards[activeCardIndex] = newCard as Card;
+
+                  setState({
+                    ...state,
+                    blackjack: {
+                      ...state.blackjack,
+                      dealerCards: dealerCards,
+                    },
+                  });
+                }
+                event.preventDefault(); // Prevents tabbing to the next focusable element
+              }
+            }
+          }
+          break;
+
+        case "Enter":
+          {
+            if (state.blackjack.state == "PLAYING" && state.activeTab == "BLACKJACK") {
+              // Stands
+              if (state.blackjack.turn !== "DEALER") nextTurn();
+
+              if (state.blackjack.turn === "DEALER") {
+                if (state.blackjack.firstRound) {
+                  modifyState({
+                    blackjack: {
+                      turn: state.blackjack.players[0].id,
+                      firstRound: false,
+                    },
+                  });
+                } else {
+                  payoutAndEndGame();
+                }
+              }
+            } else if (state.blackjack.state === "NONE") {
+              if (
+                state.blackjack.players.length <= 0 ||
+                betErrors.filter((p) => p !== null).length > 0 ||
+                sideBetErrors.length > 0 ||
+                playerTotalBetErrors.length > 0
+              ) {
+                alert("There are errors in the game, please fix them before starting");
+              } else {
+                startGame();
+              }
+            }
+          }
+          break;
+
+        case "Backspace":
+          {
             if (currentTurnPlayer != null) {
               let cards = [...currentTurnPlayer.cards];
-              let activeCard: Card;
-              let activeCardIndex;
               if (currentTurnPlayer.cards.length <= 2) {
                 if (cards[1] == EMPTY_CARD) {
-                  activeCard = cards[0];
-                  activeCardIndex = 0;
+                  cards[0] = EMPTY_CARD;
                 } else {
-                  activeCard = cards[1];
-                  activeCardIndex = 1;
+                  cards[1] = EMPTY_CARD;
                 }
               } else {
-                activeCard = cards[cards.length - 1];
-                activeCardIndex = cards.length - 1;
+                cards.pop();
               }
-
-              if (activeCard == EMPTY_CARD) {
-                event.preventDefault();
-                return;
-              }
-
-              let activeSuit = activeCard.slice(-1) as CardSuit;
-              let nextSuitIndex = suits.indexOf(activeSuit) + 1;
-              if (nextSuitIndex >= suits.length) {
-                nextSuitIndex = 0;
-              }
-
-              let newCard = activeCard.slice(0, -1) + suits[nextSuitIndex];
-
-              cards[activeCardIndex] = newCard as Card;
 
               // modifyState does not work here for some reason
               setState({
@@ -220,34 +436,15 @@ export default function Blackjack() {
               });
             } else if (state.blackjack.turn === "DEALER") {
               let dealerCards = [...state.blackjack.dealerCards];
-              let activeCard: Card;
-              let activeCardIndex;
               if (state.blackjack.dealerCards.length <= 2) {
                 if (dealerCards[1] == EMPTY_CARD) {
-                  activeCard = dealerCards[0];
-                  activeCardIndex = 0;
+                  dealerCards[0] = EMPTY_CARD;
                 } else {
-                  activeCard = dealerCards[1];
-                  activeCardIndex = 1;
+                  dealerCards[1] = EMPTY_CARD;
                 }
               } else {
-                activeCard = dealerCards[dealerCards.length - 1];
-                activeCardIndex = dealerCards.length - 1;
+                dealerCards.pop();
               }
-
-              if (activeCard == EMPTY_CARD) {
-                event.preventDefault();
-                return;
-              }
-
-              let activeSuit = activeCard.slice(-1) as CardSuit;
-              let nextSuitIndex = suits.indexOf(activeSuit) + 1;
-              if (nextSuitIndex >= suits.length) {
-                nextSuitIndex = 0;
-              }
-
-              let newCard = activeCard.slice(0, -1) + suits[nextSuitIndex];
-              dealerCards[activeCardIndex] = newCard as Card;
 
               setState({
                 ...state,
@@ -257,178 +454,109 @@ export default function Blackjack() {
                 },
               });
             }
-            event.preventDefault(); // Prevents tabbing to the next focusable element
           }
-        }
-        break;
+          break;
 
-      case "Enter":
-        {
-          if (state.blackjack.state == "PLAYING" && state.activeTab == "BLACKJACK") {
-            // Stands
-            if (state.blackjack.turn !== "DEALER") nextTurn();
-
-            if (state.blackjack.turn === "DEALER") {
-              if (state.blackjack.firstRound) {
-                modifyState({
-                  blackjack: {
-                    turn: state.blackjack.players[0].id,
-                    firstRound: false,
-                  },
-                });
-              } else {
-                payoutAndEndGame();
-              }
-            }
-          } else if (state.blackjack.state === "NONE") {
+        case "-":
+          {
             if (
-              state.blackjack.players.length <= 0 ||
-              betErrors.filter((p) => p !== null).length > 0 ||
-              sideBetErrors.length > 0 ||
-              playerTotalBetErrors.length > 0
+              currentTurnPlayer != null &&
+              !(
+                currentTurnPlayer.doubledDown ||
+                currentTurnPlayer.cards.filter((card) => card !== EMPTY_CARD).length !== 2 ||
+                getRank(currentTurnPlayer.cards[0]) !== getRank(currentTurnPlayer.cards[1]) ||
+                currentTurnPlayer.split ||
+                currentTurnPlayer.bet > getPlayer(currentTurnPlayer.id, state.players).balance
+              )
             ) {
-              alert("There are errors in the game, please fix them before starting");
-            } else {
-              startGame();
+              console.log("KBD Playing can split, splitting");
+              playerSplit(currentTurnPlayer);
             }
           }
-        }
-        break;
+          break;
 
-      case "Backspace":
-        {
-          if (currentTurnPlayer != null) {
-            let cards = [...currentTurnPlayer.cards];
-            if (currentTurnPlayer.cards.length <= 2) {
-              if (cards[1] == EMPTY_CARD) {
-                cards[0] = EMPTY_CARD;
-              } else {
-                cards[1] = EMPTY_CARD;
-              }
-            } else {
-              cards.pop();
+        case "*":
+          {
+            if (
+              currentTurnPlayer != null &&
+              !(
+                currentTurnPlayer.cards.length > 2 ||
+                currentTurnPlayer.doubledDown ||
+                getPlayer(currentTurnPlayer.id, state.players).balance < currentTurnPlayer.bet
+              )
+            ) {
+              console.log("KBD Playing can double down, doubling down");
+              doubleDown(currentTurnPlayer);
             }
+          }
+          break;
+      }
 
-            // modifyState does not work here for some reason
-            setState({
-              ...state,
-              blackjack: {
-                ...state.blackjack,
-                players: state.blackjack.players.map((p) => {
-                  if (p.id === currentTurnPlayer!.id) {
+      if (val != null) {
+        // let randomSuit = (["h", "s", "d", "c"] as CardSuit[])[Math.floor(Math.random() * 4)];
+        let rank: CardRank = val as CardRank;
+        let card: Card = `${rank}-` as Card;
+
+        if (currentTurnPlayer != null) {
+          let cards = [...currentTurnPlayer.cards];
+          if (!cards.includes(EMPTY_CARD) && !currentTurnPlayer.doubledDown) {
+            cards.push(EMPTY_CARD);
+          }
+          let index = cards.indexOf(EMPTY_CARD);
+          cards[index] = card;
+          modifyState({
+            blackjack: {
+              players: state.blackjack.players.map((p) => {
+                if (currentTurnPlayer != null) {
+                  if (p.id === currentTurnPlayer.id) {
                     return {
                       ...p,
                       cards: cards,
-                      doubledDown: false,
                     };
                   }
                   return p;
-                }),
-              },
-            });
-          } else if (state.blackjack.turn === "DEALER") {
-            let dealerCards = [...state.blackjack.dealerCards];
-            if (state.blackjack.dealerCards.length <= 2) {
-              if (dealerCards[1] == EMPTY_CARD) {
-                dealerCards[0] = EMPTY_CARD;
-              } else {
-                dealerCards[1] = EMPTY_CARD;
-              }
-            } else {
-              dealerCards.pop();
-            }
-
-            setState({
-              ...state,
-              blackjack: {
-                ...state.blackjack,
-                dealerCards: dealerCards,
-              },
-            });
-          }
-        }
-        break;
-
-      case "-":
-        {
-          if (
-            currentTurnPlayer != null &&
-            !(
-              currentTurnPlayer.doubledDown ||
-              currentTurnPlayer.cards.filter((card) => card !== EMPTY_CARD).length !== 2 ||
-              getRank(currentTurnPlayer.cards[0]) !== getRank(currentTurnPlayer.cards[1]) ||
-              currentTurnPlayer.split ||
-              currentTurnPlayer.bet > getPlayer(currentTurnPlayer.id, state.players).balance
-            )
-          ) {
-            console.log("KBD Playing can split, splitting");
-            playerSplit(currentTurnPlayer);
-          }
-        }
-        break;
-
-      case "*":
-        {
-          if (
-            currentTurnPlayer != null &&
-            !(
-              currentTurnPlayer.cards.length > 2 ||
-              currentTurnPlayer.doubledDown ||
-              getPlayer(currentTurnPlayer.id, state.players).balance < currentTurnPlayer.bet
-            )
-          ) {
-            console.log("KBD Playing can double down, doubling down");
-            doubleDown(currentTurnPlayer);
-          }
-        }
-        break;
-    }
-
-    if (val != null) {
-      // let randomSuit = (["h", "s", "d", "c"] as CardSuit[])[Math.floor(Math.random() * 4)];
-      let rank: CardRank = val as CardRank;
-      let card: Card = `${rank}-` as Card;
-
-      if (currentTurnPlayer != null) {
-        let cards = [...currentTurnPlayer.cards];
-        if (!cards.includes(EMPTY_CARD) && !currentTurnPlayer.doubledDown) {
-          cards.push(EMPTY_CARD);
-        }
-        let index = cards.indexOf(EMPTY_CARD);
-        cards[index] = card;
-        modifyState({
-          blackjack: {
-            players: state.blackjack.players.map((p) => {
-              if (currentTurnPlayer != null) {
-                if (p.id === currentTurnPlayer.id) {
-                  return {
-                    ...p,
-                    cards: cards,
-                  };
+                } else {
+                  console.warn("currentTurnPlayer is null - this should never happen");
                 }
-                return p;
-              } else {
-                console.warn("currentTurnPlayer is null - this should never happen");
-              }
-            }),
-          },
-        });
-      } else if (state.blackjack.turn === "DEALER") {
-        let dealerCards = [...state.blackjack.dealerCards];
-        if (!dealerCards.includes(EMPTY_CARD)) {
-          dealerCards.push(EMPTY_CARD);
+              }),
+            },
+          });
+        } else if (state.blackjack.turn === "DEALER") {
+          let dealerCards = [...state.blackjack.dealerCards];
+          if (!dealerCards.includes(EMPTY_CARD)) {
+            dealerCards.push(EMPTY_CARD);
+          }
+          let index = dealerCards.indexOf(EMPTY_CARD);
+          dealerCards[index] = card;
+          modifyState({
+            blackjack: {
+              dealerCards: dealerCards,
+              turn: state.blackjack.firstRound ? state.blackjack.players[0].id : "DEALER",
+              firstRound: false,
+            },
+          });
         }
-        let index = dealerCards.indexOf(EMPTY_CARD);
-        dealerCards[index] = card;
-        modifyState({
-          blackjack: {
-            dealerCards: dealerCards,
-            turn: state.blackjack.firstRound ? state.blackjack.players[0].id : "DEALER",
-            firstRound: false,
-          },
-        });
       }
-    }
+    };
+
+    const handleKeyUp = (event: KeyboardEvent) => {
+      if (event.key === "0") {
+        setZeroHeld(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, [state, modalOpen, zeroHeld]);
+
+  useKeyPress((event) => {
+    console.log(event.key);
+    //
   });
 
   const [showCardPicker, setShowCardPicker] = useState(false);
