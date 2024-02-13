@@ -173,6 +173,7 @@ export default function Blackjack() {
           val = "T";
           break;
 
+        case "/":
         case "=":
           {
             if (state.blackjack.state == "PLAYING") {
