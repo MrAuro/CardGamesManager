@@ -11,7 +11,6 @@ export type BlackjackPlayer = {
   doubledDown: boolean;
   split: boolean;
   splitFrom?: string; // For split hands, the id of the original hand
-  handPartialResult?: "BUST" | "BLACKJACK";
   handResult?: "WIN" | "LOSE" | "PUSH";
   sidebets: {
     // 0/null means no bet
