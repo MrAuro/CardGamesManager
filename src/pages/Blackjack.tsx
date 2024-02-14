@@ -1462,7 +1462,7 @@ export default function Blackjack() {
                               alignItems: "center",
                             }}
                           >
-                            {cardTotal.ace != "NONE" && (
+                            {cardTotal.ace != "NONE" && cardTotal.total < 21 && (
                               <div>
                                 <Text size="sm" mb={0} fw="bold" tt="capitalize">
                                   {cardTotal.ace}
@@ -1783,7 +1783,7 @@ export default function Blackjack() {
                           alignItems: "center",
                         }}
                       >
-                        {dealerTotal.ace != "NONE" && (
+                        {dealerTotal.ace != "NONE" && dealerTotal.total < 21 && (
                           <div>
                             <Text size="sm" mb={0} fw="bold" tt="capitalize">
                               {dealerTotal.ace}
