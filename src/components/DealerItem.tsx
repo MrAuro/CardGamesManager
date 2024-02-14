@@ -112,7 +112,7 @@ export default function DealerItem(props: {
               justifyContent: "flex-end",
             }}
           >
-            <Box ml="xs">{props.leftCardItem}</Box>
+            {props.leftCardItem}
             {state.blackjack.dealerCards.map((card, index) => (
               <Box ml="xs" key={`DEALER${card}${index}`}>
                 <PlayingCard

@@ -17,7 +17,15 @@ import {
   getCardTotal,
   getPlayer,
 } from "../utils/BlackjackHelper";
-import { Card, CardRank, CardSuit, EMPTY_CARD, getRank, getRankInt } from "../utils/CardHelper";
+import {
+  Card,
+  CardRank,
+  CardSuit,
+  EMPTY_CARD,
+  getRank,
+  getRankInt,
+  getSuit,
+} from "../utils/CardHelper";
 import { useCustomRecoilState } from "../utils/RecoilHelper";
 
 export default function Blackjack() {
@@ -1524,6 +1532,78 @@ export default function Blackjack() {
                 }
                 lefterCardItem={
                   <>
+                    {state.blackjack.sideBets.perfectPairs &&
+                      player.sidebets.perfectPairs != null &&
+                      player.sidebets.perfectPairs > 0 &&
+                      getRankInt(player.cards[0]) == getRankInt(player.cards[1]) &&
+                      (getSuit(player.cards[0]) == "-" || getSuit(player.cards[1]) == "-") && (
+                        <Box ml="xs">
+                          <Paper
+                            style={{
+                              width: "4.5rem",
+                              height: "4.5rem",
+                              backgroundColor: "transparent",
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                height: "100%",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <Text size="xl" lh="xs" ta="center" mb={0} fw="bold" c="red.8">
+                                  SUIT NEEDED
+                                </Text>
+                              </div>
+                            </div>
+                          </Paper>
+                        </Box>
+                      )}
+                    {state.blackjack.sideBets.twentyOnePlusThree &&
+                      player.sidebets.twentyOnePlusThree != null &&
+                      player.sidebets.twentyOnePlusThree > 0 &&
+                      (getSuit(player.cards[0]) == "-" || getSuit(player.cards[1]) == "-") && (
+                        <Box ml="xs">
+                          <Paper
+                            style={{
+                              width: "4.5rem",
+                              height: "4.5rem",
+                              backgroundColor: "transparent",
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                height: "100%",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <Text size="xl" lh="xs" ta="center" mb={0} fw="bold" c="red.8">
+                                  SUIT NEEDED
+                                </Text>
+                              </div>
+                            </div>
+                          </Paper>
+                        </Box>
+                      )}
+
                     {state.blackjack.sideBets.betBehind &&
                       player.sidebets.betBehind != null &&
                       player.sidebets.betBehind.bet != null &&
@@ -1760,6 +1840,44 @@ export default function Blackjack() {
             setCardIndex={setCardIndex}
             leftCardItem={
               <>
+                <Box ml="xs">
+                  <Paper
+                    style={{
+                      width: "4.5rem",
+                      height: "4.5rem",
+                      backgroundColor: "transparent",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        height: "100%",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                        }}
+                      >
+                        {state.blackjack.sideBets.twentyOnePlusThree &&
+                          state.blackjack.players.some(
+                            (p) =>
+                              p.sidebets.twentyOnePlusThree != null &&
+                              p.sidebets.twentyOnePlusThree > 0
+                          ) &&
+                          getSuit(state.blackjack.dealerCards[0]) == "-" && (
+                            <Text size="xl" lh="xs" ta="center" mb={0} fw="bold" c="red.8">
+                              SUIT NEEDED
+                            </Text>
+                          )}
+                      </div>
+                    </div>
+                  </Paper>
+                </Box>
                 <Box>
                   <Paper
                     style={{
