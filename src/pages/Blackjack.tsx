@@ -803,7 +803,6 @@ export default function Blackjack() {
               cards: [EMPTY_CARD, EMPTY_CARD],
               doubledDown: false,
               split: false,
-              handPartialResult: undefined,
               handResult: undefined,
               sidebets: {
                 twentyOnePlusThree: p.sidebets.twentyOnePlusThree,
@@ -1148,7 +1147,6 @@ export default function Blackjack() {
               cards: [EMPTY_CARD, EMPTY_CARD],
               doubledDown: false,
               split: false,
-              handPartialResult: undefined,
               handResult: undefined,
               sidebets: {
                 twentyOnePlusThree: p.sidebets.twentyOnePlusThree,
@@ -1293,112 +1291,6 @@ export default function Blackjack() {
       });
     }
   };
-
-  useEffect(() => {
-    let tempPlayers: BlackjackPlayer[] = [];
-    let tempTurn = state.blackjack.turn;
-    for (let i = state.blackjack.players.length - 1; i >= 0; i--) {
-      let player = state.blackjack.players[i];
-      let playerTotal = getCardTotal(player.cards);
-      console.log(`Player ${player.id} has ${playerTotal.total} (${player.handPartialResult})`);
-      if (playerTotal.total > 21 && player.handPartialResult !== "BUST") {
-        console.log(`Player ${player.id} has busted`);
-
-        for (let p of state.blackjack.players) {
-          if (p.id === player.id) {
-            tempPlayers.push({
-              ...p,
-              handPartialResult: "BUST",
-            });
-          }
-        }
-
-        tempTurn =
-          state.blackjack.turn === player.id
-            ? state.blackjack.players.indexOf(player) + 1 < state.blackjack.players.length
-              ? state.blackjack.players[state.blackjack.players.indexOf(player) + 1].id
-              : "DEALER"
-            : state.blackjack.turn;
-      }
-
-      if (playerTotal.total <= 21 && player.handPartialResult == "BUST") {
-        console.log(`Player ${player.id} has unbusted`);
-
-        for (let p of state.blackjack.players) {
-          if (p.id === player.id) {
-            tempPlayers.push({
-              ...p,
-              handPartialResult: undefined,
-            });
-          }
-        }
-      }
-
-      if (playerTotal.total == 21 && player.handPartialResult !== "BLACKJACK") {
-        console.log(`Player ${player.id} has blackjack`);
-
-        for (let p of state.blackjack.players) {
-          if (p.id === player.id) {
-            tempPlayers.push({
-              ...p,
-              handPartialResult: "BLACKJACK",
-            });
-          }
-        }
-
-        tempTurn =
-          state.blackjack.turn === player.id
-            ? state.blackjack.players.indexOf(player) + 1 < state.blackjack.players.length
-              ? state.blackjack.players[state.blackjack.players.indexOf(player) + 1].id
-              : "DEALER"
-            : state.blackjack.turn;
-      }
-
-      if (playerTotal.total < 21 && player.handPartialResult == "BLACKJACK") {
-        console.log(`Player ${player.id} has unblackjacked`);
-
-        for (let p of state.blackjack.players) {
-          if (p.id === player.id) {
-            tempPlayers.push({
-              ...p,
-              handPartialResult: undefined,
-            });
-          }
-        }
-      }
-    }
-
-    // add other players
-    for (let player of state.blackjack.players) {
-      if (!tempPlayers.find((p) => p.id === player.id)) {
-        tempPlayers.push(player);
-      }
-    }
-
-    // dont set the state if nothing has changed
-    let identical = true;
-    for (let i = 0; i < tempPlayers.length; i++) {
-      if (_.isEqual(tempPlayers[i], state.blackjack.players[i]) === false) {
-        identical = false;
-        break;
-      }
-    }
-
-    if (tempTurn !== state.blackjack.turn) {
-      identical = false;
-    }
-
-    if (!identical) {
-      setState({
-        ...state,
-        blackjack: {
-          ...state.blackjack,
-          players: tempPlayers,
-          turn: tempTurn,
-        },
-      });
-    }
-  }, [state.blackjack.players]);
 
   useEffect(() => {
     let allPlayerCards = state.blackjack.players.map((p) => p.cards);
@@ -1570,7 +1462,7 @@ export default function Blackjack() {
                               alignItems: "center",
                             }}
                           >
-                            {cardTotal.ace != "NONE" && (
+                            {cardTotal.ace != "NONE" && cardTotal.total < 21 && (
                               <div>
                                 <Text size="sm" mb={0} fw="bold" tt="capitalize">
                                   {cardTotal.ace}
@@ -1768,7 +1660,7 @@ export default function Blackjack() {
                     fullWidth
                     size="sm"
                     color="blue"
-                    disabled={!isTurn || player.doubledDown || player.handPartialResult == "BUST"}
+                    disabled={!isTurn || player.doubledDown}
                     onClick={() => {
                       modifyState({
                         blackjack: {
@@ -1891,7 +1783,7 @@ export default function Blackjack() {
                           alignItems: "center",
                         }}
                       >
-                        {dealerTotal.ace != "NONE" && (
+                        {dealerTotal.ace != "NONE" && dealerTotal.total < 21 && (
                           <div>
                             <Text size="sm" mb={0} fw="bold" tt="capitalize">
                               {dealerTotal.ace}
