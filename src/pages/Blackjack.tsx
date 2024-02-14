@@ -474,7 +474,7 @@ export default function Blackjack() {
               !(
                 currentTurnPlayer.doubledDown ||
                 currentTurnPlayer.cards.filter((card) => card !== EMPTY_CARD).length !== 2 ||
-                getRank(currentTurnPlayer.cards[0]) !== getRank(currentTurnPlayer.cards[1]) ||
+                getRankInt(currentTurnPlayer.cards[0]) !== getRankInt(currentTurnPlayer.cards[1]) ||
                 currentTurnPlayer.split ||
                 currentTurnPlayer.bet > getPlayer(currentTurnPlayer.id, state.players).balance
               )
@@ -1788,7 +1788,7 @@ export default function Blackjack() {
                       !isTurn ||
                       player.doubledDown ||
                       player.cards.filter((card) => card !== EMPTY_CARD).length !== 2 ||
-                      getRank(player.cards[0]) !== getRank(player.cards[1]) ||
+                      getRankInt(player.cards[0]) !== getRankInt(player.cards[1]) ||
                       player.split ||
                       player.bet > getPlayer(player.id, state.players).balance
                     }
