@@ -706,18 +706,21 @@ export default function Blackjack() {
       ) {
         let betBehindPayout = 0;
         let betBehindPlayerResult: "BLACKJACK" | "WIN" | "LOSE" | "PUSH" = "LOSE";
+        let betBehindPlayerTotal = getCardTotal(
+          state.blackjack.players.find((p) => p.id === player.sidebets.betBehind.target!)!.cards
+        );
 
-        if (playerTotal.total > 21) {
+        if (betBehindPlayerTotal.total > 21) {
           betBehindPlayerResult = "LOSE";
-        } else if (dealerTotal.total == playerTotal.total) {
+        } else if (dealerTotal.total == betBehindPlayerTotal.total) {
           betBehindPlayerResult = "PUSH";
-        } else if (playerTotal.total == 21) {
+        } else if (betBehindPlayerTotal.total == 21) {
           betBehindPlayerResult = "BLACKJACK";
         } else if (dealerTotal.total > 21) {
           betBehindPlayerResult = "WIN";
-        } else if (dealerTotal.total > playerTotal.total) {
+        } else if (dealerTotal.total > betBehindPlayerTotal.total) {
           betBehindPlayerResult = "LOSE";
-        } else if (dealerTotal.total < playerTotal.total) {
+        } else if (dealerTotal.total < betBehindPlayerTotal.total) {
           betBehindPlayerResult = "WIN";
         }
 
