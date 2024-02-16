@@ -1,11 +1,9 @@
 import { PLAYERS_STATE } from "@/stores/Players";
-import { Button, Text } from "@mantine/core";
-import { useRecoilValue } from "recoil";
+import { useRecoilImmerState } from "@/utils/RecoilImmer";
+import { Button } from "@mantine/core";
+import { useState } from "react";
 import PlayerItem from "./components/PlayerItem";
 import PlayerModal from "./components/PlayerModal";
-import { useReducer, useState } from "react";
-import { useRecoilImmerState } from "@/utils/RecoilImmer";
-import { getPlayer } from "@/utils/PlayerHelper";
 
 export default function Players() {
   const [players, setPlayers] = useRecoilImmerState(PLAYERS_STATE);
@@ -19,7 +17,7 @@ export default function Players() {
       <PlayerModal
         opened={playerModalOpened}
         title={playerModalTitle}
-        player={playerIdToEdit ? getPlayer(playerIdToEdit, players) || null : null}
+        player={playerIdToEdit ? players.find((p) => p.id === playerIdToEdit) || null : null}
         onSave={(player) => {
           setPlayerModalOpened(false);
           setPlayers((draft) => {
@@ -30,6 +28,7 @@ export default function Players() {
               draft[index] = player;
             }
           });
+          setPlayerIdToEdit(null);
         }}
         onClose={() => {
           setPlayerModalOpened(false);
@@ -44,7 +43,15 @@ export default function Players() {
         }}
       />
       {players.map((player) => (
-        <PlayerItem player={player} key={player.id} />
+        <PlayerItem
+          player={player}
+          key={player.id}
+          onClick={() => {
+            setPlayerIdToEdit(player.id);
+            setPlayerModalTitle("Edit Player");
+            setPlayerModalOpened(true);
+          }}
+        />
       ))}
       <Button
         fullWidth

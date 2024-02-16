@@ -3,7 +3,7 @@ import { parseMoney } from "@/utils/MoneyHelper";
 import { Button, Modal, NumberInput, TextInput } from "@mantine/core";
 import { getHotkeyHandler } from "@mantine/hooks";
 import { IconCurrencyDollar, IconUserFilled } from "@tabler/icons-react";
-import { useReducer, useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function PlayerModal({
   opened,
@@ -18,15 +18,22 @@ export default function PlayerModal({
   player: Player | null;
   onSave: (player: Player) => void;
   onClose: () => void;
-  onDelete?: () => void;
+  onDelete: () => void;
 }) {
   const [name, setName] = useState("");
-  const [balance, setBalance] = useState(0);
+  const [balance, setBalance] = useState(100);
 
   const [nameError, setNameError] = useState("");
   const [balanceError, setBalanceError] = useState("");
 
   const [reallyDelete, setReallyDelete] = useState(false);
+
+  useEffect(() => {
+    if (player) {
+      setName(player.name);
+      setBalance(player.balance);
+    }
+  }, [player]);
 
   const savePlayer = () => {
     let errors = false;
@@ -48,18 +55,27 @@ export default function PlayerModal({
     setBalanceError("");
 
     // If we have a player, we are editing, otherwise we are creating a new player
+    let newPlayer: Player;
     if (player) {
-      player.name = name;
-      player.balance = balance;
+      newPlayer = { ...player, name, balance };
     } else {
-      player = {
+      newPlayer = {
         id: crypto.randomUUID(),
         name,
         balance,
       };
     }
 
-    onSave(player);
+    onSave(newPlayer);
+    resetState();
+  };
+
+  const resetState = () => {
+    setName("");
+    setBalance(100);
+    setNameError("");
+    setBalanceError("");
+    setReallyDelete(false);
   };
 
   return (
@@ -68,6 +84,7 @@ export default function PlayerModal({
       opened={opened}
       onClose={() => {
         onClose();
+        resetState();
       }}
     >
       <TextInput
@@ -95,14 +112,15 @@ export default function PlayerModal({
         value={balance}
         onChange={(value) => setBalance(parseMoney(value))}
       />
-      {onDelete && (
+      {player && (
         <Button
           fullWidth
-          mt="md"
+          mt="sm"
           color="red"
           onClick={() => {
             if (reallyDelete) {
               onDelete();
+              resetState();
             } else {
               setReallyDelete(true);
             }
@@ -111,7 +129,7 @@ export default function PlayerModal({
           {reallyDelete ? "Are you sure?" : "Delete"}
         </Button>
       )}
-      <Button fullWidth mt="md" onClick={savePlayer}>
+      <Button fullWidth mt="xs" onClick={savePlayer}>
         Save
       </Button>
     </Modal>
