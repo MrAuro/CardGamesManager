@@ -1,8 +1,6 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use tauri_plugin_sql::{Migration, MigrationKind};
-
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -10,29 +8,8 @@ fn greet(name: &str) -> String {
 }
 
 fn main() {
-    let migrations = vec![
-        // Define your migrations here
-        Migration {
-            version: 1,
-            description: "create_initial_tables",
-            sql: "CREATE TABLE data (id INTEGER PRIMARY KEY, data TEXT NOT NULL);",
-            kind: MigrationKind::Up,
-        },
-
-        Migration {
-            version: 2,
-            description: "add_data",
-            sql: "IF NOT EXISTS (SELECT * FROM data WHERE id = 1) INSERT INTO data (data) VALUES ('{}');",
-            kind: MigrationKind::Down,
-        }
-    ];
-
     tauri::Builder::default()
-        .plugin(
-            tauri_plugin_sql::Builder::default()
-                .add_migrations("sqlite:data.db", migrations)
-                .build(),
-        )
+        .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .invoke_handler(tauri::generate_handler![greet])
         .run(tauri::generate_context!())

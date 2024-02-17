@@ -8,6 +8,9 @@ import ReactDOM from "react-dom/client";
 import { ErrorBoundary } from "react-error-boundary";
 import { RecoilRoot } from "recoil";
 import App from "./App";
+import { Store } from "tauri-plugin-store-api";
+
+export const TAURI_STORE = new Store(".data");
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
