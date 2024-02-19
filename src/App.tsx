@@ -1,4 +1,4 @@
-import { Container, Divider, Text } from "@mantine/core";
+import { Center, Container, Divider, Loader, Text } from "@mantine/core";
 import { Page } from "./types/State";
 import { useEffect, useMemo, useState } from "react";
 import Header from "./components/Header";
@@ -26,6 +26,7 @@ export default function App() {
   const [blackjackPlayers, setBlackjackPlayers] = useRecoilState(BLACKJACK_PLAYERS_STATE);
   const [blackjackSettings, setBlackjackSettings] = useRecoilState(BLACKJACK_SETTINGS_STATE);
   const [settings, setSettings] = useRecoilState(SETTINGS_STATE);
+  const [loading, setLoading] = useState(true);
 
   useMemo(async () => {
     let players = await TAURI_STORE.get("players");
@@ -57,6 +58,8 @@ export default function App() {
     if (settings) {
       setSettings(settings as SettingsType);
     }
+
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -102,7 +105,14 @@ export default function App() {
     <>
       <Header active={activeTab} setActive={setActiveTab} />
       <Divider my="xs" />
-      <Container>{content}</Container>
+      {loading ? (
+        <Center>
+          {" "}
+          <Loader />
+        </Center>
+      ) : (
+        <Container>{content}</Container>
+      )}
     </>
   );
 }

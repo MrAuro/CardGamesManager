@@ -38,7 +38,7 @@ const defaultBlackjackSettings: BlackjackSettings = {
 };
 
 export const BLACKJACK_SETTINGS_STATE = atom<BlackjackSettings>({
-  key: "BLACKJACK_GAME",
+  key: "BLACKJACK_SETTINGS",
   default: defaultBlackjackSettings,
 });
 
