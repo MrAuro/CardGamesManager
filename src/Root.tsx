@@ -9,8 +9,107 @@ import { ErrorBoundary } from "react-error-boundary";
 import { RecoilRoot } from "recoil";
 import App from "./App";
 import { Store } from "tauri-plugin-store-api";
+import { atom } from "recoil";
+import { Settings } from "@/types/Settings";
+import { BlackjackGame, BlackjackPlayer, BlackjackSettings } from "./types/Blackjack";
+import { Player } from "./types/Player";
 
 export const TAURI_STORE = new Store(".data");
+
+export const PLAYERS_STATE = atom<Player[]>({
+  key: "PLAYERS",
+  default: new Promise(async (resolve) => {
+    let players = await TAURI_STORE.get("players");
+    if (!players) {
+      players = [];
+      await TAURI_STORE.set("players", players);
+    }
+
+    resolve(players as Player[]);
+  }),
+});
+
+export const BLACKJACK_GAME_STATE = atom<BlackjackGame>({
+  key: "BLACKJACK_GAME",
+  default: new Promise(async (resolve) => {
+    let game = await TAURI_STORE.get("blackjackGame");
+    if (!game) {
+      game = {
+        gameState: "PREROUND",
+        currentTurn: "",
+        dealerCards: [],
+        dealerFirstTime: true,
+      };
+      await TAURI_STORE.set("blackjackGame", game);
+    }
+
+    resolve(game as BlackjackGame);
+  }),
+});
+
+export const BLACKJACK_SETTINGS = atom<BlackjackSettings>({
+  key: "BLACKJACK_SETTINGS",
+  default: new Promise(async (resolve) => {
+    let settings = await TAURI_STORE.get("blackjackSettings");
+    if (!settings) {
+      settings = {
+        decks: 2,
+        dealerHitsSoft17: true,
+        doubleAfterSplit: true,
+        splitAces: true,
+        splitAcesReceiveOneCard: true,
+
+        blackjackPayout: 3 / 2,
+
+        twentyOnePlusThreeEnabled: false,
+        twentyOnePlusThreeFlushPayout: 5,
+        twentyOnePlusThreeStraightPayout: 10,
+        twentyOnePlusThreeThreeOfAKindPayout: 30,
+        twentyOnePlusThreeStraightFlushPayout: 40,
+        twentyOnePlusThreeThreeOfAKindSuitedPayout: 100,
+
+        perfectPairsEnabled: false,
+        perfectPairsMixedPayout: 6,
+        perfectPairsColoredPayout: 12,
+        perfectPairsSuitedPayout: 30,
+
+        betBehindEnabled: false,
+      };
+      await TAURI_STORE.set("blackjackSettings", settings);
+    }
+
+    resolve(settings as BlackjackSettings);
+  }),
+});
+
+export const BLACKJACK_PLAYERS_STATE = atom<BlackjackPlayer[]>({
+  key: "BLACKJACK_PLAYERS",
+  default: new Promise(async (resolve) => {
+    let players = await TAURI_STORE.get("blackjackPlayers");
+    if (!players) {
+      players = [];
+      await TAURI_STORE.set("blackjackPlayers", players);
+    }
+
+    resolve(players as BlackjackPlayer[]);
+  }),
+});
+
+export const SETTINGS_STATE = atom<Settings>({
+  key: "SETTINGS",
+  default: new Promise(async (resolve) => {
+    let settings = await TAURI_STORE.get("settings");
+    if (!settings) {
+      settings = {
+        scale: 1,
+        debug: false,
+      };
+      await TAURI_STORE.set("settings", settings);
+    }
+
+    resolve(settings as Settings);
+  }),
+});
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>

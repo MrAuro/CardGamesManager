@@ -1,4 +1,4 @@
-import { PLAYERS_STATE } from "@/stores/Players";
+import { PLAYERS_STATE } from "@/Root";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import { Button } from "@mantine/core";
 import { useState } from "react";

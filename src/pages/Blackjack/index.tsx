@@ -2,7 +2,7 @@ import { useRecoilValue } from "recoil";
 import PostRound from "./routes/PostRound";
 import PreRound from "./routes/PreRound";
 import Round from "./routes/Round";
-import { BLACKJACK_GAME_STATE } from "../../stores/Blackjack";
+import { BLACKJACK_GAME_STATE } from "@/Root";
 
 export default function Blackjack() {
   const { gameState } = useRecoilValue(BLACKJACK_GAME_STATE);
