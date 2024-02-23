@@ -14,11 +14,8 @@ import Blackjack from "./pages/Blackjack";
 import Players from "./pages/Players";
 import Poker from "./pages/Poker";
 import Settings from "./pages/Settings";
-import { Page } from "./types/State";
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<Page>("Players");
-
   const [players] = useRecoilState(PLAYERS_STATE);
   const [playersLastSaved, setPlayersLastSaved] = useState(0);
   const [blackjackGame] = useRecoilState(BLACKJACK_GAME_STATE);
@@ -27,7 +24,7 @@ export default function App() {
   const [blackjackSettingsLastSaved, setBlackjackSettingsLastSaved] = useState(0);
   const [blackjackPlayers] = useRecoilState(BLACKJACK_PLAYERS_STATE);
   const [blackjackPlayersLastSaved, setBlackjackPlayersLastSaved] = useState(0);
-  const [settings] = useRecoilState(SETTINGS_STATE);
+  const [settings, setSettings] = useRecoilState(SETTINGS_STATE);
   const [settingsLastSaved, setSettingsLastSaved] = useState(0);
 
   useEffect(() => {
@@ -65,8 +62,10 @@ export default function App() {
     }
   }, [settings]);
 
+  document.documentElement.style.fontSize = `${settings.scale}%`;
+
   let content: JSX.Element = <Text>No content</Text>;
-  switch (activeTab) {
+  switch (settings.activeTab) {
     case "Players":
       content = <Players />;
       break;
@@ -86,7 +85,12 @@ export default function App() {
 
   return (
     <>
-      <Header active={activeTab} setActive={setActiveTab} />
+      <Header
+        active={settings.activeTab}
+        setActive={(tab) => {
+          setSettings({ ...settings, activeTab: tab });
+        }}
+      />
       <Divider my="xs" />
       <Container>{content}</Container>
     </>

@@ -103,6 +103,7 @@ export const SETTINGS_STATE = atom<Settings>({
       settings = {
         scale: 1,
         debug: false,
+        activeTab: "Players",
       };
       await TAURI_STORE.set("settings", settings);
     }
