@@ -5,3 +5,7 @@ export function parseMoney(value: string | number): number {
     return value;
   }
 }
+
+export function formatMoney(value: number): string {
+  return `$${value.toFixed(2)}`;
+}
