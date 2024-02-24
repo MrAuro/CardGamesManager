@@ -44,6 +44,8 @@ export default function PreRound() {
   const theme = useMantineTheme();
   const [blackjackSettings] = useRecoilState(BLACKJACK_SETTINGS);
 
+  const [sidebetsOpen, setSidebetsOpen] = useState<string[]>([]);
+
   return (
     <>
       <Button fullWidth mt="sm">
@@ -59,8 +61,6 @@ export default function PreRound() {
       <PlayerSelector
         game="BLACKJACK"
         playerElement={(index, player, blackjackPlayer) => {
-          const [sidebetsOpen, setSidebetsOpen] = useState(false);
-
           if (!blackjackPlayer) return <></>;
 
           return (
@@ -118,7 +118,13 @@ export default function PreRound() {
                             <Button
                               fullWidth
                               variant="light"
-                              onClick={() => setSidebetsOpen(!sidebetsOpen)}
+                              onClick={() => {
+                                if (sidebetsOpen.includes(player.id)) {
+                                  setSidebetsOpen(sidebetsOpen.filter((id) => id !== player.id));
+                                } else {
+                                  setSidebetsOpen([...sidebetsOpen, player.id]);
+                                }
+                              }}
                               color="green"
                             >
                               <IconChevronsDown size="1.25rem" />
@@ -130,7 +136,7 @@ export default function PreRound() {
                         </ButtonGroup>
                       </div>
                     </Group>
-                    <Collapse in={sidebetsOpen}>
+                    <Collapse in={sidebetsOpen.includes(player.id)}>
                       <Divider my="xs" />
                       <Grid columns={amountOfSideBetsEnabled(blackjackSettings) * 12}>
                         {blackjackSettings.perfectPairsEnabled && (
