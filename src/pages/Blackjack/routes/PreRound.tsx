@@ -1,6 +1,5 @@
 import { BLACKJACK_PLAYERS_STATE, BLACKJACK_SETTINGS } from "@/Root";
 import PlayerSelector from "@/components/PlayerSelector";
-import { BlackjackSettings } from "@/types/Blackjack";
 import { formatMoney } from "@/utils/MoneyHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import { Draggable, DraggableStateSnapshot } from "@hello-pangea/dnd";
@@ -78,7 +77,7 @@ export default function PreRound() {
                     opacity: snapshot.isDragging && !snapshot.isDropAnimating ? 0.65 : 1,
                   }}
                 >
-                  <Card withBorder radius="md">
+                  <Card withBorder radius="md" p="sm">
                     <Group justify="space-between">
                       <div>
                         <Text size="lg" fw="bold">
@@ -95,22 +94,96 @@ export default function PreRound() {
                           width: "80%",
                         }}
                       >
-                        <NumberInput radius="md" mx="sm" leftSection={<IconCurrencyDollar />} />
+                        <NumberInput
+                          radius="md"
+                          mx="sm"
+                          decimalScale={2}
+                          fixedDecimalScale
+                          thousandSeparator=","
+                          value={blackjackPlayer.bet}
+                          leftSection={<IconCurrencyDollar />}
+                          onChange={(value) => {
+                            setBlackjackPlayers((draft) => {
+                              draft[index].bet = Math.floor(parseFloat(`${value}`) * 100) / 100;
+                              console.log(draft[index].bet, value);
+                            });
+                          }}
+                        />
                         <ButtonGroup
                           style={{
                             width: "100%",
                           }}
                         >
-                          <Button fullWidth variant="light">
+                          <Button
+                            fullWidth
+                            variant="light"
+                            disabled={blackjackPlayer.bet + 5 > player.balance}
+                            onClick={() => {
+                              setBlackjackPlayers((draft) => {
+                                draft[index].bet = Math.floor((draft[index].bet + 5) * 100) / 100;
+                              });
+                            }}
+                            style={{
+                              backgroundColor:
+                                blackjackPlayer.bet + 5 > player.balance
+                                  ? theme.colors.dark[5]
+                                  : undefined,
+                            }}
+                          >
                             +5
                           </Button>
-                          <Button fullWidth variant="light">
+                          <Button
+                            fullWidth
+                            variant="light"
+                            disabled={blackjackPlayer.bet * 2 > player.balance}
+                            onClick={() => {
+                              setBlackjackPlayers((draft) => {
+                                draft[index].bet = Math.floor(draft[index].bet * 2 * 100) / 100;
+                              });
+                            }}
+                            style={{
+                              backgroundColor:
+                                blackjackPlayer.bet * 2 > player.balance
+                                  ? theme.colors.dark[5]
+                                  : undefined,
+                            }}
+                          >
                             X2
                           </Button>
-                          <Button fullWidth variant="light">
+                          <Button
+                            fullWidth
+                            variant="light"
+                            disabled={Math.floor((blackjackPlayer.bet * 100) / 2) == 0}
+                            onClick={() => {
+                              setBlackjackPlayers((draft) => {
+                                draft[index].bet = Math.floor((draft[index].bet / 2) * 100) / 100;
+                              });
+                            }}
+                            style={{
+                              backgroundColor:
+                                Math.floor((blackjackPlayer.bet * 100) / 2) == 0
+                                  ? theme.colors.dark[5]
+                                  : undefined,
+                            }}
+                          >
                             1/2
                           </Button>
-                          <Button fullWidth variant="light">
+                          <Button
+                            fullWidth
+                            variant="light"
+                            disabled={blackjackPlayer.bet == player.balance}
+                            onClick={() => {
+                              setBlackjackPlayers((draft) => {
+                                draft[index].bet = Math.floor(player.balance * 100) / 100;
+                              });
+                            }}
+                            style={{
+                              backgroundColor:
+                                blackjackPlayer.bet == player.balance
+                                  ? theme.colors.dark[5]
+                                  : undefined,
+                            }}
+                          >
                             Max
                           </Button>
                           {(blackjackSettings.betBehindEnabled ||
