@@ -218,11 +218,3 @@ export default function PreRound() {
     </>
   );
 }
-
-const amountOfSideBetsEnabled = (blackjackSettings: BlackjackSettings) => {
-  let amount = 0;
-  if (blackjackSettings.perfectPairsEnabled) amount++;
-  if (blackjackSettings.twentyOnePlusThreeEnabled) amount++;
-  if (blackjackSettings.betBehindEnabled) amount++;
-  return amount;
-};
