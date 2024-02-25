@@ -1,7 +1,8 @@
-import { BLACKJACK_SETTINGS } from "@/Root";
+import { BLACKJACK_PLAYERS_STATE, BLACKJACK_SETTINGS } from "@/Root";
 import PlayerSelector from "@/components/PlayerSelector";
 import { BlackjackSettings } from "@/types/Blackjack";
 import { formatMoney } from "@/utils/MoneyHelper";
+import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import { Draggable, DraggableStateSnapshot } from "@hello-pangea/dnd";
 import {
   Button,
@@ -42,6 +43,7 @@ function getStyle(style: any, snapshot: DraggableStateSnapshot) {
 export default function PreRound() {
   const theme = useMantineTheme();
   const [blackjackSettings] = useRecoilState(BLACKJACK_SETTINGS);
+  const [blackjackPlayers, setBlackjackPlayers] = useRecoilImmerState(BLACKJACK_PLAYERS_STATE);
 
   const [sidebetsOpen, setSidebetsOpen] = useState<string[]>([]);
 
@@ -145,7 +147,16 @@ export default function PreRound() {
                               )}
                             </Button>
                           )}
-                          <Button fullWidth variant="light" color="red">
+                          <Button
+                            fullWidth
+                            variant="light"
+                            color="red"
+                            onClick={() => {
+                              setBlackjackPlayers((draft) => {
+                                draft.splice(index, 1);
+                              });
+                            }}
+                          >
                             <IconX size="1.25rem" />
                           </Button>
                         </ButtonGroup>
