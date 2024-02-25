@@ -67,6 +67,7 @@ export default function PreRound() {
             <Draggable key={player.id} index={index} draggableId={player.id}>
               {(provided, snapshot) => (
                 <div
+                  key={player.id}
                   ref={provided.innerRef}
                   {...provided.draggableProps}
                   {...provided.dragHandleProps}
