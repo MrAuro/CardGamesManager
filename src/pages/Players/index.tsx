@@ -1,9 +1,10 @@
-import { PLAYERS_STATE } from "@/Root";
+import { BLACKJACK_PLAYERS_STATE, PLAYERS_STATE } from "@/Root";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import { Button } from "@mantine/core";
 import { useState } from "react";
 import PlayerItem from "./components/PlayerItem";
 import PlayerModal from "./components/PlayerModal";
+import { useRecoilState } from "recoil";
 
 export default function Players() {
   const [players, setPlayers] = useRecoilImmerState(PLAYERS_STATE);
@@ -11,6 +12,8 @@ export default function Players() {
   const [playerModalOpened, setPlayerModalOpened] = useState(false);
   const [playerIdToEdit, setPlayerIdToEdit] = useState<string | null>(null);
   const [playerModalTitle, setPlayerModalTitle] = useState("Add Player");
+
+  const [blackjackPlayers] = useRecoilState(BLACKJACK_PLAYERS_STATE);
 
   return (
     <>
@@ -35,11 +38,12 @@ export default function Players() {
         }}
         onDelete={() => {
           setPlayerModalOpened(false);
-          if (playerIdToEdit)
+          if (playerIdToEdit && blackjackPlayers.every((p) => p.id !== playerIdToEdit))
             setPlayers((draft) => {
               const index = draft.findIndex((p) => p.id === playerIdToEdit);
               draft.splice(index, 1);
             });
+          else alert("Cannot delete player that is in a game");
         }}
       />
       {players.map((player) => (
