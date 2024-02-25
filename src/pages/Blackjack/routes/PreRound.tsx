@@ -9,7 +9,6 @@ import {
   Card,
   Collapse,
   Divider,
-  Grid,
   Group,
   NumberInput,
   Select,
@@ -127,7 +126,23 @@ export default function PreRound() {
                               }}
                               color="green"
                             >
-                              <IconChevronsDown size="1.25rem" />
+                              {sidebetsOpen.includes(player.id) ? (
+                                <IconChevronsDown
+                                  size="1.25rem"
+                                  style={{
+                                    transform: "rotate(180deg)",
+                                    transition: "transform 0.3s ease",
+                                  }}
+                                />
+                              ) : (
+                                <IconChevronsDown
+                                  size="1.25rem"
+                                  style={{
+                                    transform: "rotate(0deg)",
+                                    transition: "transform 0.3s ease",
+                                  }}
+                                />
+                              )}
                             </Button>
                           )}
                           <Button fullWidth variant="light" color="red">
@@ -137,49 +152,41 @@ export default function PreRound() {
                       </div>
                     </Group>
                     <Collapse in={sidebetsOpen.includes(player.id)}>
-                      <Divider my="xs" />
-                      <Grid columns={amountOfSideBetsEnabled(blackjackSettings) * 12}>
+                      <Divider mt={5} mb={5} />
+                      <Group grow preventGrowOverflow={false} wrap="nowrap">
                         {blackjackSettings.perfectPairsEnabled && (
-                          <Grid.Col
-                            span={
-                              amountOfSideBetsEnabled(blackjackSettings) *
-                              12 *
-                              (blackjackSettings.betBehindEnabled
-                                ? blackjackSettings.twentyOnePlusThreeEnabled
-                                  ? 0.2
-                                  : 0.4
-                                : 1 / amountOfSideBetsEnabled(blackjackSettings))
-                            }
-                          >
-                            <Group grow>
-                              <NumberInput
-                                label="Perfect Pairs"
-                                radius="md"
-                                decimalScale={2}
-                                fixedDecimalScale
-                                thousandSeparator=","
-                                placeholder="0.00"
-                                leftSection={<IconCurrencyDollar />}
-                                allowNegative={false}
-                              />
-                            </Group>
-                          </Grid.Col>
+                          <Group grow>
+                            <NumberInput
+                              label="Perfect Pairs"
+                              radius="md"
+                              decimalScale={2}
+                              fixedDecimalScale
+                              thousandSeparator=","
+                              placeholder="0.00"
+                              leftSection={<IconCurrencyDollar />}
+                              allowNegative={false}
+                            />
+                          </Group>
                         )}
                         {blackjackSettings.twentyOnePlusThreeEnabled && (
-                          <Grid.Col
-                            span={
-                              amountOfSideBetsEnabled(blackjackSettings) *
-                              12 *
-                              (blackjackSettings.betBehindEnabled
-                                ? blackjackSettings.perfectPairsEnabled
-                                  ? 0.2
-                                  : 0.4
-                                : 1 / amountOfSideBetsEnabled(blackjackSettings))
-                            }
-                          >
-                            <Group grow>
+                          <Group grow>
+                            <NumberInput
+                              label="21+3"
+                              radius="md"
+                              decimalScale={2}
+                              fixedDecimalScale
+                              thousandSeparator=","
+                              placeholder="0.00"
+                              leftSection={<IconCurrencyDollar />}
+                              allowNegative={false}
+                            />
+                          </Group>
+                        )}
+                        {blackjackSettings.betBehindEnabled && (
+                          <Group grow>
+                            <Group>
                               <NumberInput
-                                label="21+3"
+                                label="Bet Behind Amount"
                                 radius="md"
                                 decimalScale={2}
                                 fixedDecimalScale
@@ -189,46 +196,17 @@ export default function PreRound() {
                                 allowNegative={false}
                               />
                             </Group>
-                          </Grid.Col>
+                            <Select
+                              label="Bet Behind Player"
+                              radius="md"
+                              leftSection={<IconUserSearch />}
+                              leftSectionPointerEvents="none"
+                              searchable
+                              placeholder="Select Player"
+                            />
+                          </Group>
                         )}
-                        {blackjackSettings.betBehindEnabled && (
-                          <Grid.Col
-                            span={
-                              amountOfSideBetsEnabled(blackjackSettings) *
-                              12 *
-                              (blackjackSettings.twentyOnePlusThreeEnabled &&
-                              blackjackSettings.perfectPairsEnabled
-                                ? 0.6
-                                : amountOfSideBetsEnabled(blackjackSettings) == 1
-                                ? 1
-                                : 0.6)
-                            }
-                          >
-                            <Group grow>
-                              <Group grow>
-                                <NumberInput
-                                  label="Bet Behind Amount"
-                                  radius="md"
-                                  decimalScale={2}
-                                  fixedDecimalScale
-                                  thousandSeparator=","
-                                  placeholder="0.00"
-                                  leftSection={<IconCurrencyDollar />}
-                                  allowNegative={false}
-                                />
-                              </Group>
-                              <Select
-                                label="Bet Behind Player"
-                                radius="md"
-                                leftSection={<IconUserSearch />}
-                                leftSectionPointerEvents="none"
-                                searchable
-                                placeholder="Select Player"
-                              />
-                            </Group>
-                          </Grid.Col>
-                        )}
-                      </Grid>
+                      </Group>
                     </Collapse>
                   </Card>
                 </div>
