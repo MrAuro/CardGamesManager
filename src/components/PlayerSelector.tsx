@@ -32,6 +32,14 @@ export default function PlayerSelector({
   );
   // TODO: Map poker players instead of an empty array
 
+  useEffect(() => {
+    let orderedPlayers = listState.map((id) => blackjackPlayers.find((p) => p.id === id)!);
+
+    orderedPlayers = orderedPlayers.filter((p) => p != undefined);
+
+    setBlackjackPlayers(orderedPlayers);
+  }, [listState]);
+
   // Immediately clears the selection
   // https://discord.com/channels/854810300876062770/1202574436516237323/1202575107290304522 (Mantine Discord)
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>();
