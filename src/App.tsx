@@ -15,6 +15,8 @@ import Players from "./pages/Players";
 import Poker from "./pages/Poker";
 import Settings from "./pages/Settings";
 
+import "@/styles/App.css";
+
 export default function App() {
   const [players] = useRecoilState(PLAYERS_STATE);
   const [playersLastSaved, setPlayersLastSaved] = useState(0);
