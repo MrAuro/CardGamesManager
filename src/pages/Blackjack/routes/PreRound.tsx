@@ -7,7 +7,9 @@ import {
   Button,
   ButtonGroup,
   Card,
+  CloseButton,
   Collapse,
+  Combobox,
   Divider,
   Group,
   NumberInput,
@@ -250,6 +252,13 @@ export default function PreRound() {
                               placeholder="0.00"
                               leftSection={<IconCurrencyDollar />}
                               allowNegative={false}
+                              value={blackjackPlayer.sidebets.perfectPairs}
+                              onChange={(value) => {
+                                setBlackjackPlayers((draft) => {
+                                  draft[index].sidebets.perfectPairs =
+                                    Math.floor(parseFloat(`${value}`) * 100) / 100;
+                                });
+                              }}
                             />
                           </Group>
                         )}
@@ -264,6 +273,13 @@ export default function PreRound() {
                               placeholder="0.00"
                               leftSection={<IconCurrencyDollar />}
                               allowNegative={false}
+                              value={blackjackPlayer.sidebets.twentyOnePlusThree}
+                              onChange={(value) => {
+                                setBlackjackPlayers((draft) => {
+                                  draft[index].sidebets.twentyOnePlusThree =
+                                    Math.floor(parseFloat(`${value}`) * 100) / 100;
+                                });
+                              }}
                             />
                           </Group>
                         )}
@@ -279,6 +295,13 @@ export default function PreRound() {
                                 placeholder="0.00"
                                 leftSection={<IconCurrencyDollar />}
                                 allowNegative={false}
+                                value={blackjackPlayer.sidebets.betBehind.bet}
+                                onChange={(value) => {
+                                  setBlackjackPlayers((draft) => {
+                                    draft[index].sidebets.betBehind.bet =
+                                      Math.floor(parseFloat(`${value}`) * 100) / 100;
+                                  });
+                                }}
                               />
                             </Group>
                             <Select
@@ -288,6 +311,40 @@ export default function PreRound() {
                               leftSectionPointerEvents="none"
                               searchable
                               placeholder="Select Player"
+                              value={blackjackPlayer.sidebets.betBehind.target || null}
+                              data={blackjackPlayers
+                                .filter((p) => p.id !== player.id)
+                                .map((p) => ({ label: p.displayName, value: p.id }))}
+                              onChange={(value) => {
+                                if (value === null) {
+                                  setBlackjackPlayers((draft) => {
+                                    draft[index].sidebets.betBehind.bet = 0;
+                                    draft[index].sidebets.betBehind.target = "";
+                                  });
+                                } else {
+                                  setBlackjackPlayers((draft) => {
+                                    draft[index].sidebets.betBehind.target = value;
+                                  });
+                                }
+                              }}
+                              rightSection={
+                                blackjackPlayer.sidebets.betBehind.target ? (
+                                  <CloseButton
+                                    size="sm"
+                                    onClick={() => {
+                                      setBlackjackPlayers((draft) => {
+                                        draft[index].sidebets.betBehind.bet = 0;
+                                        draft[index].sidebets.betBehind.target = "";
+                                      });
+                                    }}
+                                  />
+                                ) : (
+                                  <Combobox.Chevron />
+                                )
+                              }
+                              rightSectionPointerEvents={
+                                blackjackPlayer.sidebets.betBehind.target?.length ? "auto" : "none"
+                              }
                             />
                           </Group>
                         )}
