@@ -1,9 +1,11 @@
 import { BLACKJACK_PLAYERS_STATE, BLACKJACK_SETTINGS } from "@/Root";
 import PlayerSelector from "@/components/PlayerSelector";
 import { formatMoney } from "@/utils/MoneyHelper";
+import { getPlayerErrors } from "@/utils/PlayerHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import { Draggable, DraggableStateSnapshot } from "@hello-pangea/dnd";
 import {
+  Alert,
   Button,
   ButtonGroup,
   Card,
@@ -16,12 +18,16 @@ import {
   Select,
   Text,
   Title,
+  darken,
+  lighten,
   useMantineTheme,
 } from "@mantine/core";
 import {
   IconArrowsShuffle,
   IconChevronsDown,
   IconCurrencyDollar,
+  IconInfoCircle,
+  IconInfoTriangle,
   IconUserSearch,
   IconX,
 } from "@tabler/icons-react";
@@ -50,11 +56,25 @@ export default function PreRound() {
 
   return (
     <>
-      <Button fullWidth mt="sm">
+      {blackjackPlayers.some((player) => player.errors.length > 0) && (
+        <Alert color="red" title="Invalid bets" icon={<IconInfoTriangle />}>
+          {blackjackPlayers
+            .filter((player) => player.errors.length > 0)
+            .map((player) => {
+              return (
+                <Text key={player.id}>
+                  <b>{player.displayName}</b>: {player.errors.join(", ")}
+                </Text>
+              );
+            })}
+        </Alert>
+      )}
+      <Button
+        fullWidth
+        mt="sm"
+        disabled={blackjackPlayers.some((player) => player.errors.length > 0)}
+      >
         Start Game
-      </Button>
-      <Button fullWidth mt="sm" variant="light" leftSection={<IconArrowsShuffle />}>
-        Shuffle Deck
       </Button>
       <Divider my="md" />
       <Title order={2} mb="sm">
@@ -80,7 +100,7 @@ export default function PreRound() {
                     opacity: snapshot.isDragging && !snapshot.isDropAnimating ? 0.65 : 1,
                   }}
                 >
-                  <Card withBorder radius="md" p="sm">
+                  <Card withBorder radius="md" p="sm" key={player.id}>
                     <Group justify="space-between">
                       <div>
                         <Text size="lg" fw="bold">
@@ -104,11 +124,23 @@ export default function PreRound() {
                           fixedDecimalScale
                           thousandSeparator=","
                           value={blackjackPlayer.bet}
+                          error={blackjackPlayer.errors.length > 0}
                           leftSection={<IconCurrencyDollar />}
                           onChange={(value) => {
                             setBlackjackPlayers((draft) => {
                               draft[index].bet = Math.floor(parseFloat(`${value}`) * 100) / 100;
-                              console.log(draft[index].bet, value);
+
+                              draft[index].errors = getPlayerErrors(
+                                player.balance,
+                                blackjackSettings,
+                                {
+                                  bet: draft[index].bet,
+                                  twentyOnePlusThree: draft[index].sidebets.twentyOnePlusThree,
+                                  perfectPairs: draft[index].sidebets.perfectPairs,
+                                  betBehindBet: draft[index].sidebets.betBehind.bet,
+                                  betBehindTarget: draft[index].sidebets.betBehind.target,
+                                }
+                              );
                             });
                           }}
                         />
@@ -124,6 +156,18 @@ export default function PreRound() {
                             onClick={() => {
                               setBlackjackPlayers((draft) => {
                                 draft[index].bet = Math.floor((draft[index].bet + 5) * 100) / 100;
+
+                                draft[index].errors = getPlayerErrors(
+                                  player.balance,
+                                  blackjackSettings,
+                                  {
+                                    bet: draft[index].bet,
+                                    twentyOnePlusThree: draft[index].sidebets.twentyOnePlusThree,
+                                    perfectPairs: draft[index].sidebets.perfectPairs,
+                                    betBehindBet: draft[index].sidebets.betBehind.bet,
+                                    betBehindTarget: draft[index].sidebets.betBehind.target,
+                                  }
+                                );
                               });
                             }}
                             style={{
@@ -142,6 +186,18 @@ export default function PreRound() {
                             onClick={() => {
                               setBlackjackPlayers((draft) => {
                                 draft[index].bet = Math.floor(draft[index].bet * 2 * 100) / 100;
+
+                                draft[index].errors = getPlayerErrors(
+                                  player.balance,
+                                  blackjackSettings,
+                                  {
+                                    bet: draft[index].bet,
+                                    twentyOnePlusThree: draft[index].sidebets.twentyOnePlusThree,
+                                    perfectPairs: draft[index].sidebets.perfectPairs,
+                                    betBehindBet: draft[index].sidebets.betBehind.bet,
+                                    betBehindTarget: draft[index].sidebets.betBehind.target,
+                                  }
+                                );
                               });
                             }}
                             style={{
@@ -160,6 +216,18 @@ export default function PreRound() {
                             onClick={() => {
                               setBlackjackPlayers((draft) => {
                                 draft[index].bet = Math.floor((draft[index].bet / 2) * 100) / 100;
+
+                                draft[index].errors = getPlayerErrors(
+                                  player.balance,
+                                  blackjackSettings,
+                                  {
+                                    bet: draft[index].bet,
+                                    twentyOnePlusThree: draft[index].sidebets.twentyOnePlusThree,
+                                    perfectPairs: draft[index].sidebets.perfectPairs,
+                                    betBehindBet: draft[index].sidebets.betBehind.bet,
+                                    betBehindTarget: draft[index].sidebets.betBehind.target,
+                                  }
+                                );
                               });
                             }}
                             style={{
@@ -178,6 +246,18 @@ export default function PreRound() {
                             onClick={() => {
                               setBlackjackPlayers((draft) => {
                                 draft[index].bet = Math.floor(player.balance * 100) / 100;
+
+                                draft[index].errors = getPlayerErrors(
+                                  player.balance,
+                                  blackjackSettings,
+                                  {
+                                    bet: draft[index].bet,
+                                    twentyOnePlusThree: draft[index].sidebets.twentyOnePlusThree,
+                                    perfectPairs: draft[index].sidebets.perfectPairs,
+                                    betBehindBet: draft[index].sidebets.betBehind.bet,
+                                    betBehindTarget: draft[index].sidebets.betBehind.target,
+                                  }
+                                );
                               });
                             }}
                             style={{
@@ -238,7 +318,9 @@ export default function PreRound() {
                         </ButtonGroup>
                       </div>
                     </Group>
-                    <Collapse in={sidebetsOpen.includes(player.id)}>
+                    <Collapse
+                      in={sidebetsOpen.includes(player.id) || blackjackPlayer.errors.length > 0}
+                    >
                       <Divider mt={5} mb={5} />
                       <Group grow preventGrowOverflow={false} wrap="nowrap">
                         {blackjackSettings.perfectPairsEnabled && (
@@ -253,10 +335,23 @@ export default function PreRound() {
                               leftSection={<IconCurrencyDollar />}
                               allowNegative={false}
                               value={blackjackPlayer.sidebets.perfectPairs}
+                              error={blackjackPlayer.errors.length > 0}
                               onChange={(value) => {
                                 setBlackjackPlayers((draft) => {
                                   draft[index].sidebets.perfectPairs =
                                     Math.floor(parseFloat(`${value}`) * 100) / 100;
+
+                                  draft[index].errors = getPlayerErrors(
+                                    player.balance,
+                                    blackjackSettings,
+                                    {
+                                      bet: draft[index].bet,
+                                      twentyOnePlusThree: draft[index].sidebets.twentyOnePlusThree,
+                                      perfectPairs: draft[index].sidebets.perfectPairs,
+                                      betBehindBet: draft[index].sidebets.betBehind.bet,
+                                      betBehindTarget: draft[index].sidebets.betBehind.target,
+                                    }
+                                  );
                                 });
                               }}
                             />
@@ -274,10 +369,23 @@ export default function PreRound() {
                               leftSection={<IconCurrencyDollar />}
                               allowNegative={false}
                               value={blackjackPlayer.sidebets.twentyOnePlusThree}
+                              error={blackjackPlayer.errors.length > 0}
                               onChange={(value) => {
                                 setBlackjackPlayers((draft) => {
                                   draft[index].sidebets.twentyOnePlusThree =
                                     Math.floor(parseFloat(`${value}`) * 100) / 100;
+
+                                  draft[index].errors = getPlayerErrors(
+                                    player.balance,
+                                    blackjackSettings,
+                                    {
+                                      bet: draft[index].bet,
+                                      twentyOnePlusThree: draft[index].sidebets.twentyOnePlusThree,
+                                      perfectPairs: draft[index].sidebets.perfectPairs,
+                                      betBehindBet: draft[index].sidebets.betBehind.bet,
+                                      betBehindTarget: draft[index].sidebets.betBehind.target,
+                                    }
+                                  );
                                 });
                               }}
                             />
@@ -296,10 +404,24 @@ export default function PreRound() {
                                 leftSection={<IconCurrencyDollar />}
                                 allowNegative={false}
                                 value={blackjackPlayer.sidebets.betBehind.bet}
+                                error={blackjackPlayer.errors.length > 0}
                                 onChange={(value) => {
                                   setBlackjackPlayers((draft) => {
                                     draft[index].sidebets.betBehind.bet =
                                       Math.floor(parseFloat(`${value}`) * 100) / 100;
+
+                                    draft[index].errors = getPlayerErrors(
+                                      player.balance,
+                                      blackjackSettings,
+                                      {
+                                        bet: draft[index].bet,
+                                        twentyOnePlusThree:
+                                          draft[index].sidebets.twentyOnePlusThree,
+                                        perfectPairs: draft[index].sidebets.perfectPairs,
+                                        betBehindBet: draft[index].sidebets.betBehind.bet,
+                                        betBehindTarget: draft[index].sidebets.betBehind.target,
+                                      }
+                                    );
                                   });
                                 }}
                               />
@@ -315,15 +437,42 @@ export default function PreRound() {
                               data={blackjackPlayers
                                 .filter((p) => p.id !== player.id)
                                 .map((p) => ({ label: p.displayName, value: p.id }))}
+                              error={blackjackPlayer.errors.length > 0}
                               onChange={(value) => {
                                 if (value === null) {
                                   setBlackjackPlayers((draft) => {
                                     draft[index].sidebets.betBehind.bet = 0;
                                     draft[index].sidebets.betBehind.target = "";
+
+                                    draft[index].errors = getPlayerErrors(
+                                      player.balance,
+                                      blackjackSettings,
+                                      {
+                                        bet: draft[index].bet,
+                                        twentyOnePlusThree:
+                                          draft[index].sidebets.twentyOnePlusThree,
+                                        perfectPairs: draft[index].sidebets.perfectPairs,
+                                        betBehindBet: draft[index].sidebets.betBehind.bet,
+                                        betBehindTarget: draft[index].sidebets.betBehind.target,
+                                      }
+                                    );
                                   });
                                 } else {
                                   setBlackjackPlayers((draft) => {
                                     draft[index].sidebets.betBehind.target = value;
+
+                                    draft[index].errors = getPlayerErrors(
+                                      player.balance,
+                                      blackjackSettings,
+                                      {
+                                        bet: draft[index].bet,
+                                        twentyOnePlusThree:
+                                          draft[index].sidebets.twentyOnePlusThree,
+                                        perfectPairs: draft[index].sidebets.perfectPairs,
+                                        betBehindBet: draft[index].sidebets.betBehind.bet,
+                                        betBehindTarget: draft[index].sidebets.betBehind.target,
+                                      }
+                                    );
                                   });
                                 }
                               }}
@@ -335,6 +484,19 @@ export default function PreRound() {
                                       setBlackjackPlayers((draft) => {
                                         draft[index].sidebets.betBehind.bet = 0;
                                         draft[index].sidebets.betBehind.target = "";
+
+                                        draft[index].errors = getPlayerErrors(
+                                          player.balance,
+                                          blackjackSettings,
+                                          {
+                                            bet: draft[index].bet,
+                                            twentyOnePlusThree:
+                                              draft[index].sidebets.twentyOnePlusThree,
+                                            perfectPairs: draft[index].sidebets.perfectPairs,
+                                            betBehindBet: draft[index].sidebets.betBehind.bet,
+                                            betBehindTarget: draft[index].sidebets.betBehind.target,
+                                          }
+                                        );
                                       });
                                     }}
                                   />

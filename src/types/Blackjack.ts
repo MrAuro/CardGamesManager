@@ -41,6 +41,7 @@ export type BlackjackPlayer = {
   split: boolean;
   displayName: string;
   splitFrom?: string; // For split hands, the id of the original player
+  errors: string[];
   sidebets: {
     twentyOnePlusThree: number;
     perfectPairs: number;
