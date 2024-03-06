@@ -78,6 +78,7 @@ export default function PlayerSelector({
                 cards: [],
                 displayName: player!.name,
                 doubledDown: false,
+                errors: [],
                 sidebets: {
                   betBehind: {
                     bet: 0,
