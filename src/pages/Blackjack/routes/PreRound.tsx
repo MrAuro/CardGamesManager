@@ -1,7 +1,8 @@
-import { BLACKJACK_PLAYERS_STATE, BLACKJACK_SETTINGS } from "@/Root";
+import { BLACKJACK_GAME_STATE, BLACKJACK_PLAYERS_STATE, BLACKJACK_SETTINGS } from "@/Root";
 import PlayerSelector from "@/components/PlayerSelector";
+import { getPlayerErrors } from "@/utils/BlackjackHelper";
+import { EMPTY_CARD } from "@/utils/CardHelper";
 import { formatMoney } from "@/utils/MoneyHelper";
-import { getPlayerErrors } from "@/utils/PlayerHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import { Draggable, DraggableStateSnapshot } from "@hello-pangea/dnd";
 import {
@@ -18,15 +19,11 @@ import {
   Select,
   Text,
   Title,
-  darken,
-  lighten,
   useMantineTheme,
 } from "@mantine/core";
 import {
-  IconArrowsShuffle,
   IconChevronsDown,
   IconCurrencyDollar,
-  IconInfoCircle,
   IconInfoTriangle,
   IconUserSearch,
   IconX,
@@ -51,11 +48,51 @@ export default function PreRound() {
   const theme = useMantineTheme();
   const [blackjackSettings] = useRecoilState(BLACKJACK_SETTINGS);
   const [blackjackPlayers, setBlackjackPlayers] = useRecoilImmerState(BLACKJACK_PLAYERS_STATE);
+  const [blackjackGame, setBlackjackGame] = useRecoilState(BLACKJACK_GAME_STATE);
 
   const [sidebetsOpen, setSidebetsOpen] = useState<string[]>([]);
+  const [gameErrors, setGameErrors] = useState<string[]>([]);
+
+  const startGame = () => {
+    let tempGameErrors = [];
+    if (blackjackPlayers.length < 1) {
+      tempGameErrors.push("At least one player is required");
+    }
+
+    if (blackjackPlayers.some((player) => player.errors.length > 0)) {
+      tempGameErrors.push("Invalid bets");
+    }
+
+    setGameErrors(tempGameErrors);
+    if (tempGameErrors.length > 0) return;
+
+    setBlackjackGame({
+      ...blackjackGame,
+      currentTurn: "DEALER",
+      gameState: "ROUND",
+      dealerCards: [EMPTY_CARD, EMPTY_CARD],
+      dealerFirstTime: true,
+    });
+
+    setBlackjackPlayers((draft) => {
+      draft.forEach((player) => {
+        player.cards = [];
+        player.doubledDown = false;
+        player.split = false;
+        player.splitFrom = undefined;
+      });
+    });
+  };
 
   return (
     <>
+      {gameErrors.length > 0 && (
+        <Alert color="red" title="Game Errors" icon={<IconInfoTriangle />}>
+          {gameErrors.map((error) => (
+            <Text key={error}>{error}</Text>
+          ))}
+        </Alert>
+      )}
       {blackjackPlayers.some((player) => player.errors.length > 0) && (
         <Alert color="red" title="Invalid bets" icon={<IconInfoTriangle />}>
           {blackjackPlayers
@@ -73,6 +110,7 @@ export default function PreRound() {
         fullWidth
         mt="sm"
         disabled={blackjackPlayers.some((player) => player.errors.length > 0)}
+        onClick={startGame}
       >
         Start Game
       </Button>
