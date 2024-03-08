@@ -13,6 +13,7 @@ import { atom } from "recoil";
 import { Settings } from "@/types/Settings";
 import { BlackjackGame, BlackjackPlayer, BlackjackSettings } from "./types/Blackjack";
 import { Player } from "./types/Player";
+import { EMPTY_CARD } from "./utils/CardHelper";
 
 export const TAURI_STORE = new Store(".data");
 
@@ -20,6 +21,7 @@ export const PLAYERS_STATE = atom<Player[]>({
   key: "PLAYERS",
   default: new Promise(async (resolve) => {
     let players = await TAURI_STORE.get("players");
+    console.log("initial players", players);
     if (!players) {
       players = [];
       await TAURI_STORE.set("players", players);
@@ -37,7 +39,7 @@ export const BLACKJACK_GAME_STATE = atom<BlackjackGame>({
       game = {
         gameState: "PREROUND",
         currentTurn: "",
-        dealerCards: [],
+        dealerCards: [EMPTY_CARD, EMPTY_CARD],
         dealerFirstTime: true,
       };
       await TAURI_STORE.set("blackjackGame", game);
@@ -160,6 +162,18 @@ function fallbackRender(props: { error: any; resetErrorBoundary: any }) {
       <Title order={1}>An error occurred</Title>
       <Button fullWidth mt="sm" variant="light" onClick={props.resetErrorBoundary}>
         Retry
+      </Button>
+      <Button
+        fullWidth
+        mt="sm"
+        variant="light"
+        color="red"
+        onClick={() => {
+          TAURI_STORE.clear();
+          window.location.reload();
+        }}
+      >
+        Reset data
       </Button>
       <pre>{props.error.message}</pre>
       <pre>{props.error?.stack}</pre>

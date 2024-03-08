@@ -1,18 +1,47 @@
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import PostRound from "./routes/PostRound";
 import PreRound from "./routes/PreRound";
 import Round from "./routes/Round";
 import { BLACKJACK_GAME_STATE } from "@/Root";
+import { Button } from "@mantine/core";
+import { EMPTY_CARD } from "@/utils/CardHelper";
 
 export default function Blackjack() {
-  const { gameState } = useRecoilValue(BLACKJACK_GAME_STATE);
+  const [gameState, setGameState] = useRecoilState(BLACKJACK_GAME_STATE);
 
-  switch (gameState) {
+  let component;
+
+  switch (gameState.gameState) {
     case "PREROUND":
-      return <PreRound />;
+      component = <PreRound />;
+      break;
     case "ROUND":
-      return <Round />;
+      component = <Round />;
+      break;
     case "POSTROUND":
-      return <PostRound />;
+      component = <PostRound />;
+      break;
   }
+
+  return (
+    <>
+      {component}{" "}
+      {true && (
+        <Button
+          variant="outline"
+          onClick={() => {
+            console.log("setting preround", gameState);
+            setGameState({
+              currentTurn: "",
+              dealerCards: [EMPTY_CARD, EMPTY_CARD],
+              dealerFirstTime: true,
+              gameState: "PREROUND",
+            });
+          }}
+        >
+          SET PREROUND
+        </Button>
+      )}
+    </>
+  );
 }
