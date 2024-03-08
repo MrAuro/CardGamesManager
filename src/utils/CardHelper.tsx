@@ -31,6 +31,8 @@ export const suitToIcon = (suit: CardSuit): ReactNode => {
 export const getSuit = (card: Card): CardSuit => card[1] as CardSuit;
 export const getRank = (card: Card): CardRank => card[0] as CardRank;
 
+export const EMPTY_CARD: Card = "--";
+
 export const getRankInt = (card: Card): number => {
   const rank = getRank(card);
   if (rank === "T") return 10;
