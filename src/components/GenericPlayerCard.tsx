@@ -15,7 +15,7 @@ export default function GenericPlayerCard({
     <Card withBorder radius="md" key={""}>
       <Group justify="space-between">
         <div>
-          <Text size={rem(22)} fw="bold">
+          <Text size="xl" fw="bold">
             {header}
           </Text>
 
