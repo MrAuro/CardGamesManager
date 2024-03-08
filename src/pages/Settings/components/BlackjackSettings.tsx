@@ -44,6 +44,7 @@ export default function BlackjackSettings() {
         label="Enabled"
         labelPosition="right"
         checked={blackjackSettings.perfectPairsEnabled}
+        disabled={blackjackGame.gameState != "PREROUND"}
         onChange={(event) => {
           setBlackjackSettings({
             ...blackjackSettings,
@@ -127,6 +128,7 @@ export default function BlackjackSettings() {
         label="Enabled"
         labelPosition="right"
         checked={blackjackSettings.twentyOnePlusThreeEnabled}
+        disabled={blackjackGame.gameState != "PREROUND"}
         onChange={(event) =>
           setBlackjackSettings({
             ...blackjackSettings,
@@ -248,6 +250,7 @@ export default function BlackjackSettings() {
         label="Enabled"
         labelPosition="right"
         checked={blackjackSettings.betBehindEnabled}
+        disabled={blackjackGame.gameState != "PREROUND"}
         onChange={(event) => {
           setBlackjackSettings({
             ...blackjackSettings,
