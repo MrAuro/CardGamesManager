@@ -1,10 +1,10 @@
-import { useRecoilState, useRecoilValue } from "recoil";
+import { BLACKJACK_GAME_STATE } from "@/Root";
+import { EMPTY_CARD } from "@/utils/CardHelper";
+import { Button } from "@mantine/core";
+import { useRecoilState } from "recoil";
 import PostRound from "./routes/PostRound";
 import PreRound from "./routes/PreRound";
 import Round from "./routes/Round";
-import { BLACKJACK_GAME_STATE } from "@/Root";
-import { Button } from "@mantine/core";
-import { EMPTY_CARD } from "@/utils/CardHelper";
 
 export default function Blackjack() {
   const [gameState, setGameState] = useRecoilState(BLACKJACK_GAME_STATE);

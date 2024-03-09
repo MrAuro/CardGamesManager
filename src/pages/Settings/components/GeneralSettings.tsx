@@ -1,11 +1,59 @@
-import { PLAYERS_STATE, SETTINGS_STATE } from "@/Root";
+import { KEYBINDINGS_STATE, PLAYERS_STATE, SETTINGS_STATE } from "@/Root";
+import { Scope, Scopes, getActions } from "@/types/Keybindings";
 import { Player } from "@/types/Player";
-import { Button, Input, Slider, Title } from "@mantine/core";
+import { useRecoilImmerState } from "@/utils/RecoilImmer";
+import {
+  ActionIcon,
+  Button,
+  Code,
+  Grid,
+  Input,
+  Select,
+  Slider,
+  Table,
+  Text,
+  Title,
+} from "@mantine/core";
+import { IconKeyframe, IconKeyframeFilled, IconPlus, IconTrash } from "@tabler/icons-react";
+import { useState } from "react";
+import { useRecordHotkeys } from "react-hotkeys-hook";
 import { useRecoilState } from "recoil";
 
 export default function GeneralSettings() {
   const [settings, setSettings] = useRecoilState(SETTINGS_STATE);
-  const [players, setPlayers] = useRecoilState(PLAYERS_STATE);
+  const [, setPlayers] = useRecoilState(PLAYERS_STATE);
+  const [keybindings, setKeybindings] = useRecoilImmerState(KEYBINDINGS_STATE);
+
+  const [keylistening, setKeylistening] = useState("");
+  const [keys, { start, stop }] = useRecordHotkeys();
+
+  const saveKey = (id: string, key: string) => {
+    setKeybindings((draft) => {
+      const index = draft.findIndex((kb) => kb.id === id);
+      draft[index].key = key;
+    });
+  };
+
+  const saveScope = (id: string, scope: Scope) => {
+    setKeybindings((draft) => {
+      const index = draft.findIndex((kb) => kb.id === id);
+      draft[index].scope = scope;
+    });
+  };
+
+  const saveAction = (id: string, action: string) => {
+    setKeybindings((draft) => {
+      const index = draft.findIndex((kb) => kb.id === id);
+      draft[index].action = action as any;
+    });
+  };
+
+  const deleteKeybinding = (id: string) => {
+    setKeybindings((draft) => {
+      const index = draft.findIndex((kb) => kb.id === id);
+      draft.splice(index, 1);
+    });
+  };
 
   return (
     <>
@@ -76,6 +124,153 @@ export default function GeneralSettings() {
           }}
         />
       </Input.Wrapper>
+      <Text fw="bold">Keyboard Shortcuts:</Text>
+      <Table
+        withColumnBorders
+        withTableBorder
+        mt="xs"
+        style={{
+          tableLayout: "fixed",
+        }}
+      >
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Keybinding</Table.Th>
+            <Table.Th>Scope</Table.Th>
+            <Table.Th>Action</Table.Th>
+            <Table.Th
+              style={{
+                width: "50px",
+              }}
+            />
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>
+          {keybindings.map((keybinding) => {
+            return (
+              <Table.Tr key={keybinding.id}>
+                <Table.Td py={0}>
+                  <Grid>
+                    <Grid.Col
+                      span={11}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Text component="div">
+                        {keybinding.key !== "" ? (
+                          <Code>{keybinding.key}</Code>
+                        ) : keylistening === keybinding.id ? (
+                          keys.size > 0 ? (
+                            <Code>{Array.from(keys).join("+")}...</Code>
+                          ) : (
+                            <Text size="sm" c="dimmed">
+                              Press a key combo...
+                            </Text>
+                          )
+                        ) : (
+                          <Text size="sm" c="dimmed">
+                            None
+                          </Text>
+                        )}
+                      </Text>
+                    </Grid.Col>
+                    <Grid.Col
+                      span={1}
+                      style={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        alignItems: "center",
+                      }}
+                    >
+                      <ActionIcon
+                        variant="transparent"
+                        c="gray"
+                        onClick={() => {
+                          if (keylistening === keybinding.id) {
+                            saveKey(keybinding.id, Array.from(keys).join("+"));
+
+                            setKeylistening("");
+                            stop();
+                          } else {
+                            saveKey(keybinding.id, "");
+
+                            setKeylistening(keybinding.id);
+                            start();
+                          }
+                        }}
+                      >
+                        {keylistening === keybinding.id ? <IconKeyframeFilled /> : <IconKeyframe />}
+                      </ActionIcon>
+                    </Grid.Col>
+                  </Grid>
+                </Table.Td>
+
+                <Table.Td>
+                  <Select
+                    data={Scopes}
+                    defaultValue={keybinding.scope}
+                    allowDeselect={false}
+                    onChange={(value) => {
+                      saveScope(keybinding.id, value as Scope);
+                    }}
+                  />
+                </Table.Td>
+                <Table.Td>
+                  <Select
+                    data={getActions(keybinding.scope)}
+                    defaultValue={keybinding.action}
+                    allowDeselect={false}
+                    onChange={(value) => saveAction(keybinding.id, value as string)}
+                  />
+                </Table.Td>
+                <Table.Td
+                  py={0}
+                  style={{
+                    width: "40px",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      alignItems: "center",
+                    }}
+                  >
+                    <ActionIcon
+                      variant="transparent"
+                      c="red"
+                      onClick={() => deleteKeybinding(keybinding.id)}
+                    >
+                      <IconTrash />
+                    </ActionIcon>
+                  </div>
+                </Table.Td>
+              </Table.Tr>
+            );
+          })}
+        </Table.Tbody>
+        <Table.Caption>
+          <Button
+            leftSection={<IconPlus />}
+            variant="subtle"
+            size="compact-sm"
+            onClick={() => {
+              setKeybindings((draft) => {
+                draft.push({
+                  id: crypto.randomUUID(),
+                  key: "",
+                  action: "None",
+                  scope: "None",
+                });
+              });
+            }}
+          >
+            Add Keybinding
+          </Button>
+        </Table.Caption>
+      </Table>
     </>
   );
 }

@@ -2,6 +2,7 @@ import {
   BLACKJACK_GAME_STATE,
   BLACKJACK_PLAYERS_STATE,
   BLACKJACK_SETTINGS,
+  KEYBINDINGS_STATE,
   PLAYERS_STATE,
   SETTINGS_STATE,
 } from "@/Root";
@@ -20,6 +21,8 @@ import "@/styles/App.css";
 export default function App() {
   const [players] = useRecoilState(PLAYERS_STATE);
   const [playersLastSaved, setPlayersLastSaved] = useState(0);
+  const [keybindings] = useRecoilState(KEYBINDINGS_STATE);
+  const [keybindingsLastSaved, setKeybindingsLastSaved] = useState(0);
   const [blackjackGame] = useRecoilState(BLACKJACK_GAME_STATE);
   const [blackjackGameLastSaved, setBlackjackGameLastSaved] = useState(0);
   const [blackjackSettings] = useRecoilState(BLACKJACK_SETTINGS);
@@ -35,6 +38,13 @@ export default function App() {
       TAURI_STORE.set("players", players);
     }
   }, [players]);
+
+  useEffect(() => {
+    if (keybindingsLastSaved < Date.now() - 500) {
+      setKeybindingsLastSaved(Date.now());
+      TAURI_STORE.set("keybindings", keybindings);
+    }
+  }, [keybindings]);
 
   useEffect(() => {
     if (blackjackGameLastSaved < Date.now() - 500) {
