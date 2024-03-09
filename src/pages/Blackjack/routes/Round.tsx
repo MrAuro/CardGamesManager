@@ -1,13 +1,10 @@
-import { BLACKJACK_SETTINGS, BLACKJACK_PLAYERS_STATE, BLACKJACK_GAME_STATE } from "@/Root";
-import PlayingCard from "@/components/PlayingCard";
-import { useRecoilImmerState } from "@/utils/RecoilImmer";
-import { useMantineTheme, Group, Text } from "@mantine/core";
-import { atom, useRecoilState } from "recoil";
-import DealerItem from "../components/DealerItem";
-import GenericCard from "@/components/GenericPlayerCard";
-import GenericPlayerCard from "@/components/GenericPlayerCard";
+import { BLACKJACK_GAME_STATE, BLACKJACK_PLAYERS_STATE, BLACKJACK_SETTINGS } from "@/Root";
 import CardSelector from "@/components/CardSelector";
 import { Card } from "@/types/Card";
+import { useRecoilImmerState } from "@/utils/RecoilImmer";
+import { useMantineTheme } from "@mantine/core";
+import { atom, useRecoilState } from "recoil";
+import DealerCard from "../components/DealerCard";
 
 export const CARD_SELECTOR_STATE = atom<{
   opened: boolean;
@@ -66,7 +63,7 @@ export default function Round() {
           });
         }}
       />
-      <DealerItem
+      <DealerCard
         cards={blackjackGame.dealerCards}
         isActive={blackjackGame.currentTurn == "DEALER"}
         firstTurn={blackjackGame.dealerFirstTime}

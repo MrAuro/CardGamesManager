@@ -5,7 +5,7 @@ import { Button, Container, Divider, Paper, Text, rem, useMantineTheme } from "@
 import { useRecoilState } from "recoil";
 import { CARD_SELECTOR_STATE } from "../routes/Round";
 
-export default function DealerItem({
+export default function DealerCard({
   cards,
   isActive,
 }: {
