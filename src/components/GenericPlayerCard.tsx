@@ -5,14 +5,25 @@ export default function GenericPlayerCard({
   subtext,
   rightSection,
   children,
+  backgroundColor,
 }: {
   header: string;
   subtext?: string;
   rightSection?: JSX.Element;
   children?: JSX.Element[] | JSX.Element;
+  backgroundColor?: string;
 }) {
   return (
-    <Card withBorder radius="md" key={""}>
+    <Card
+      withBorder
+      radius="md"
+      key={""}
+      pt="xs"
+      pb="xs"
+      style={{
+        backgroundColor: backgroundColor ? backgroundColor : undefined,
+      }}
+    >
       <Group justify="space-between">
         <div>
           <Text size="xl" fw="bold">

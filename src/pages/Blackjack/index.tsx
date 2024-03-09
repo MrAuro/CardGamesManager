@@ -42,6 +42,7 @@ export default function Blackjack() {
           SET PREROUND
         </Button>
       )}
+      {gameState.currentTurn} | {gameState.dealerFirstTime ? "First" : "Not First"}
     </>
   );
 }
