@@ -1,12 +1,25 @@
 import GenericPlayerCard from "@/components/GenericPlayerCard";
 import PlayingCard from "@/components/PlayingCard";
 import { Card } from "@/types/Card";
-import { Button, Container, Divider, Paper, Text, rem } from "@mantine/core";
+import { Button, Container, Divider, Paper, Text, rem, useMantineTheme } from "@mantine/core";
+import { useRecoilState } from "recoil";
+import { CARD_SELECTOR_STATE } from "../routes/Round";
 
-export default function DealerItem({ cards }: { cards: Card[] }) {
+export default function DealerItem({
+  cards,
+  isActive,
+}: {
+  cards: Card[];
+  isActive: boolean;
+  firstTurn: boolean;
+}) {
+  const theme = useMantineTheme();
+  const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
+
   return (
     <GenericPlayerCard
       header="Dealer"
+      backgroundColor={isActive ? theme.colors.dark[6] : theme.colors.dark[7]}
       rightSection={
         <>
           <Paper
@@ -38,8 +51,21 @@ export default function DealerItem({ cards }: { cards: Card[] }) {
             </div>
           </Paper>
           {cards.map((card, index) => (
-            <Container p={0} m={0} pl="xs">
-              <PlayingCard key={index} card={card} onClick={() => {}} disabled={true} />
+            <Container p={0} m={0} pl="xs" key={`${card}-${index}`}>
+              <PlayingCard
+                key={index}
+                card={card}
+                onClick={() => {
+                  setCardSelector({
+                    ...cardSelector,
+                    intitalCard: card,
+                    opened: true,
+                    onSubmitTarget: "DEALER",
+                    onSubmitIndex: index,
+                  });
+                }}
+                disabled={isActive}
+              />
             </Container>
           ))}
         </>
