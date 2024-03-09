@@ -1,17 +1,31 @@
 import GenericPlayerCard from "@/components/GenericPlayerCard";
 import PlayingCard from "@/components/PlayingCard";
 import { Card } from "@/types/Card";
-import { Button, Container, Divider, Paper, Text, rem, useMantineTheme } from "@mantine/core";
+import {
+  Button,
+  Container,
+  Divider,
+  Group,
+  Paper,
+  Text,
+  rem,
+  useMantineTheme,
+} from "@mantine/core";
 import { useRecoilState } from "recoil";
 import { CARD_SELECTOR_STATE } from "../routes/Round";
 
 export default function DealerCard({
   cards,
   isActive,
+  firstTurn,
+  nextTurn,
+  forceTurn,
 }: {
   cards: Card[];
   isActive: boolean;
   firstTurn: boolean;
+  nextTurn: (dealerFirstTurn: boolean) => void;
+  forceTurn: (playerId: string) => void;
 }) {
   const theme = useMantineTheme();
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
@@ -72,7 +86,34 @@ export default function DealerCard({
       }
     >
       <Divider my="xs" />
-      <Button fullWidth>Button</Button>
+      <Group grow>
+        {firstTurn ? (
+          <Button
+            disabled={!isActive}
+            fullWidth
+            onClick={() => {
+              nextTurn(false);
+            }}
+          >
+            Next Turn
+          </Button>
+        ) : (
+          <Button disabled={!isActive} fullWidth>
+            Add Card
+          </Button>
+        )}
+        <Button variant={isActive ? "filled" : "light"} fullWidth color="red">
+          Refund & Cancel
+        </Button>
+        {!firstTurn && isActive && (
+          <Button fullWidth color="green">
+            Payout & End
+          </Button>
+        )}
+        <Button disabled={isActive} fullWidth color="gray" onClick={() => forceTurn("DEALER")}>
+          Force Turn
+        </Button>
+      </Group>
     </GenericPlayerCard>
   );
 }

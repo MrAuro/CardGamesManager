@@ -13,7 +13,7 @@ export default function Header({
     <Container size="md" mt="sm">
       <Group gap={5} justify={false ? "center" : "space-between"}>
         <Text size={rem(26)} fw="bold">
-          {active}
+          Card Games Manager
         </Text>
         <Tabs variant="pills" radius="xl">
           <Tabs.List>

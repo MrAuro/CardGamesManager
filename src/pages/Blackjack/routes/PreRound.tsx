@@ -1,4 +1,9 @@
-import { BLACKJACK_GAME_STATE, BLACKJACK_PLAYERS_STATE, BLACKJACK_SETTINGS } from "@/Root";
+import {
+  BLACKJACK_GAME_STATE,
+  BLACKJACK_PLAYERS_STATE,
+  BLACKJACK_SETTINGS,
+  PLAYERS_STATE,
+} from "@/Root";
 import PlayerSelector from "@/components/PlayerSelector";
 import { EMPTY_CARD } from "@/utils/CardHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
@@ -27,6 +32,7 @@ export default function PreRound() {
   const [blackjackSettings] = useRecoilState(BLACKJACK_SETTINGS);
   const [blackjackPlayers, setBlackjackPlayers] = useRecoilImmerState(BLACKJACK_PLAYERS_STATE);
   const [blackjackGame, setBlackjackGame] = useRecoilState(BLACKJACK_GAME_STATE);
+  const [, setPlayers] = useRecoilImmerState(PLAYERS_STATE);
 
   const [sidebetsOpen, setSidebetsOpen] = useState<string[]>([]);
   const [gameErrors, setGameErrors] = useState<string[]>([]);
@@ -52,12 +58,18 @@ export default function PreRound() {
       dealerFirstTime: true,
     });
 
-    setBlackjackPlayers((draft) => {
+    setPlayers((draft) => {
       draft.forEach((player) => {
-        player.cards = [];
-        player.doubledDown = false;
-        player.split = false;
-        player.splitFrom = undefined;
+        player.balance -= blackjackPlayers.find((p) => p.id === player.id)?.bet || 0;
+      });
+    });
+
+    setBlackjackPlayers((draft) => {
+      draft.forEach((blackjackPlayer) => {
+        blackjackPlayer.cards = Array(2).fill(EMPTY_CARD);
+        blackjackPlayer.doubledDown = false;
+        blackjackPlayer.split = false;
+        blackjackPlayer.splitFrom = undefined;
       });
     });
   };

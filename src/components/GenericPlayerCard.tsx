@@ -3,12 +3,14 @@ import { Card, Group, Text, rem } from "@mantine/core";
 export default function GenericPlayerCard({
   header,
   subtext,
+  subsection,
   rightSection,
   children,
   backgroundColor,
 }: {
   header: string;
   subtext?: string;
+  subsection?: JSX.Element[] | JSX.Element;
   rightSection?: JSX.Element;
   children?: JSX.Element[] | JSX.Element;
   backgroundColor?: string;
@@ -35,6 +37,7 @@ export default function GenericPlayerCard({
               {subtext}
             </Text>
           ) : null}
+          {subsection}
         </div>
         {rightSection && (
           <div
