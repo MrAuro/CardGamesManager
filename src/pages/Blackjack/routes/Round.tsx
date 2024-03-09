@@ -1,10 +1,17 @@
-import { BLACKJACK_GAME_STATE, BLACKJACK_PLAYERS_STATE, BLACKJACK_SETTINGS } from "@/Root";
+import {
+  BLACKJACK_GAME_STATE,
+  BLACKJACK_PLAYERS_STATE,
+  BLACKJACK_SETTINGS,
+  PLAYERS_STATE,
+} from "@/Root";
 import CardSelector from "@/components/CardSelector";
 import { Card } from "@/types/Card";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
-import { useMantineTheme } from "@mantine/core";
+import { Stack, useMantineTheme } from "@mantine/core";
 import { atom, useRecoilState } from "recoil";
 import DealerCard from "../components/DealerCard";
+import RoundPlayerCard from "../components/RoundPlayerCard";
+import { getPlayer } from "@/utils/PlayerHelper";
 
 export const CARD_SELECTOR_STATE = atom<{
   opened: boolean;
@@ -27,6 +34,39 @@ export default function Round() {
   const [blackjackPlayers, setBlackjackPlayers] = useRecoilImmerState(BLACKJACK_PLAYERS_STATE);
   const [blackjackGame, setBlackjackGame] = useRecoilState(BLACKJACK_GAME_STATE);
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
+  const [players] = useRecoilState(PLAYERS_STATE);
+
+  const nextTurn = (dealerFirstTurn: boolean = false) => {
+    if (blackjackGame.currentTurn == "DEALER") {
+      setBlackjackGame({
+        ...blackjackGame,
+        currentTurn: blackjackPlayers[0].id,
+        dealerFirstTime: dealerFirstTurn,
+      });
+    } else {
+      let turnIndex = blackjackPlayers.findIndex((p) => p.id === blackjackGame.currentTurn);
+
+      let nextTurnIndex = turnIndex + 1;
+      if (nextTurnIndex >= blackjackPlayers.length) {
+        setBlackjackGame({
+          ...blackjackGame,
+          currentTurn: "DEALER",
+        });
+      } else {
+        setBlackjackGame({
+          ...blackjackGame,
+          currentTurn: blackjackPlayers[nextTurnIndex].id,
+        });
+      }
+    }
+  };
+
+  const forceTurn = (playerId: string) => {
+    setBlackjackGame({
+      ...blackjackGame,
+      currentTurn: playerId,
+    });
+  };
 
   return (
     <>
@@ -63,11 +103,27 @@ export default function Round() {
           });
         }}
       />
-      <DealerCard
-        cards={blackjackGame.dealerCards}
-        isActive={blackjackGame.currentTurn == "DEALER"}
-        firstTurn={blackjackGame.dealerFirstTime}
-      />
+      <Stack gap="sm">
+        <DealerCard
+          cards={blackjackGame.dealerCards}
+          isActive={blackjackGame.currentTurn == "DEALER"}
+          firstTurn={blackjackGame.dealerFirstTime}
+          nextTurn={nextTurn}
+          forceTurn={forceTurn}
+        />
+        {blackjackPlayers.map((blackjackPlayer) => {
+          return (
+            <RoundPlayerCard
+              key={blackjackPlayer.id}
+              player={getPlayer(blackjackPlayer.id, players)!}
+              blackjackPlayer={blackjackPlayer}
+              isActive={blackjackGame.currentTurn == blackjackPlayer.id}
+              nextTurn={nextTurn}
+              forceTurn={forceTurn}
+            />
+          );
+        })}
+      </Stack>
     </>
   );
 }

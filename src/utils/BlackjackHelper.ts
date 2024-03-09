@@ -1,4 +1,6 @@
 import { BlackjackSettings } from "@/types/Blackjack";
+import { Card, CardRank } from "@/types/Card";
+import { getRank } from "./CardHelper";
 
 export function getPlayerErrors(
   balance: number,
@@ -47,3 +49,58 @@ export function getPlayerErrors(
 
   return errors;
 }
+
+export function getCardValue(card: Card): number {
+  const rank = getRank(card);
+  if (rank === "A") return 11;
+  if (["T", "J", "Q", "K"].includes(rank)) return 10;
+  return parseInt(rank);
+}
+
+export const getCardTotal = (
+  cards: Card[]
+): {
+  ace: "SOFT" | "HARD" | "NONE";
+  total: number;
+} => {
+  let total = 0;
+  let aceCount = 0;
+  for (let card of cards) {
+    if (getRank(card) === "-") continue;
+    if (getRank(card) === "A") {
+      aceCount++;
+      total += 11;
+    } else if (
+      getRank(card) === "T" ||
+      getRank(card) === "J" ||
+      getRank(card) === "Q" ||
+      getRank(card) === "K"
+    ) {
+      total += 10;
+    } else {
+      total += parseInt(getRank(card));
+    }
+  }
+
+  let softAceCount = aceCount;
+  while (total > 21 && aceCount > 0) {
+    total -= 10;
+    aceCount--;
+    softAceCount--;
+  }
+
+  let aceHard = softAceCount > 0;
+
+  aceHard = !aceHard;
+
+  return {
+    ace: aceHard
+      ? cards.some((c) => getRank(c) === "A")
+        ? "HARD"
+        : "NONE"
+      : softAceCount > 0
+      ? "SOFT"
+      : "NONE",
+    total: total,
+  };
+};
