@@ -1,4 +1,9 @@
-import { BLACKJACK_PLAYERS_STATE, BLACKJACK_SETTINGS, PLAYERS_STATE } from "@/Root";
+import {
+  BLACKJACK_GAME_STATE,
+  BLACKJACK_PLAYERS_STATE,
+  BLACKJACK_SETTINGS,
+  PLAYERS_STATE,
+} from "@/Root";
 import GenericPlayerCard from "@/components/GenericPlayerCard";
 import PlayingCard from "@/components/PlayingCard";
 import { BlackjackPlayer } from "@/types/Blackjack";
@@ -8,6 +13,7 @@ import {
   findTwentyOnePlusThree,
   getCardTotal,
   getCardValue,
+  shortenTwentyOnePlusThree,
 } from "@/utils/BlackjackHelper";
 import { EMPTY_CARD } from "@/utils/CardHelper";
 import { formatMoney } from "@/utils/MoneyHelper";
@@ -41,6 +47,7 @@ export default function RoundPlayerCard({
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
   const [blackjackPlayers, setBlackjackPlayers] = useRecoilImmerState(BLACKJACK_PLAYERS_STATE);
   const blackjackSettings = useRecoilValue(BLACKJACK_SETTINGS);
+  const blackjackGame = useRecoilValue(BLACKJACK_GAME_STATE);
   const [players, setPlayers] = useRecoilImmerState(PLAYERS_STATE);
   const theme = useMantineTheme();
 
@@ -72,8 +79,44 @@ export default function RoundPlayerCard({
   }
 
   const calculatedTwentyOnePlusThree = blackjackPlayer.sidebets.twentyOnePlusThree
-    ? findTwentyOnePlusThree(blackjackPlayer.cards)
+    ? findTwentyOnePlusThree([...blackjackPlayer.cards, blackjackGame.dealerCards[0]])
     : null;
+
+  let twentyOnePlusThreeEarnings = -blackjackPlayer.sidebets.twentyOnePlusThree;
+  switch (calculatedTwentyOnePlusThree) {
+    case "None":
+      break;
+
+    case "Flush":
+      twentyOnePlusThreeEarnings =
+        blackjackPlayer.sidebets.twentyOnePlusThree *
+        blackjackSettings.twentyOnePlusThreeFlushPayout;
+      break;
+
+    case "Straight":
+      twentyOnePlusThreeEarnings =
+        blackjackPlayer.sidebets.twentyOnePlusThree *
+        blackjackSettings.twentyOnePlusThreeStraightPayout;
+      break;
+
+    case "Three of a Kind":
+      twentyOnePlusThreeEarnings =
+        blackjackPlayer.sidebets.twentyOnePlusThree *
+        blackjackSettings.twentyOnePlusThreeThreeOfAKindPayout;
+      break;
+
+    case "Straight Flush":
+      twentyOnePlusThreeEarnings =
+        blackjackPlayer.sidebets.twentyOnePlusThree *
+        blackjackSettings.twentyOnePlusThreeStraightFlushPayout;
+      break;
+
+    case "Suited Three of a Kind":
+      twentyOnePlusThreeEarnings =
+        blackjackPlayer.sidebets.twentyOnePlusThree *
+        blackjackSettings.twentyOnePlusThreeThreeOfAKindSuitedPayout;
+      break;
+  }
 
   return (
     <GenericPlayerCard
@@ -99,6 +142,7 @@ export default function RoundPlayerCard({
                 height: "4.5rem",
                 backgroundColor: "transparent",
               }}
+              ml="xs"
             >
               <div
                 style={{
@@ -135,6 +179,63 @@ export default function RoundPlayerCard({
                     </Text>
                     <Text size="sm" fw={600} ta="center" c="dimmed">
                       {formatMoney(blackjackPlayer.sidebets.perfectPairs)}
+                    </Text>
+                  </>
+                )}
+              </div>
+            </Paper>
+          )}
+          {calculatedTwentyOnePlusThree && (
+            <Paper
+              style={{
+                width: "4.5rem",
+                height: "4.5rem",
+                backgroundColor: "transparent",
+              }}
+              ml="xs"
+            >
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "100%",
+                  height: "100%",
+                }}
+              >
+                <Text size="xs" c="dimmed" fw={600} tt="capitalize" ta="center">
+                  21+3
+                </Text>
+                {blackjackPlayer.cards.filter((card) => card != EMPTY_CARD).length > 0 ? (
+                  <>
+                    <Text
+                      size="md"
+                      fw="bold"
+                      ta="center"
+                      style={{
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {shortenTwentyOnePlusThree(calculatedTwentyOnePlusThree)}
+                    </Text>
+                    <Text
+                      size="sm"
+                      fw={600}
+                      ta="center"
+                      c={twentyOnePlusThreeEarnings <= 0 ? "red" : "green"}
+                    >
+                      {twentyOnePlusThreeEarnings > 0 && "+"}
+                      {formatMoney(twentyOnePlusThreeEarnings)}
+                    </Text>
+                  </>
+                ) : (
+                  <>
+                    <Text size="md" fw="bold" ta="center">
+                      Pending
+                    </Text>
+                    <Text size="sm" fw={600} ta="center" c="dimmed">
+                      {formatMoney(blackjackPlayer.sidebets.twentyOnePlusThree)}
                     </Text>
                   </>
                 )}

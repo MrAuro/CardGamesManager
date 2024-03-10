@@ -145,6 +145,23 @@ type TwentyOnePlusThree =
   | "Straight Flush"
   | "Suited Three of a Kind";
 
+export const shortenTwentyOnePlusThree = (str: TwentyOnePlusThree): string => {
+  switch (str) {
+    case "None":
+      return "None";
+    case "Flush":
+      return "Flush";
+    case "Straight":
+      return "Straight";
+    case "Three of a Kind":
+      return "Trips";
+    case "Straight Flush":
+      return "Straight Flush";
+    case "Suited Three of a Kind":
+      return "Suited Trips";
+  }
+};
+
 export const findTwentyOnePlusThree = (cards: Card[]): TwentyOnePlusThree => {
   let res: TwentyOnePlusThree = "None";
 
