@@ -128,6 +128,10 @@ export const findPerfectPairs = (cards: Card[]): "None" | "Mixed" | "Colored" | 
     if (getSuit(cards[0]) == getSuit(cards[1])) {
       res = "Perfect";
     }
+
+    if (getSuit(cards[0]) == "-" || getSuit(cards[1]) == "-") {
+      res = "None";
+    }
   }
 
   return res;
