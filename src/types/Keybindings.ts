@@ -1,19 +1,11 @@
 // conditional types based on Scope
 
+import { CardRank_NOEMPTY, CardSuit_NOEMPTY } from "./Card";
+
 export type CardInputs =
-  | "Ace"
-  | "Two"
-  | "Three"
-  | "Four"
-  | "Five"
-  | "Six"
-  | "Seven"
-  | "Eight"
-  | "Nine"
-  | "Ten"
-  | "Jack"
-  | "Queen"
-  | "King";
+  | CardRank_NOEMPTY
+  | CardSuit_NOEMPTY
+  | `${CardRank_NOEMPTY}${CardSuit_NOEMPTY}`;
 
 export type Scope = "None" | "Blackjack PreRound" | "Blackjack Round" | "Blackjack PostRound";
 export const Scopes: Scope[] = [
@@ -57,25 +49,19 @@ export type Keybinding = {
     }
 );
 
+const availableRanks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K"];
+const availableSuits = ["h", "s", "d", "c"];
+
+export const availableCards = availableRanks.flatMap((rank) =>
+  availableSuits.map((suit) => `${rank}${suit}`)
+);
+
 export function getActions(scope: Scope): string[] {
   switch (scope) {
     case "Blackjack PreRound":
       return ["Start Game"];
     case "Blackjack Round":
       return [
-        "Ace",
-        "Two",
-        "Three",
-        "Four",
-        "Five",
-        "Six",
-        "Seven",
-        "Eight",
-        "Nine",
-        "Ten",
-        "Jack",
-        "Queen",
-        "King",
         "Payout & End",
         "Next Turn",
         "Refund & Cancel",
@@ -83,6 +69,9 @@ export function getActions(scope: Scope): string[] {
         "Stand",
         "Double",
         "Split",
+        ...availableRanks,
+        ...availableSuits,
+        ...availableCards,
       ];
     case "Blackjack PostRound":
       return ["Next Round"];
