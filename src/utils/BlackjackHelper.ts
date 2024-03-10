@@ -164,6 +164,10 @@ export const shortenTwentyOnePlusThree = (str: TwentyOnePlusThree): string => {
 
 export const findTwentyOnePlusThree = (cards: Card[]): TwentyOnePlusThree => {
   let res: TwentyOnePlusThree = "None";
+  if (cards.length !== 3) {
+    console.warn("21+3 sidebet requires 3 cards, got", cards.length);
+    return res;
+  }
 
   for (let i = 0; i < cards.length; i++) {
     if (isAnyEmpty(cards[i])) {
