@@ -219,6 +219,7 @@ export default function GeneralSettings() {
                 </Table.Td>
                 <Table.Td>
                   <Select
+                    searchable
                     data={getActions(keybinding.scope)}
                     defaultValue={keybinding.action}
                     allowDeselect={false}

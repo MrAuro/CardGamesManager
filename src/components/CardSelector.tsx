@@ -15,14 +15,28 @@ import { useEffect, useState } from "react";
 export default function CardSelector({
   opened,
   intitialCard,
+  activeCardOverride,
   onSubmit,
 }: {
   opened: boolean;
   intitialCard?: Card;
+  activeCardOverride?: Card;
   onSubmit: (card: Card) => void;
 }) {
   const [selectedCardRank, setSelectedCardRank] = useState<CardRank>("-");
   const [selectedCardSuit, setSelectedCardSuit] = useState<CardSuit>("-");
+
+  useEffect(() => {
+    if (activeCardOverride) {
+      if (getRank(activeCardOverride) != "-") {
+        setSelectedCardRank(getRank(activeCardOverride));
+      }
+
+      if (getSuit(activeCardOverride) != "-") {
+        setSelectedCardSuit(getSuit(activeCardOverride));
+      }
+    }
+  }, [activeCardOverride]);
 
   useEffect(() => {
     if (intitialCard) {
