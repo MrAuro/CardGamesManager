@@ -128,6 +128,46 @@ export default function Round() {
             {
               if (cardSelector.opened) {
                 setActiveCardOverride(`${"-"}${keybinding.action as CardSuit}`);
+              } else {
+                // Get the last non-empty card and change the suit
+                if (blackjackGame.currentTurn == "DEALER") {
+                  let cards = [...blackjackGame.dealerCards];
+                  if (cards.includes(EMPTY_CARD)) {
+                    let lastCard = cards[cards.indexOf(EMPTY_CARD) - 1];
+                    cards[cards.indexOf(EMPTY_CARD) - 1] = `${lastCard[0]}${
+                      keybinding.action as CardSuit
+                    }` as Card;
+                  } else {
+                    let lastCard = cards[cards.length - 1];
+                    cards[cards.length - 1] = `${lastCard[0]}${
+                      keybinding.action as CardSuit
+                    }` as Card;
+                  }
+
+                  setBlackjackGame({
+                    ...blackjackGame,
+                    dealerCards: cards,
+                  });
+                } else {
+                  setBlackjackPlayers((draft) => {
+                    let blackjackPlayer = draft.find((p) => p.id == blackjackGame.currentTurn);
+
+                    if (blackjackPlayer) {
+                      if (blackjackPlayer.cards.includes(EMPTY_CARD)) {
+                        let lastCard =
+                          blackjackPlayer.cards[blackjackPlayer.cards.indexOf(EMPTY_CARD) - 1];
+                        blackjackPlayer.cards[blackjackPlayer.cards.indexOf(EMPTY_CARD) - 1] = `${
+                          lastCard[0]
+                        }${keybinding.action as CardSuit}` as Card;
+                      } else {
+                        let lastCard = blackjackPlayer.cards[blackjackPlayer.cards.length - 1];
+                        blackjackPlayer.cards[blackjackPlayer.cards.length - 1] = `${lastCard[0]}${
+                          keybinding.action as CardSuit
+                        }` as Card;
+                      }
+                    }
+                  });
+                }
               }
             }
             break;
@@ -148,6 +188,75 @@ export default function Round() {
             {
               if (cardSelector.opened) {
                 setActiveCardOverride(`${keybinding.action as CardRank}${"-"}`);
+              } else {
+                // When we are dealing with Ranks, we add the card instead of modifying the last one
+                if (blackjackGame.currentTurn == "DEALER") {
+                  let newDealerCards = [...blackjackGame.dealerCards];
+                  if (newDealerCards.includes(EMPTY_CARD)) {
+                    newDealerCards[newDealerCards.indexOf(EMPTY_CARD)] = `${
+                      keybinding.action as CardRank
+                    }${"-"}` as Card;
+                  } else {
+                    newDealerCards.push(`${keybinding.action as CardRank}${"-"}` as Card);
+                  }
+                  setBlackjackGame({
+                    ...blackjackGame,
+                    dealerCards: newDealerCards,
+                  });
+                } else {
+                  setBlackjackPlayers((draft) => {
+                    let blackjackPlayer = draft.find((p) => p.id == blackjackGame.currentTurn);
+
+                    if (blackjackPlayer) {
+                      if (blackjackPlayer.cards.includes(EMPTY_CARD)) {
+                        blackjackPlayer.cards[blackjackPlayer.cards.indexOf(EMPTY_CARD)] = `${
+                          keybinding.action as CardRank
+                        }${"-"}` as Card;
+                      } else {
+                        blackjackPlayer.cards.push(
+                          `${keybinding.action as CardRank}${"-"}` as Card
+                        );
+                      }
+                    }
+                  });
+                }
+              }
+            }
+            break;
+
+          case "Remove Last Card":
+            {
+              if (blackjackGame.currentTurn == "DEALER") {
+                let cards = [...blackjackGame.dealerCards];
+                if (blackjackGame.dealerCards.length <= 2) {
+                  if (cards[1] == EMPTY_CARD) {
+                    cards[0] = EMPTY_CARD;
+                  } else {
+                    cards[1] = EMPTY_CARD;
+                  }
+                } else {
+                  cards.pop();
+                }
+
+                setBlackjackGame({
+                  ...blackjackGame,
+                  dealerCards: cards,
+                });
+              } else {
+                setBlackjackPlayers((draft) => {
+                  let blackjackPlayer = draft.find((p) => p.id == blackjackGame.currentTurn);
+
+                  let cards = blackjackPlayer!.cards;
+                  if (cards.length <= 2) {
+                    if (cards[1] == EMPTY_CARD) {
+                      cards[0] = EMPTY_CARD;
+                    } else {
+                      cards[1] = EMPTY_CARD;
+                    }
+                  } else {
+                    cards.pop();
+                  }
+                });
               }
             }
             break;
@@ -159,6 +268,34 @@ export default function Round() {
                 if (keybinding.action == card) {
                   if (cardSelector.opened) {
                     setActiveCardOverride(card);
+                  } else {
+                    // Append the card to the player's hand
+                    if (blackjackGame.currentTurn == "DEALER") {
+                      let cards = [...blackjackGame.dealerCards];
+                      if (cards.includes(EMPTY_CARD)) {
+                        cards[cards.indexOf(EMPTY_CARD)] = card;
+                      } else {
+                        cards.push(card);
+                      }
+
+                      setBlackjackGame({
+                        ...blackjackGame,
+                        dealerCards: cards,
+                      });
+                    } else {
+                      setBlackjackPlayers((draft) => {
+                        let blackjackPlayer = draft.find((p) => p.id == blackjackGame.currentTurn);
+
+                        if (blackjackPlayer) {
+                          if (blackjackPlayer.cards.includes(EMPTY_CARD)) {
+                            blackjackPlayer.cards[blackjackPlayer.cards.indexOf(EMPTY_CARD)] =
+                              card as Card;
+                          } else {
+                            blackjackPlayer.cards.push(card as Card);
+                          }
+                        }
+                      });
+                    }
                   }
                 }
               }
