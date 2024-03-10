@@ -17,6 +17,9 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { EMPTY_CARD } from "@/utils/CardHelper";
 import { useState } from "react";
 import { availableCards } from "@/types/Keybindings";
+import { Player } from "@/types/Player";
+import { BlackjackPlayer } from "@/types/Blackjack";
+import { getCardTotal } from "@/utils/BlackjackHelper";
 
 export const CARD_SELECTOR_STATE = atom<{
   opened: boolean;
@@ -336,6 +339,65 @@ export default function Round() {
       ...blackjackGame,
       currentTurn: playerId,
     });
+  };
+
+  const refundAndCancel = () => {
+    let newPlayers: Player[] = [...players];
+    let newBlackjackPlayers: BlackjackPlayer[] = [...blackjackPlayers];
+    console.log(newPlayers, newBlackjackPlayers, "new");
+
+    for (let blackjackPlayer of newBlackjackPlayers) {
+      let amountToRefund = blackjackPlayer.bet;
+      if (blackjackPlayer.doubledDown) {
+        amountToRefund += blackjackPlayer.bet;
+      }
+
+      if (blackjackPlayer.sidebets.betBehind) {
+        amountToRefund += blackjackPlayer.sidebets.betBehind.bet;
+      }
+
+      if (blackjackPlayer.sidebets.perfectPairs) {
+        amountToRefund += blackjackPlayer.sidebets.perfectPairs;
+      }
+
+      if (blackjackPlayer.sidebets.twentyOnePlusThree) {
+        amountToRefund += blackjackPlayer.sidebets.twentyOnePlusThree;
+      }
+
+      newPlayers = newPlayers.map((p) => {
+        if (p.id === blackjackPlayer.id) {
+          return {
+            ...p,
+            balance: p.balance + amountToRefund,
+          };
+        }
+        return p;
+      });
+
+      newBlackjackPlayers = newBlackjackPlayers.map((p) => {
+        if (p.id === blackjackPlayer.id) {
+          return {
+            ...p,
+            cards: [EMPTY_CARD, EMPTY_CARD],
+            doubledDown: false,
+          };
+        }
+        return p;
+      });
+    }
+
+    newBlackjackPlayers = newBlackjackPlayers.filter((p) => !p.splitFrom);
+
+    setBlackjackGame({
+      ...blackjackGame,
+      currentTurn: "DEALER",
+      dealerCards: [EMPTY_CARD, EMPTY_CARD],
+      dealerFirstTime: true,
+      gameState: "PREROUND",
+    });
+
+    setBlackjackPlayers(newBlackjackPlayers);
+    setPlayers(newPlayers);
   };
 
   return (
