@@ -61,6 +61,7 @@ export default function Round() {
         switch (keybinding.action) {
           case "Next Turn":
           case "Stand":
+          case "Payout & End":
             console.log(blackjackGame);
             if (blackjackGame.currentTurn == "DEALER" && !blackjackGame.dealerFirstTime) {
               payoutAndEnd();
@@ -69,14 +70,8 @@ export default function Round() {
             }
             break;
 
-          case "Payout & End":
-            // TODO: Implement payout and end
-            console.log("Payout & End");
-            break;
-
           case "Refund & Cancel":
-            // TODO: Implement refund and cancel
-            console.log("Refund & Cancel");
+            refundAndCancel();
             break;
 
           case "Hit":

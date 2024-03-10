@@ -75,7 +75,19 @@ export default function PreRound() {
 
     setPlayers((draft) => {
       draft.forEach((player) => {
-        player.balance -= blackjackPlayers.find((p) => p.id === player.id)?.bet || 0;
+        // player.balance -= blackjackPlayers.find((p) => p.id === player.id)?.bet || 0;
+        const blackjackPlayer = blackjackPlayers.find((p) => p.id === player.id);
+        if (blackjackPlayer) {
+          player.balance -= blackjackPlayer.bet;
+
+          player.balance -= blackjackPlayer.sidebets.perfectPairs;
+          player.balance -= blackjackPlayer.sidebets.twentyOnePlusThree;
+          player.balance -= blackjackPlayer.sidebets.betBehind.bet;
+
+          if (player.balance < 0) {
+            player.balance = 0;
+          }
+        }
       });
     });
 
