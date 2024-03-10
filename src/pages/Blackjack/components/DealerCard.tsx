@@ -13,6 +13,7 @@ import {
 } from "@mantine/core";
 import { useRecoilState } from "recoil";
 import { CARD_SELECTOR_STATE } from "../routes/Round";
+import { getCardTotal } from "@/utils/BlackjackHelper";
 
 export default function DealerCard({
   cards,
@@ -20,15 +21,27 @@ export default function DealerCard({
   firstTurn,
   nextTurn,
   forceTurn,
+  refundAndCancel,
 }: {
   cards: Card[];
   isActive: boolean;
   firstTurn: boolean;
   nextTurn: (dealerFirstTurn: boolean) => void;
   forceTurn: (playerId: string) => void;
+  refundAndCancel: () => void;
 }) {
   const theme = useMantineTheme();
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
+
+  const calculatedCardResult = getCardTotal(cards);
+
+  let dealerAction: "hit" | "stand" = "stand";
+  // Dealer hits on soft 17, stands on hard 17
+  if (calculatedCardResult.ace == "SOFT" && calculatedCardResult.total <= 17) {
+    dealerAction = "hit";
+  } else if (calculatedCardResult.total < 17) {
+    dealerAction = "hit";
+  }
 
   return (
     <GenericPlayerCard
@@ -54,13 +67,13 @@ export default function DealerCard({
               }}
             >
               <Text size={rem(14)} fw={600} tt="uppercase" ta="center">
-                BLACKJACK
+                {calculatedCardResult.ace !== "NONE" ? calculatedCardResult.ace : ""}
               </Text>
               <Text size={rem(30)} fw="bold" ta="center">
-                21
+                {calculatedCardResult.total}
               </Text>
               <Text size={rem(14)} fw={600} tt="uppercase" ta="center" mt="3">
-                STAND
+                {dealerAction}
               </Text>
             </div>
           </Paper>
@@ -102,7 +115,12 @@ export default function DealerCard({
             Add Card
           </Button>
         )}
-        <Button variant={isActive ? "filled" : "light"} fullWidth color="red">
+        <Button
+          variant={isActive ? "filled" : "light"}
+          fullWidth
+          color="red"
+          onClick={refundAndCancel}
+        >
           Refund & Cancel
         </Button>
         {!firstTurn && isActive && (
