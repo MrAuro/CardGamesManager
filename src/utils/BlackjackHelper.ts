@@ -269,13 +269,21 @@ export function calculateBasePayoutMultiplier(handTotal: number, dealerTotal: nu
     result = "WIN";
   }
 
-  if (result === "BLACKJACK") {
-    return 2.5;
-  } else if (result === "WIN") {
-    return 2;
-  } else if (result === "LOSE") {
-    return 0;
-  } else if (result === "PUSH") {
-    return 1;
+  let mult = 0;
+  switch (result) {
+    case "BLACKJACK":
+      mult = 2.5;
+      break;
+    case "WIN":
+      mult = 2;
+      break;
+    case "LOSE":
+      mult = 0;
+      break;
+    case "PUSH":
+      mult = 1;
+      break;
   }
+
+  return mult;
 }
