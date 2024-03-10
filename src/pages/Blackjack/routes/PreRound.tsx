@@ -2,6 +2,7 @@ import {
   BLACKJACK_GAME_STATE,
   BLACKJACK_PLAYERS_STATE,
   BLACKJACK_SETTINGS,
+  KEYBINDINGS_STATE,
   PLAYERS_STATE,
 } from "@/Root";
 import PlayerSelector from "@/components/PlayerSelector";
@@ -13,6 +14,7 @@ import { IconInfoTriangle } from "@tabler/icons-react";
 import { useState } from "react";
 import { useRecoilState } from "recoil";
 import PreRoundPlayerCard from "../components/PreRoundPlayerCard";
+import { useHotkeys } from "react-hotkeys-hook";
 
 function getStyle(style: any, snapshot: DraggableStateSnapshot) {
   if (!snapshot.isDropAnimating) {
@@ -33,9 +35,22 @@ export default function PreRound() {
   const [blackjackPlayers, setBlackjackPlayers] = useRecoilImmerState(BLACKJACK_PLAYERS_STATE);
   const [blackjackGame, setBlackjackGame] = useRecoilState(BLACKJACK_GAME_STATE);
   const [, setPlayers] = useRecoilImmerState(PLAYERS_STATE);
+  const [keybindings] = useRecoilImmerState(KEYBINDINGS_STATE);
 
   const [sidebetsOpen, setSidebetsOpen] = useState<string[]>([]);
   const [gameErrors, setGameErrors] = useState<string[]>([]);
+
+  keybindings.forEach((keybinding) => {
+    if (keybinding.scope === "Blackjack PreRound") {
+      useHotkeys(keybinding.key, () => {
+        switch (keybinding.action) {
+          case "Start Game":
+            startGame();
+            break;
+        }
+      });
+    }
+  });
 
   const startGame = () => {
     let tempGameErrors = [];
