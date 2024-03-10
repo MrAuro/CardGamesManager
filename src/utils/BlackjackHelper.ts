@@ -255,17 +255,27 @@ export const findTwentyOnePlusThree = (cards: Card[]): TwentyOnePlusThree => {
 export function calculateBasePayoutMultiplier(handTotal: number, dealerTotal: number): number {
   let result: "BLACKJACK" | "WIN" | "LOSE" | "PUSH" = "LOSE";
 
-  if (handTotal.total > 21) {
+  if (handTotal > 21) {
     result = "LOSE";
-  } else if (dealerTotal.total == handTotal.total) {
+  } else if (dealerTotal == handTotal) {
     result = "PUSH";
-  } else if (handTotal.total == 21) {
+  } else if (handTotal == 21) {
     result = "BLACKJACK";
-  } else if (dealerTotal.total > 21) {
+  } else if (dealerTotal > 21) {
     result = "WIN";
-  } else if (dealerTotal.total > handTotal.total) {
+  } else if (dealerTotal > handTotal) {
     result = "LOSE";
-  } else if (dealerTotal.total < handTotal.total) {
+  } else if (dealerTotal < handTotal) {
     result = "WIN";
+  }
+
+  if (result === "BLACKJACK") {
+    return 2.5;
+  } else if (result === "WIN") {
+    return 2;
+  } else if (result === "LOSE") {
+    return 0;
+  } else if (result === "PUSH") {
+    return 1;
   }
 }
