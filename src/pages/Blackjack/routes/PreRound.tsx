@@ -81,7 +81,7 @@ export default function PreRound() {
 
     setBlackjackPlayers((draft) => {
       draft.forEach((blackjackPlayer) => {
-        blackjackPlayer.cards = Array(2).fill(EMPTY_CARD);
+        blackjackPlayer.cards = [EMPTY_CARD, EMPTY_CARD];
         blackjackPlayer.doubledDown = false;
         blackjackPlayer.split = false;
         blackjackPlayer.splitFrom = undefined;

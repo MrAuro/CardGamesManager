@@ -1,6 +1,7 @@
 import { KEYBINDINGS_STATE, PLAYERS_STATE, SETTINGS_STATE } from "@/Root";
 import { Scope, Scopes, getActions } from "@/types/Keybindings";
 import { Player } from "@/types/Player";
+import { DefaultKeybinds } from "@/utils/DefaultKeybinds";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import {
   ActionIcon,
@@ -84,7 +85,14 @@ export default function GeneralSettings() {
           setPlayers(players);
         }}
       >
-        Populate players
+        populate players
+      </Button>
+      <Button
+        onClick={() => {
+          setKeybindings([...DefaultKeybinds]);
+        }}
+      >
+        set default keybindings
       </Button>
       <Input.Wrapper mb="xl" label="UI Scale">
         <Slider

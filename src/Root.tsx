@@ -15,6 +15,7 @@ import { BlackjackGame, BlackjackPlayer, BlackjackSettings } from "./types/Black
 import { Player } from "./types/Player";
 import { EMPTY_CARD } from "./utils/CardHelper";
 import { Keybinding } from "./types/Keybindings";
+import { DefaultKeybinds } from "./utils/DefaultKeybinds";
 
 export const TAURI_STORE = new Store(".data");
 
@@ -37,7 +38,7 @@ export const KEYBINDINGS_STATE = atom<Keybinding[]>({
   default: new Promise(async (resolve) => {
     let keybindings = await TAURI_STORE.get("keybindings");
     if (!keybindings) {
-      keybindings = [];
+      keybindings = [...DefaultKeybinds];
       await TAURI_STORE.set("keybindings", keybindings);
     }
 
