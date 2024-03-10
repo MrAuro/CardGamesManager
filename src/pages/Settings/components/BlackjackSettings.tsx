@@ -10,26 +10,24 @@ export default function BlackjackSettings() {
   return (
     <>
       <Title order={2}>Blackjack Settings</Title>
-      <Grid>
+      <Grid mb="xs">
         <Grid.Col span={{ base: 12, sm: 4 }}>
-          <InputWrapper label="Deck Count" mb="xs">
-            <NumberInput
-              radius="md"
-              allowNegative={false}
-              decimalScale={0}
-              fixedDecimalScale
-              leftSection={<IconStack2 />}
-              placeholder="0"
-              disabled={blackjackGame.gameState != "PREROUND"}
-              value={blackjackSettings.decks}
-              onChange={(value) => {
-                setBlackjackSettings({
-                  ...blackjackSettings,
-                  decks: parseInt(`${value}`),
-                });
-              }}
-            />
-          </InputWrapper>
+          <NumberInput
+            label="Blackjack Payout"
+            radius="md"
+            allowNegative={false}
+            thousandSeparator=","
+            leftSection={<IconX />}
+            placeholder="0"
+            disabled={blackjackGame.gameState != "PREROUND"}
+            value={blackjackSettings.blackjackPayout}
+            onChange={(value) =>
+              setBlackjackSettings({
+                ...blackjackSettings,
+                blackjackPayout: parseFloat(`${value}`),
+              })
+            }
+          />
         </Grid.Col>
       </Grid>
       {/* <Text size="lg" fw={500}>
