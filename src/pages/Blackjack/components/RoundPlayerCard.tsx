@@ -9,6 +9,7 @@ import PlayingCard from "@/components/PlayingCard";
 import { BlackjackPlayer } from "@/types/Blackjack";
 import { Player } from "@/types/Player";
 import {
+  calculateBasePayoutMultiplier,
   findPerfectPairs,
   findTwentyOnePlusThree,
   getCardTotal,
@@ -120,6 +121,46 @@ export default function RoundPlayerCard({
         blackjackPlayer.sidebets.twentyOnePlusThree *
         blackjackSettings.twentyOnePlusThreeThreeOfAKindSuitedPayout;
       break;
+  }
+
+  let betBehindResult = "None";
+  let betBehindName = "";
+  let betBehindPayout = 0;
+  if (blackjackPlayer.sidebets.betBehind.target) {
+    betBehindPayout = -blackjackPlayer.sidebets.betBehind.bet;
+    const betBehindPlayer = blackjackPlayers.find(
+      (player) => player.id == blackjackPlayer.sidebets.betBehind.target
+    );
+    if (!betBehindPlayer) {
+      console.warn("Bet behind player not found", blackjackPlayer.sidebets.betBehind.target);
+      return;
+    }
+
+    betBehindName = betBehindPlayer.displayName;
+
+    if (betBehindPlayer.cards.filter((c) => c == EMPTY_CARD).length == 2) {
+      betBehindResult = "Pending";
+    } else {
+      let betBehindBetMultiplier = calculateBasePayoutMultiplier(
+        getCardTotal(betBehindPlayer.cards).total,
+        getCardTotal(blackjackGame.dealerCards).total
+      );
+
+      if (betBehindBetMultiplier != 0)
+        betBehindPayout = blackjackPlayer.sidebets.betBehind.bet * betBehindBetMultiplier;
+
+      console.log(betBehindBetMultiplier, "1");
+
+      if (betBehindBetMultiplier == 2.5) {
+        betBehindResult = "Blackjack";
+      } else if (betBehindBetMultiplier == 2) {
+        betBehindResult = "Win";
+      } else if (betBehindBetMultiplier == 1) {
+        betBehindResult = "Push";
+      } else if (betBehindBetMultiplier == 0) {
+        betBehindResult = "Lose";
+      }
+    }
   }
 
   return (
@@ -243,6 +284,56 @@ export default function RoundPlayerCard({
                     </Text>
                   </>
                 )}
+              </div>
+            </Paper>
+          )}
+          {betBehindResult != "None" && (
+            <Paper
+              style={{
+                width: "4.5rem",
+                height: "4.5rem",
+                backgroundColor: "transparent",
+              }}
+              ml="xs"
+            >
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "100%",
+                  height: "100%",
+                }}
+              >
+                <Text size="xs" c="dimmed" fw={600} tt="capitalize" ta="center">
+                  Bet Behind
+                </Text>
+                <Text size="xs" ta="center">
+                  {betBehindName}
+                </Text>
+                <>
+                  <Text
+                    size="md"
+                    fw="bold"
+                    ta="center"
+                    style={{
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {betBehindResult}
+                  </Text>
+                  {betBehindResult == "Pending" ? (
+                    <Text size="sm" fw={600} ta="center" c="dimmed">
+                      {formatMoney(blackjackPlayer.sidebets.betBehind.bet)}
+                    </Text>
+                  ) : (
+                    <Text size="sm" fw={600} ta="center" c={betBehindPayout <= 0 ? "red" : "green"}>
+                      {betBehindPayout > 0 && "+"}
+                      {formatMoney(betBehindPayout)}
+                    </Text>
+                  )}
+                </>
               </div>
             </Paper>
           )}
