@@ -23,26 +23,5 @@ export default function Blackjack() {
       break;
   }
 
-  return (
-    <>
-      {component}{" "}
-      {true && (
-        <Button
-          variant="outline"
-          onClick={() => {
-            console.log("setting preround", gameState);
-            setGameState({
-              currentTurn: "",
-              dealerCards: [EMPTY_CARD, EMPTY_CARD],
-              dealerFirstTime: true,
-              gameState: "PREROUND",
-            });
-          }}
-        >
-          SET PREROUND
-        </Button>
-      )}
-      {gameState.currentTurn} | {gameState.dealerFirstTime ? "First" : "Not First"}
-    </>
-  );
+  return <>{component} </>;
 }

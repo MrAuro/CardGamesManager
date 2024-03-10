@@ -6,20 +6,20 @@ import {
   PLAYERS_STATE,
 } from "@/Root";
 import CardSelector from "@/components/CardSelector";
+import { BlackjackPlayer } from "@/types/Blackjack";
 import { Card, CardRank, CardSuit } from "@/types/Card";
+import { availableCards } from "@/types/Keybindings";
+import { Player } from "@/types/Player";
+import { getCardTotal } from "@/utils/BlackjackHelper";
+import { EMPTY_CARD } from "@/utils/CardHelper";
+import { getPlayer } from "@/utils/PlayerHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import { Stack, useMantineTheme } from "@mantine/core";
+import { useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 import { atom, useRecoilState } from "recoil";
 import DealerCard from "../components/DealerCard";
 import RoundPlayerCard from "../components/RoundPlayerCard";
-import { getPlayer } from "@/utils/PlayerHelper";
-import { useHotkeys } from "react-hotkeys-hook";
-import { EMPTY_CARD } from "@/utils/CardHelper";
-import { useState } from "react";
-import { availableCards } from "@/types/Keybindings";
-import { Player } from "@/types/Player";
-import { BlackjackPlayer } from "@/types/Blackjack";
-import { getCardTotal } from "@/utils/BlackjackHelper";
 
 export const CARD_SELECTOR_STATE = atom<{
   opened: boolean;
@@ -56,7 +56,12 @@ export default function Round() {
         switch (keybinding.action) {
           case "Next Turn":
           case "Stand":
-            nextTurn();
+            console.log(blackjackGame);
+            if (blackjackGame.currentTurn == "DEALER" && !blackjackGame.dealerFirstTime) {
+              payoutAndEnd();
+            } else {
+              nextTurn();
+            }
             break;
 
           case "Payout & End":
@@ -400,6 +405,69 @@ export default function Round() {
     setPlayers(newPlayers);
   };
 
+  const payoutAndEnd = () => {
+    const dealerTotal = getCardTotal(blackjackGame.dealerCards);
+    let newPlayers: Player[] = [...players];
+    let newBlackjackPlayers: BlackjackPlayer[] = [...blackjackPlayers];
+
+    for (let blackjackPlayer of newBlackjackPlayers) {
+      const handTotal = getCardTotal(blackjackPlayer.cards);
+      const player = getPlayer(blackjackPlayer.id, players)!;
+
+      let result: "BLACKJACK" | "WIN" | "LOSE" | "PUSH" = "LOSE";
+
+      if (handTotal.total > 21) {
+        result = "LOSE";
+      } else if (dealerTotal.total == handTotal.total) {
+        result = "PUSH";
+      } else if (handTotal.total == 21) {
+        result = "BLACKJACK";
+      } else if (dealerTotal.total > 21) {
+        result = "WIN";
+      } else if (dealerTotal.total > handTotal.total) {
+        result = "LOSE";
+      } else if (dealerTotal.total < handTotal.total) {
+        result = "WIN";
+      }
+
+      let bet = blackjackPlayer.doubledDown ? blackjackPlayer.bet * 2 : blackjackPlayer.bet;
+      let payout = 0;
+
+      if (result == "BLACKJACK") {
+        payout = bet * 1.5;
+        payout += bet;
+      } else if (result == "WIN") {
+        payout = bet;
+        payout += bet;
+      } else if (result == "PUSH") {
+        payout = bet;
+      }
+
+      // TODO: Add sidebet payouts
+
+      newPlayers = newPlayers.map((p) => {
+        if (p.id === blackjackPlayer.id) {
+          return {
+            ...p,
+            balance: p.balance + payout,
+          };
+        }
+        return p;
+      });
+    }
+
+    setBlackjackGame({
+      ...blackjackGame,
+      currentTurn: "DEALER",
+      dealerCards: [EMPTY_CARD, EMPTY_CARD],
+      dealerFirstTime: true,
+      gameState: "PREROUND",
+    });
+
+    setBlackjackPlayers(newBlackjackPlayers);
+    setPlayers(newPlayers);
+  };
+
   return (
     <>
       <CardSelector
@@ -443,6 +511,7 @@ export default function Round() {
           firstTurn={blackjackGame.dealerFirstTime}
           nextTurn={nextTurn}
           forceTurn={forceTurn}
+          refundAndCancel={refundAndCancel}
         />
         {blackjackPlayers.map((blackjackPlayer) => {
           return (

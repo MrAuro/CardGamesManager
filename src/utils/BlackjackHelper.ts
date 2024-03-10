@@ -1,5 +1,5 @@
 import { BlackjackSettings } from "@/types/Blackjack";
-import { Card, CardRank } from "@/types/Card";
+import { Card } from "@/types/Card";
 import { EMPTY_CARD, getRank, getSuit, isAnyEmpty } from "./CardHelper";
 
 export function getPlayerErrors(
