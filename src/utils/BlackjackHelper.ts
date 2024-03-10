@@ -251,3 +251,21 @@ export const findTwentyOnePlusThree = (cards: Card[]): TwentyOnePlusThree => {
 
   return res;
 };
+
+export function calculateBasePayoutMultiplier(handTotal: number, dealerTotal: number): number {
+  let result: "BLACKJACK" | "WIN" | "LOSE" | "PUSH" = "LOSE";
+
+  if (handTotal.total > 21) {
+    result = "LOSE";
+  } else if (dealerTotal.total == handTotal.total) {
+    result = "PUSH";
+  } else if (handTotal.total == 21) {
+    result = "BLACKJACK";
+  } else if (dealerTotal.total > 21) {
+    result = "WIN";
+  } else if (dealerTotal.total > handTotal.total) {
+    result = "LOSE";
+  } else if (dealerTotal.total < handTotal.total) {
+    result = "WIN";
+  }
+}

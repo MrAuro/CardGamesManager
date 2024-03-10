@@ -10,7 +10,12 @@ import { BlackjackPlayer } from "@/types/Blackjack";
 import { Card, CardRank, CardSuit } from "@/types/Card";
 import { availableCards } from "@/types/Keybindings";
 import { Player } from "@/types/Player";
-import { getCardTotal } from "@/utils/BlackjackHelper";
+import {
+  calculateBasePayoutMultiplier,
+  findPerfectPairs,
+  findTwentyOnePlusThree,
+  getCardTotal,
+} from "@/utils/BlackjackHelper";
 import { EMPTY_CARD } from "@/utils/CardHelper";
 import { getPlayer } from "@/utils/PlayerHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
@@ -411,39 +416,135 @@ export default function Round() {
     let newBlackjackPlayers: BlackjackPlayer[] = [...blackjackPlayers];
 
     for (let blackjackPlayer of newBlackjackPlayers) {
-      const handTotal = getCardTotal(blackjackPlayer.cards);
-      const player = getPlayer(blackjackPlayer.id, players)!;
+      let earningsStrings = [];
 
-      let result: "BLACKJACK" | "WIN" | "LOSE" | "PUSH" = "LOSE";
-
-      if (handTotal.total > 21) {
-        result = "LOSE";
-      } else if (dealerTotal.total == handTotal.total) {
-        result = "PUSH";
-      } else if (handTotal.total == 21) {
-        result = "BLACKJACK";
-      } else if (dealerTotal.total > 21) {
-        result = "WIN";
-      } else if (dealerTotal.total > handTotal.total) {
-        result = "LOSE";
-      } else if (dealerTotal.total < handTotal.total) {
-        result = "WIN";
-      }
-
+      let payoutMultiplier = calculateBasePayoutMultiplier(
+        getCardTotal(blackjackPlayer.cards).total,
+        dealerTotal.total
+      );
       let bet = blackjackPlayer.doubledDown ? blackjackPlayer.bet * 2 : blackjackPlayer.bet;
-      let payout = 0;
 
-      if (result == "BLACKJACK") {
-        payout = bet * 1.5;
-        payout += bet;
-      } else if (result == "WIN") {
-        payout = bet;
-        payout += bet;
-      } else if (result == "PUSH") {
-        payout = bet;
+      let payout = 0;
+      payout += bet * payoutMultiplier;
+
+      if (payoutMultiplier == 2.5) {
+        earningsStrings.push("Blackjack");
+      } else if (payoutMultiplier == 2) {
+        earningsStrings.push("Win");
+      } else if (payoutMultiplier == 1) {
+        earningsStrings.push("Push");
       }
 
-      // TODO: Add sidebet payouts
+      if (blackjackPlayer.sidebets.perfectPairs && blackjackSettings.perfectPairsEnabled) {
+        const perfectPairsResult = findPerfectPairs(blackjackPlayer.cards);
+        let sidebetPayouts = 0;
+        switch (perfectPairsResult) {
+          case "None":
+            break;
+
+          case "Mixed":
+            earningsStrings.push("Perfect Pairs (Mixed)");
+            sidebetPayouts +=
+              blackjackPlayer.sidebets.perfectPairs * blackjackSettings.perfectPairsMixedPayout;
+            break;
+
+          case "Colored":
+            earningsStrings.push("Perfect Pairs (Colored)");
+            sidebetPayouts +=
+              blackjackPlayer.sidebets.perfectPairs * blackjackSettings.perfectPairsColoredPayout;
+            break;
+
+          case "Perfect":
+            earningsStrings.push("Perfect Pairs (Perfect)");
+            sidebetPayouts +=
+              blackjackPlayer.sidebets.perfectPairs * blackjackSettings.perfectPairsSuitedPayout;
+            break;
+        }
+
+        payout += sidebetPayouts;
+      }
+
+      if (
+        blackjackPlayer.sidebets.twentyOnePlusThree &&
+        blackjackSettings.twentyOnePlusThreeEnabled
+      ) {
+        const twentyOnePlusThreeResult = findTwentyOnePlusThree([
+          blackjackPlayer.cards[0],
+          blackjackPlayer.cards[1],
+          blackjackGame.dealerCards[0],
+        ]);
+
+        switch (twentyOnePlusThreeResult) {
+          case "None":
+            break;
+
+          case "Flush":
+            earningsStrings.push("21+3 (Flush)");
+            payout +=
+              blackjackPlayer.sidebets.twentyOnePlusThree *
+              blackjackSettings.twentyOnePlusThreeFlushPayout;
+            break;
+
+          case "Straight":
+            earningsStrings.push("21+3 (Straight)");
+            payout +=
+              blackjackPlayer.sidebets.twentyOnePlusThree *
+              blackjackSettings.twentyOnePlusThreeStraightPayout;
+            break;
+
+          case "Three of a Kind":
+            earningsStrings.push("21+3 (Three of a Kind)");
+            payout +=
+              blackjackPlayer.sidebets.twentyOnePlusThree *
+              blackjackSettings.twentyOnePlusThreeThreeOfAKindPayout;
+            break;
+
+          case "Straight Flush":
+            earningsStrings.push("21+3 (Straight Flush)");
+            payout +=
+              blackjackPlayer.sidebets.twentyOnePlusThree *
+              blackjackSettings.twentyOnePlusThreeStraightFlushPayout;
+            break;
+
+          case "Suited Three of a Kind":
+            earningsStrings.push("21+3 (Suited Three of a Kind)");
+            payout +=
+              blackjackPlayer.sidebets.twentyOnePlusThree *
+              blackjackSettings.twentyOnePlusThreeThreeOfAKindSuitedPayout;
+            break;
+        }
+
+        payout += blackjackPlayer.sidebets.twentyOnePlusThree;
+      }
+
+      if (
+        blackjackPlayer.sidebets.betBehind &&
+        blackjackSettings.betBehindEnabled &&
+        blackjackPlayer.sidebets.betBehind.target
+      ) {
+        let betBehindTargetPlayer = blackjackPlayers.find(
+          (p) => p.id === blackjackPlayer.sidebets.betBehind.target
+        );
+
+        if (betBehindTargetPlayer) {
+          let betBehindBetMultiplier = calculateBasePayoutMultiplier(
+            getCardTotal(betBehindTargetPlayer.cards).total,
+            dealerTotal.total
+          );
+
+          if (betBehindBetMultiplier == 2.5) {
+            earningsStrings.push("Bet Behind (Blackjack)");
+          } else if (betBehindBetMultiplier == 2) {
+            earningsStrings.push("Bet Behind (Win)");
+          } else if (betBehindBetMultiplier == 1) {
+            earningsStrings.push("Bet Behind (Push)");
+          }
+
+          payout += blackjackPlayer.sidebets.betBehind.bet * betBehindBetMultiplier;
+        }
+      }
+
+      console.log(`${blackjackPlayer.displayName}: ${earningsStrings.join(", ")}`);
 
       newPlayers = newPlayers.map((p) => {
         if (p.id === blackjackPlayer.id) {
