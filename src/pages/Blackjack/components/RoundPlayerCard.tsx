@@ -79,7 +79,11 @@ export default function RoundPlayerCard({
   }
 
   const calculatedTwentyOnePlusThree = blackjackPlayer.sidebets.twentyOnePlusThree
-    ? findTwentyOnePlusThree([...blackjackPlayer.cards, blackjackGame.dealerCards[0]])
+    ? findTwentyOnePlusThree([
+        blackjackPlayer.cards[0],
+        blackjackPlayer.cards[1],
+        blackjackGame.dealerCards[0],
+      ])
     : null;
 
   let twentyOnePlusThreeEarnings = -blackjackPlayer.sidebets.twentyOnePlusThree;
