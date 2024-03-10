@@ -24,7 +24,8 @@ export type BlackjackRoundActions =
   | "Hit"
   | "Stand"
   | "Double"
-  | "Split";
+  | "Split"
+  | "Remove Last Card";
 export type BlackjackPostRoundActions = "Next Round";
 
 export type Keybinding = {
@@ -69,6 +70,7 @@ export function getActions(scope: Scope): string[] {
         "Stand",
         "Double",
         "Split",
+        "Remove Last Card",
         ...availableRanks,
         ...availableSuits,
         ...availableCards,
