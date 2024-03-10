@@ -7,5 +7,10 @@ export function parseMoney(value: string | number): number {
 }
 
 export function formatMoney(value: number): string {
-  return `$${value.toFixed(2)}`;
+  if (value < 0) {
+    // -$100 looks better than $-100
+    return `-$${Math.abs(value).toFixed(2)}`;
+  } else {
+    return `$${value.toFixed(2)}`;
+  }
 }

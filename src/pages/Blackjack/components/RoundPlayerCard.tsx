@@ -1,8 +1,17 @@
+import { BLACKJACK_PLAYERS_STATE, BLACKJACK_SETTINGS, PLAYERS_STATE } from "@/Root";
 import GenericPlayerCard from "@/components/GenericPlayerCard";
 import PlayingCard from "@/components/PlayingCard";
 import { BlackjackPlayer } from "@/types/Blackjack";
 import { Player } from "@/types/Player";
+import {
+  findPerfectPairs,
+  findTwentyOnePlusThree,
+  getCardTotal,
+  getCardValue,
+} from "@/utils/BlackjackHelper";
+import { EMPTY_CARD } from "@/utils/CardHelper";
 import { formatMoney } from "@/utils/MoneyHelper";
+import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import {
   Button,
   Container,
@@ -13,12 +22,8 @@ import {
   rem,
   useMantineTheme,
 } from "@mantine/core";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { CARD_SELECTOR_STATE } from "../routes/Round";
-import { BLACKJACK_PLAYERS_STATE, PLAYERS_STATE } from "@/Root";
-import { useRecoilImmerState } from "@/utils/RecoilImmer";
-import { EMPTY_CARD } from "@/utils/CardHelper";
-import { getCardTotal, getCardValue } from "@/utils/BlackjackHelper";
 
 export default function RoundPlayerCard({
   player,
@@ -35,10 +40,40 @@ export default function RoundPlayerCard({
 }) {
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
   const [blackjackPlayers, setBlackjackPlayers] = useRecoilImmerState(BLACKJACK_PLAYERS_STATE);
+  const blackjackSettings = useRecoilValue(BLACKJACK_SETTINGS);
   const [players, setPlayers] = useRecoilImmerState(PLAYERS_STATE);
   const theme = useMantineTheme();
 
   const calculatedCardResult = getCardTotal(blackjackPlayer.cards);
+
+  const calculatedPerfectPairs = blackjackPlayer.sidebets.perfectPairs
+    ? findPerfectPairs(blackjackPlayer.cards)
+    : null;
+
+  let perfectPairEarnings = -blackjackPlayer.sidebets.perfectPairs;
+  switch (calculatedPerfectPairs) {
+    case "None":
+      break;
+
+    case "Mixed":
+      perfectPairEarnings =
+        blackjackPlayer.sidebets.perfectPairs * blackjackSettings.perfectPairsMixedPayout;
+      break;
+
+    case "Colored":
+      perfectPairEarnings =
+        blackjackPlayer.sidebets.perfectPairs * blackjackSettings.perfectPairsColoredPayout;
+      break;
+
+    case "Perfect":
+      perfectPairEarnings =
+        blackjackPlayer.sidebets.perfectPairs * blackjackSettings.perfectPairsSuitedPayout;
+      break;
+  }
+
+  const calculatedTwentyOnePlusThree = blackjackPlayer.sidebets.twentyOnePlusThree
+    ? findTwentyOnePlusThree(blackjackPlayer.cards)
+    : null;
 
   return (
     <GenericPlayerCard
@@ -57,6 +92,55 @@ export default function RoundPlayerCard({
       }
       rightSection={
         <>
+          {calculatedPerfectPairs && (
+            <Paper
+              style={{
+                width: "4.5rem",
+                height: "4.5rem",
+                backgroundColor: "transparent",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "100%",
+                  height: "100%",
+                }}
+              >
+                <Text size="xs" c="dimmed" fw={600} tt="capitalize" ta="center">
+                  Perfect Pairs
+                </Text>
+                {blackjackPlayer.cards.filter((card) => card != EMPTY_CARD).length > 0 ? (
+                  <>
+                    <Text size="md" fw="bold" ta="center">
+                      {calculatedPerfectPairs}
+                    </Text>
+                    <Text
+                      size="sm"
+                      fw={600}
+                      ta="center"
+                      c={perfectPairEarnings <= 0 ? "red" : "green"}
+                    >
+                      {perfectPairEarnings > 0 && "+"}
+                      {formatMoney(perfectPairEarnings)}
+                    </Text>
+                  </>
+                ) : (
+                  <>
+                    <Text size="md" fw="bold" ta="center">
+                      Pending
+                    </Text>
+                    <Text size="sm" fw={600} ta="center" c="dimmed">
+                      {formatMoney(blackjackPlayer.sidebets.perfectPairs)}
+                    </Text>
+                  </>
+                )}
+              </div>
+            </Paper>
+          )}
           <Paper
             style={{
               width: "4.5rem",

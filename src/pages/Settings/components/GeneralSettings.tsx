@@ -19,7 +19,6 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import {
   IconDeviceFloppy,
-  IconEdit,
   IconKeyframe,
   IconKeyframeFilled,
   IconPencil,
