@@ -25,6 +25,7 @@ export default function PreRoundPlayerCard({
   blackjackSettings,
   sidebetsOpen,
   setSidebetsOpen,
+  removePlayer,
   blackjackPlayers,
 }: {
   player: Player;
@@ -35,6 +36,7 @@ export default function PreRoundPlayerCard({
   sidebetsOpen: string[];
   setSidebetsOpen: (value: string[]) => void;
   blackjackPlayers: BlackjackPlayer[];
+  removePlayer: (id: string) => void;
 }) {
   const theme = useMantineTheme();
 
@@ -217,9 +219,7 @@ export default function PreRoundPlayerCard({
                 variant="light"
                 color="red"
                 onClick={() => {
-                  setBlackjackPlayers((draft) => {
-                    draft.splice(index, 1);
-                  });
+                  removePlayer(player.id);
                 }}
               >
                 <IconX size="1.25rem" />

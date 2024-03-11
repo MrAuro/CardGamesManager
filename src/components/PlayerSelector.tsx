@@ -5,7 +5,7 @@ import { Player } from "@/types/Player";
 import { formatMoney } from "@/utils/MoneyHelper";
 import { getPlayer } from "@/utils/PlayerHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
-import { Select } from "@mantine/core";
+import { Select, Text } from "@mantine/core";
 import { useListState } from "@mantine/hooks";
 import { IconSearch } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
@@ -18,6 +18,7 @@ export default function PlayerSelector({
   playerElement: (
     index: number,
     player: Player,
+    removePlayer: (id: string) => void,
     blackjackPlayer?: BlackjackPlayer,
     pokerPlayer?: any
   ) => JSX.Element;
@@ -31,6 +32,10 @@ export default function PlayerSelector({
     game == "BLACKJACK" ? blackjackPlayers.map((player) => player.id) : []
   );
   // TODO: Map poker players instead of an empty array
+
+  const removePlayer = (id: string) => {
+    handlers.filter((playerId) => playerId !== id);
+  };
 
   useEffect(() => {
     let orderedPlayers = listState.map((id) => blackjackPlayers.find((p) => p.id === id)!);
@@ -96,6 +101,11 @@ export default function PlayerSelector({
           handlers.append(option.value);
         }}
       />
+      {blackjackPlayers.length < 1 && (
+        <Text ta="center" size="md" fw="bold">
+          No players added
+        </Text>
+      )}
       <DragDropContext
         onDragEnd={({ destination, source }) => {
           handlers.reorder({
@@ -111,6 +121,7 @@ export default function PlayerSelector({
                 return playerElement(
                   index,
                   getPlayer(id, players)!,
+                  removePlayer,
                   blackjackPlayers.find((player) => player.id == id)
                 );
               })}

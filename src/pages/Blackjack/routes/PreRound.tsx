@@ -126,7 +126,9 @@ export default function PreRound() {
       <Button
         fullWidth
         mt="sm"
-        disabled={blackjackPlayers.some((player) => player.errors.length > 0)}
+        disabled={
+          blackjackPlayers.some((player) => player.errors.length > 0) || blackjackPlayers.length < 1
+        }
         onClick={startGame}
       >
         Start Game
@@ -137,7 +139,7 @@ export default function PreRound() {
       </Title>
       <PlayerSelector
         game="BLACKJACK"
-        playerElement={(index, player, blackjackPlayer) => {
+        playerElement={(index, player, removePlayer, blackjackPlayer) => {
           if (!blackjackPlayer) return <></>;
 
           return (
@@ -164,6 +166,7 @@ export default function PreRound() {
                     sidebetsOpen={sidebetsOpen}
                     setSidebetsOpen={setSidebetsOpen}
                     blackjackPlayers={blackjackPlayers}
+                    removePlayer={removePlayer}
                   />
                 </div>
               )}
