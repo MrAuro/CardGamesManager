@@ -1,4 +1,4 @@
-import { KEYBINDINGS_STATE, PLAYERS_STATE, SETTINGS_STATE } from "@/Root";
+import { KEYBINDINGS_STATE, PLAYERS_STATE, SETTINGS_STATE, TAURI_STORE } from "@/Root";
 import { Scope, Scopes, getActions } from "@/types/Keybindings";
 import { Player } from "@/types/Player";
 import { DefaultKeybinds } from "@/utils/DefaultKeybinds";
@@ -7,7 +7,6 @@ import {
   ActionIcon,
   Button,
   Code,
-  Collapse,
   Grid,
   Input,
   Select,
@@ -17,14 +16,7 @@ import {
   Title,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import {
-  IconDeviceFloppy,
-  IconKeyframe,
-  IconKeyframeFilled,
-  IconPencil,
-  IconPlus,
-  IconTrash,
-} from "@tabler/icons-react";
+import { IconKeyframe, IconKeyframeFilled, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
 import { useRecordHotkeys } from "react-hotkeys-hook";
 import { useRecoilState } from "recoil";
@@ -36,7 +28,6 @@ export default function GeneralSettings() {
 
   const [opened, { toggle }] = useDisclosure(false);
   const [keylistening, setKeylistening] = useState("");
-  const [keyEditing, setKeyEditing] = useState("");
   const [keys, { start, stop }] = useRecordHotkeys();
 
   const saveKey = (id: string, key: string) => {
@@ -97,6 +88,17 @@ export default function GeneralSettings() {
         populate players
       </Button>
       <Button
+        mt="sm"
+        variant="light"
+        color="red"
+        onClick={() => {
+          TAURI_STORE.clear();
+          window.location.reload();
+        }}
+      >
+        Reset data
+      </Button>
+      <Button
         onClick={() => {
           setKeybindings([...DefaultKeybinds]);
         }}
@@ -145,7 +147,7 @@ export default function GeneralSettings() {
       </Input.Wrapper>
       {/* <Text fw="bold">Keyboard Shortcuts</Text> */}
       <Button onClick={toggle}>{opened ? "Hide" : "Show"} Keyboard Shortcuts</Button>
-      <Collapse in={opened}>
+      {opened && (
         <Table
           withColumnBorders
           withTableBorder
@@ -161,7 +163,7 @@ export default function GeneralSettings() {
               <Table.Th>Action</Table.Th>
               <Table.Th
                 style={{
-                  width: "80px",
+                  width: "50px",
                 }}
               />
             </Table.Tr>
@@ -205,105 +207,72 @@ export default function GeneralSettings() {
                           alignItems: "center",
                         }}
                       >
-                        {keyEditing === keybinding.id && (
-                          <ActionIcon
-                            variant="transparent"
-                            c="gray"
-                            onClick={() => {
-                              if (keylistening === keybinding.id) {
-                                saveKey(keybinding.id, Array.from(keys).join("+"));
+                        <ActionIcon
+                          variant="transparent"
+                          c="gray"
+                          onClick={() => {
+                            if (keylistening === keybinding.id) {
+                              saveKey(keybinding.id, Array.from(keys).join("+"));
 
-                                setKeylistening("");
-                                stop();
-                              } else {
-                                saveKey(keybinding.id, "");
+                              setKeylistening("");
+                              stop();
+                            } else {
+                              saveKey(keybinding.id, "");
 
-                                setKeylistening(keybinding.id);
-                                start();
-                              }
-                            }}
-                          >
-                            {keylistening === keybinding.id ? (
-                              <IconKeyframeFilled />
-                            ) : (
-                              <IconKeyframe />
-                            )}
-                          </ActionIcon>
-                        )}
+                              setKeylistening(keybinding.id);
+                              start();
+                            }
+                          }}
+                        >
+                          {keylistening === keybinding.id ? (
+                            <IconKeyframeFilled />
+                          ) : (
+                            <IconKeyframe />
+                          )}
+                        </ActionIcon>
                       </Grid.Col>
                     </Grid>
                   </Table.Td>
 
-                  <Table.Td
-                    style={{
-                      height: 51, // Prevents the height from changing when the select is shown
-                    }}
-                  >
-                    {keyEditing === keybinding.id ? (
-                      <Select
-                        searchable
-                        data={Scopes}
-                        defaultValue={keybinding.scope}
-                        allowDeselect={false}
-                        onChange={(value) => saveScope(keybinding.id, value as Scope)}
-                      />
-                    ) : (
-                      <Text size="sm" c="dimmed">
-                        {keybinding.scope}
-                      </Text>
-                    )}
+                  <Table.Td>
+                    <Select
+                      data={Scopes}
+                      defaultValue={keybinding.scope}
+                      allowDeselect={false}
+                      onChange={(value) => {
+                        saveScope(keybinding.id, value as Scope);
+                      }}
+                    />
                   </Table.Td>
                   <Table.Td>
-                    {keyEditing === keybinding.id ? (
-                      <Select
-                        searchable
-                        data={getActions(keybinding.scope)}
-                        defaultValue={keybinding.action}
-                        allowDeselect={false}
-                        onChange={(value) => saveAction(keybinding.id, value as string)}
-                      />
-                    ) : (
-                      <Text size="sm" c="dimmed">
-                        {keybinding.action}
-                      </Text>
-                    )}
+                    <Select
+                      searchable
+                      data={getActions(keybinding.scope)}
+                      defaultValue={keybinding.action}
+                      allowDeselect={false}
+                      onChange={(value) => saveAction(keybinding.id, value as string)}
+                    />
                   </Table.Td>
                   <Table.Td
                     py={0}
                     style={{
-                      width: "80px",
+                      width: "40px",
                     }}
                   >
                     <div
                       style={{
                         display: "flex",
-                        justifyContent: "center",
+                        justifyContent: "flex-end",
                         alignItems: "center",
-                        gap: 5,
                       }}
                     >
                       <ActionIcon
                         variant="transparent"
-                        c="gray"
-                        onClick={() => {
-                          if (keyEditing === keybinding.id) {
-                            setKeyEditing("");
-                          } else {
-                            setKeyEditing(keybinding.id);
-                          }
-                        }}
+                        c="red"
+                        onClick={() => deleteKeybinding(keybinding.id)}
                       >
-                        {keyEditing === keybinding.id ? <IconDeviceFloppy /> : <IconPencil />}
+                        <IconTrash />
                       </ActionIcon>
-                      {keyEditing === keybinding.id && (
-                        <ActionIcon
-                          variant="transparent"
-                          c="red"
-                          onClick={() => deleteKeybinding(keybinding.id)}
-                        >
-                          <IconTrash />
-                        </ActionIcon>
-                      )}
                     </div>
                   </Table.Td>
                 </Table.Tr>
@@ -330,7 +299,7 @@ export default function GeneralSettings() {
             </Button>
           </Table.Caption>
         </Table>
-      </Collapse>
+      )}
     </>
   );
 }

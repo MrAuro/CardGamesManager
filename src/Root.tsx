@@ -76,7 +76,7 @@ export const BLACKJACK_SETTINGS = atom<BlackjackSettings>({
         splitAces: true,
         splitAcesReceiveOneCard: true,
 
-        blackjackPayout: 3 / 2,
+        blackjackPayout: 1.5,
 
         twentyOnePlusThreeEnabled: false,
         twentyOnePlusThreeFlushPayout: 5,
@@ -94,6 +94,7 @@ export const BLACKJACK_SETTINGS = atom<BlackjackSettings>({
       };
       await TAURI_STORE.set("blackjackSettings", settings);
     }
+    console.log(settings);
 
     resolve(settings as BlackjackSettings);
   }),
