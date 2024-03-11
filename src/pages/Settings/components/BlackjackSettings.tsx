@@ -7,6 +7,8 @@ export default function BlackjackSettings() {
   const [blackjackSettings, setBlackjackSettings] = useRecoilState(BLACKJACK_SETTINGS);
   const [blackjackGame] = useRecoilState(BLACKJACK_GAME_STATE);
 
+  console.log(blackjackSettings.blackjackPayout, "aaa");
+
   return (
     <>
       <Title order={2}>Blackjack Settings</Title>
@@ -21,6 +23,8 @@ export default function BlackjackSettings() {
             placeholder="0"
             disabled={blackjackGame.gameState != "PREROUND"}
             value={blackjackSettings.blackjackPayout}
+            decimalScale={2}
+            fixedDecimalScale
             onChange={(value) =>
               setBlackjackSettings({
                 ...blackjackSettings,
@@ -68,6 +72,8 @@ export default function BlackjackSettings() {
                 placeholder="0"
                 disabled={blackjackGame.gameState != "PREROUND"}
                 value={blackjackSettings.perfectPairsMixedPayout}
+                decimalScale={2}
+                fixedDecimalScale
                 onChange={(value) => {
                   setBlackjackSettings({
                     ...blackjackSettings,
@@ -86,6 +92,8 @@ export default function BlackjackSettings() {
                 placeholder="0"
                 disabled={blackjackGame.gameState != "PREROUND"}
                 value={blackjackSettings.perfectPairsColoredPayout}
+                decimalScale={2}
+                fixedDecimalScale
                 onChange={(value) => {
                   setBlackjackSettings({
                     ...blackjackSettings,
@@ -106,6 +114,8 @@ export default function BlackjackSettings() {
                 placeholder="0"
                 disabled={blackjackGame.gameState != "PREROUND"}
                 value={blackjackSettings.perfectPairsSuitedPayout}
+                decimalScale={2}
+                fixedDecimalScale
                 onChange={(value) =>
                   setBlackjackSettings({
                     ...blackjackSettings,
@@ -152,6 +162,8 @@ export default function BlackjackSettings() {
                 placeholder="0"
                 disabled={blackjackGame.gameState != "PREROUND"}
                 value={blackjackSettings.twentyOnePlusThreeFlushPayout}
+                decimalScale={2}
+                fixedDecimalScale
                 onChange={(value) =>
                   setBlackjackSettings({
                     ...blackjackSettings,
@@ -170,6 +182,8 @@ export default function BlackjackSettings() {
                 placeholder="0"
                 disabled={blackjackGame.gameState != "PREROUND"}
                 value={blackjackSettings.twentyOnePlusThreeStraightPayout}
+                decimalScale={2}
+                fixedDecimalScale
                 onChange={(value) => {
                   setBlackjackSettings({
                     ...blackjackSettings,
@@ -190,6 +204,8 @@ export default function BlackjackSettings() {
                 placeholder="0"
                 disabled={blackjackGame.gameState != "PREROUND"}
                 value={blackjackSettings.twentyOnePlusThreeThreeOfAKindPayout}
+                decimalScale={2}
+                fixedDecimalScale
                 onChange={(value) => {
                   setBlackjackSettings({
                     ...blackjackSettings,
@@ -208,6 +224,8 @@ export default function BlackjackSettings() {
                 placeholder="0"
                 disabled={blackjackGame.gameState != "PREROUND"}
                 value={blackjackSettings.twentyOnePlusThreeStraightFlushPayout}
+                decimalScale={2}
+                fixedDecimalScale
                 onChange={(value) => {
                   setBlackjackSettings({
                     ...blackjackSettings,
@@ -228,6 +246,8 @@ export default function BlackjackSettings() {
                 placeholder="0"
                 disabled={blackjackGame.gameState != "PREROUND"}
                 value={blackjackSettings.twentyOnePlusThreeThreeOfAKindSuitedPayout}
+                decimalScale={2}
+                fixedDecimalScale
                 onChange={(value) => {
                   setBlackjackSettings({
                     ...blackjackSettings,
