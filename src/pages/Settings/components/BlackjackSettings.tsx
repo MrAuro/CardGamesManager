@@ -7,8 +7,6 @@ export default function BlackjackSettings() {
   const [blackjackSettings, setBlackjackSettings] = useRecoilState(BLACKJACK_SETTINGS);
   const [blackjackGame] = useRecoilState(BLACKJACK_GAME_STATE);
 
-  console.log(blackjackSettings.blackjackPayout, "aaa");
-
   return (
     <>
       <Title order={2}>Blackjack Settings</Title>

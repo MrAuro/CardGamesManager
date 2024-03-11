@@ -149,8 +149,6 @@ export default function RoundPlayerCard({
       if (betBehindBetMultiplier != 0)
         betBehindPayout = blackjackPlayer.sidebets.betBehind.bet * betBehindBetMultiplier;
 
-      console.log(betBehindBetMultiplier, "1");
-
       if (betBehindBetMultiplier == 2.5) {
         betBehindResult = "Blackjack";
       } else if (betBehindBetMultiplier == 2) {
