@@ -161,10 +161,8 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
               centered: true,
             }}
           >
-            <Container>
-              <Notifications limit={3} />
-              <App />
-            </Container>
+            <Notifications limit={3} />
+            <App />
           </ModalsProvider>
         </ErrorBoundary>
       </RecoilRoot>
