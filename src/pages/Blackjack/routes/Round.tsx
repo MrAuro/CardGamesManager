@@ -19,7 +19,7 @@ import {
 import { EMPTY_CARD } from "@/utils/CardHelper";
 import { getPlayer } from "@/utils/PlayerHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
-import { Stack, useMantineTheme } from "@mantine/core";
+import { Stack } from "@mantine/core";
 import { useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { atom, useRecoilState } from "recoil";
@@ -44,7 +44,6 @@ export const CARD_SELECTOR_STATE = atom<{
 });
 
 export default function Round() {
-  const theme = useMantineTheme();
   const [blackjackSettings] = useRecoilState(BLACKJACK_SETTINGS);
   const [blackjackPlayers, setBlackjackPlayers] = useRecoilImmerState(BLACKJACK_PLAYERS_STATE);
   const [blackjackGame, setBlackjackGame] = useRecoilState(BLACKJACK_GAME_STATE);
@@ -60,9 +59,6 @@ export default function Round() {
 
         switch (keybinding.action) {
           case "Next Turn":
-          case "Stand":
-          case "Payout & End":
-            console.log(blackjackGame);
             if (blackjackGame.currentTurn == "DEALER" && !blackjackGame.dealerFirstTime) {
               payoutAndEnd();
             } else {
@@ -315,22 +311,37 @@ export default function Round() {
   });
 
   const nextTurn = (dealerFirstTurn: boolean = false) => {
+    console.log(`NEXT TURN`);
+
     if (blackjackGame.currentTurn == "DEALER") {
+      console.log(
+        `Dealers first turn. Setting to ${blackjackPlayers[0].id} (${blackjackPlayers[0].displayName})`
+      );
+
       setBlackjackGame({
         ...blackjackGame,
         currentTurn: blackjackPlayers[0].id,
         dealerFirstTime: dealerFirstTurn,
       });
     } else {
+      console.log(`Current turn is ${blackjackGame.currentTurn}`);
       let turnIndex = blackjackPlayers.findIndex((p) => p.id === blackjackGame.currentTurn);
+      console.log(`Index of current turn is ${turnIndex}`);
 
       let nextTurnIndex = turnIndex + 1;
+      console.log(`Next turn index is ${nextTurnIndex}`);
       if (nextTurnIndex >= blackjackPlayers.length) {
+        console.log(
+          `Next turn index is greater than or equal to the length of the players array. Setting to DEALER`
+        );
         setBlackjackGame({
           ...blackjackGame,
           currentTurn: "DEALER",
         });
       } else {
+        console.log(
+          `Setting to ${blackjackPlayers[nextTurnIndex].id} (${blackjackPlayers[nextTurnIndex].displayName})`
+        );
         setBlackjackGame({
           ...blackjackGame,
           currentTurn: blackjackPlayers[nextTurnIndex].id,

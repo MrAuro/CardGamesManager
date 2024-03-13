@@ -18,11 +18,9 @@ export const Scopes: Scope[] = [
 export type BlackjackPreRoundActions = "Start Game";
 export type BlackjackRoundActions =
   | CardInputs
-  | "Payout & End"
   | "Next Turn"
   | "Refund & Cancel"
   | "Hit"
-  | "Stand"
   | "Double"
   | "Split"
   | "Remove Last Card";
@@ -63,11 +61,9 @@ export function getActions(scope: Scope): string[] {
       return ["Start Game"];
     case "Blackjack Round":
       return [
-        "Payout & End",
         "Next Turn",
         "Refund & Cancel",
         "Hit",
-        "Stand",
         "Double",
         "Split",
         "Remove Last Card",

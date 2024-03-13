@@ -72,36 +72,10 @@ export default function GeneralSettings() {
       <Title order={2}>General Settings</Title>
       <Button
         onClick={() => {
-          const players: Player[] = [
-            "Michael",
-            "Jim",
-            "Pam",
-            "Dwight",
-            "Angela",
-            "Kevin",
-            "Oscar",
-            "Toby",
-            "Creed",
-            "Stanley",
-          ].map((name) => {
-            return {
-              name,
-              balance: Math.floor(Math.random() * 41) + 10,
-              id: crypto.randomUUID(),
-            };
-          });
-
-          setPlayers(players);
+          setSettings({ ...settings, debug: !settings.debug });
         }}
       >
-        populate players
-      </Button>
-      <Button
-        onClick={() => {
-          setKeybindings([...DefaultKeybinds]);
-        }}
-      >
-        set default keybindings
+        {settings.debug ? "Close" : "Open"} DevTools
       </Button>
       <Input.Wrapper mb="xl" label="UI Scale">
         <Slider
