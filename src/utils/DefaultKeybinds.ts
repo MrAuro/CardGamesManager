@@ -16,7 +16,7 @@ export const DefaultKeybinds: Keybinding[] = [
   {
     id: "3",
     scope: "Blackjack Round",
-    action: "Stand",
+    action: "Next Turn",
     key: "enter",
   },
   {
@@ -24,12 +24,6 @@ export const DefaultKeybinds: Keybinding[] = [
     scope: "Blackjack Round",
     action: "Hit",
     key: "space",
-  },
-  {
-    id: "4",
-    scope: "Blackjack Round",
-    action: "Payout & End",
-    key: "enter",
   },
   {
     id: "22",

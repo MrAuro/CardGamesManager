@@ -1,4 +1,4 @@
-import { Card, Group, Text, rem } from "@mantine/core";
+import { Card, Group, Text } from "@mantine/core";
 
 export default function GenericPlayerCard({
   header,
