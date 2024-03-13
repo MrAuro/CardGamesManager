@@ -6,7 +6,7 @@ import {
   PLAYERS_STATE,
   SETTINGS_STATE,
 } from "@/Root";
-import { Container, Divider, Text } from "@mantine/core";
+import { Container, Divider, Grid, Text } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import { TAURI_STORE } from "./Root";
@@ -17,6 +17,8 @@ import Poker from "./pages/Poker";
 import Settings from "./pages/Settings";
 
 import "@/styles/App.css";
+
+import DevTools from "./components/DevTools";
 
 export default function App() {
   const [players] = useRecoilState(PLAYERS_STATE);
@@ -97,14 +99,22 @@ export default function App() {
 
   return (
     <>
-      <Header
-        active={settings.activeTab}
-        setActive={(tab) => {
-          setSettings({ ...settings, activeTab: tab });
-        }}
-      />
-      <Divider my="xs" />
-      <Container>{content}</Container>
+      <Container>
+        <Header
+          active={settings.activeTab}
+          setActive={(tab) => {
+            setSettings({ ...settings, activeTab: tab });
+          }}
+        />
+        <Divider my="xs" />
+        {settings.debug ? (
+          <>
+            <DevTools />
+            <Divider my="xs" />
+          </>
+        ) : null}
+        <Container>{content}</Container>
+      </Container>
     </>
   );
 }
