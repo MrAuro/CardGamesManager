@@ -1,10 +1,11 @@
 import { BLACKJACK_PLAYERS_STATE, PLAYERS_STATE } from "@/Root";
+import GenericPlayerCard from "@/components/GenericPlayerCard";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
-import { Button } from "@mantine/core";
+import { ActionIcon, Button, Flex } from "@mantine/core";
+import { IconPencil } from "@tabler/icons-react";
 import { useState } from "react";
-import PlayerItem from "./components/PlayerItem";
-import PlayerModal from "./components/PlayerModal";
 import { useRecoilState } from "recoil";
+import PlayerModal from "./components/PlayerModal";
 
 export default function Players() {
   const [players, setPlayers] = useRecoilImmerState(PLAYERS_STATE);
@@ -46,19 +47,33 @@ export default function Players() {
           else alert("Cannot delete player that is in a game");
         }}
       />
-      {players.map((player) => (
-        <PlayerItem
-          player={player}
-          key={player.id}
-          onClick={() => {
-            setPlayerIdToEdit(player.id);
-            setPlayerModalTitle("Edit Player");
-            setPlayerModalOpened(true);
-          }}
-        />
-      ))}
+      <Flex direction="column" gap="xs">
+        {players.map((player) => (
+          <GenericPlayerCard
+            header={player.name}
+            subtext={`$${player.balance.toFixed(2)}`}
+            key={player.id}
+            rightSection={
+              <ActionIcon
+                variant="transparent"
+                color="dark.0"
+                size="xl"
+                radius="md"
+                onClick={() => {
+                  setPlayerIdToEdit(player.id);
+                  setPlayerModalTitle("Edit Player");
+                  setPlayerModalOpened(true);
+                }}
+              >
+                <IconPencil />
+              </ActionIcon>
+            }
+          />
+        ))}
+      </Flex>
       <Button
         fullWidth
+        my="sm"
         onClick={() => {
           setPlayerIdToEdit(null);
           setPlayerModalTitle("Add Player");
