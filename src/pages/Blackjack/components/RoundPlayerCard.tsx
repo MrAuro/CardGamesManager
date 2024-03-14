@@ -58,8 +58,21 @@ export default function RoundPlayerCard({
 
   const calculatedCardResult = getCardTotal(blackjackPlayer.cards);
 
+  let ppCards = [...blackjackPlayer.cards];
+  if (blackjackPlayer.split && !blackjackPlayer.splitFrom) {
+    console.log(`PP(ui): Player split, using split cards for perfect pairs`);
+    const splitFromPlayer = blackjackPlayers.find((p) => p.splitFrom === blackjackPlayer.id);
+
+    if (!splitFromPlayer) {
+      console.error(`PP(ui): Split from player not found`, blackjackPlayer);
+      return;
+    }
+
+    ppCards = [blackjackPlayer.cards[0], splitFromPlayer.cards[0]];
+  }
+
   const calculatedPerfectPairs = blackjackPlayer.sidebets.perfectPairs
-    ? findPerfectPairs(blackjackPlayer.cards)
+    ? findPerfectPairs(ppCards)
     : null;
 
   let perfectPairEarnings = -blackjackPlayer.sidebets.perfectPairs;
@@ -83,12 +96,29 @@ export default function RoundPlayerCard({
       break;
   }
 
+  let twentyOnePlusThreeCards = [
+    blackjackPlayer.cards[0],
+    blackjackPlayer.cards[1],
+    blackjackGame.dealerCards[0],
+  ];
+  if (blackjackPlayer.split && !blackjackPlayer.splitFrom) {
+    console.log(`21+3(ui): Player split, using split cards for 21+3`);
+    const splitFromPlayer = blackjackPlayers.find((p) => p.splitFrom === blackjackPlayer.id);
+
+    if (!splitFromPlayer) {
+      console.error(`21+3(ui): Split from player not found`, blackjackPlayer);
+      return;
+    }
+
+    twentyOnePlusThreeCards = [
+      blackjackPlayer.cards[0],
+      splitFromPlayer.cards[0],
+      blackjackGame.dealerCards[0],
+    ];
+  }
+
   const calculatedTwentyOnePlusThree = blackjackPlayer.sidebets.twentyOnePlusThree
-    ? findTwentyOnePlusThree([
-        blackjackPlayer.cards[0],
-        blackjackPlayer.cards[1],
-        blackjackGame.dealerCards[0],
-      ])
+    ? findTwentyOnePlusThree(twentyOnePlusThreeCards)
     : null;
 
   let twentyOnePlusThreeEarnings = -blackjackPlayer.sidebets.twentyOnePlusThree;

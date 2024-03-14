@@ -4,6 +4,7 @@ import {
   KEYBINDINGS_STATE,
   PLAYERS_STATE,
   SETTINGS_STATE,
+  TAURI_STORE,
 } from "@/Root";
 import { Player } from "@/types/Player";
 import { DefaultKeybinds } from "@/utils/DefaultKeybinds";
@@ -61,73 +62,80 @@ export default function DevTools() {
       <Text fw="bold" size="lg">
         DevTools
       </Text>
-      <Flex gap="xs">
-        <Button
-          onClick={() => {
-            setSettings({
-              ...settings,
-              debug: false,
-            });
-          }}
-        >
-          Close DevTools
-        </Button>
-        <Button
-          onClick={() => {
-            const players: Player[] = [
-              "Michael",
-              "Jim",
-              "Pam",
-              "Dwight",
-              "Angela",
-              "Kevin",
-              "Oscar",
-              "Toby",
-              "Creed",
-              "Stanley",
-            ].map((name) => {
-              return {
-                name,
-                balance: Math.floor(Math.random() * 41) + 10,
-                id: crypto.randomUUID(),
-              };
-            });
+      <Button
+        onClick={() => {
+          setSettings({
+            ...settings,
+            debug: false,
+          });
+        }}
+      >
+        Close DevTools
+      </Button>
+      <Button
+        onClick={() => {
+          const players: Player[] = [
+            "Michael",
+            "Jim",
+            "Pam",
+            "Dwight",
+            "Angela",
+            "Kevin",
+            "Oscar",
+            "Toby",
+            "Creed",
+            "Stanley",
+          ].map((name) => {
+            return {
+              name,
+              balance: Math.floor(Math.random() * 41) + 10,
+              id: crypto.randomUUID(),
+            };
+          });
 
-            setPlayers(players);
-          }}
-        >
-          Set Default Players
-        </Button>
-        <Button
-          onClick={() => {
-            setKeybindings([...DefaultKeybinds]);
-          }}
-        >
-          Set Default Keybindings
-        </Button>
+          setPlayers(players);
+        }}
+      >
+        Set Default Players
+      </Button>
+      <Button
+        onClick={() => {
+          setKeybindings([...DefaultKeybinds]);
+        }}
+      >
+        Set Default Keybindings
+      </Button>
 
-        <Button
-          onClick={() => {
-            setPlayersOpen(!playersOpen);
-          }}
-        >
-          {playersOpen ? "Close" : "Open"} Players
-        </Button>
-        <Button
-          onClick={() => {
-            setBlackjackPlayersOpen(!blackjackPlayersOpen);
-          }}
-        >
-          {blackjackPlayersOpen ? "Close" : "Open"} Blackjack Players
-        </Button>
-        <Button
-          onClick={() => {
-            setBlackjackGameOpen(!blackjackGameOpen);
-          }}
-        >
-          {blackjackGameOpen ? "Close" : "Open"} Blackjack Game
-        </Button>
-      </Flex>
+      <Button
+        onClick={() => {
+          setPlayersOpen(!playersOpen);
+        }}
+      >
+        {playersOpen ? "Close" : "Open"} Players
+      </Button>
+      <Button
+        onClick={() => {
+          setBlackjackPlayersOpen(!blackjackPlayersOpen);
+        }}
+      >
+        {blackjackPlayersOpen ? "Close" : "Open"} Blackjack Players
+      </Button>
+      <Button
+        onClick={() => {
+          setBlackjackGameOpen(!blackjackGameOpen);
+        }}
+      >
+        {blackjackGameOpen ? "Close" : "Open"} Blackjack Game
+      </Button>
+      <Button
+        color="red"
+        onClick={() => {
+          TAURI_STORE.clear();
+          window.location.reload();
+        }}
+      >
+        Reset data
+      </Button>
 
       <Collapse in={playersOpen}>
         <JsonInput
