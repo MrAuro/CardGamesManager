@@ -9,7 +9,7 @@ import PlayingCard from "@/components/PlayingCard";
 import { BlackjackPlayer } from "@/types/Blackjack";
 import { Player } from "@/types/Player";
 import {
-  calculateBasePayoutMultiplier,
+  getHandResult,
   findPerfectPairs,
   findTwentyOnePlusThree,
   getCardTotal,
@@ -175,22 +175,24 @@ export default function RoundPlayerCard({
     if (betBehindPlayer.cards.filter((c) => c == EMPTY_CARD).length == 2) {
       betBehindResult = "Pending";
     } else {
-      let betBehindBetMultiplier = calculateBasePayoutMultiplier(
+      let betBehindHandResult = getHandResult(
         getCardTotal(betBehindPlayer.cards).total,
         getCardTotal(blackjackGame.dealerCards).total
       );
 
-      if (betBehindBetMultiplier != 0)
-        betBehindPayout = blackjackPlayer.sidebets.betBehind.bet * betBehindBetMultiplier;
-
-      if (betBehindBetMultiplier == 2.5) {
+      if (betBehindHandResult == "BLACKJACK") {
         betBehindResult = "Blackjack";
-      } else if (betBehindBetMultiplier == 2) {
+        betBehindPayout =
+          blackjackPlayer.sidebets.betBehind.bet * blackjackSettings.blackjackPayout;
+      } else if (betBehindHandResult == "WIN") {
         betBehindResult = "Win";
-      } else if (betBehindBetMultiplier == 1) {
+        betBehindPayout = blackjackPlayer.sidebets.betBehind.bet;
+      } else if (betBehindHandResult == "PUSH") {
         betBehindResult = "Push";
-      } else if (betBehindBetMultiplier == 0) {
+        betBehindPayout = 0;
+      } else {
         betBehindResult = "Lose";
+        betBehindPayout = -blackjackPlayer.sidebets.betBehind.bet;
       }
     }
   }
