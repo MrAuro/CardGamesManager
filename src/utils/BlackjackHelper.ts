@@ -277,7 +277,7 @@ export const findTwentyOnePlusThree = (cards: Card[]): TwentyOnePlusThree => {
   return res;
 };
 
-export function calculateBasePayoutMultiplier(handTotal: number, dealerTotal: number): number {
+export function getHandResult(handTotal: number, dealerTotal: number) {
   let result: "BLACKJACK" | "WIN" | "LOSE" | "PUSH" = "LOSE";
 
   if (handTotal > 21) {
@@ -294,21 +294,5 @@ export function calculateBasePayoutMultiplier(handTotal: number, dealerTotal: nu
     result = "WIN";
   }
 
-  let mult = 0;
-  switch (result) {
-    case "BLACKJACK":
-      mult = 2.5;
-      break;
-    case "WIN":
-      mult = 2;
-      break;
-    case "LOSE":
-      mult = 0;
-      break;
-    case "PUSH":
-      mult = 1;
-      break;
-  }
-
-  return mult;
+  return result;
 }

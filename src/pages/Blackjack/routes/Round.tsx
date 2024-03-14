@@ -11,7 +11,7 @@ import { Card, CardRank, CardSuit } from "@/types/Card";
 import { availableCards } from "@/types/Keybindings";
 import { Player } from "@/types/Player";
 import {
-  calculateBasePayoutMultiplier,
+  getHandResult,
   findPerfectPairs,
   findTwentyOnePlusThree,
   getCardTotal,
@@ -499,22 +499,22 @@ export default function Round() {
     for (let blackjackPlayer of newBlackjackPlayers) {
       let earningsStrings = [];
 
-      let payoutMultiplier = calculateBasePayoutMultiplier(
-        getCardTotal(blackjackPlayer.cards).total,
-        dealerTotal.total
-      );
+      let handResult = getHandResult(getCardTotal(blackjackPlayer.cards).total, dealerTotal.total);
       let bet = blackjackPlayer.doubledDown ? blackjackPlayer.bet * 2 : blackjackPlayer.bet;
+      console.log(
+        `Bet: ${bet} because doubled down: ${blackjackPlayer.doubledDown} | Payout: ${handResult}`
+      );
 
       let payout = 0;
-      payout += bet * payoutMultiplier;
-
-      if (payoutMultiplier == 2.5) {
-        earningsStrings.push("Blackjack");
-      } else if (payoutMultiplier == 2) {
-        earningsStrings.push("Win");
-      } else if (payoutMultiplier == 1) {
-        earningsStrings.push("Push");
+      if (handResult == "BLACKJACK") {
+        payout += bet * blackjackSettings.blackjackPayout + bet;
+      } else if (handResult == "WIN") {
+        payout += bet * 2;
+      } else if (handResult == "PUSH") {
+        payout += bet;
       }
+
+      console.log(`Payout for ${blackjackPlayer.displayName}: ${payout}`);
 
       if (
         blackjackPlayer.sidebets.perfectPairs &&
@@ -644,20 +644,27 @@ export default function Round() {
         );
 
         if (betBehindTargetPlayer) {
-          let betBehindBetMultiplier = calculateBasePayoutMultiplier(
+          let betBehindPayout = 0;
+          let betBehindHandResult = getHandResult(
             getCardTotal(betBehindTargetPlayer.cards).total,
             dealerTotal.total
           );
 
-          if (betBehindBetMultiplier == 2.5) {
-            earningsStrings.push("Bet Behind (Blackjack)");
-          } else if (betBehindBetMultiplier == 2) {
-            earningsStrings.push("Bet Behind (Win)");
-          } else if (betBehindBetMultiplier == 1) {
-            earningsStrings.push("Bet Behind (Push)");
+          if (betBehindHandResult == "BLACKJACK") {
+            betBehindPayout +=
+              blackjackPlayer.sidebets.betBehind.bet * blackjackSettings.blackjackPayout +
+              blackjackPlayer.sidebets.betBehind.bet;
+          } else if (betBehindHandResult == "WIN") {
+            betBehindPayout += blackjackPlayer.sidebets.betBehind.bet * 2;
+          } else if (betBehindHandResult == "PUSH") {
+            betBehindPayout += blackjackPlayer.sidebets.betBehind.bet;
           }
 
-          payout += blackjackPlayer.sidebets.betBehind.bet * betBehindBetMultiplier;
+          earningsStrings.push(
+            `Bet Behind (${betBehindTargetPlayer.displayName}): ${betBehindPayout}`
+          );
+
+          payout += betBehindPayout;
         }
       }
 
