@@ -1,5 +1,3 @@
-import { Card, CardRank, CardSuit } from "@/types/Card";
-import { EMPTY_CARD, getRank, getSuit, isAnyEmpty, suitToIcon } from "@/utils/CardHelper";
 import {
   ActionIcon,
   Button,
@@ -11,63 +9,55 @@ import {
 } from "@mantine/core";
 import { IconBan } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
+import { Card, CardRank, CardSuit, EMPTY_CARD, suitToIcon } from "../utils/CardHelper";
 
-export default function CardSelector({
-  opened,
-  intitialCard,
-  activeCardOverride,
-  onSubmit,
-}: {
+// import { USED_CARDS } from "../App";
+// import {
+//   Card,
+//   CardRank,
+//   CardSuit,
+//   EMPTY_CARD,
+//   suitToIcon,
+// } from "../utils/Game";
+
+export default function CardPicker(props: {
   opened: boolean;
-  intitialCard?: Card;
-  activeCardOverride?: Card;
-  onSubmit: (card: Card) => void;
+  setOpened: (opened: boolean) => void;
+  handleClose: (card: Card) => void;
+  hideSuit?: boolean;
 }) {
   const [selectedCardRank, setSelectedCardRank] = useState<CardRank>("-");
   const [selectedCardSuit, setSelectedCardSuit] = useState<CardSuit>("-");
 
   useEffect(() => {
-    if (activeCardOverride) {
-      if (getRank(activeCardOverride) != "-") {
-        setSelectedCardRank(getRank(activeCardOverride));
-      }
-
-      if (getSuit(activeCardOverride) != "-") {
-        setSelectedCardSuit(getSuit(activeCardOverride));
-      }
+    if (selectedCardRank != "-" && selectedCardSuit != "-") {
+      props.handleClose(`${selectedCardRank}${selectedCardSuit}`);
+      setSelectedCardRank("-");
+      setSelectedCardSuit("-");
     }
-  }, [activeCardOverride]);
 
-  useEffect(() => {
-    if (intitialCard) {
-      setSelectedCardRank(getRank(intitialCard));
-      setSelectedCardSuit(getSuit(intitialCard));
-    }
-  }, [opened]);
-
-  useEffect(() => {
-    if (!isAnyEmpty(`${selectedCardRank}${selectedCardSuit}`) && opened) {
-      if (intitialCard && intitialCard != EMPTY_CARD) {
-        if (
-          getRank(intitialCard) != selectedCardRank ||
-          getSuit(intitialCard) != selectedCardSuit
-        ) {
-          onSubmit(`${selectedCardRank}${selectedCardSuit}`);
-        }
-      } else {
-        onSubmit(`${selectedCardRank}${selectedCardSuit}`);
-      }
+    if (selectedCardRank != "-" && props.hideSuit) {
+      // If hideSuit, then we are playing blackjack where suits dont matter
+      // We use a random suit to make the card unique
+      let randomSuit = (["h", "s", "d", "c"] as CardSuit[])[Math.floor(Math.random() * 4)];
+      props.handleClose(`${selectedCardRank}${randomSuit}`);
+      setSelectedCardRank("-");
+      setSelectedCardRank("-");
     }
   }, [selectedCardRank, selectedCardSuit]);
 
+  const handleClose = (card: Card) => {
+    props.handleClose(card);
+  };
+
   return (
     <Modal
-      opened={opened}
+      opened={props.opened}
       onClose={() => {
         if (selectedCardRank != "-" && selectedCardSuit != "-") {
-          onSubmit(`${selectedCardRank}${selectedCardSuit}`);
+          handleClose(`${selectedCardRank}${selectedCardSuit}`);
         } else {
-          onSubmit(EMPTY_CARD);
+          handleClose(EMPTY_CARD);
         }
       }}
       title="Select a card"
@@ -91,24 +81,28 @@ export default function CardSelector({
             setSelectedCardRank={setSelectedCardRank}
             setSelectedCardSuit={setSelectedCardSuit}
             label={<IconBan size="1.25rem" stroke="0.2rem" />}
-            onClick={() => onSubmit(EMPTY_CARD)}
+            onClick={() => handleClose(EMPTY_CARD)}
           />
         </SimpleGrid>
       </Group>
-      <Divider my="md" />
-      <Group justify="center" grow>
-        <SimpleGrid cols={{ sm: 4, xs: 2 }} spacing="xs" verticalSpacing="xs">
-          {(["h", "s", "d", "c"] as CardSuit[]).map((suit) => (
-            <SuitButton
-              key={suit}
-              suit={suit}
-              selectedCardRank={selectedCardRank}
-              selectedCardSuit={selectedCardSuit}
-              setSelectedCardSuit={setSelectedCardSuit}
-            />
-          ))}
-        </SimpleGrid>
-      </Group>
+      {props.hideSuit ? null : (
+        <>
+          <Divider my="md" />
+          <Group justify="center" grow>
+            <SimpleGrid cols={{ sm: 4, xs: 2 }} spacing="xs" verticalSpacing="xs">
+              {(["h", "s", "d", "c"] as CardSuit[]).map((suit) => (
+                <SuitButton
+                  key={suit}
+                  suit={suit}
+                  selectedCardRank={selectedCardRank}
+                  selectedCardSuit={selectedCardSuit}
+                  setSelectedCardSuit={setSelectedCardSuit}
+                />
+              ))}
+            </SimpleGrid>
+          </Group>
+        </>
+      )}
     </Modal>
   );
 }

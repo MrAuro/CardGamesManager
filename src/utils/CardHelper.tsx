@@ -5,7 +5,26 @@ import {
   IconSpadeFilled,
 } from "@tabler/icons-react";
 import { ReactNode } from "react";
-import { Card, CardRank, CardSuit } from "../types/Card";
+
+export type CardRank =
+  | "2"
+  | "3"
+  | "4"
+  | "5"
+  | "6"
+  | "7"
+  | "8"
+  | "9"
+  | "T"
+  | "J"
+  | "Q"
+  | "K"
+  | "A"
+  | "-";
+export type CardSuit = "h" | "d" | "c" | "s" | "-";
+
+export type Card = `${CardRank}${CardSuit}`;
+export const EMPTY_CARD: Card = "--";
 
 export const isAnyEmpty = (card: Card): boolean => {
   return getSuit(card) === "-" || getRank(card) === "-";
@@ -30,8 +49,6 @@ export const suitToIcon = (suit: CardSuit): ReactNode => {
 
 export const getSuit = (card: Card): CardSuit => card[1] as CardSuit;
 export const getRank = (card: Card): CardRank => card[0] as CardRank;
-
-export const EMPTY_CARD: Card = "--";
 
 export const getRankInt = (card: Card): number => {
   const rank = getRank(card);
