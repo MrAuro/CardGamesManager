@@ -11,7 +11,6 @@ import {
   Input,
   Select,
   Slider,
-  Switch,
   Table,
   Text,
   Title,
@@ -20,7 +19,6 @@ import { useDisclosure } from "@mantine/hooks";
 import {
   IconDeviceFloppy,
   IconEye,
-  IconEyeCancel,
   IconEyeOff,
   IconKeyframe,
   IconKeyframeFilled,
