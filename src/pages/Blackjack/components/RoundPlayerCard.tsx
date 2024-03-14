@@ -51,6 +51,8 @@ export default function RoundPlayerCard({
   const theme = useMantineTheme();
 
   const calculatedCardResult = getCardTotal(blackjackPlayer.cards);
+  const isBust = calculatedCardResult.total > 21;
+  const isBlackjack = calculatedCardResult.total == 21;
 
   let ppCards = [...blackjackPlayer.cards];
   if (blackjackPlayer.split && !blackjackPlayer.splitFrom) {
@@ -191,10 +193,23 @@ export default function RoundPlayerCard({
     }
   }
 
+  let outlineColor = theme.colors.dark[5];
+  let nonDefaultOutline = false;
+  if (isBust && isActive) {
+    outlineColor = theme.colors.red[6];
+    nonDefaultOutline = true;
+  } else if (isBlackjack && isActive) {
+    outlineColor = theme.colors.green[4];
+    nonDefaultOutline = true;
+  }
+
   return (
     <GenericPlayerCard
       header={blackjackPlayer.displayName}
       backgroundColor={isActive ? theme.colors.dark[6] : theme.colors.dark[7]}
+      styles={{
+        outline: nonDefaultOutline ? `2px solid ${outlineColor}` : undefined,
+      }}
       subsection={
         <>
           <Text size="md" fw={600}>
@@ -389,8 +404,8 @@ export default function RoundPlayerCard({
                 {calculatedCardResult.total}
               </Text>
               <Text size={rem(14)} fw={600} ta="center">
-                {calculatedCardResult.total > 21 ? "BUST" : ""}{" "}
-                {calculatedCardResult.total == 21 ? "BLACKJACK" : ""}
+                {isBust && "BUST"}
+                {isBlackjack && "BLACKJACK"}
               </Text>
             </div>
           </Paper>
