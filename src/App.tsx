@@ -43,6 +43,7 @@ export default function App() {
 
   useEffect(() => {
     if (keybindingsLastSaved < Date.now() - 500) {
+      console.log(`saving keybindings`);
       setKeybindingsLastSaved(Date.now());
       TAURI_STORE.set("keybindings", keybindings);
     }

@@ -38,6 +38,7 @@ export const KEYBINDINGS_STATE = atom<Keybinding[]>({
   default: new Promise(async (resolve) => {
     let keybindings = await TAURI_STORE.get("keybindings");
     if (!keybindings) {
+      console.log(`keybindings not found, setting to default`);
       keybindings = [...DefaultKeybinds];
       await TAURI_STORE.set("keybindings", keybindings);
     }
