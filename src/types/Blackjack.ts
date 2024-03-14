@@ -9,6 +9,35 @@ export type BlackjackGame = {
   dealerFirstTime: boolean;
 };
 
+export type EarningsResultType = {
+  amount: number;
+  blackjackPlayerId: string;
+} & (
+  | {
+      source: "Blackjack";
+      result: "BLACKJACK" | "WIN" | "PUSH" | "LOSE";
+      split?: boolean;
+    }
+  | {
+      source: "Perfect Pairs";
+      result: "Mixed" | "Colored" | "Perfect" | "None";
+    }
+  | {
+      source: "21+3";
+      result:
+        | "None"
+        | "Flush"
+        | "Straight"
+        | "Three of a Kind"
+        | "Straight Flush"
+        | "Suited Three of a Kind";
+    }
+  | {
+      source: "Bet Behind";
+      result: "BLACKJACK" | "WIN" | "PUSH" | "LOSE";
+    }
+);
+
 export type BlackjackSettings = {
   decks: number;
   dealerHitsSoft17: boolean;
