@@ -9,12 +9,16 @@ import PlayerSelector from "@/components/PlayerSelector";
 import { EMPTY_CARD } from "@/utils/CardHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import { Draggable, DraggableStateSnapshot } from "@hello-pangea/dnd";
-import { Alert, Button, Divider, Text, Title, useMantineTheme } from "@mantine/core";
+import { Alert, Button, Divider, Group, Table, Text, Title, useMantineTheme } from "@mantine/core";
 import { IconInfoTriangle } from "@tabler/icons-react";
 import { useState } from "react";
 import { useRecoilState } from "recoil";
 import PreRoundPlayerCard from "../components/PreRoundPlayerCard";
 import { useHotkeys } from "react-hotkeys-hook";
+import { modals } from "@mantine/modals";
+import { getPlayer } from "@/utils/PlayerHelper";
+import { EarningsResultType } from "@/types/Blackjack";
+import { formatMoney } from "@/utils/MoneyHelper";
 
 function getStyle(style: any, snapshot: DraggableStateSnapshot) {
   if (!snapshot.isDropAnimating) {
@@ -34,7 +38,7 @@ export default function PreRound() {
   const [blackjackSettings] = useRecoilState(BLACKJACK_SETTINGS);
   const [blackjackPlayers, setBlackjackPlayers] = useRecoilImmerState(BLACKJACK_PLAYERS_STATE);
   const [blackjackGame, setBlackjackGame] = useRecoilState(BLACKJACK_GAME_STATE);
-  const [, setPlayers] = useRecoilImmerState(PLAYERS_STATE);
+  const [players, setPlayers] = useRecoilImmerState(PLAYERS_STATE);
   const [keybindings] = useRecoilImmerState(KEYBINDINGS_STATE);
 
   const [sidebetsOpen, setSidebetsOpen] = useState<string[]>([]);

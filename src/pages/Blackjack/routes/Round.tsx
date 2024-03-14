@@ -6,7 +6,7 @@ import {
   PLAYERS_STATE,
 } from "@/Root";
 import CardSelector from "@/components/CardSelector";
-import { BlackjackPlayer } from "@/types/Blackjack";
+import { BlackjackPlayer, EarningsResultType } from "@/types/Blackjack";
 import { Card, CardRank, CardSuit } from "@/types/Card";
 import { availableCards } from "@/types/Keybindings";
 import { Player } from "@/types/Player";
@@ -19,12 +19,14 @@ import {
 import { EMPTY_CARD, getRankInt } from "@/utils/CardHelper";
 import { getPlayer } from "@/utils/PlayerHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
-import { Stack } from "@mantine/core";
+import { Button, ScrollArea, Stack, Table, Text, Title } from "@mantine/core";
 import { useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { atom, useRecoilState } from "recoil";
 import DealerCard from "../components/DealerCard";
 import RoundPlayerCard from "../components/RoundPlayerCard";
+import { modals } from "@mantine/modals";
+import { formatMoney } from "@/utils/MoneyHelper";
 
 export const CARD_SELECTOR_STATE = atom<{
   opened: boolean;
@@ -496,9 +498,8 @@ export default function Round() {
     let newPlayers: Player[] = [...players];
     let newBlackjackPlayers: BlackjackPlayer[] = [...blackjackPlayers];
 
+    let earningsResults: EarningsResultType[] = [];
     for (let blackjackPlayer of newBlackjackPlayers) {
-      let earningsStrings = [];
-
       let handResult = getHandResult(getCardTotal(blackjackPlayer.cards).total, dealerTotal.total);
       let bet = blackjackPlayer.doubledDown ? blackjackPlayer.bet * 2 : blackjackPlayer.bet;
       console.log(
@@ -512,6 +513,22 @@ export default function Round() {
         payout += bet * 2;
       } else if (handResult == "PUSH") {
         payout += bet;
+      }
+
+      if (handResult != "LOSE") {
+        earningsResults.push({
+          source: "Blackjack",
+          result: handResult,
+          amount: payout,
+          blackjackPlayerId: blackjackPlayer.id,
+        });
+      } else {
+        earningsResults.push({
+          source: "Blackjack",
+          result: "LOSE",
+          amount: -bet,
+          blackjackPlayerId: blackjackPlayer.id,
+        });
       }
 
       console.log(`Payout for ${blackjackPlayer.displayName}: ${payout}`);
@@ -538,24 +555,57 @@ export default function Round() {
         let sidebetPayouts = 0;
         switch (perfectPairsResult) {
           case "None":
+            {
+              let amt = blackjackPlayer.sidebets.perfectPairs;
+              earningsResults.push({
+                source: "Perfect Pairs",
+                result: "None",
+                amount: -amt,
+                blackjackPlayerId: blackjackPlayer.id,
+              });
+            }
             break;
 
           case "Mixed":
-            earningsStrings.push("Perfect Pairs (Mixed)");
-            sidebetPayouts +=
-              blackjackPlayer.sidebets.perfectPairs * blackjackSettings.perfectPairsMixedPayout;
+            {
+              let amt =
+                blackjackPlayer.sidebets.perfectPairs * blackjackSettings.perfectPairsMixedPayout;
+              earningsResults.push({
+                source: "Perfect Pairs",
+                result: "Mixed",
+                amount: amt,
+                blackjackPlayerId: blackjackPlayer.id,
+              });
+              sidebetPayouts += amt;
+            }
             break;
 
           case "Colored":
-            earningsStrings.push("Perfect Pairs (Colored)");
-            sidebetPayouts +=
-              blackjackPlayer.sidebets.perfectPairs * blackjackSettings.perfectPairsColoredPayout;
+            {
+              let amt =
+                blackjackPlayer.sidebets.perfectPairs * blackjackSettings.perfectPairsColoredPayout;
+              earningsResults.push({
+                source: "Perfect Pairs",
+                result: "Colored",
+                amount: amt,
+                blackjackPlayerId: blackjackPlayer.id,
+              });
+              sidebetPayouts += amt;
+            }
             break;
 
           case "Perfect":
-            earningsStrings.push("Perfect Pairs (Perfect)");
-            sidebetPayouts +=
-              blackjackPlayer.sidebets.perfectPairs * blackjackSettings.perfectPairsSuitedPayout;
+            {
+              let amt =
+                blackjackPlayer.sidebets.perfectPairs * blackjackSettings.perfectPairsSuitedPayout;
+              earningsResults.push({
+                source: "Perfect Pairs",
+                result: "Perfect",
+                amount: amt,
+                blackjackPlayerId: blackjackPlayer.id,
+              });
+              sidebetPayouts += amt;
+            }
             break;
         }
 
@@ -592,41 +642,90 @@ export default function Round() {
 
         switch (twentyOnePlusThreeResult) {
           case "None":
+            {
+              let amt = blackjackPlayer.sidebets.twentyOnePlusThree;
+              earningsResults.push({
+                source: "21+3",
+                result: "None",
+                amount: -amt,
+                blackjackPlayerId: blackjackPlayer.id,
+              });
+            }
             break;
 
           case "Flush":
-            earningsStrings.push("21+3 (Flush)");
-            payout +=
-              blackjackPlayer.sidebets.twentyOnePlusThree *
-              blackjackSettings.twentyOnePlusThreeFlushPayout;
+            {
+              let amt =
+                blackjackPlayer.sidebets.twentyOnePlusThree *
+                blackjackSettings.twentyOnePlusThreeFlushPayout;
+              earningsResults.push({
+                source: "21+3",
+                result: "Flush",
+                amount: amt,
+                blackjackPlayerId: blackjackPlayer.id,
+              });
+              payout += amt;
+            }
             break;
 
           case "Straight":
-            earningsStrings.push("21+3 (Straight)");
-            payout +=
-              blackjackPlayer.sidebets.twentyOnePlusThree *
-              blackjackSettings.twentyOnePlusThreeStraightPayout;
+            {
+              let amt =
+                blackjackPlayer.sidebets.twentyOnePlusThree *
+                blackjackSettings.twentyOnePlusThreeStraightPayout;
+              earningsResults.push({
+                source: "21+3",
+                result: "Straight",
+                amount: amt,
+                blackjackPlayerId: blackjackPlayer.id,
+              });
+              payout += amt;
+            }
             break;
 
           case "Three of a Kind":
-            earningsStrings.push("21+3 (Three of a Kind)");
-            payout +=
-              blackjackPlayer.sidebets.twentyOnePlusThree *
-              blackjackSettings.twentyOnePlusThreeThreeOfAKindPayout;
+            {
+              let amt =
+                blackjackPlayer.sidebets.twentyOnePlusThree *
+                blackjackSettings.twentyOnePlusThreeThreeOfAKindPayout;
+              earningsResults.push({
+                source: "21+3",
+                result: "Three of a Kind",
+                amount: amt,
+                blackjackPlayerId: blackjackPlayer.id,
+              });
+              payout += amt;
+            }
             break;
 
           case "Straight Flush":
-            earningsStrings.push("21+3 (Straight Flush)");
-            payout +=
-              blackjackPlayer.sidebets.twentyOnePlusThree *
-              blackjackSettings.twentyOnePlusThreeStraightFlushPayout;
+            {
+              let amt =
+                blackjackPlayer.sidebets.twentyOnePlusThree *
+                blackjackSettings.twentyOnePlusThreeStraightFlushPayout;
+              earningsResults.push({
+                source: "21+3",
+                result: "Straight Flush",
+                amount: amt,
+                blackjackPlayerId: blackjackPlayer.id,
+              });
+              payout += amt;
+            }
             break;
 
           case "Suited Three of a Kind":
-            earningsStrings.push("21+3 (Suited Three of a Kind)");
-            payout +=
-              blackjackPlayer.sidebets.twentyOnePlusThree *
-              blackjackSettings.twentyOnePlusThreeThreeOfAKindSuitedPayout;
+            {
+              let amt =
+                blackjackPlayer.sidebets.twentyOnePlusThree *
+                blackjackSettings.twentyOnePlusThreeThreeOfAKindSuitedPayout;
+              earningsResults.push({
+                source: "21+3",
+                result: "Suited Three of a Kind",
+                amount: amt,
+                blackjackPlayerId: blackjackPlayer.id,
+              });
+              payout += amt;
+            }
             break;
         }
 
@@ -660,15 +759,118 @@ export default function Round() {
             betBehindPayout += blackjackPlayer.sidebets.betBehind.bet;
           }
 
-          earningsStrings.push(
-            `Bet Behind (${betBehindTargetPlayer.displayName}): ${betBehindPayout}`
-          );
+          if (betBehindHandResult != "LOSE") {
+            earningsResults.push({
+              source: "Bet Behind",
+              result: betBehindHandResult,
+              amount: betBehindPayout,
+              blackjackPlayerId: blackjackPlayer.id,
+            });
+          } else {
+            earningsResults.push({
+              source: "Bet Behind",
+              result: "LOSE",
+              amount: -blackjackPlayer.sidebets.betBehind.bet,
+              blackjackPlayerId: blackjackPlayer.id,
+            });
+          }
 
           payout += betBehindPayout;
         }
       }
 
-      console.log(`${blackjackPlayer.displayName}: ${earningsStrings.join(", ")}`);
+      let groupedResults: { [key: string]: EarningsResultType[] } = {};
+      earningsResults.forEach((result) => {
+        const id = result.blackjackPlayerId.includes("-SPLIT")
+          ? result.blackjackPlayerId.split("-SPLIT")[0]
+          : result.blackjackPlayerId;
+
+        if (!groupedResults[id]) {
+          groupedResults[id] = [];
+        }
+
+        if (result.source === "Blackjack") {
+          groupedResults[id].push({
+            ...result,
+            split: result.blackjackPlayerId.includes("-SPLIT"),
+          });
+        } else {
+          groupedResults[id].push(result);
+        }
+      });
+
+      modals.open({
+        title: "Round Results",
+        children: (
+          <>
+            <ScrollArea>
+              {Object.entries(groupedResults).map(([key, value]) => {
+                const player = getPlayer(key, players)!;
+                let total = value.reduce((acc, curr) => acc + curr.amount, 0);
+
+                return (
+                  <div key={key}>
+                    <Title order={3}>{player.name}</Title>
+                    <Table
+                      withColumnBorders
+                      withRowBorders
+                      verticalSpacing={4}
+                      style={{
+                        tableLayout: "fixed",
+                        width: "100%",
+                      }}
+                    >
+                      <Table.Tbody>
+                        {value.map((result, index) => {
+                          if (result.source == "Blackjack") {
+                            return (
+                              <Table.Tr key={index}>
+                                <Table.Td>
+                                  Base{" "}
+                                  {result.result
+                                    .toLowerCase()
+                                    .replace(/^\w/, (c) => c.toUpperCase())}
+                                  {result.split ? " (Split)" : ""}
+                                </Table.Td>
+                                <Table.Td>
+                                  <Text size="sm" c={result.amount > 0 ? "green" : "red"}>
+                                    {result.amount > 0 ? "+" : null}
+                                    {formatMoney(result.amount)}
+                                  </Text>
+                                </Table.Td>
+                              </Table.Tr>
+                            );
+                          } else {
+                            return (
+                              <Table.Tr key={index}>
+                                <Table.Td>{result.source}</Table.Td>
+                                <Table.Td>
+                                  <Text size="sm" c={result.amount > 0 ? "green" : "red"}>
+                                    {result.amount > 0 ? "+" : null}
+                                    {formatMoney(result.amount)}
+                                  </Text>
+                                </Table.Td>
+                              </Table.Tr>
+                            );
+                          }
+                        })}
+                        <Table.Tr>
+                          <Table.Td fw="bold">Total</Table.Td>
+                          <Table.Td>
+                            <Text size="md" fw="bold" c={total > 0 ? "green" : "red"}>
+                              {formatMoney(total)}
+                            </Text>
+                          </Table.Td>
+                        </Table.Tr>
+                      </Table.Tbody>
+                    </Table>
+                  </div>
+                );
+              })}
+            </ScrollArea>
+          </>
+        ),
+      });
 
       newPlayers = newPlayers.map((p) => {
         if (blackjackPlayer.splitFrom) {
@@ -738,6 +940,7 @@ export default function Round() {
           });
         }}
       />
+
       <Stack gap="sm">
         <DealerCard
           cards={blackjackGame.dealerCards}
