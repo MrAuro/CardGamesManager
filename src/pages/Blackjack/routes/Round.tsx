@@ -16,7 +16,7 @@ import {
   findTwentyOnePlusThree,
   getCardTotal,
 } from "@/utils/BlackjackHelper";
-import { EMPTY_CARD } from "@/utils/CardHelper";
+import { EMPTY_CARD, getRank, getRankInt } from "@/utils/CardHelper";
 import { getPlayer } from "@/utils/PlayerHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import { Stack } from "@mantine/core";
@@ -97,32 +97,17 @@ export default function Round() {
 
           case "Double":
             {
-              setBlackjackPlayers((draft) => {
-                let blackjackPlayer = draft.find((p) => p.id == blackjackGame.currentTurn);
-
-                if (
-                  blackjackPlayer &&
-                  !blackjackPlayer.doubledDown &&
-                  getPlayer(blackjackPlayer.id, players)!.balance >= blackjackPlayer.bet
-                ) {
-                  blackjackPlayer.doubledDown = true;
-                  blackjackPlayer.cards.push(EMPTY_CARD);
-                }
-              });
-
-              setPlayers((draft) => {
-                let player = draft.find((p) => p.id == blackjackGame.currentTurn);
-                if (player) {
-                  let blackjackPlayer = blackjackPlayers.find((p) => p.id == player!.id);
-                  player.balance -= blackjackPlayer!.bet;
-                }
-              });
+              doubleDown(
+                blackjackPlayers.find((p) => p.id == blackjackGame.currentTurn)!,
+                players.find((p) => p.id == blackjackGame.currentTurn)!
+              );
             }
             break;
 
           case "Split":
-            // TODO: Implement split
-            console.log("Split");
+            {
+              splitHand(blackjackGame.currentTurn);
+            }
             break;
 
           case "h":
@@ -350,6 +335,88 @@ export default function Round() {
     }
   };
 
+  const splitHand = (playerId: string) => {
+    console.log(`Splitting hand for ${playerId}`);
+
+    const player = players.find((p) => p.id === playerId);
+    const blackjackPlayer = blackjackPlayers.find((p) => p.id === playerId);
+
+    if (!player || !blackjackPlayer) {
+      console.error("Player not found when splitting", playerId);
+      return;
+    }
+
+    if (player.balance < blackjackPlayer.bet) {
+      console.error("Player does not have enough balance to split", playerId);
+      return;
+    }
+
+    if (blackjackPlayer.cards.length > 2) {
+      console.error("Player has more than 2 cards", playerId);
+      return;
+    }
+
+    if (getRankInt(blackjackPlayer.cards[0]) != getRankInt(blackjackPlayer.cards[1])) {
+      console.error("Cards are not the same rank", playerId);
+      return;
+    }
+
+    if (blackjackPlayer.split || blackjackPlayer.splitFrom) {
+      console.error("Player has already split", playerId);
+      return;
+    }
+
+    setPlayers((draft) => {
+      draft.forEach((player) => {
+        if (player.id === playerId) {
+          player.balance -= blackjackPlayer.bet;
+        }
+      });
+    });
+
+    let newBlackjackPlayers: BlackjackPlayer[] = [...blackjackPlayers];
+    const playerIndex = newBlackjackPlayers.findIndex((p) => p.id === playerId);
+
+    // add a new player after the current player
+    newBlackjackPlayers.splice(playerIndex + 1, 0, {
+      ...blackjackPlayer,
+      id: `${blackjackPlayer.id}-SPLIT`,
+      displayName: `${blackjackPlayer.displayName} (Split)`,
+      cards: [blackjackPlayer.cards[1], EMPTY_CARD],
+      split: true,
+      splitFrom: playerId,
+    });
+
+    // remove the second card from the current player
+    newBlackjackPlayers[playerIndex] = {
+      ...blackjackPlayer,
+      cards: [blackjackPlayer.cards[0], EMPTY_CARD],
+      split: true,
+    };
+
+    setBlackjackPlayers(newBlackjackPlayers);
+  };
+
+  const doubleDown = (blackjackPlayer: BlackjackPlayer, player: Player) => {
+    setBlackjackPlayers((draft) => {
+      draft.map((bjPlayer) => {
+        if (bjPlayer.id == blackjackPlayer.id) {
+          bjPlayer.doubledDown = true;
+          bjPlayer.cards.push(EMPTY_CARD);
+        }
+      });
+    });
+
+    setPlayers((draft) => {
+      draft.map((player) => {
+        let id = blackjackPlayer.splitFrom || blackjackPlayer.id;
+        if (player.id == id) {
+          player.balance -= blackjackPlayer.bet;
+        }
+      });
+    });
+  };
+
   const forceTurn = (playerId: string) => {
     setBlackjackGame({
       ...blackjackGame,
@@ -553,11 +620,20 @@ export default function Round() {
       console.log(`${blackjackPlayer.displayName}: ${earningsStrings.join(", ")}`);
 
       newPlayers = newPlayers.map((p) => {
-        if (p.id === blackjackPlayer.id) {
-          return {
-            ...p,
-            balance: p.balance + payout,
-          };
+        if (blackjackPlayer.splitFrom) {
+          if (p.id === blackjackPlayer.splitFrom) {
+            return {
+              ...p,
+              balance: p.balance + payout,
+            };
+          }
+        } else {
+          if (p.id === blackjackPlayer.id) {
+            return {
+              ...p,
+              balance: p.balance + payout,
+            };
+          }
         }
         return p;
       });
@@ -571,7 +647,7 @@ export default function Round() {
       gameState: "PREROUND",
     });
 
-    setBlackjackPlayers(newBlackjackPlayers);
+    setBlackjackPlayers(newBlackjackPlayers.filter((p) => !p.splitFrom));
     setPlayers(newPlayers);
   };
 
@@ -624,11 +700,13 @@ export default function Round() {
           return (
             <RoundPlayerCard
               key={blackjackPlayer.id}
-              player={getPlayer(blackjackPlayer.id, players)!}
+              player={getPlayer(blackjackPlayer.splitFrom || blackjackPlayer.id, players)!}
               blackjackPlayer={blackjackPlayer}
               isActive={blackjackGame.currentTurn == blackjackPlayer.id}
               nextTurn={nextTurn}
               forceTurn={forceTurn}
+              splitHand={splitHand}
+              doubleDown={doubleDown}
             />
           );
         })}

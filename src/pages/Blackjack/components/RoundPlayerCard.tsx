@@ -38,12 +38,16 @@ export default function RoundPlayerCard({
   isActive,
   nextTurn,
   forceTurn,
+  splitHand,
+  doubleDown,
 }: {
   player: Player;
   blackjackPlayer: BlackjackPlayer;
   isActive: boolean;
   nextTurn: () => void;
   forceTurn: (playerId: string) => void;
+  splitHand: (playerId: string) => void;
+  doubleDown: (blackjackPlayer: BlackjackPlayer, player: Player) => void;
 }) {
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
   const [blackjackPlayers, setBlackjackPlayers] = useRecoilImmerState(BLACKJACK_PLAYERS_STATE);
@@ -169,7 +173,6 @@ export default function RoundPlayerCard({
         <>
           <Text size="md" fw={600}>
             {formatMoney(blackjackPlayer.bet)} {blackjackPlayer.doubledDown ? "(X2)" : ""}{" "}
-            {blackjackPlayer.split ? "(Split)" : ""}
           </Text>
           <Text size="sm" c="dimmed">
             {formatMoney(player.balance)}
@@ -414,22 +417,7 @@ export default function RoundPlayerCard({
           fullWidth
           color="red"
           onClick={() => {
-            setBlackjackPlayers((draft) => {
-              draft.map((player) => {
-                if (player.id == blackjackPlayer.id) {
-                  player.doubledDown = true;
-                  player.cards.push(EMPTY_CARD);
-                }
-              });
-            });
-
-            setPlayers((draft) => {
-              draft.map((player) => {
-                if (player.id == blackjackPlayer.id) {
-                  player.balance -= blackjackPlayer.bet;
-                }
-              });
-            });
+            doubleDown(blackjackPlayer, player);
           }}
         >
           Double
@@ -442,7 +430,9 @@ export default function RoundPlayerCard({
           }
           fullWidth
           color="grape"
-          onClick={() => {}}
+          onClick={() => {
+            splitHand(blackjackPlayer.id);
+          }}
         >
           Split
         </Button>

@@ -140,6 +140,8 @@ export default function PreRound() {
       <PlayerSelector
         game="BLACKJACK"
         playerElement={(index, player, removePlayer, blackjackPlayer) => {
+          console.log(`Player  Element:`, index, player, blackjackPlayer);
+
           if (!blackjackPlayer) return <></>;
 
           return (

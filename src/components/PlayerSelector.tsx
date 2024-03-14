@@ -120,7 +120,10 @@ export default function PlayerSelector({
               {listState.map((id, index) => {
                 return playerElement(
                   index,
-                  getPlayer(id, players)!,
+                  getPlayer(
+                    blackjackPlayers.find((player) => player.id == id)?.splitFrom || id,
+                    players
+                  )!,
                   removePlayer,
                   blackjackPlayers.find((player) => player.id == id)
                 );
