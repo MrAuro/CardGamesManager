@@ -841,6 +841,14 @@ export default function Round() {
 
       modals.open({
         title: "Round Results",
+        onKeyDown: (event) => {
+          if (event.key === "Enter") {
+            modals.closeAll();
+          }
+
+          // Prevent keybindings from being triggered
+          event.stopPropagation();
+        },
         children: (
           <>
             <ScrollArea>
