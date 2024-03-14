@@ -1,19 +1,14 @@
-import {
-  BLACKJACK_GAME_STATE,
-  BLACKJACK_PLAYERS_STATE,
-  BLACKJACK_SETTINGS,
-  PLAYERS_STATE,
-} from "@/Root";
+import { BLACKJACK_GAME_STATE, BLACKJACK_PLAYERS_STATE, BLACKJACK_SETTINGS } from "@/Root";
 import GenericPlayerCard from "@/components/GenericPlayerCard";
 import PlayingCard from "@/components/PlayingCard";
 import { BlackjackPlayer } from "@/types/Blackjack";
 import { Player } from "@/types/Player";
 import {
-  getHandResult,
   findPerfectPairs,
   findTwentyOnePlusThree,
   getCardTotal,
   getCardValue,
+  getHandResult,
   shortenTwentyOnePlusThree,
 } from "@/utils/BlackjackHelper";
 import { EMPTY_CARD } from "@/utils/CardHelper";
@@ -53,7 +48,6 @@ export default function RoundPlayerCard({
   const [blackjackPlayers, setBlackjackPlayers] = useRecoilImmerState(BLACKJACK_PLAYERS_STATE);
   const blackjackSettings = useRecoilValue(BLACKJACK_SETTINGS);
   const blackjackGame = useRecoilValue(BLACKJACK_GAME_STATE);
-  const [players, setPlayers] = useRecoilImmerState(PLAYERS_STATE);
   const theme = useMantineTheme();
 
   const calculatedCardResult = getCardTotal(blackjackPlayer.cards);

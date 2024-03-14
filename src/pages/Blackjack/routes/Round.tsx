@@ -11,12 +11,12 @@ import { Card, CardRank, CardSuit } from "@/types/Card";
 import { availableCards } from "@/types/Keybindings";
 import { Player } from "@/types/Player";
 import {
-  getHandResult,
   findPerfectPairs,
   findTwentyOnePlusThree,
   getCardTotal,
+  getHandResult,
 } from "@/utils/BlackjackHelper";
-import { EMPTY_CARD, getRank, getRankInt } from "@/utils/CardHelper";
+import { EMPTY_CARD, getRankInt } from "@/utils/CardHelper";
 import { getPlayer } from "@/utils/PlayerHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import { Stack } from "@mantine/core";
@@ -405,7 +405,7 @@ export default function Round() {
     setBlackjackPlayers(newBlackjackPlayers);
   };
 
-  const doubleDown = (blackjackPlayer: BlackjackPlayer, player: Player) => {
+  const doubleDown = (blackjackPlayer: BlackjackPlayer, _: Player) => {
     setBlackjackPlayers((draft) => {
       draft.map((bjPlayer) => {
         if (bjPlayer.id == blackjackPlayer.id) {
