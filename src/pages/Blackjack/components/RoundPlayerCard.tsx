@@ -370,6 +370,7 @@ export default function RoundPlayerCard({
               height: "4.5rem",
               backgroundColor: "transparent",
             }}
+            ml="xs"
           >
             <div
               style={{
@@ -386,6 +387,10 @@ export default function RoundPlayerCard({
               </Text>
               <Text size={rem(30)} fw="bold" ta="center">
                 {calculatedCardResult.total}
+              </Text>
+              <Text size={rem(14)} fw={600} ta="center">
+                {calculatedCardResult.total > 21 ? "BUST" : ""}{" "}
+                {calculatedCardResult.total == 21 ? "BLACKJACK" : ""}
               </Text>
             </div>
           </Paper>
