@@ -6,7 +6,7 @@ import {
   PLAYERS_STATE,
   SETTINGS_STATE,
 } from "@/Root";
-import { Container, Divider, Text } from "@mantine/core";
+import { Container, Divider, Text, useMantineTheme } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import { TAURI_STORE } from "./Root";
@@ -33,6 +33,8 @@ export default function App() {
   const [blackjackPlayersLastSaved, setBlackjackPlayersLastSaved] = useState(0);
   const [settings, setSettings] = useRecoilState(SETTINGS_STATE);
   const [settingsLastSaved, setSettingsLastSaved] = useState(0);
+
+  const theme = useMantineTheme();
 
   useEffect(() => {
     if (playersLastSaved < Date.now() - 500) {
@@ -76,6 +78,12 @@ export default function App() {
       TAURI_STORE.set("settings", settings);
     }
   }, [settings]);
+
+  useEffect(() => {
+    if (!settings.cornerOfEyeMode) {
+      document.body.style.backgroundColor = theme.colors.dark[7];
+    }
+  }, [settings.cornerOfEyeMode]);
 
   document.documentElement.style.fontSize = `${settings.scale}%`;
 

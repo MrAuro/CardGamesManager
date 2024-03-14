@@ -136,6 +136,13 @@ export default function DevTools() {
       >
         Reset data
       </Button>
+      <Button
+        onClick={() => {
+          document.body.style.backgroundColor = `#ff0000`;
+        }}
+      >
+        Change document background color
+      </Button>
 
       <Collapse in={playersOpen}>
         <JsonInput
