@@ -1,45 +1,68 @@
-import { Card, EMPTY_CARD, getRank, getSuit, isAnyEmpty } from "./CardHelper";
-import { Player } from "../types/Player";
+import { BlackjackSettings } from "@/types/Blackjack";
+import { Card } from "@/types/Card";
+import { EMPTY_CARD, getRank, getSuit, isAnyEmpty } from "./CardHelper";
 
-export type BlackjackGameState = "NONE" | "PLAYING" | "GAME_OVER";
+export function getPlayerErrors(
+  balance: number,
+  settings: BlackjackSettings,
+  bets: {
+    bet: number;
+    twentyOnePlusThree: number;
+    perfectPairs: number;
+    betBehindBet: number;
+    betBehindTarget: string | null;
+  }
+): string[] {
+  // Rather than passing the the player and blackjackPlayer objects,
+  // we pass in the balance and a flattened bets object
+  // This is done to prevent the state from being one behind
+  // (due to the new bet being saved after the errors are calculated)
 
-export type BlackjackPlayer = {
-  displayName?: string;
-  id: string; // Player id (except when split, where its a new id)
-  cards: Card[];
-  bet: number;
-  doubledDown: boolean;
-  split: boolean;
-  splitFrom?: string; // For split hands, the id of the original hand
-  handResult?: "WIN" | "LOSE" | "PUSH";
-  sidebets: {
-    // 0/null means no bet
-    twentyOnePlusThree: number | null;
-    perfectPairs: number | null;
-    betBehind: {
-      bet: number | null;
-      target: string | null; // Target player id
-    };
-  };
-};
+  const errors: string[] = [];
 
-export const getPlayer = (idOrPlayer: string | BlackjackPlayer, players: Player[]): Player => {
-  let id: string = typeof idOrPlayer === "string" ? idOrPlayer : idOrPlayer.id;
+  let totalBet = 0;
+  if (bets.bet < 0) errors.push("Invalid bet amount");
+  totalBet += bets.bet;
 
-  let player = players.find((player: Player) => player.id === id);
-  if (player == null) {
-    throw new Error(`Player with id ${id} not found`);
+  if (settings.twentyOnePlusThreeEnabled && bets.twentyOnePlusThree > 0) {
+    if (bets.twentyOnePlusThree < 0) errors.push("Invalid 21+3 bet amount");
+    totalBet += bets.twentyOnePlusThree;
   }
 
-  return player;
-};
+  if (settings.perfectPairsEnabled && bets.perfectPairs > 0) {
+    if (bets.perfectPairs < 0) errors.push("Invalid perfect pairs bet amount");
+    totalBet += bets.perfectPairs;
+  }
 
-type GetCardTotalResponse = {
+  if (settings.betBehindEnabled) {
+    if (bets.betBehindBet < 0) errors.push("Invalid bet behind amount");
+    totalBet += bets.betBehindBet;
+
+    if (!bets.betBehindTarget && bets.betBehindBet > 0) {
+      errors.push("Invalid bet behind target");
+    }
+  }
+
+  if (totalBet > balance) {
+    errors.push("Insufficient funds");
+  }
+
+  return errors;
+}
+
+export function getCardValue(card: Card): number {
+  const rank = getRank(card);
+  if (rank === "A") return 11;
+  if (["T", "J", "Q", "K"].includes(rank)) return 10;
+  return parseInt(rank);
+}
+
+export const getCardTotal = (
+  cards: Card[]
+): {
   ace: "SOFT" | "HARD" | "NONE";
   total: number;
-};
-
-export const getCardTotal = (cards: Card[]): GetCardTotalResponse => {
+} => {
   let total = 0;
   let aceCount = 0;
   for (let card of cards) {
@@ -81,7 +104,6 @@ export const getCardTotal = (cards: Card[]): GetCardTotalResponse => {
     total: total,
   };
 };
-
 export const findPerfectPairs = (cards: Card[]): "None" | "Mixed" | "Colored" | "Perfect" => {
   let res: "None" | "Mixed" | "Colored" | "Perfect" = "None";
   if (getRank(cards[0]) !== getRank(cards[1])) {
@@ -106,6 +128,10 @@ export const findPerfectPairs = (cards: Card[]): "None" | "Mixed" | "Colored" | 
     if (getSuit(cards[0]) == getSuit(cards[1])) {
       res = "Perfect";
     }
+
+    if (getSuit(cards[0]) == "-" || getSuit(cards[1]) == "-") {
+      res = "None";
+    }
   }
 
   return res;
@@ -119,8 +145,29 @@ type TwentyOnePlusThree =
   | "Straight Flush"
   | "Suited Three of a Kind";
 
+export const shortenTwentyOnePlusThree = (str: TwentyOnePlusThree): string => {
+  switch (str) {
+    case "None":
+      return "None";
+    case "Flush":
+      return "Flush";
+    case "Straight":
+      return "Straight";
+    case "Three of a Kind":
+      return "Trips";
+    case "Straight Flush":
+      return "Straight Flush";
+    case "Suited Three of a Kind":
+      return "Suited Trips";
+  }
+};
+
 export const findTwentyOnePlusThree = (cards: Card[]): TwentyOnePlusThree => {
   let res: TwentyOnePlusThree = "None";
+  if (cards.length !== 3) {
+    console.warn("21+3 sidebet requires 3 cards, got", cards.length);
+    return res;
+  }
 
   for (let i = 0; i < cards.length; i++) {
     if (isAnyEmpty(cards[i])) {
@@ -229,3 +276,23 @@ export const findTwentyOnePlusThree = (cards: Card[]): TwentyOnePlusThree => {
 
   return res;
 };
+
+export function getHandResult(handTotal: number, dealerTotal: number) {
+  let result: "BLACKJACK" | "WIN" | "LOSE" | "PUSH" = "LOSE";
+
+  if (handTotal > 21) {
+    result = "LOSE";
+  } else if (dealerTotal == handTotal) {
+    result = "PUSH";
+  } else if (handTotal == 21) {
+    result = "BLACKJACK";
+  } else if (dealerTotal > 21) {
+    result = "WIN";
+  } else if (dealerTotal > handTotal) {
+    result = "LOSE";
+  } else if (dealerTotal < handTotal) {
+    result = "WIN";
+  }
+
+  return result;
+}
