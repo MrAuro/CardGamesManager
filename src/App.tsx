@@ -6,7 +6,7 @@ import {
   PLAYERS_STATE,
   SETTINGS_STATE,
 } from "@/Root";
-import { Container, Divider, Grid, Text } from "@mantine/core";
+import { Container, Divider, Text } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import { TAURI_STORE } from "./Root";
