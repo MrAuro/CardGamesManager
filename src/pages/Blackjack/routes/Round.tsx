@@ -4,6 +4,7 @@ import {
   BLACKJACK_SETTINGS,
   KEYBINDINGS_STATE,
   PLAYERS_STATE,
+  SETTINGS_STATE,
 } from "@/Root";
 import CardSelector from "@/components/CardSelector";
 import { BlackjackPlayer, EarningsResultType } from "@/types/Blackjack";
@@ -19,8 +20,17 @@ import {
 import { EMPTY_CARD, getRankInt } from "@/utils/CardHelper";
 import { getPlayer } from "@/utils/PlayerHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
-import { Button, ScrollArea, Stack, Table, Text, Title } from "@mantine/core";
-import { useState } from "react";
+import {
+  Button,
+  ScrollArea,
+  Stack,
+  Table,
+  Text,
+  Title,
+  darken,
+  useMantineTheme,
+} from "@mantine/core";
+import { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { atom, useRecoilState } from "recoil";
 import DealerCard from "../components/DealerCard";
@@ -53,6 +63,45 @@ export default function Round() {
   const [players, setPlayers] = useRecoilImmerState(PLAYERS_STATE);
   const [keybindings] = useRecoilImmerState(KEYBINDINGS_STATE);
   const [activeCardOverride, setActiveCardOverride] = useState<Card | undefined>(undefined);
+  const [settings] = useRecoilState(SETTINGS_STATE);
+  const theme = useMantineTheme();
+
+  useEffect(() => {
+    if (!settings.cornerOfEyeMode) return;
+
+    // document.body.style.backgroundColor
+    if (blackjackGame.currentTurn == "DEALER") {
+      const calculatedCardResult = getCardTotal(blackjackGame.dealerCards);
+
+      let dealerAction: "hit" | "stand" = "stand";
+      // Dealer hits on soft 17, stands on hard 17
+      if (calculatedCardResult.ace == "SOFT" && calculatedCardResult.total <= 17) {
+        dealerAction = "hit";
+      } else if (calculatedCardResult.total < 17) {
+        dealerAction = "hit";
+      }
+
+      if (calculatedCardResult.total > 21) {
+        document.body.style.backgroundColor = theme.colors.red[7];
+      } else if (calculatedCardResult.total == 21) {
+        document.body.style.backgroundColor = theme.colors.yellow[7];
+      } else if (dealerAction == "hit") {
+        document.body.style.backgroundColor = theme.colors.blue[7];
+      } else {
+        document.body.style.backgroundColor = theme.colors.dark[7];
+      }
+    } else {
+      const bjPlayer = blackjackPlayers.find((p) => p.id == blackjackGame.currentTurn);
+      let handTotal = getCardTotal(bjPlayer!.cards).total;
+      if (handTotal > 21) {
+        document.body.style.backgroundColor = theme.colors.red[7];
+      } else if (handTotal == 21) {
+        document.body.style.backgroundColor = theme.colors.yellow[7];
+      } else {
+        document.body.style.backgroundColor = theme.colors.dark[7];
+      }
+    }
+  }, [blackjackGame.currentTurn, blackjackGame.dealerCards, blackjackPlayers]);
 
   keybindings.forEach((keybinding) => {
     if (keybinding.scope === "Blackjack Round") {

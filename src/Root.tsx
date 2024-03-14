@@ -123,6 +123,7 @@ export const SETTINGS_STATE = atom<Settings>({
         scale: 100,
         debug: false,
         activeTab: "Players",
+        cornerOfEyeMode: false,
       };
       await TAURI_STORE.set("settings", settings);
     }

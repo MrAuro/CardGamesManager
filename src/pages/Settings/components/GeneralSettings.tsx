@@ -4,12 +4,14 @@ import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import {
   ActionIcon,
   Button,
+  ButtonGroup,
   Code,
   Collapse,
   Grid,
   Input,
   Select,
   Slider,
+  Switch,
   Table,
   Text,
   Title,
@@ -17,6 +19,9 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import {
   IconDeviceFloppy,
+  IconEye,
+  IconEyeCancel,
+  IconEyeOff,
   IconKeyframe,
   IconKeyframeFilled,
   IconPencil,
@@ -74,6 +79,31 @@ export default function GeneralSettings() {
       >
         {settings.debug ? "Close" : "Open"} DevTools
       </Button>
+      <Input.Wrapper
+        label="Corner of Eye Mode"
+        description="Makes use of bright colors to inform the user of important actions"
+      >
+        <ButtonGroup mt={5}>
+          <Button
+            variant={settings.cornerOfEyeMode ? "filled" : "default"}
+            leftSection={<IconEye />}
+            onClick={() => {
+              setSettings({ ...settings, cornerOfEyeMode: true });
+            }}
+          >
+            On
+          </Button>
+          <Button
+            variant={!settings.cornerOfEyeMode ? "filled" : "default"}
+            leftSection={<IconEyeOff />}
+            onClick={() => {
+              setSettings({ ...settings, cornerOfEyeMode: false });
+            }}
+          >
+            Off
+          </Button>
+        </ButtonGroup>
+      </Input.Wrapper>
       <Input.Wrapper mb="xl" label="UI Scale">
         <Slider
           defaultValue={settings.scale}
