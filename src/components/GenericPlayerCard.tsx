@@ -7,6 +7,7 @@ export default function GenericPlayerCard({
   rightSection,
   children,
   backgroundColor,
+  styles,
 }: {
   header: string;
   subtext?: string;
@@ -14,6 +15,7 @@ export default function GenericPlayerCard({
   rightSection?: JSX.Element;
   children?: JSX.Element[] | JSX.Element;
   backgroundColor?: string;
+  styles?: any;
 }) {
   return (
     <Card
@@ -24,6 +26,7 @@ export default function GenericPlayerCard({
       pb="xs"
       style={{
         backgroundColor: backgroundColor ? backgroundColor : undefined,
+        ...styles,
       }}
     >
       <Group justify="space-between">
