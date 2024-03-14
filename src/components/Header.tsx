@@ -1,60 +1,56 @@
 import { Container, Group, Tabs, Text, rem } from "@mantine/core";
-import { PAGES, Page } from "../types/State";
-import { IconCards, IconClubs, IconSettings, IconUsers } from "@tabler/icons-react";
+import { useState } from "react";
+import { ROUTES, STATE, State } from "../App";
+import { useCustomRecoilState } from "../utils/RecoilHelper";
 
-export default function Header({
-  active,
-  setActive,
-}: {
-  active: string;
-  setActive: (page: Page) => void;
-}) {
+export default function Header() {
+  const [state, , modifyState] = useCustomRecoilState<State>(STATE);
+  const [active, setActive] = useState(state.activeTab);
+
+  const itemsLabel = ROUTES.map((link) => (
+    <Tabs.Tab
+      value={link.link}
+      data-active={active === link.link || undefined}
+      leftSection={link.icon}
+      key={link.link}
+      fw={active === link.link ? 500 : "normal"}
+      onClick={(event) => {
+        event.preventDefault();
+        modifyState({ activeTab: link.link as any });
+        setActive(link.link as any);
+      }}
+    >
+      {link.label}
+    </Tabs.Tab>
+  ));
+
+  const itemsIcon = ROUTES.map((link) => (
+    <Tabs.Tab
+      value={link.link}
+      data-active={active === link.link || undefined}
+      leftSection={link.icon}
+      key={link.link}
+      fw={active === link.link ? 500 : "normal"}
+      onClick={(event) => {
+        event.preventDefault();
+        modifyState({ activeTab: link.link as any });
+        setActive(link.link as any);
+      }}
+    />
+  ));
+
   return (
-    <Container size="md" mt="sm">
-      <Group gap={5} justify={false ? "center" : "space-between"}>
-        <Text size={rem(26)} fw="bold">
-          Card Games Manager
-        </Text>
-        <Tabs variant="pills" radius="xl">
-          <Tabs.List>
-            {PAGES.map((page) => {
-              let icon: JSX.Element;
-              switch (page) {
-                case "Players":
-                  icon = <IconUsers size="1.4rem" />;
-                  break;
-
-                case "Blackjack":
-                  icon = <IconCards size="1.4rem" />;
-                  break;
-
-                case "Poker":
-                  icon = <IconClubs size="1.4rem" />;
-                  break;
-
-                case "Settings":
-                  icon = <IconSettings size="1.4rem" />;
-                  break;
-              }
-
-              return (
-                <Tabs.Tab
-                  value={page}
-                  data-active={active === page || undefined}
-                  key={page}
-                  fw={active === page ? 500 : "normal"}
-                  onClick={() => {
-                    setActive(page);
-                  }}
-                  leftSection={icon}
-                >
-                  {page}
-                </Tabs.Tab>
-              );
-            })}
-          </Tabs.List>
-        </Tabs>
-      </Group>
-    </Container>
+    <header>
+      <Container size="md" mt="sm">
+        <Group gap={5} justify={false ? "center" : "space-between"}>
+          <Text size={rem(26)} fw="bold">
+            {ROUTES.find((r) => r.link === active)?.label}
+          </Text>
+          <Tabs variant="pills" radius="xl">
+            <Tabs.List>{false ? itemsIcon : itemsLabel}</Tabs.List>
+          </Tabs>
+        </Group>
+      </Container>
+    </header>
   );
 }

@@ -1,30 +1,41 @@
-import { Card } from "@/types/Card";
-import { getSuit, suitToIcon, getRank, EMPTY_CARD } from "@/utils/CardHelper";
-import { Paper, useMantineTheme, Text } from "@mantine/core";
+import { Paper, Text, useMantineColorScheme, useMantineTheme } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
+import { Card, EMPTY_CARD, getRank, getSuit, suitToIcon } from "../utils/CardHelper";
 
-export default function PlayingCard({
-  card,
-  onClick,
-  disabled,
-}: {
+export default function PlayingCard(props: {
   card: Card;
   onClick: (card: Card) => void;
-  disabled: boolean;
+  disabled?: boolean;
 }) {
   const theme = useMantineTheme();
+  const { colorScheme } = useMantineColorScheme();
 
   let backgroundColor;
-  if (!disabled) {
-    if (card == EMPTY_CARD) {
-      backgroundColor = theme.colors.dark[7];
+  if (colorScheme == "dark") {
+    if (!props.disabled) {
+      if (props.card == EMPTY_CARD) {
+        backgroundColor = theme.colors.dark[7];
+      } else {
+        backgroundColor = theme.colors.gray[0];
+      }
+    } else if (props.card == EMPTY_CARD) {
+      backgroundColor = theme.colors.dark[6];
     } else {
       backgroundColor = theme.colors.gray[0];
     }
-  } else if (card == EMPTY_CARD) {
-    backgroundColor = theme.colors.dark[6];
   } else {
-    backgroundColor = theme.colors.gray[0];
+    if (!props.disabled) {
+      backgroundColor = theme.colors.gray[1];
+    } else if (props.card == EMPTY_CARD) {
+      backgroundColor = theme.colors.gray[0];
+    }
+  }
+
+  let iconColor;
+  if (colorScheme == "dark") {
+    iconColor = theme.colors.dark[3];
+  } else {
+    iconColor = theme.colors.gray[5];
   }
 
   return (
@@ -36,15 +47,15 @@ export default function PlayingCard({
         height: "4.5rem",
         backgroundColor: backgroundColor,
 
-        cursor: disabled ? "pointer" : "not-allowed",
+        cursor: props.disabled ? "pointer" : "not-allowed",
       }}
       onClick={() => {
-        if (disabled) {
-          onClick(card);
+        if (props.disabled) {
+          props.onClick(props.card);
         }
       }}
     >
-      {card == EMPTY_CARD ? (
+      {props.card == EMPTY_CARD ? (
         <>
           <Text
             size="xl"
@@ -55,7 +66,7 @@ export default function PlayingCard({
               height: "100%",
             }}
           >
-            {disabled ? <IconPlus color={theme.colors.dark[3]} /> : null}
+            {props.disabled ? <IconPlus color={iconColor} /> : null}
           </Text>
         </>
       ) : (
@@ -72,7 +83,7 @@ export default function PlayingCard({
             fw={800}
             ta="center"
             c={
-              getSuit(card) === "h" || getSuit(card) === "d"
+              getSuit(props.card) === "h" || getSuit(props.card) === "d"
                 ? theme.colors.red[6]
                 : theme.colors.dark[5]
             }
@@ -83,8 +94,8 @@ export default function PlayingCard({
               alignItems: "center",
             }}
           >
-            {suitToIcon(getSuit(card))}
-            {getRank(card)}
+            {suitToIcon(getSuit(props.card))}
+            {getRank(props.card)}
           </Text>
         </div>
       )}
