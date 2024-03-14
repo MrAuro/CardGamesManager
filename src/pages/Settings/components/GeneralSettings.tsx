@@ -1,7 +1,5 @@
-import { KEYBINDINGS_STATE, PLAYERS_STATE, SETTINGS_STATE } from "@/Root";
+import { KEYBINDINGS_STATE, SETTINGS_STATE } from "@/Root";
 import { Scope, Scopes, getActions } from "@/types/Keybindings";
-import { Player } from "@/types/Player";
-import { DefaultKeybinds } from "@/utils/DefaultKeybinds";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import {
   ActionIcon,
@@ -31,7 +29,6 @@ import { useRecoilState } from "recoil";
 
 export default function GeneralSettings() {
   const [settings, setSettings] = useRecoilState(SETTINGS_STATE);
-  const [, setPlayers] = useRecoilState(PLAYERS_STATE);
   const [keybindings, setKeybindings] = useRecoilImmerState(KEYBINDINGS_STATE);
 
   const [opened, { toggle }] = useDisclosure(false);

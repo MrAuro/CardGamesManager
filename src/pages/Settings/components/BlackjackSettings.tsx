@@ -1,6 +1,6 @@
 import { BLACKJACK_GAME_STATE, BLACKJACK_SETTINGS } from "@/Root";
-import { Checkbox, Grid, InputWrapper, NumberInput, Text, Title, rem } from "@mantine/core";
-import { IconStack2, IconX } from "@tabler/icons-react";
+import { Checkbox, Grid, NumberInput, Text, Title, rem } from "@mantine/core";
+import { IconX } from "@tabler/icons-react";
 import { useRecoilState } from "recoil";
 
 export default function BlackjackSettings() {
