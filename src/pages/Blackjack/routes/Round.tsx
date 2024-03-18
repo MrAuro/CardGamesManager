@@ -819,107 +819,6 @@ export default function Round() {
         }
       }
 
-      let groupedResults: { [key: string]: EarningsResultType[] } = {};
-      earningsResults.forEach((result) => {
-        const id = result.blackjackPlayerId.includes("-SPLIT")
-          ? result.blackjackPlayerId.split("-SPLIT")[0]
-          : result.blackjackPlayerId;
-
-        if (!groupedResults[id]) {
-          groupedResults[id] = [];
-        }
-
-        if (result.source === "Blackjack") {
-          groupedResults[id].push({
-            ...result,
-            split: result.blackjackPlayerId.includes("-SPLIT"),
-          });
-        } else {
-          groupedResults[id].push(result);
-        }
-      });
-
-      modals.open({
-        title: "Round Results",
-        onKeyDown: (event) => {
-          if (event.key === "Enter") {
-            modals.closeAll();
-          }
-
-          // Prevent keybindings from being triggered
-          event.stopPropagation();
-        },
-        children: (
-          <>
-            <ScrollArea>
-              {Object.entries(groupedResults).map(([key, value]) => {
-                const player = getPlayer(key, players)!;
-                let total = value.reduce((acc, curr) => acc + curr.amount, 0);
-
-                return (
-                  <div key={key}>
-                    <Title order={3}>{player.name}</Title>
-                    <Table
-                      withColumnBorders
-                      withRowBorders
-                      verticalSpacing={4}
-                      style={{
-                        tableLayout: "fixed",
-                        width: "100%",
-                      }}
-                    >
-                      <Table.Tbody>
-                        {value.map((result, index) => {
-                          if (result.source == "Blackjack") {
-                            return (
-                              <Table.Tr key={index}>
-                                <Table.Td>
-                                  Base{" "}
-                                  {result.result
-                                    .toLowerCase()
-                                    .replace(/^\w/, (c) => c.toUpperCase())}
-                                  {result.split ? " (Split)" : ""}
-                                </Table.Td>
-                                <Table.Td>
-                                  <Text size="sm" c={result.amount > 0 ? "green" : "red"}>
-                                    {result.amount > 0 ? "+" : null}
-                                    {formatMoney(result.amount)}
-                                  </Text>
-                                </Table.Td>
-                              </Table.Tr>
-                            );
-                          } else {
-                            return (
-                              <Table.Tr key={index}>
-                                <Table.Td>{result.source}</Table.Td>
-                                <Table.Td>
-                                  <Text size="sm" c={result.amount > 0 ? "green" : "red"}>
-                                    {result.amount > 0 ? "+" : null}
-                                    {formatMoney(result.amount)}
-                                  </Text>
-                                </Table.Td>
-                              </Table.Tr>
-                            );
-                          }
-                        })}
-                        <Table.Tr>
-                          <Table.Td fw="bold">Total</Table.Td>
-                          <Table.Td>
-                            <Text size="md" fw="bold" c={total > 0 ? "green" : "red"}>
-                              {formatMoney(total)}
-                            </Text>
-                          </Table.Td>
-                        </Table.Tr>
-                      </Table.Tbody>
-                    </Table>
-                  </div>
-                );
-              })}
-            </ScrollArea>
-          </>
-        ),
-      });
-
       newPlayers = newPlayers.map((p) => {
         if (blackjackPlayer.splitFrom) {
           if (p.id === blackjackPlayer.splitFrom) {
@@ -939,6 +838,105 @@ export default function Round() {
         return p;
       });
     }
+
+    let groupedResults: { [key: string]: EarningsResultType[] } = {};
+    earningsResults.forEach((result) => {
+      const id = result.blackjackPlayerId.includes("-SPLIT")
+        ? result.blackjackPlayerId.split("-SPLIT")[0]
+        : result.blackjackPlayerId;
+
+      if (!groupedResults[id]) {
+        groupedResults[id] = [];
+      }
+
+      if (result.source === "Blackjack") {
+        groupedResults[id].push({
+          ...result,
+          split: result.blackjackPlayerId.includes("-SPLIT"),
+        });
+      } else {
+        groupedResults[id].push(result);
+      }
+    });
+
+    modals.open({
+      title: "Round Results",
+      onKeyDown: (event) => {
+        if (event.key === "Enter") {
+          modals.closeAll();
+        }
+
+        // Prevent keybindings from being triggered
+        event.stopPropagation();
+      },
+      children: (
+        <>
+          <ScrollArea>
+            {Object.entries(groupedResults).map(([key, value]) => {
+              const player = getPlayer(key, players)!;
+              let total = value.reduce((acc, curr) => acc + curr.amount, 0);
+
+              return (
+                <div key={key}>
+                  <Title order={3}>{player.name}</Title>
+                  <Table
+                    withColumnBorders
+                    withRowBorders
+                    verticalSpacing={4}
+                    style={{
+                      tableLayout: "fixed",
+                      width: "100%",
+                    }}
+                  >
+                    <Table.Tbody>
+                      {value.map((result, index) => {
+                        if (result.source == "Blackjack") {
+                          return (
+                            <Table.Tr key={index}>
+                              <Table.Td>
+                                Base{" "}
+                                {result.result.toLowerCase().replace(/^\w/, (c) => c.toUpperCase())}
+                                {result.split ? " (Split)" : ""}
+                              </Table.Td>
+                              <Table.Td>
+                                <Text size="sm" c={result.amount > 0 ? "green" : "red"}>
+                                  {result.amount > 0 ? "+" : null}
+                                  {formatMoney(result.amount)}
+                                </Text>
+                              </Table.Td>
+                            </Table.Tr>
+                          );
+                        } else {
+                          return (
+                            <Table.Tr key={index}>
+                              <Table.Td>{result.source}</Table.Td>
+                              <Table.Td>
+                                <Text size="sm" c={result.amount > 0 ? "green" : "red"}>
+                                  {result.amount > 0 ? "+" : null}
+                                  {formatMoney(result.amount)}
+                                </Text>
+                              </Table.Td>
+                            </Table.Tr>
+                          );
+                        }
+                      })}
+                      <Table.Tr>
+                        <Table.Td fw="bold">Total</Table.Td>
+                        <Table.Td>
+                          <Text size="md" fw="bold" c={total > 0 ? "green" : "red"}>
+                            {formatMoney(total)}
+                          </Text>
+                        </Table.Td>
+                      </Table.Tr>
+                    </Table.Tbody>
+                  </Table>
+                </div>
+              );
+            })}
+          </ScrollArea>
+        </>
+      ),
+    });
 
     setBlackjackGame({
       ...blackjackGame,
