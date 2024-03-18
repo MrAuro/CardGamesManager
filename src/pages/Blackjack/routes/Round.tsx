@@ -521,6 +521,8 @@ export default function Round() {
 
     newBlackjackPlayers = newBlackjackPlayers.filter((p) => !p.splitFrom);
 
+    document.body.style.backgroundColor = theme.colors.dark[7];
+
     setBlackjackGame({
       ...blackjackGame,
       currentTurn: "DEALER",
@@ -838,6 +840,8 @@ export default function Round() {
         return p;
       });
     }
+
+    document.body.style.backgroundColor = theme.colors.dark[7];
 
     let groupedResults: { [key: string]: EarningsResultType[] } = {};
     earningsResults.forEach((result) => {
