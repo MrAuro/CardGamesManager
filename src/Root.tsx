@@ -16,6 +16,7 @@ import { Player } from "./types/Player";
 import { EMPTY_CARD } from "./utils/CardHelper";
 import { Keybinding } from "./types/Keybindings";
 import { DefaultKeybinds } from "./utils/DefaultKeybinds";
+import { PokerGame, PokerPlayer, PokerSettings } from "./types/Poker";
 
 export const TAURI_STORE = new Store(".data");
 
@@ -111,6 +112,55 @@ export const BLACKJACK_PLAYERS_STATE = atom<BlackjackPlayer[]>({
     }
 
     resolve(players as BlackjackPlayer[]);
+  }),
+});
+
+export const POKER_GAME_STATE = atom<PokerGame>({
+  key: "POKER_GAME",
+  default: new Promise(async (resolve) => {
+    let game = await TAURI_STORE.get("pokerGame");
+    if (!game) {
+      game = {
+        gameState: "PREROUND",
+        currentTurn: "",
+        communityCards: [],
+        currentBet: 0,
+      };
+      await TAURI_STORE.set("pokerGame", game);
+    }
+
+    resolve(game as PokerGame);
+  }),
+});
+
+export const POKER_PLAYERS_STATE = atom<PokerPlayer[]>({
+  key: "POKER_PLAYERS",
+  default: new Promise(async (resolve) => {
+    let players = await TAURI_STORE.get("pokerPlayers");
+    if (!players) {
+      players = [];
+      await TAURI_STORE.set("pokerPlayers", players);
+    }
+
+    resolve(players as PokerPlayer[]);
+  }),
+});
+
+export const POKER_SETTINGS_STATE = atom<PokerSettings>({
+  key: "POKER_SETTINGS",
+  default: new Promise(async (resolve) => {
+    let settings = await TAURI_STORE.get("pokerSettings");
+    if (!settings) {
+      settings = {
+        forcedBetOption: true,
+        smallBlind: 5,
+        bigBlind: 10,
+        ante: 0,
+      };
+      await TAURI_STORE.set("pokerSettings", settings);
+    }
+
+    resolve(settings as PokerSettings);
   }),
 });
 
