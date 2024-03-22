@@ -7,6 +7,9 @@ export type PokerGame = {
   currentTurn: string;
   communityCards: Card[];
   currentBet: number;
+  currentDealer: string;
+  currentSmallBlind: string;
+  currentBigBlind: string;
 };
 
 export type PokerPlayer = {
