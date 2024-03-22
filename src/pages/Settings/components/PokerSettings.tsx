@@ -1,3 +1,77 @@
+import { POKER_GAME_STATE, POKER_SETTINGS_STATE } from "@/Root";
+import { Grid, NumberInput, Title } from "@mantine/core";
+import { IconCurrencyDollar, IconX } from "@tabler/icons-react";
+import { useRecoilState } from "recoil";
+
 export default function PokerSettings() {
-  return <div>Poker Settings</div>;
+  const [pokerSettings, setPokerSettings] = useRecoilState(POKER_SETTINGS_STATE);
+  const [pokerGame] = useRecoilState(POKER_GAME_STATE);
+
+  return (
+    <>
+      <Title order={2}>Poker Settings</Title>
+      <Grid mb="xs">
+        <Grid.Col span={{ base: 12, sm: 3 }}>
+          <NumberInput
+            label="Small Blind"
+            radius="md"
+            allowNegative={false}
+            thousandSeparator=","
+            leftSection={<IconCurrencyDollar />}
+            placeholder="0"
+            disabled={pokerGame.gameState != "PREROUND"}
+            value={pokerSettings.smallBlind}
+            decimalScale={2}
+            fixedDecimalScale
+            onChange={(value) =>
+              setPokerSettings({
+                ...pokerSettings,
+                smallBlind: parseFloat(`${value}`),
+              })
+            }
+          />
+        </Grid.Col>
+        <Grid.Col span={{ base: 12, sm: 3 }}>
+          <NumberInput
+            label="Big Blind"
+            radius="md"
+            allowNegative={false}
+            thousandSeparator=","
+            leftSection={<IconCurrencyDollar />}
+            placeholder="0"
+            disabled={pokerGame.gameState != "PREROUND"}
+            value={pokerSettings.bigBlind}
+            decimalScale={2}
+            fixedDecimalScale
+            onChange={(value) =>
+              setPokerSettings({
+                ...pokerSettings,
+                bigBlind: parseFloat(`${value}`),
+              })
+            }
+          />
+        </Grid.Col>
+        <Grid.Col span={{ base: 12, sm: 3 }}>
+          <NumberInput
+            label="Ante"
+            radius="md"
+            allowNegative={false}
+            thousandSeparator=","
+            leftSection={<IconCurrencyDollar />}
+            placeholder="0"
+            disabled={pokerGame.gameState != "PREROUND"}
+            value={pokerSettings.ante}
+            decimalScale={2}
+            fixedDecimalScale
+            onChange={(value) => {
+              setPokerSettings({
+                ...pokerSettings,
+                ante: parseFloat(`${value}`),
+              });
+            }}
+          />
+        </Grid.Col>
+      </Grid>
+    </>
+  );
 }
