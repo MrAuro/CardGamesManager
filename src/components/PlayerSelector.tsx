@@ -1,4 +1,9 @@
-import { BLACKJACK_PLAYERS_STATE, PLAYERS_STATE } from "@/Root";
+import {
+  BLACKJACK_PLAYERS_STATE,
+  PLAYERS_STATE,
+  POKER_GAME_STATE,
+  POKER_PLAYERS_STATE,
+} from "@/Root";
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
 import { BlackjackPlayer } from "@/types/Blackjack";
 import { Player } from "@/types/Player";
@@ -9,6 +14,8 @@ import { Select, Text } from "@mantine/core";
 import { useListState } from "@mantine/hooks";
 import { IconSearch } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
+import { PokerPlayer } from "@/types/Poker";
+import { useRecoilState } from "recoil";
 
 export default function PlayerSelector({
   game,
@@ -20,29 +27,46 @@ export default function PlayerSelector({
     player: Player,
     removePlayer: (id: string) => void,
     blackjackPlayer?: BlackjackPlayer,
-    pokerPlayer?: any
+    pokerPlayer?: PokerPlayer
   ) => JSX.Element;
+  onReorder?: () => void;
 }) {
   const [players] = useRecoilImmerState(PLAYERS_STATE);
 
   const [blackjackPlayers, setBlackjackPlayers] = useRecoilImmerState(BLACKJACK_PLAYERS_STATE);
-  // TODO: Add poker players state
+  const [pokerPlayers, setPokerPlayers] = useRecoilImmerState(POKER_PLAYERS_STATE);
+  const [pokerGame, setPokerGame] = useRecoilState(POKER_GAME_STATE);
 
   const [listState, handlers] = useListState<string>(
-    game == "BLACKJACK" ? blackjackPlayers.map((player) => player.id) : []
+    game == "BLACKJACK"
+      ? blackjackPlayers.map((player) => player.id)
+      : pokerPlayers.map((player) => player.id)
   );
-  // TODO: Map poker players instead of an empty array
 
   const removePlayer = (id: string) => {
     handlers.filter((playerId) => playerId !== id);
   };
 
   useEffect(() => {
-    let orderedPlayers = listState.map((id) => blackjackPlayers.find((p) => p.id === id)!);
+    if (game == "BLACKJACK") {
+      let orderedPlayers = listState.map((id) => blackjackPlayers.find((p) => p.id === id)!);
+      orderedPlayers = orderedPlayers.filter((p) => p != undefined);
+      setBlackjackPlayers(orderedPlayers);
+    } else if (game == "POKER") {
+      let orderedPlayers = listState.map((id) => pokerPlayers.find((p) => p.id === id)!);
+      orderedPlayers = orderedPlayers.filter((p) => p != undefined);
+      setPokerPlayers(orderedPlayers);
 
-    orderedPlayers = orderedPlayers.filter((p) => p != undefined);
+      let dealerIndex = orderedPlayers.findIndex((player) => player.id == pokerGame.currentDealer);
+      let sbIndex = (dealerIndex + 1) % orderedPlayers.length;
+      let bbIndex = (dealerIndex + 2) % orderedPlayers.length;
 
-    setBlackjackPlayers(orderedPlayers);
+      setPokerGame({
+        ...pokerGame,
+        currentSmallBlind: orderedPlayers[sbIndex].id,
+        currentBigBlind: orderedPlayers[bbIndex].id,
+      });
+    }
   }, [listState]);
 
   // Immediately clears the selection
@@ -96,7 +120,16 @@ export default function PlayerSelector({
               });
             });
           } else {
-            // TODO
+            setPokerPlayers((draft) => {
+              draft.push({
+                id: player!.id,
+                allIn: false,
+                cards: [],
+                currentBet: 0,
+                displayName: player!.name,
+                folded: false,
+              });
+            });
           }
           handlers.append(option.value);
         }}
@@ -118,15 +151,25 @@ export default function PlayerSelector({
           {(provided) => (
             <div {...provided.droppableProps} ref={provided.innerRef}>
               {listState.map((id, index) => {
-                return playerElement(
-                  index,
-                  getPlayer(
-                    blackjackPlayers.find((player) => player.id == id)?.splitFrom || id,
-                    players
-                  )!,
-                  removePlayer,
-                  blackjackPlayers.find((player) => player.id == id)
-                );
+                if (game == "BLACKJACK") {
+                  return playerElement(
+                    index,
+                    getPlayer(
+                      blackjackPlayers.find((player) => player.id == id)?.splitFrom || id,
+                      players
+                    )!,
+                    removePlayer,
+                    blackjackPlayers.find((player) => player.id == id)
+                  );
+                } else if (game == "POKER") {
+                  return playerElement(
+                    index,
+                    getPlayer(id, players)!,
+                    removePlayer,
+                    undefined,
+                    pokerPlayers.find((player) => player.id == id)
+                  );
+                }
               })}
               {provided.placeholder}
             </div>
