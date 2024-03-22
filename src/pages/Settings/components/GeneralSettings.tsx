@@ -17,6 +17,7 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
+  IconCash,
   IconDeviceFloppy,
   IconEye,
   IconEyeOff,
@@ -24,6 +25,7 @@ import {
   IconKeyframeFilled,
   IconPencil,
   IconPlus,
+  IconPokerChip,
   IconTrash,
 } from "@tabler/icons-react";
 import { useState } from "react";
@@ -70,13 +72,6 @@ export default function GeneralSettings() {
   return (
     <>
       <Title order={2}>General Settings</Title>
-      <Button
-        onClick={() => {
-          setSettings({ ...settings, debug: !settings.debug });
-        }}
-      >
-        {settings.debug ? "Close" : "Open"} DevTools
-      </Button>
       <Input.Wrapper
         label="Corner of Eye Mode"
         description="Makes use of bright colors to inform the user of important actions"
@@ -102,7 +97,35 @@ export default function GeneralSettings() {
           </Button>
         </ButtonGroup>
       </Input.Wrapper>
-      <Input.Wrapper mb="xl" label="UI Scale">
+      <Input.Wrapper
+        label="Poker Chips Mode (coming soon)"
+        description="Use poker chips instead of cash for the UI"
+        mt="sm"
+      >
+        <ButtonGroup mt={5}>
+          <Button
+            disabled // TODO
+            variant={settings.chipsMode ? "filled" : "default"}
+            leftSection={<IconCash />}
+            onClick={() => {
+              setSettings({ ...settings, chipsMode: true });
+            }}
+          >
+            On
+          </Button>
+          <Button
+            disabled // TODO
+            variant={!settings.chipsMode ? "filled" : "default"}
+            leftSection={<IconPokerChip />}
+            onClick={() => {
+              setSettings({ ...settings, chipsMode: false });
+            }}
+          >
+            Off
+          </Button>
+        </ButtonGroup>
+      </Input.Wrapper>
+      <Input.Wrapper mb="xl" label="UI Scale" mt="sm">
         <Slider
           defaultValue={settings.scale}
           min={50}
@@ -135,7 +158,15 @@ export default function GeneralSettings() {
         />
       </Input.Wrapper>
       {/* <Text fw="bold">Keyboard Shortcuts</Text> */}
-      <Button onClick={toggle}>{opened ? "Hide" : "Show"} Keyboard Shortcuts</Button>
+      <Button
+        onClick={() => {
+          setSettings({ ...settings, debug: !settings.debug });
+        }}
+        mr="sm"
+      >
+        {settings.debug ? "Close" : "Open"} DevTools
+      </Button>
+      <Button onClick={toggle}>{opened ? "Hide" : "Show"} Keybindings Editor</Button>
       <Collapse in={opened}>
         <Table
           withColumnBorders

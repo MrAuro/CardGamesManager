@@ -5,4 +5,5 @@ export type Settings = {
   debug: boolean;
   activeTab: Page;
   cornerOfEyeMode: boolean;
+  chipsMode: boolean;
 };
