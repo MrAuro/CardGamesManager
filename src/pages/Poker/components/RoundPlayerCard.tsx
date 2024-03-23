@@ -28,7 +28,10 @@ export default function RoundPlayerCard({
       header={
         <>
           <Flex align="center" mr="sm" gap="xs">
-            {pokerPlayer.displayName} {pokerGame.currentDealer == player.id && <DealerBadge />}
+            <Text size="xl" fw="bold">
+              {pokerPlayer.displayName}
+            </Text>
+            {pokerGame.currentDealer == player.id && <DealerBadge />}
             {pokerSettings.forcedBetOption == "BLINDS" &&
               pokerGame.currentSmallBlind == player.id && <SmallBlindBadge />}
             {pokerSettings.forcedBetOption == "BLINDS" &&

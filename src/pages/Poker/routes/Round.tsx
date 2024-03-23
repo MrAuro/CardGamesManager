@@ -62,6 +62,7 @@ export default function Round() {
               player={getPlayer(pokerPlayer.id, players)!}
               pokerPlayer={pokerPlayer}
               active={pokerPlayer.id === pokerGame.currentTurn}
+              key={pokerPlayer.id}
             />
           );
         })}
