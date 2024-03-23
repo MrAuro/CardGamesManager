@@ -31,9 +31,13 @@ export default function GenericPlayerCard({
     >
       <Group justify="space-between">
         <div>
-          <Text size="xl" fw="bold">
-            {header}
-          </Text>
+          {typeof header === "string" ? (
+            <Text size="xl" fw="bold">
+              {header}
+            </Text>
+          ) : (
+            header
+          )}
 
           {subtext ? (
             <Text size="sm" c="dimmed">
