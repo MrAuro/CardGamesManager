@@ -1,6 +1,6 @@
 import { POKER_GAME_STATE, POKER_SETTINGS_STATE } from "@/Root";
-import { Grid, NumberInput, Title } from "@mantine/core";
-import { IconCurrencyDollar, IconX } from "@tabler/icons-react";
+import { Button, ButtonGroup, Grid, Input, NumberInput, Title } from "@mantine/core";
+import { IconCoins, IconCurrencyDollar, IconPokerChip } from "@tabler/icons-react";
 import { useRecoilState } from "recoil";
 
 export default function PokerSettings() {
@@ -10,7 +10,29 @@ export default function PokerSettings() {
   return (
     <>
       <Title order={2}>Poker Settings</Title>
-      <Grid mb="xs">
+      <Input.Wrapper label="Forced Bet" description="Use blinds or antes for forced bets">
+        <ButtonGroup mt={5}>
+          <Button
+            variant={pokerSettings.forcedBetOption == "BLINDS" ? "filled" : "default"}
+            leftSection={<IconCoins />}
+            onClick={() => {
+              setPokerSettings({ ...pokerSettings, forcedBetOption: "BLINDS" });
+            }}
+          >
+            Blinds
+          </Button>
+          <Button
+            variant={pokerSettings.forcedBetOption == "ANTE" ? "filled" : "default"}
+            leftSection={<IconPokerChip />}
+            onClick={() => {
+              setPokerSettings({ ...pokerSettings, forcedBetOption: "ANTE" });
+            }}
+          >
+            Antes
+          </Button>
+        </ButtonGroup>
+      </Input.Wrapper>
+      <Grid my="xs">
         <Grid.Col span={{ base: 12, sm: 3 }}>
           <NumberInput
             label="Small Blind"

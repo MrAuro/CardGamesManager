@@ -22,7 +22,7 @@ export type PokerPlayer = {
 };
 
 export type PokerSettings = {
-  forcedBetOption: boolean;
+  forcedBetOption: "BLINDS" | "ANTE";
   smallBlind: number;
   bigBlind: number;
   ante: number;
