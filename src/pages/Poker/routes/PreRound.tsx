@@ -7,6 +7,8 @@ import {
 } from "@/Root";
 import GenericPlayerCard from "@/components/GenericPlayerCard";
 import PlayerSelector, { PlayerSelectorHandles } from "@/components/PlayerSelector";
+import { PokerPlayer } from "@/types/Poker";
+import { EMPTY_CARD } from "@/utils/CardHelper";
 import { formatMoney } from "@/utils/MoneyHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import { Draggable, DraggableStateSnapshot } from "@hello-pangea/dnd";
@@ -43,7 +45,7 @@ export default function PreRound() {
   const [pokerSettings] = useRecoilState(POKER_SETTINGS_STATE);
   const [pokerGame, setPokerGame] = useRecoilState(POKER_GAME_STATE);
   const [pokerPlayers, setPokerPlayers] = useRecoilImmerState(POKER_PLAYERS_STATE);
-  const [players] = useRecoilImmerState(PLAYERS_STATE);
+  const [players, setPlayers] = useRecoilImmerState(PLAYERS_STATE);
   const [keybindings] = useRecoilImmerState(KEYBINDINGS_STATE);
 
   const playerSelectorRef = useRef<PlayerSelectorHandles>(null);
@@ -63,6 +65,71 @@ export default function PreRound() {
     });
   };
 
+  const anyNegativeBalance = players
+    .filter((player) => pokerPlayers.some((p) => p.id == player.id))
+    .some((player) => player.balance < 0);
+
+  const cantStart =
+    pokerPlayers.length < 2 ||
+    !pokerPlayers.some((player) => player.id == pokerGame.currentDealer) ||
+    anyNegativeBalance;
+
+  const startGame = () => {
+    if (cantStart) {
+      console.warn("Cannot start game, not enough players or no dealer selected");
+      return;
+    }
+
+    setPokerPlayers((draft) => {
+      draft.forEach((pokerPlayer: PokerPlayer) => {
+        pokerPlayer.allIn = false;
+        pokerPlayer.cards = [EMPTY_CARD, EMPTY_CARD];
+        pokerPlayer.currentBet = 0;
+        pokerPlayer.folded = false;
+      });
+    });
+
+    let paymentsToTake: { [key: string]: number } = {};
+    if (pokerSettings.forcedBetOption === "BLINDS") {
+      paymentsToTake[pokerGame.currentSmallBlind] = pokerSettings.smallBlind;
+      paymentsToTake[pokerGame.currentBigBlind] = pokerSettings.bigBlind;
+    } else {
+      pokerPlayers.forEach((player) => {
+        paymentsToTake[player.id] = pokerSettings.ante;
+      });
+    }
+
+    console.log(`Taking payments:`, paymentsToTake);
+
+    setPlayers((draft) => {
+      draft.forEach((player) => {
+        if (paymentsToTake[player.id]) {
+          console.log(`Taking ${paymentsToTake[player.id]} from ${player.name}`);
+          player.balance -= paymentsToTake[player.id];
+        }
+      });
+    });
+
+    let firstTurn;
+    if (pokerSettings.forcedBetOption === "BLINDS") {
+      // To the left of the big blind
+      const bbIndex = pokerPlayers.findIndex((player) => player.id == pokerGame.currentBigBlind);
+      firstTurn = pokerPlayers[(bbIndex + 1) % pokerPlayers.length].id;
+    } else {
+      // To the left of the dealer
+      const dealerIndex = pokerPlayers.findIndex((player) => player.id == pokerGame.currentDealer);
+      firstTurn = pokerPlayers[(dealerIndex + 1) % pokerPlayers.length].id;
+    }
+
+    setPokerGame({
+      ...pokerGame,
+      communityCards: [EMPTY_CARD, EMPTY_CARD, EMPTY_CARD, EMPTY_CARD, EMPTY_CARD],
+      currentBet: 0,
+      gameState: "PREFLOP",
+      currentTurn: firstTurn,
+    });
+  };
+
   return (
     <>
       {
@@ -75,14 +142,18 @@ export default function PreRound() {
           </Alert>
         )
       }
-      <Button
-        fullWidth
-        mt="sm"
-        disabled={
-          pokerPlayers.length < 2 ||
-          !pokerPlayers.some((player) => player.id == pokerGame.currentDealer)
-        }
-      >
+      {
+        //
+        anyNegativeBalance && (
+          <Alert color="red" title="Negative Balances" icon={<IconInfoTriangle />}>
+            <Flex direction="column" gap="sm">
+              Some players have negative balances, please top up their balances before starting the
+              game
+            </Flex>
+          </Alert>
+        )
+      }
+      <Button fullWidth mt="sm" onClick={startGame} disabled={cantStart}>
         Start Game (
         {pokerSettings.forcedBetOption == "BLINDS"
           ? `${formatMoney(pokerSettings.smallBlind, true, true)}/${formatMoney(
