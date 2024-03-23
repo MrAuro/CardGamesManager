@@ -23,7 +23,13 @@ import {
   Tooltip,
   useMantineTheme,
 } from "@mantine/core";
-import { IconCircleLetterD, IconInfoTriangle, IconX } from "@tabler/icons-react";
+import {
+  IconCircleLetterD,
+  IconInfoTriangle,
+  IconSpade,
+  IconSpadeFilled,
+  IconX,
+} from "@tabler/icons-react";
 import { useRef } from "react";
 import { useRecoilState } from "recoil";
 
@@ -280,25 +286,52 @@ export default function PreRound() {
   );
 }
 
-function DealerBadge() {
+export function DealerBadge() {
+  const theme = useMantineTheme();
+
   return (
-    <Badge color="gray" size="lg">
+    <Badge
+      size="xl"
+      circle
+      style={{
+        backgroundColor: theme.colors.gray[1],
+        color: theme.colors.dark[6],
+        fontSize: "0.70rem",
+        fontWeight: 800,
+      }}
+    >
       BTN
     </Badge>
   );
 }
 
-function BigBlindBadge() {
+export function BigBlindBadge() {
   return (
-    <Badge color="yellow" size="lg">
+    <Badge
+      color="yellow"
+      size="xl"
+      circle
+      style={{
+        fontSize: "0.90rem",
+        fontWeight: 700,
+      }}
+    >
       BB
     </Badge>
   );
 }
 
-function SmallBlindBadge() {
+export function SmallBlindBadge() {
   return (
-    <Badge color="blue" size="lg">
+    <Badge
+      color="blue"
+      size="xl"
+      circle
+      style={{
+        fontSize: "0.90rem",
+        fontWeight: 700,
+      }}
+    >
       SB
     </Badge>
   );
