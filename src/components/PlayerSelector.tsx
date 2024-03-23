@@ -58,6 +58,7 @@ export default function PlayerSelector({
       setPokerPlayers(orderedPlayers);
 
       let dealerIndex = orderedPlayers.findIndex((player) => player.id == pokerGame.currentDealer);
+      if (dealerIndex == -1) return;
       let sbIndex = (dealerIndex + 1) % orderedPlayers.length;
       let bbIndex = (dealerIndex + 2) % orderedPlayers.length;
 
@@ -134,7 +135,12 @@ export default function PlayerSelector({
           handlers.append(option.value);
         }}
       />
-      {blackjackPlayers.length < 1 && (
+      {game == "BLACKJACK" && blackjackPlayers.length < 1 && (
+        <Text ta="center" size="md" fw="bold">
+          No players added
+        </Text>
+      )}
+      {game == "POKER" && pokerPlayers.length < 1 && (
         <Text ta="center" size="md" fw="bold">
           No players added
         </Text>
