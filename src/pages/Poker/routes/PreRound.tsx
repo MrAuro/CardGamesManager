@@ -6,11 +6,12 @@ import {
   POKER_SETTINGS_STATE,
 } from "@/Root";
 import GenericPlayerCard from "@/components/GenericPlayerCard";
-import PlayerSelector from "@/components/PlayerSelector";
+import PlayerSelector, { PlayerSelectorHandles } from "@/components/PlayerSelector";
 import { formatMoney } from "@/utils/MoneyHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import { Draggable, DraggableStateSnapshot } from "@hello-pangea/dnd";
 import {
+  Alert,
   Badge,
   Button,
   ButtonGroup,
@@ -20,7 +21,15 @@ import {
   Tooltip,
   useMantineTheme,
 } from "@mantine/core";
-import { IconCircleLetterD, IconTarget, IconX } from "@tabler/icons-react";
+import {
+  IconCircleLetterD,
+  IconInfoTriangle,
+  IconLetterD,
+  IconTarget,
+  IconX,
+} from "@tabler/icons-react";
+import shuffle from "lodash/shuffle";
+import { useRef } from "react";
 import { useRecoilState } from "recoil";
 
 function getStyle(style: any, snapshot: DraggableStateSnapshot) {
@@ -40,9 +49,11 @@ export default function PreRound() {
   const theme = useMantineTheme();
   const [pokerSettings] = useRecoilState(POKER_SETTINGS_STATE);
   const [pokerGame, setPokerGame] = useRecoilState(POKER_GAME_STATE);
-  const [pokerPlayers] = useRecoilImmerState(POKER_PLAYERS_STATE);
+  const [pokerPlayers, setPokerPlayers] = useRecoilImmerState(POKER_PLAYERS_STATE);
   const [players] = useRecoilImmerState(PLAYERS_STATE);
   const [keybindings] = useRecoilImmerState(KEYBINDINGS_STATE);
+
+  const playerSelectorRef = useRef<PlayerSelectorHandles>(null);
 
   const setDealer = (playerId: string) => {
     let playerIndex = pokerPlayers.findIndex((player) => player.id == playerId);
@@ -61,14 +72,56 @@ export default function PreRound() {
 
   return (
     <>
-      <Button fullWidth mt="sm">
+      {
+        //
+        !pokerPlayers.some((player) => player.id == pokerGame.currentDealer) && (
+          <Alert color="red" title="No Dealer" icon={<IconInfoTriangle />}>
+            <Flex direction="column" gap="sm">
+              There is no dealer selected, please select a dealer in order to start the game
+            </Flex>
+          </Alert>
+        )
+      }
+      <Button
+        fullWidth
+        mt="sm"
+        disabled={
+          pokerPlayers.length < 2 ||
+          !pokerPlayers.some((player) => player.id == pokerGame.currentDealer)
+        }
+      >
         Start Game
+      </Button>
+      <Button
+        variant="light"
+        color="gray"
+        mt="xs"
+        fullWidth
+        onClick={() => {
+          let dealerIndex = Math.floor(Math.random() * pokerPlayers.length);
+          setDealer(pokerPlayers[dealerIndex].id);
+        }}
+      >
+        Pick Random Dealer
+      </Button>
+      <Button
+        variant="light"
+        color="gray"
+        mt="xs"
+        fullWidth
+        onClick={() => {
+          if (playerSelectorRef.current) playerSelectorRef.current.shuffleListState();
+          else console.error("PlayerSelectorRef is null when shuffling", playerSelectorRef);
+        }}
+      >
+        Shuffle Players
       </Button>
       <Divider my="md" />
       <Title order={2} mb="sm">
         Players
       </Title>
       <PlayerSelector
+        ref={playerSelectorRef}
         game="POKER"
         playerElement={(index, player, removePlayer, _, pokerPlayer) => {
           if (!pokerPlayer) return <></>;
@@ -131,6 +184,12 @@ export default function PreRound() {
                             color="red"
                             onClick={() => {
                               removePlayer(player.id);
+                              setPokerGame({
+                                ...pokerGame,
+                                currentDealer: "",
+                                currentSmallBlind: "",
+                                currentBigBlind: "",
+                              });
                             }}
                           >
                             <IconX size="1.25rem" />
