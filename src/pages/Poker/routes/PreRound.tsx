@@ -54,8 +54,8 @@ export default function PreRound() {
     setPokerGame({
       ...pokerGame,
       currentDealer: playerId,
-      currentSmallBlind: pokerPlayers[sbIndex].id,
-      currentBigBlind: pokerPlayers[bbIndex].id,
+      currentSmallBlind: pokerSettings.forcedBetOption === "BLINDS" ? pokerPlayers[sbIndex].id : "",
+      currentBigBlind: pokerSettings.forcedBetOption === "BLINDS" ? pokerPlayers[bbIndex].id : "",
     });
   };
 
@@ -96,8 +96,10 @@ export default function PreRound() {
                       <>
                         <Flex align="center" mr="sm">
                           {pokerGame.currentDealer == player.id && <DealerBadge />}
-                          {pokerGame.currentSmallBlind == player.id && <SmallBlindBadge />}
-                          {pokerGame.currentBigBlind == player.id && <BigBlindBadge />}
+                          {pokerSettings.forcedBetOption == "BLINDS" &&
+                            pokerGame.currentSmallBlind == player.id && <SmallBlindBadge />}
+                          {pokerSettings.forcedBetOption == "BLINDS" &&
+                            pokerGame.currentBigBlind == player.id && <BigBlindBadge />}
                         </Flex>
                         <ButtonGroup>
                           <Tooltip
