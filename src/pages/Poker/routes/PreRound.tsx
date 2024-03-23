@@ -83,7 +83,15 @@ export default function PreRound() {
           !pokerPlayers.some((player) => player.id == pokerGame.currentDealer)
         }
       >
-        Start Game
+        Start Game (
+        {pokerSettings.forcedBetOption == "BLINDS"
+          ? `${formatMoney(pokerSettings.smallBlind, true, true)}/${formatMoney(
+              pokerSettings.bigBlind,
+              true,
+              true
+            )}`
+          : `${formatMoney(pokerSettings.ante, true, true)}`}
+        )
       </Button>
       <Button
         variant="light"
