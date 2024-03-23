@@ -21,14 +21,7 @@ import {
   Tooltip,
   useMantineTheme,
 } from "@mantine/core";
-import {
-  IconCircleLetterD,
-  IconInfoTriangle,
-  IconLetterD,
-  IconTarget,
-  IconX,
-} from "@tabler/icons-react";
-import shuffle from "lodash/shuffle";
+import { IconCircleLetterD, IconInfoTriangle, IconX } from "@tabler/icons-react";
 import { useRef } from "react";
 import { useRecoilState } from "recoil";
 
