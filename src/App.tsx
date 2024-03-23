@@ -46,14 +46,14 @@ export default function App() {
   const theme = useMantineTheme();
 
   useEffect(() => {
-    if (playersLastSaved < Date.now() - 500) {
+    if (playersLastSaved < Date.now() - 100) {
       setPlayersLastSaved(Date.now());
       TAURI_STORE.set("players", players);
     }
   }, [players]);
 
   useEffect(() => {
-    if (keybindingsLastSaved < Date.now() - 500) {
+    if (keybindingsLastSaved < Date.now() - 100) {
       console.log(`saving keybindings`);
       setKeybindingsLastSaved(Date.now());
       TAURI_STORE.set("keybindings", keybindings);
@@ -61,49 +61,49 @@ export default function App() {
   }, [keybindings]);
 
   useEffect(() => {
-    if (blackjackGameLastSaved < Date.now() - 500) {
+    if (blackjackGameLastSaved < Date.now() - 100) {
       setBlackjackGameLastSaved(Date.now());
       TAURI_STORE.set("blackjackGame", blackjackGame);
     }
   }, [blackjackGame]);
 
   useEffect(() => {
-    if (blackjackSettingsLastSaved < Date.now() - 500) {
+    if (blackjackSettingsLastSaved < Date.now() - 100) {
       setBlackjackSettingsLastSaved(Date.now());
       TAURI_STORE.set("blackjackSettings", blackjackSettings);
     }
   }, [blackjackSettings]);
 
   useEffect(() => {
-    if (blackjackPlayersLastSaved < Date.now() - 500) {
+    if (blackjackPlayersLastSaved < Date.now() - 100) {
       setBlackjackPlayersLastSaved(Date.now());
       TAURI_STORE.set("blackjackPlayers", blackjackPlayers);
     }
   }, [blackjackPlayers]);
 
   useEffect(() => {
-    if (settingsLastSaved < Date.now() - 500) {
+    if (settingsLastSaved < Date.now() - 100) {
       setSettingsLastSaved(Date.now());
       TAURI_STORE.set("settings", settings);
     }
   }, [settings]);
 
   useEffect(() => {
-    if (pokerGameLastSaved < Date.now() - 500) {
+    if (pokerGameLastSaved < Date.now() - 100) {
       setPokerGameLastSaved(Date.now());
       TAURI_STORE.set("pokerGame", pokerGame);
     }
   }, [pokerGame]);
 
   useEffect(() => {
-    if (pokerSettingsLastSaved < Date.now() - 500) {
+    if (pokerSettingsLastSaved < Date.now() - 100) {
       setPokerSettingsLastSaved(Date.now());
       TAURI_STORE.set("pokerSettings", pokerSettings);
     }
   }, [pokerSettings]);
 
   useEffect(() => {
-    if (pokerPlayersLastSaved < Date.now() - 500) {
+    if (pokerPlayersLastSaved < Date.now() - 100) {
       setPokerPlayersLastSaved(Date.now());
       TAURI_STORE.set("pokerPlayers", pokerPlayers);
     }
