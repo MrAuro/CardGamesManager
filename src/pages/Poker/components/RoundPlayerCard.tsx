@@ -1,11 +1,13 @@
+import { POKER_GAME_STATE, POKER_SETTINGS_STATE } from "@/Root";
 import GenericPlayerCard from "@/components/GenericPlayerCard";
 import PlayingCard from "@/components/PlayingCard";
 import { CARD_SELECTOR_STATE } from "@/pages/Blackjack/routes/Round";
 import { Player } from "@/types/Player";
 import { PokerPlayer } from "@/types/Poker";
 import { formatMoney } from "@/utils/MoneyHelper";
-import { Button, Container, Divider, Group, Text, useMantineTheme } from "@mantine/core";
-import { useRecoilState } from "recoil";
+import { Button, Container, Divider, Flex, Group, Text, useMantineTheme } from "@mantine/core";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { DealerBadge, SmallBlindBadge, BigBlindBadge } from "../routes/PreRound";
 
 export default function RoundPlayerCard({
   player,
@@ -18,10 +20,22 @@ export default function RoundPlayerCard({
 }) {
   const theme = useMantineTheme();
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
+  const pokerGame = useRecoilValue(POKER_GAME_STATE);
+  const pokerSettings = useRecoilValue(POKER_SETTINGS_STATE);
 
   return (
     <GenericPlayerCard
-      header={pokerPlayer.displayName}
+      header={
+        <>
+          <Flex align="center" mr="sm" gap="xs">
+            {pokerPlayer.displayName} {pokerGame.currentDealer == player.id && <DealerBadge />}
+            {pokerSettings.forcedBetOption == "BLINDS" &&
+              pokerGame.currentSmallBlind == player.id && <SmallBlindBadge />}
+            {pokerSettings.forcedBetOption == "BLINDS" &&
+              pokerGame.currentBigBlind == player.id && <BigBlindBadge />}
+          </Flex>
+        </>
+      }
       backgroundColor={active ? theme.colors.dark[6] : theme.colors.dark[7]}
       subsection={
         <Text size="md" fw={600}>

@@ -9,7 +9,7 @@ export default function GenericPlayerCard({
   backgroundColor,
   styles,
 }: {
-  header: string;
+  header: string | JSX.Element;
   subtext?: string;
   subsection?: JSX.Element[] | JSX.Element;
   rightSection?: JSX.Element;
