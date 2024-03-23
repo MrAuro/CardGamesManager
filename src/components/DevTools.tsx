@@ -3,6 +3,8 @@ import {
   BLACKJACK_PLAYERS_STATE,
   KEYBINDINGS_STATE,
   PLAYERS_STATE,
+  POKER_GAME_STATE,
+  POKER_PLAYERS_STATE,
   SETTINGS_STATE,
   TAURI_STORE,
 } from "@/Root";
@@ -37,6 +39,18 @@ export default function DevTools() {
   const [blackjackGameOpen, setBlackjackGameOpen] = useState(false);
   const [autoUpdateBlackjackGame, setAutoUpdateBlackjackGame] = useState(false);
 
+  const [pokerPlayers, setPokerPlayers] = useRecoilImmerState(POKER_PLAYERS_STATE);
+  const [tempPokerPlayers, setTempPokerPlayers] = useState<string>(
+    JSON.stringify(pokerPlayers, null, 2)
+  );
+  const [pokerPlayersOpen, setPokerPlayersOpen] = useState(false);
+  const [autoUpdatePokerPlayers, setAutoUpdatePokerPlayers] = useState(false);
+
+  const [pokerGame, setPokerGame] = useRecoilState(POKER_GAME_STATE);
+  const [tempPokerGame, setTempPokerGame] = useState<string>(JSON.stringify(pokerGame, null, 2));
+  const [pokerGameOpen, setPokerGameOpen] = useState(false);
+  const [autoUpdatePokerGame, setAutoUpdatePokerGame] = useState(false);
+
   const [settings, setSettings] = useRecoilState(SETTINGS_STATE);
 
   useEffect(() => {
@@ -57,6 +71,18 @@ export default function DevTools() {
     }
   }, [blackjackGame, autoUpdateBlackjackGame]);
 
+  useEffect(() => {
+    if (autoUpdatePokerPlayers) {
+      setTempPokerPlayers(JSON.stringify(pokerPlayers, null, 2));
+    }
+  }, [pokerPlayers, autoUpdatePokerPlayers]);
+
+  useEffect(() => {
+    if (autoUpdatePokerGame) {
+      setTempPokerGame(JSON.stringify(pokerGame, null, 2));
+    }
+  }, [pokerGame, autoUpdatePokerGame]);
+
   return (
     <Paper withBorder p="sm">
       <Text fw="bold" size="lg">
@@ -69,6 +95,7 @@ export default function DevTools() {
             debug: false,
           });
         }}
+        color="green"
       >
         Close DevTools
       </Button>
@@ -96,7 +123,7 @@ export default function DevTools() {
           setPlayers(players);
         }}
       >
-        Set Default Players
+        Set Fake Players
       </Button>
       <Button
         onClick={() => {
@@ -110,6 +137,7 @@ export default function DevTools() {
         onClick={() => {
           setPlayersOpen(!playersOpen);
         }}
+        color="yellow"
       >
         {playersOpen ? "Close" : "Open"} Players
       </Button>
@@ -117,6 +145,7 @@ export default function DevTools() {
         onClick={() => {
           setBlackjackPlayersOpen(!blackjackPlayersOpen);
         }}
+        color="orange"
       >
         {blackjackPlayersOpen ? "Close" : "Open"} Blackjack Players
       </Button>
@@ -124,8 +153,25 @@ export default function DevTools() {
         onClick={() => {
           setBlackjackGameOpen(!blackjackGameOpen);
         }}
+        color="orange"
       >
         {blackjackGameOpen ? "Close" : "Open"} Blackjack Game
+      </Button>
+      <Button
+        onClick={() => {
+          setPokerPlayersOpen(!pokerPlayersOpen);
+        }}
+        color="grape"
+      >
+        {pokerPlayersOpen ? "Close" : "Open"} Poker Players
+      </Button>
+      <Button
+        onClick={() => {
+          setPokerGameOpen(!pokerGameOpen);
+        }}
+        color="grape"
+      >
+        {pokerGameOpen ? "Close" : "Open"} Poker Game
       </Button>
       <Button
         color="red"
@@ -135,13 +181,6 @@ export default function DevTools() {
         }}
       >
         Reset data
-      </Button>
-      <Button
-        onClick={() => {
-          document.body.style.backgroundColor = `#ff0000`;
-        }}
-      >
-        Change document background color
       </Button>
 
       <Collapse in={playersOpen}>
@@ -379,6 +418,170 @@ export default function DevTools() {
             checked={autoUpdateBlackjackGame}
             onChange={(event) => {
               setAutoUpdateBlackjackGame(event.currentTarget.checked);
+            }}
+          />
+        </Flex>
+      </Collapse>
+
+      <Collapse in={pokerPlayersOpen}>
+        <JsonInput
+          label={
+            JSON.stringify(pokerPlayers, null, 2) === tempPokerPlayers
+              ? "Poker Players"
+              : "Poker Players (modified)"
+          }
+          radius="sm"
+          value={tempPokerPlayers}
+          onChange={(value) => {
+            setTempPokerPlayers(value);
+          }}
+          formatOnBlur
+          autosize
+          minRows={4}
+          maxRows={20}
+          validationError="Invalid JSON"
+          onKeyDown={getHotkeyHandler([
+            [
+              "mod+S",
+              () => {
+                let parsed = null;
+                try {
+                  parsed = JSON.parse(tempPokerPlayers);
+                } catch (e) {
+                  console.error(e);
+                  notifications.show({
+                    message: "Invalid JSON",
+                    color: "red",
+                  });
+                }
+
+                if (parsed) {
+                  setPokerPlayers(parsed);
+                }
+              },
+            ],
+          ])}
+        />
+        <Flex gap="xs" mt="xs" align="center">
+          <Button
+            variant="light"
+            fullWidth
+            onClick={() => {
+              let parsed = null;
+              try {
+                parsed = JSON.parse(tempPokerPlayers);
+              } catch (e) {
+                console.error(e);
+                notifications.show({
+                  message: "Invalid JSON",
+                  color: "red",
+                });
+              }
+
+              if (parsed) {
+                setPokerPlayers(parsed);
+              }
+            }}
+          >
+            Save
+          </Button>
+          <Button
+            variant="light"
+            fullWidth
+            color="red"
+            onClick={() => {
+              setTempPokerPlayers(JSON.stringify(pokerPlayers, null, 2));
+            }}
+          >
+            Reset
+          </Button>
+          <Checkbox
+            radius="sm"
+            checked={autoUpdatePokerPlayers}
+            onChange={(event) => {
+              setAutoUpdatePokerPlayers(event.currentTarget.checked);
+            }}
+          />
+        </Flex>
+      </Collapse>
+
+      <Collapse in={pokerGameOpen}>
+        <JsonInput
+          label={
+            JSON.stringify(pokerGame, null, 2) === tempPokerGame
+              ? "Poker Game"
+              : "Poker Game (modified)"
+          }
+          radius="sm"
+          value={tempPokerGame}
+          onChange={(value) => {
+            setTempPokerGame(value);
+          }}
+          formatOnBlur
+          autosize
+          minRows={4}
+          maxRows={20}
+          validationError="Invalid JSON"
+          onKeyDown={getHotkeyHandler([
+            [
+              "mod+S",
+              () => {
+                let parsed = null;
+                try {
+                  parsed = JSON.parse(tempPokerGame);
+                } catch (e) {
+                  console.error(e);
+                  notifications.show({
+                    message: "Invalid JSON",
+                    color: "red",
+                  });
+                }
+
+                if (parsed) {
+                  setPokerGame(parsed);
+                }
+              },
+            ],
+          ])}
+        />
+        <Flex gap="xs" mt="xs" align="center">
+          <Button
+            variant="light"
+            fullWidth
+            onClick={() => {
+              let parsed = null;
+              try {
+                parsed = JSON.parse(tempPokerGame);
+              } catch (e) {
+                console.error(e);
+                notifications.show({
+                  message: "Invalid JSON",
+                  color: "red",
+                });
+              }
+
+              if (parsed) {
+                setPokerGame(parsed);
+              }
+            }}
+          >
+            Save
+          </Button>
+          <Button
+            variant="light"
+            fullWidth
+            color="red"
+            onClick={() => {
+              setTempPokerGame(JSON.stringify(pokerGame, null, 2));
+            }}
+          >
+            Reset
+          </Button>
+          <Checkbox
+            radius="sm"
+            checked={autoUpdatePokerGame}
+            onChange={(event) => {
+              setAutoUpdatePokerGame(event.currentTarget.checked);
             }}
           />
         </Flex>
