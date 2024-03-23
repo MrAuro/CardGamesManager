@@ -20,7 +20,7 @@ import {
   Tooltip,
   useMantineTheme,
 } from "@mantine/core";
-import { IconTarget, IconX } from "@tabler/icons-react";
+import { IconCircleLetterD, IconTarget, IconX } from "@tabler/icons-react";
 import { useRecoilState } from "recoil";
 
 function getStyle(style: any, snapshot: DraggableStateSnapshot) {
@@ -111,11 +111,18 @@ export default function PreRound() {
                               fullWidth
                               variant="light"
                               color="blue"
+                              disabled={pokerGame.currentDealer == player.id}
+                              style={{
+                                backgroundColor:
+                                  pokerGame.currentDealer == player.id
+                                    ? theme.colors.dark[5]
+                                    : undefined,
+                              }}
                               onClick={() => {
                                 setDealer(player.id);
                               }}
                             >
-                              <IconTarget size="1.25rem" />
+                              <IconCircleLetterD size="1.25rem" />
                             </Button>
                           </Tooltip>
                           <Button
