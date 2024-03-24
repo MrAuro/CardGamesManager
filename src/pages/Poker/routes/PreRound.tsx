@@ -86,15 +86,7 @@ export default function PreRound() {
       return;
     }
 
-    setPokerPlayers((draft) => {
-      draft.forEach((pokerPlayer: PokerPlayer) => {
-        pokerPlayer.allIn = false;
-        pokerPlayer.cards = [EMPTY_CARD, EMPTY_CARD];
-        pokerPlayer.currentBet = 0;
-        pokerPlayer.folded = false;
-      });
-    });
-
+    let amountInPot = 0;
     let paymentsToTake: { [key: string]: number } = {};
     if (pokerSettings.forcedBetOption === "BLINDS") {
       paymentsToTake[pokerGame.currentSmallBlind] = pokerSettings.smallBlind;
@@ -105,6 +97,16 @@ export default function PreRound() {
       });
     }
 
+    setPokerPlayers((draft) => {
+      draft.forEach((pokerPlayer: PokerPlayer) => {
+        pokerPlayer.allIn = false;
+        pokerPlayer.cards = [EMPTY_CARD, EMPTY_CARD];
+        pokerPlayer.currentBet = 0;
+        pokerPlayer.folded = false;
+        pokerPlayer.currentBet = paymentsToTake[pokerPlayer.id] || 0;
+      });
+    });
+
     console.log(`Taking payments:`, paymentsToTake);
 
     setPlayers((draft) => {
@@ -112,6 +114,7 @@ export default function PreRound() {
         if (paymentsToTake[player.id]) {
           console.log(`Taking ${paymentsToTake[player.id]} from ${player.name}`);
           player.balance -= paymentsToTake[player.id];
+          amountInPot += paymentsToTake[player.id];
         }
       });
     });
@@ -130,9 +133,16 @@ export default function PreRound() {
     setPokerGame({
       ...pokerGame,
       communityCards: [EMPTY_CARD, EMPTY_CARD, EMPTY_CARD, EMPTY_CARD, EMPTY_CARD],
-      currentBet: 0,
+      currentBet: Math.max(...Object.values(paymentsToTake)),
       gameState: "PREFLOP",
       currentTurn: firstTurn,
+      pots: [
+        {
+          type: "MAIN",
+          amount: amountInPot,
+          participants: Object.keys(paymentsToTake),
+        },
+      ],
     });
   };
 

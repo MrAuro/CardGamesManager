@@ -26,6 +26,85 @@ export default function Round() {
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
   const [activeCardOverride, setActiveCardOverride] = useState<Card | undefined>(undefined);
 
+  const nextTurn = () => {
+    let currentPlayerIndex = pokerPlayers.findIndex(
+      (player) => player.id === pokerGame.currentTurn
+    );
+
+    if (pokerGame.currentTurn == pokerGame.currentBigBlind && pokerGame.gameState == "PREFLOP") {
+      // End of preflop
+      setPokerGame({
+        ...pokerGame,
+        gameState: "FLOP",
+        currentTurn: pokerGame.currentSmallBlind,
+      });
+      return;
+    }
+
+    setPokerGame({
+      ...pokerGame,
+      currentTurn: pokerPlayers[(currentPlayerIndex + 1) % pokerPlayers.length].id,
+    });
+  };
+
+  const checkAction = () => {
+    nextTurn();
+  };
+
+  // const betAction = (amount: number) => {
+  //   let currentPlayerIndex = pokerPlayers.findIndex(
+  //     (player) => player.id === pokerGame.currentTurn
+  //   );
+
+  //   setPokerGame({
+  //     ...pokerGame,
+  //     currentBet: pokerGame.currentBet + amount,
+  //   })
+  // };
+
+  const callAction = () => {
+    let currentPlayerIndex = pokerPlayers.findIndex(
+      (player) => player.id === pokerGame.currentTurn
+    );
+    let pokerPlayer = { ...pokerPlayers.find((player) => player.id === pokerGame.currentTurn)! };
+    let player = { ...getPlayer(pokerPlayer.id, players)! };
+
+    let amountToCall = pokerGame.currentBet - pokerPlayer.currentBet;
+    if (amountToCall > player.balance) {
+      amountToCall = player.balance;
+      pokerPlayer.allIn = true;
+    } else {
+      const lastPot = { ...pokerGame.pots[pokerGame.pots.length - 1] };
+      lastPot.amount += amountToCall;
+      if (!lastPot.participants.includes(pokerPlayer.id)) {
+        lastPot.participants = [...lastPot.participants, pokerPlayer.id];
+      }
+
+      setPokerGame({
+        ...pokerGame,
+        pots: [...pokerGame.pots.slice(0, pokerGame.pots.length - 1), lastPot],
+        currentTurn: pokerPlayers[(currentPlayerIndex + 1) % pokerPlayers.length].id,
+      });
+    }
+
+    pokerPlayer.currentBet += amountToCall;
+    player.balance -= amountToCall;
+
+    setPlayers((players) => {
+      let playerIndex = players.findIndex((player) => player.id === pokerPlayer.id);
+      players[playerIndex] = player;
+      return players;
+    });
+
+    setPokerPlayers((pokerPlayers) => {
+      let playerIndex = pokerPlayers.findIndex((player) => player.id === pokerPlayer.id);
+      pokerPlayers[playerIndex] = pokerPlayer;
+      return pokerPlayers;
+    });
+
+    // nextTurn();
+  };
+
   return (
     <>
       <CardSelector
@@ -63,6 +142,8 @@ export default function Round() {
               pokerPlayer={pokerPlayer}
               active={pokerPlayer.id === pokerGame.currentTurn}
               key={pokerPlayer.id}
+              checkAction={checkAction}
+              callAction={callAction}
             />
           );
         })}
