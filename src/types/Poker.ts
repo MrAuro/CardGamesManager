@@ -10,6 +10,11 @@ export type PokerGame = {
   currentDealer: string;
   currentSmallBlind: string;
   currentBigBlind: string;
+  pots: {
+    type: "MAIN" | "SIDE";
+    amount: number;
+    participants: string[];
+  }[];
 };
 
 export type PokerPlayer = {

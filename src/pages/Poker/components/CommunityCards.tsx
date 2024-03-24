@@ -1,8 +1,13 @@
+import { PLAYERS_STATE, POKER_GAME_STATE, POKER_PLAYERS_STATE } from "@/Root";
 import PlayingCard from "@/components/PlayingCard";
+import { formatMoney } from "@/utils/MoneyHelper";
 import { Card, Divider, Flex, Text, Title, useMantineTheme } from "@mantine/core";
+import { useRecoilValue } from "recoil";
 
 export default function CommunityCards() {
   const theme = useMantineTheme();
+  const pokerGame = useRecoilValue(POKER_GAME_STATE);
+  const pokerPlayers = useRecoilValue(POKER_PLAYERS_STATE);
 
   return (
     <Card
@@ -15,10 +20,25 @@ export default function CommunityCards() {
       }}
     >
       <Title order={3} ta="center">
-        Community Cards
+        Community Cards ({pokerGame.gameState})
       </Title>
       <Text size="sm" ta="center" fw={500}>
-        Pot: $123.45
+        {pokerGame.pots.map((pot) => {
+          return (
+            <Text key={`${pot.amount}-${pot.type}-${pot.participants.join(",")}`}>
+              <b>
+                {pot.type} Pot {formatMoney(pot.amount)}
+              </b>
+              <br />
+              {pot.participants
+                .map(
+                  (participant) =>
+                    pokerPlayers.find((player) => player.id === participant)?.displayName
+                )
+                .join(", ")}
+            </Text>
+          );
+        })}
       </Text>
       <Divider my="xs" />
       <Flex justify="center" gap="sm">
