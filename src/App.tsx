@@ -36,11 +36,11 @@ export default function App() {
   const [blackjackPlayersLastSaved, setBlackjackPlayersLastSaved] = useState(0);
   const [settings, setSettings] = useRecoilState(SETTINGS_STATE);
   const [settingsLastSaved, setSettingsLastSaved] = useState(0);
-  const [pokerGame, setPokerGame] = useRecoilState(POKER_GAME_STATE);
+  const [pokerGame] = useRecoilState(POKER_GAME_STATE);
   const [pokerGameLastSaved, setPokerGameLastSaved] = useState(0);
-  const [pokerSettings, setPokerSettings] = useRecoilState(POKER_SETTINGS_STATE);
+  const [pokerSettings] = useRecoilState(POKER_SETTINGS_STATE);
   const [pokerSettingsLastSaved, setPokerSettingsLastSaved] = useState(0);
-  const [pokerPlayers, setPokerPlayers] = useRecoilState(POKER_PLAYERS_STATE);
+  const [pokerPlayers] = useRecoilState(POKER_PLAYERS_STATE);
   const [pokerPlayersLastSaved, setPokerPlayersLastSaved] = useState(0);
 
   const theme = useMantineTheme();

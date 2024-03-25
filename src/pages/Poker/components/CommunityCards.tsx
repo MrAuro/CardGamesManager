@@ -1,4 +1,4 @@
-import { PLAYERS_STATE, POKER_GAME_STATE, POKER_PLAYERS_STATE } from "@/Root";
+import { POKER_GAME_STATE, POKER_PLAYERS_STATE } from "@/Root";
 import PlayingCard from "@/components/PlayingCard";
 import { formatMoney } from "@/utils/MoneyHelper";
 import { Card, Divider, Flex, Text, Title, useMantineTheme } from "@mantine/core";
@@ -27,7 +27,8 @@ export default function CommunityCards() {
           return (
             <Text key={`${pot.amount}-${pot.type}-${pot.participants.join(",")}`}>
               <b>
-                {pot.type} Pot {formatMoney(pot.amount)}
+                {pot.type} Pot{" "}
+                {formatMoney(Object.values(pot.amount).reduce((sum, value) => sum + value, 0))}
               </b>
               <br />
               {pot.participants

@@ -14,19 +14,23 @@ import {
   Group,
   NumberInput,
   Text,
+  Tooltip,
   useMantineTheme,
 } from "@mantine/core";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { DealerBadge, SmallBlindBadge, BigBlindBadge } from "../routes/PreRound";
+import { DealerBadge, SmallBlindBadge, BigBlindBadge, AllInBadge } from "../routes/PreRound";
 import { useDisclosure } from "@mantine/hooks";
 import {
+  IconCoin,
+  IconCoins,
   IconCurrencyDollar,
+  IconSum,
   IconTriangle,
   IconTriangleFilled,
   IconTrianglePlus,
   IconTrianglePlus2,
 } from "@tabler/icons-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
 
 export default function RoundPlayerCard({
@@ -35,21 +39,36 @@ export default function RoundPlayerCard({
   active,
   checkAction,
   callAction,
+  raiseAction,
+  betAction,
 }: {
   player: Player;
   pokerPlayer: PokerPlayer;
   active: boolean;
   checkAction: () => void;
   callAction: () => void;
+  raiseAction: (raiseTo: number) => void;
+  betAction: (amount: number) => void;
 }) {
   const theme = useMantineTheme();
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
   const pokerGame = useRecoilValue(POKER_GAME_STATE);
   const pokerSettings = useRecoilValue(POKER_SETTINGS_STATE);
 
+  const [betOrRaise, setBetOrRaise] = useState<"BET" | "RAISE">("BET");
   const [betOpened, betOpenedHandlers] = useDisclosure(false);
-  const [bet, setBet] = useState(0);
+  const [bet, setBet] = useState(pokerGame.currentBet);
   const betInputRef = useRef<HTMLInputElement>(null);
+
+  const [betError, setBetError] = useState<string | null>(null);
+  useEffect(() => {
+    if (bet < pokerGame.currentBet) {
+      setBetError("Bet must be greater than the current bet");
+      return;
+    }
+
+    setBetError(null);
+  }, [bet]);
 
   return (
     <GenericPlayerCard
@@ -59,6 +78,7 @@ export default function RoundPlayerCard({
             <Text size="xl" fw="bold">
               {pokerPlayer.displayName}
             </Text>
+            {pokerPlayer.allIn && <AllInBadge />}
             {pokerGame.currentDealer == player.id && <DealerBadge />}
             {pokerSettings.forcedBetOption == "BLINDS" &&
               pokerGame.currentSmallBlind == player.id && <SmallBlindBadge />}
@@ -115,14 +135,12 @@ export default function RoundPlayerCard({
                     fixedDecimalScale
                     thousandSeparator=","
                     placeholder="0.00"
+                    error={betError}
                     leftSection={<IconCurrencyDollar />}
                     allowNegative={false}
                     value={bet}
                     onChange={(value) => {
                       setBet(parseFloat(`${value}`));
-                    }}
-                    onFocus={(event) => {
-                      console.log("focus", event);
                     }}
                   />
                 </Grid.Col>
@@ -143,15 +161,30 @@ export default function RoundPlayerCard({
                   <Button
                     fullWidth
                     color="red"
-                    disabled={!active}
+                    disabled={!active || pokerPlayer.currentBet == player.balance}
                     leftSection={<IconTriangleFilled />}
+                    onClick={() => {
+                      setBet(player.balance);
+                      betAction(player.balance);
+                    }}
                   >
                     All In ({formatMoney(player.balance, true, true)})
                   </Button>
                 </Grid.Col>
                 <Grid.Col span={5}>
-                  <Button fullWidth color="blue" disabled={!active}>
-                    Bet {formatMoney(0, true, true)}
+                  <Button
+                    fullWidth
+                    color="blue"
+                    disabled={!active || betError != null}
+                    onClick={() => {
+                      if (betOrRaise == "RAISE") {
+                        // raiseAction(totalAmount);
+                      } else {
+                        betAction(bet);
+                      }
+                    }}
+                  >
+                    {betOrRaise == "BET" ? "Bet" : "Raise"} {formatMoney(bet, true, false)}
                   </Button>
                 </Grid.Col>
               </Grid>
@@ -172,17 +205,33 @@ export default function RoundPlayerCard({
             <Button fullWidth color="red" disabled={!active}>
               Fold
             </Button>
-            {pokerGame.currentBet > pokerPlayer.currentBet && (
-              <Button fullWidth color="blue" disabled={!active}>
-                Raise
-              </Button>
-            )}
-            {pokerGame.currentBet == pokerPlayer.currentBet && (
+            {pokerGame.currentBet > 0 && (
               <Button
                 fullWidth
                 color="blue"
-                disabled={!active}
+                disabled={!active || pokerPlayer.allIn}
                 onClick={() => {
+                  setBetOrRaise("RAISE");
+                  betOpenedHandlers.open();
+
+                  // Focus and go to the beginning of the input
+                  // We wait 100ms to make sure the input is rendered
+                  setTimeout(() => {
+                    betInputRef.current?.focus();
+                    betInputRef.current?.setSelectionRange(0, 0);
+                  }, 100);
+                }}
+              >
+                Raise
+              </Button>
+            )}
+            {pokerGame.currentBet == 0 && (
+              <Button
+                fullWidth
+                color="blue"
+                disabled={!active || pokerPlayer.allIn}
+                onClick={() => {
+                  setBetOrRaise("BET");
                   betOpenedHandlers.open();
 
                   // Focus and go to the beginning of the input
