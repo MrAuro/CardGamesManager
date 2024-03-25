@@ -51,7 +51,7 @@ export default function GenericPlayerCard({
             style={{
               display: "flex",
               justifyContent: "flex-end",
-              width: "80%",
+              width: "75%",
             }}
           >
             {rightSection}

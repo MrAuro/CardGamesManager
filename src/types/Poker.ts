@@ -12,8 +12,10 @@ export type PokerGame = {
   currentBigBlind: string;
   pots: {
     type: "MAIN" | "SIDE";
-    amount: number;
     participants: string[];
+    amount: {
+      [key: string]: number; // How much each player has contributed to this pot
+    };
   }[];
 };
 

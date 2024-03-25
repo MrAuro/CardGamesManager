@@ -28,6 +28,7 @@ import {
   IconInfoTriangle,
   IconSpade,
   IconSpadeFilled,
+  IconTriangleFilled,
   IconX,
 } from "@tabler/icons-react";
 import { useRef } from "react";
@@ -139,7 +140,9 @@ export default function PreRound() {
       pots: [
         {
           type: "MAIN",
-          amount: amountInPot,
+          amount: {
+            ...paymentsToTake,
+          },
           participants: Object.keys(paymentsToTake),
         },
       ],
@@ -296,53 +299,82 @@ export default function PreRound() {
   );
 }
 
+export function AllInBadge() {
+  return (
+    <Tooltip label="All In" openDelay={300}>
+      <Badge
+        color="red"
+        size="xl"
+        circle
+        style={{
+          fontSize: "0.90rem",
+          fontWeight: 700,
+        }}
+      >
+        <Flex p={3}>
+          <IconTriangleFilled />
+        </Flex>
+      </Badge>
+    </Tooltip>
+  );
+}
+
 export function DealerBadge() {
   const theme = useMantineTheme();
 
   return (
-    <Badge
-      size="xl"
-      circle
-      style={{
-        backgroundColor: theme.colors.gray[1],
-        color: theme.colors.dark[6],
-        fontSize: "0.70rem",
-        fontWeight: 800,
-      }}
-    >
-      BTN
-    </Badge>
+    <Tooltip label="Dealer" openDelay={300}>
+      <Badge
+        size="xl"
+        circle
+        style={{
+          backgroundColor: theme.colors.gray[1],
+          color: theme.colors.dark[6],
+          fontSize: "0.70rem",
+          fontWeight: 800,
+          userSelect: "none",
+        }}
+      >
+        BTN
+      </Badge>
+    </Tooltip>
   );
 }
 
 export function BigBlindBadge() {
   return (
-    <Badge
-      color="yellow"
-      size="xl"
-      circle
-      style={{
-        fontSize: "0.90rem",
-        fontWeight: 700,
-      }}
-    >
-      BB
-    </Badge>
+    <Tooltip label="Big Blind" openDelay={300}>
+      <Badge
+        color="yellow"
+        size="xl"
+        circle
+        style={{
+          fontSize: "0.90rem",
+          fontWeight: 700,
+          userSelect: "none",
+        }}
+      >
+        BB
+      </Badge>
+    </Tooltip>
   );
 }
 
 export function SmallBlindBadge() {
   return (
-    <Badge
-      color="blue"
-      size="xl"
-      circle
-      style={{
-        fontSize: "0.90rem",
-        fontWeight: 700,
-      }}
-    >
-      SB
-    </Badge>
+    <Tooltip label="Small Blind" openDelay={300}>
+      <Badge
+        color="blue"
+        size="xl"
+        circle
+        style={{
+          fontSize: "0.90rem",
+          fontWeight: 700,
+          userSelect: "none",
+        }}
+      >
+        SB
+      </Badge>
+    </Tooltip>
   );
 }

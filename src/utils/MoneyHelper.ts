@@ -7,6 +7,8 @@ export function parseMoney(value: string | number): number {
 }
 
 export function formatMoney(value: number, useCents = false, noLeadingZeros = false): string {
+  if (isNaN(value)) return "$0.00";
+
   if (value > -1 && value < 1 && useCents) {
     // 0.50 -> 50c, 0.05 -> 5c
     const p = value.toFixed(2).split(".");

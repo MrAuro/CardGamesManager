@@ -37,6 +37,14 @@ export default function Round() {
         ...pokerGame,
         gameState: "FLOP",
         currentTurn: pokerGame.currentSmallBlind,
+        currentBet: 0,
+      });
+
+      setPokerPlayers((pokerPlayers) => {
+        pokerPlayers.forEach((player) => {
+          player.currentBet = 0;
+        });
+        return pokerPlayers;
       });
       return;
     }
@@ -51,6 +59,8 @@ export default function Round() {
     nextTurn();
   };
 
+  const raiseAction = (raiseTo: number) => {};
+
   // const betAction = (amount: number) => {
   //   let currentPlayerIndex = pokerPlayers.findIndex(
   //     (player) => player.id === pokerGame.currentTurn
@@ -61,6 +71,56 @@ export default function Round() {
   //     currentBet: pokerGame.currentBet + amount,
   //   })
   // };
+  const betAction = (amount: number) => {
+    let currentPlayerIndex = pokerPlayers.findIndex(
+      (player) => player.id === pokerGame.currentTurn
+    );
+    let pokerPlayer = { ...pokerPlayers.find((player) => player.id === pokerGame.currentTurn)! };
+    let player = { ...getPlayer(pokerPlayer.id, players)! };
+
+    if (Math.abs(amount - player.balance) < 0.0001) {
+      // floating point comparison
+      pokerPlayer.allIn = true;
+    }
+
+    if (!pokerPlayer.allIn) {
+      const _lastPot = pokerGame.pots[pokerGame.pots.length - 1];
+      let lastPot = {
+        type: _lastPot.type,
+        participants: [..._lastPot.participants],
+        amount: { ..._lastPot.amount },
+      };
+
+      lastPot.amount[pokerPlayer.id] = amount;
+      if (!lastPot.participants.includes(pokerPlayer.id)) {
+        lastPot.participants.push(pokerPlayer.id);
+      }
+
+      setPokerGame({
+        ...pokerGame,
+        pots: [...pokerGame.pots.slice(0, pokerGame.pots.length - 1), lastPot],
+        currentTurn: pokerPlayers[(currentPlayerIndex + 1) % pokerPlayers.length].id,
+        currentBet: Math.max(pokerGame.currentBet, amount),
+      });
+    } else {
+      //
+    }
+
+    pokerPlayer.currentBet = amount;
+    player.balance -= amount;
+
+    setPlayers((players) => {
+      let playerIndex = players.findIndex((player) => player.id === pokerPlayer.id);
+      players[playerIndex] = player;
+      return players;
+    });
+
+    setPokerPlayers((pokerPlayers) => {
+      let playerIndex = pokerPlayers.findIndex((player) => player.id === pokerPlayer.id);
+      pokerPlayers[playerIndex] = pokerPlayer;
+      return pokerPlayers;
+    });
+  };
 
   const callAction = () => {
     let currentPlayerIndex = pokerPlayers.findIndex(
@@ -74,10 +134,16 @@ export default function Round() {
       amountToCall = player.balance;
       pokerPlayer.allIn = true;
     } else {
-      const lastPot = { ...pokerGame.pots[pokerGame.pots.length - 1] };
-      lastPot.amount += amountToCall;
+      // deep copy the last pot
+      const _lastPot = pokerGame.pots[pokerGame.pots.length - 1];
+      let lastPot = {
+        type: _lastPot.type,
+        participants: [..._lastPot.participants],
+        amount: { ..._lastPot.amount },
+      };
+      lastPot.amount[pokerPlayer.id] = amountToCall;
       if (!lastPot.participants.includes(pokerPlayer.id)) {
-        lastPot.participants = [...lastPot.participants, pokerPlayer.id];
+        lastPot.participants.push(pokerPlayer.id);
       }
 
       setPokerGame({
@@ -144,6 +210,8 @@ export default function Round() {
               key={pokerPlayer.id}
               checkAction={checkAction}
               callAction={callAction}
+              raiseAction={raiseAction}
+              betAction={betAction}
             />
           );
         })}
