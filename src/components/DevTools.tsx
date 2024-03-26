@@ -115,7 +115,7 @@ export default function DevTools() {
           ].map((name) => {
             return {
               name,
-              balance: Math.floor(Math.random() * 41) + 10,
+              balance: 100,
               id: crypto.randomUUID(),
             };
           });
