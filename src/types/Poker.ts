@@ -10,13 +10,13 @@ export type PokerGame = {
   currentDealer: string;
   currentSmallBlind: string;
   currentBigBlind: string;
-  pots: {
-    type: "MAIN" | "SIDE";
-    participants: string[];
-    amount: {
-      [key: string]: number; // How much each player has contributed to this pot
+  pots: PokerPot[];
+  currentBets: {
+    [playerId: string]: {
+      amount: number;
+      dontAddToPot: boolean;
     };
-  }[];
+  };
 };
 
 export type PokerPlayer = {
@@ -33,4 +33,11 @@ export type PokerSettings = {
   smallBlind: number;
   bigBlind: number;
   ante: number;
+};
+
+export type PokerPot = {
+  eligiblePlayers: string[];
+  amount: number;
+  maximum: number;
+  closed: boolean;
 };

@@ -9,6 +9,12 @@ export default function CommunityCards() {
   const pokerGame = useRecoilValue(POKER_GAME_STATE);
   const pokerPlayers = useRecoilValue(POKER_PLAYERS_STATE);
 
+  let temp: string[] = [];
+
+  for (const [k, v] of Object.entries(pokerGame.currentBets)) {
+    temp.push(`${k}: ${v.amount} (${v.dontAddToPot})`);
+  }
+
   return (
     <Card
       withBorder
@@ -24,21 +30,12 @@ export default function CommunityCards() {
       </Title>
       <Text size="sm" ta="center" fw={500}>
         {pokerGame.pots.map((pot) => {
-          return (
-            <Text key={`${pot.amount}-${pot.type}-${pot.participants.join(",")}`}>
-              <b>
-                {pot.type} Pot{" "}
-                {formatMoney(Object.values(pot.amount).reduce((sum, value) => sum + value, 0))}
-              </b>
-              <br />
-              {pot.participants
-                .map(
-                  (participant) =>
-                    pokerPlayers.find((player) => player.id === participant)?.displayName
-                )
-                .join(", ")}
-            </Text>
-          );
+          return JSON.stringify(pot, null, 2);
+        })}
+      </Text>
+      <Text size="sm" ta="center" fw={500}>
+        {temp.map((bet) => {
+          return <div>{bet}</div>;
         })}
       </Text>
       <Divider my="xs" />

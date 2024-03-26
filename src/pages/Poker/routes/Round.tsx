@@ -15,6 +15,10 @@ import CardSelector from "@/components/CardSelector";
 import { CARD_SELECTOR_STATE } from "@/pages/Blackjack/routes/Round";
 import { useState } from "react";
 import { Card } from "@/types/Card";
+import cloneDeep from "lodash/cloneDeep";
+import { PokerGame, PokerPlayer, PokerPot } from "@/types/Poker";
+import { round } from "@/utils/MoneyHelper";
+import { Player } from "@/types/Player";
 
 export default function Round() {
   const [pokerGame, setPokerGame] = useRecoilState(POKER_GAME_STATE);
@@ -26,37 +30,122 @@ export default function Round() {
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
   const [activeCardOverride, setActiveCardOverride] = useState<Card | undefined>(undefined);
 
-  const nextTurn = () => {
-    let currentPlayerIndex = pokerPlayers.findIndex(
-      (player) => player.id === pokerGame.currentTurn
+  const getNextTurnData = (
+    _tempPokerGame: PokerGame,
+    _tempPokerPlayers: PokerPlayer[]
+  ): [PokerGame, PokerPlayer[]] => {
+    let tempPokerGame = cloneDeep(_tempPokerGame);
+    let tempPokerPlayers = cloneDeep(_tempPokerPlayers);
+
+    const playingPlayers = tempPokerPlayers.filter((player) => !player.folded && !player.allIn);
+    let currentPlayerIndex = playingPlayers.findIndex(
+      (player) => player.id === tempPokerGame.currentTurn
     );
 
-    if (pokerGame.currentTurn == pokerGame.currentBigBlind && pokerGame.gameState == "PREFLOP") {
-      // End of preflop
-      setPokerGame({
-        ...pokerGame,
-        gameState: "FLOP",
-        currentTurn: pokerGame.currentSmallBlind,
-        currentBet: 0,
-      });
-
-      setPokerPlayers((pokerPlayers) => {
-        pokerPlayers.forEach((player) => {
-          player.currentBet = 0;
-        });
-        return pokerPlayers;
-      });
-      return;
+    if (playingPlayers.length == 0) {
+      // TODO
     }
 
-    setPokerGame({
-      ...pokerGame,
-      currentTurn: pokerPlayers[(currentPlayerIndex + 1) % pokerPlayers.length].id,
+    let nextPlayerIndex = (currentPlayerIndex + 1) % playingPlayers.length;
+    let nextPlayer = playingPlayers[nextPlayerIndex];
+
+    if (playingPlayers.length == 1) {
+      // TODO
+    }
+
+    tempPokerGame.currentTurn = nextPlayer.id;
+
+    return [tempPokerGame, tempPokerPlayers];
+  };
+
+  const collectBets = (
+    tempPokerGame: PokerGame,
+    tempPokerPlayers: PokerPlayer[]
+  ): [PokerGame, PokerPlayer[]] => {
+    // Puts all active bets into pots and sidepots
+    let currentBets = cloneDeep(pokerGame.currentBets);
+    let pots = cloneDeep(pokerGame.pots);
+
+    let smallestBet = Number.MAX_VALUE;
+    let largestBet = 0;
+    for (const [playerId, bet] of Object.entries(currentBets)) {
+      if (bet.amount < smallestBet) {
+        smallestBet = bet.amount;
+      }
+
+      if (bet.amount > largestBet) {
+        largestBet = bet.amount;
+      }
+    }
+
+    if (smallestBet == largestBet) {
+      // All bets are the same, so just add them to the main pot, no need for side pots
+      let mainPot = pots[0];
+
+      for (const [playerId, bet] of Object.entries(currentBets)) {
+        if (bet.dontAddToPot) {
+          if (
+            pokerGame.currentSmallBlind == playerId &&
+            pokerSettings.forcedBetOption == "BLINDS"
+          ) {
+            mainPot.amount -= pokerSettings.smallBlind;
+            mainPot.amount += bet.amount;
+          } else {
+            continue;
+          }
+        } else {
+          mainPot.amount += bet.amount;
+        }
+      }
+    } else {
+      // pepeLaugh good luck
+    }
+
+    tempPokerPlayers.forEach((pokerPlayer) => {
+      pokerPlayer.currentBet = 0;
     });
+
+    pots.forEach((pot) => {
+      pot.amount = round(pot.amount);
+    });
+
+    tempPokerGame.currentBets = {};
+    tempPokerGame.currentBet = 0;
+    tempPokerGame.pots = pots;
+
+    return [tempPokerGame, tempPokerPlayers];
+  };
+
+  const foldAction = () => {
+    console.log(`Player folds`);
+    let tempPokerGame = cloneDeep(pokerGame);
+    let tempPokerPlayers = cloneDeep(pokerPlayers);
+
+    tempPokerPlayers = tempPokerPlayers.map((player) => {
+      if (player.id == tempPokerGame.currentTurn) {
+        player.folded = true;
+      }
+
+      return player;
+    });
+    const [_tempPokerGame, _tempPokerPlayers] = getNextTurnData(tempPokerGame, tempPokerPlayers);
+    tempPokerGame = _tempPokerGame;
+    tempPokerPlayers = _tempPokerPlayers;
+
+    setPokerGame(tempPokerGame);
+    setPokerPlayers(tempPokerPlayers);
   };
 
   const checkAction = () => {
-    nextTurn();
+    let tempPokerGame = cloneDeep(pokerGame);
+    let tempPokerPlayers = cloneDeep(pokerPlayers);
+
+    const [_tempPokerGame, _tempPokerPlayers] = getNextTurnData(tempPokerGame, tempPokerPlayers);
+    tempPokerGame = _tempPokerGame;
+    tempPokerPlayers = _tempPokerPlayers;
+
+    setPokerGame(tempPokerGame);
+    setPokerPlayers(tempPokerPlayers);
   };
 
   const raiseAction = (raiseTo: number) => {};
@@ -78,97 +167,112 @@ export default function Round() {
     let pokerPlayer = { ...pokerPlayers.find((player) => player.id === pokerGame.currentTurn)! };
     let player = { ...getPlayer(pokerPlayer.id, players)! };
 
-    if (Math.abs(amount - player.balance) < 0.0001) {
-      // floating point comparison
+    if (pokerPlayer.allIn) {
+      console.error(
+        `Player ${pokerPlayer.displayName} is already all in`,
+        pokerPlayer,
+        player,
+        amount
+      );
+      return;
+    }
+
+    // Floating point comparison
+    if (Math.abs(player.balance - amount) < 0.0001) {
       pokerPlayer.allIn = true;
     }
 
-    if (!pokerPlayer.allIn) {
-      const _lastPot = pokerGame.pots[pokerGame.pots.length - 1];
-      let lastPot = {
-        type: _lastPot.type,
-        participants: [..._lastPot.participants],
-        amount: { ..._lastPot.amount },
-      };
-
-      lastPot.amount[pokerPlayer.id] = amount;
-      if (!lastPot.participants.includes(pokerPlayer.id)) {
-        lastPot.participants.push(pokerPlayer.id);
-      }
-
-      setPokerGame({
-        ...pokerGame,
-        pots: [...pokerGame.pots.slice(0, pokerGame.pots.length - 1), lastPot],
-        currentTurn: pokerPlayers[(currentPlayerIndex + 1) % pokerPlayers.length].id,
-        currentBet: Math.max(pokerGame.currentBet, amount),
-      });
-    } else {
-      //
-    }
-
     pokerPlayer.currentBet = amount;
-    player.balance -= amount;
+    let currentBets = cloneDeep(pokerGame.currentBets);
+    if (!currentBets[pokerPlayer.id]) {
+      currentBets[pokerPlayer.id] = {
+        amount: 0,
+        dontAddToPot: false,
+      };
+    }
+    currentBets[pokerPlayer.id].amount = amount;
+    setPokerGame({
+      ...pokerGame,
+      currentBets: currentBets,
+      currentTurn: pokerPlayers[(currentPlayerIndex + 1) % pokerPlayers.length].id,
+      currentBet: Math.max(pokerGame.currentBet, amount),
+    });
+
+    setPokerPlayers((pokerPlayers) => {
+      pokerPlayers[currentPlayerIndex] = pokerPlayer;
+      return pokerPlayers;
+    });
+
+    // Prevent weird floating point errors
+    player.balance = Math.round((player.balance - amount) * 100) / 100;
 
     setPlayers((players) => {
       let playerIndex = players.findIndex((player) => player.id === pokerPlayer.id);
       players[playerIndex] = player;
       return players;
-    });
-
-    setPokerPlayers((pokerPlayers) => {
-      let playerIndex = pokerPlayers.findIndex((player) => player.id === pokerPlayer.id);
-      pokerPlayers[playerIndex] = pokerPlayer;
-      return pokerPlayers;
     });
   };
 
   const callAction = () => {
-    let currentPlayerIndex = pokerPlayers.findIndex(
-      (player) => player.id === pokerGame.currentTurn
+    const tempPokerPlayers = cloneDeep(pokerPlayers);
+    const tempPokerGame = cloneDeep(pokerGame);
+    const tempPlayers = cloneDeep(players);
+
+    let currentPlayerIndex = tempPokerPlayers.findIndex(
+      (player) => player.id === tempPokerGame.currentTurn
     );
-    let pokerPlayer = { ...pokerPlayers.find((player) => player.id === pokerGame.currentTurn)! };
-    let player = { ...getPlayer(pokerPlayer.id, players)! };
+    let pokerPlayer = {
+      ...tempPokerPlayers.find((player) => player.id === tempPokerGame.currentTurn)!,
+    };
+    let player = { ...getPlayer(pokerPlayer.id, tempPlayers)! };
 
-    let amountToCall = pokerGame.currentBet - pokerPlayer.currentBet;
-    if (amountToCall > player.balance) {
-      amountToCall = player.balance;
-      pokerPlayer.allIn = true;
-    } else {
-      // deep copy the last pot
-      const _lastPot = pokerGame.pots[pokerGame.pots.length - 1];
-      let lastPot = {
-        type: _lastPot.type,
-        participants: [..._lastPot.participants],
-        amount: { ..._lastPot.amount },
-      };
-      lastPot.amount[pokerPlayer.id] = amountToCall;
-      if (!lastPot.participants.includes(pokerPlayer.id)) {
-        lastPot.participants.push(pokerPlayer.id);
-      }
+    const amountToCallTo = tempPokerGame.currentBet - pokerPlayer.currentBet;
 
-      setPokerGame({
-        ...pokerGame,
-        pots: [...pokerGame.pots.slice(0, pokerGame.pots.length - 1), lastPot],
-        currentTurn: pokerPlayers[(currentPlayerIndex + 1) % pokerPlayers.length].id,
-      });
+    if (pokerPlayer.allIn) {
+      console.error(
+        `Player ${pokerPlayer.displayName} is already all in`,
+        pokerPlayer,
+        player,
+        amountToCallTo
+      );
+      return;
     }
 
-    pokerPlayer.currentBet += amountToCall;
-    player.balance -= amountToCall;
+    if (player.balance < amountToCallTo) {
+      pokerPlayer.allIn = true;
+      pokerPlayer.currentBet = player.balance;
+    } else {
+      pokerPlayer.currentBet = tempPokerGame.currentBet;
+    }
 
-    setPlayers((players) => {
-      let playerIndex = players.findIndex((player) => player.id === pokerPlayer.id);
-      players[playerIndex] = player;
-      return players;
-    });
+    let currentBets = cloneDeep(tempPokerGame.currentBets);
+    console.log(currentBets);
+    if (!currentBets[pokerPlayer.id]) {
+      currentBets[pokerPlayer.id] = {
+        amount: 0,
+        dontAddToPot: false,
+      };
+    }
+    currentBets[pokerPlayer.id].amount = pokerPlayer.currentBet;
 
-    setPokerPlayers((pokerPlayers) => {
-      let playerIndex = pokerPlayers.findIndex((player) => player.id === pokerPlayer.id);
-      pokerPlayers[playerIndex] = pokerPlayer;
-      return pokerPlayers;
-    });
+    //  Round all bets to the hundredths place
+    for (const playerId in currentBets) {
+      currentBets[playerId].amount = round(currentBets[playerId].amount);
+    }
 
-    // nextTurn();
+    tempPokerGame.currentBets = currentBets;
+    tempPokerGame.currentTurn =
+      tempPokerPlayers[(currentPlayerIndex + 1) % tempPokerPlayers.length].id;
+
+    pokerPlayer.currentBet = round(pokerPlayer.currentBet);
+    tempPokerPlayers[currentPlayerIndex] = pokerPlayer;
+
+    player.balance = round(player.balance - amountToCallTo);
+    tempPlayers[tempPlayers.findIndex((p) => p.id === player.id)] = player;
+
+    setPlayers(tempPlayers);
+    setPokerGame(tempPokerGame);
+    setPokerPlayers(tempPokerPlayers);
   };
 
   return (
@@ -201,20 +305,23 @@ export default function Round() {
 
       <Flex direction="column" gap="xs">
         <CommunityCards />
-        {pokerPlayers.map((pokerPlayer) => {
-          return (
-            <RoundPlayerCard
-              player={getPlayer(pokerPlayer.id, players)!}
-              pokerPlayer={pokerPlayer}
-              active={pokerPlayer.id === pokerGame.currentTurn}
-              key={pokerPlayer.id}
-              checkAction={checkAction}
-              callAction={callAction}
-              raiseAction={raiseAction}
-              betAction={betAction}
-            />
-          );
-        })}
+        {pokerPlayers
+          .filter((p) => !p.folded)
+          .map((pokerPlayer) => {
+            return (
+              <RoundPlayerCard
+                player={getPlayer(pokerPlayer.id, players)!}
+                pokerPlayer={pokerPlayer}
+                active={pokerPlayer.id === pokerGame.currentTurn}
+                key={pokerPlayer.id}
+                checkAction={checkAction}
+                callAction={callAction}
+                raiseAction={raiseAction}
+                betAction={betAction}
+                foldAction={foldAction}
+              />
+            );
+          })}
       </Flex>
       <Button
         onClick={() => {
