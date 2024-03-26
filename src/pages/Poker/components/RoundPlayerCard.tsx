@@ -15,6 +15,7 @@ import {
   NumberInput,
   Text,
   Tooltip,
+  darken,
   useMantineTheme,
 } from "@mantine/core";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -41,6 +42,7 @@ export default function RoundPlayerCard({
   callAction,
   raiseAction,
   betAction,
+  foldAction,
 }: {
   player: Player;
   pokerPlayer: PokerPlayer;
@@ -49,11 +51,26 @@ export default function RoundPlayerCard({
   callAction: () => void;
   raiseAction: (raiseTo: number) => void;
   betAction: (amount: number) => void;
+  foldAction: () => void;
 }) {
   const theme = useMantineTheme();
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
   const pokerGame = useRecoilValue(POKER_GAME_STATE);
   const pokerSettings = useRecoilValue(POKER_SETTINGS_STATE);
+
+  const [foldConfirm, setFoldConfirm] = useState(false);
+  const [timerStart, setTimerStart] = useState<number | null>(null);
+
+  const [dateNow, setDateNow] = useState(Date.now());
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (foldConfirm) {
+        setDateNow(Date.now());
+      }
+    }, 5);
+
+    return () => clearInterval(interval);
+  }, [foldConfirm]);
 
   const [betOrRaise, setBetOrRaise] = useState<"BET" | "RAISE">("BET");
   const [betOpened, betOpenedHandlers] = useDisclosure(false);
@@ -75,7 +92,13 @@ export default function RoundPlayerCard({
       header={
         <>
           <Flex align="center" mr="sm" gap="xs">
-            <Text size="xl" fw="bold">
+            <Text
+              size="xl"
+              c={pokerPlayer.folded ? "dimmed" : undefined}
+              fw={pokerPlayer.folded ? 600 : "bold"}
+              td={pokerPlayer.folded ? "line-through" : undefined}
+              fs={pokerPlayer.folded ? "italic" : undefined}
+            >
               {pokerPlayer.displayName}
             </Text>
             {pokerPlayer.allIn && <AllInBadge />}
@@ -177,14 +200,11 @@ export default function RoundPlayerCard({
                     color="blue"
                     disabled={!active || betError != null}
                     onClick={() => {
-                      if (betOrRaise == "RAISE") {
-                        // raiseAction(totalAmount);
-                      } else {
-                        betAction(bet);
-                      }
+                      betAction(bet);
+                      betOpenedHandlers.close();
                     }}
                   >
-                    {betOrRaise == "BET" ? "Bet" : "Raise"} {formatMoney(bet, true, false)}
+                    {betOrRaise == "BET" ? "Bet" : "Raise to"} {formatMoney(bet, true, false)}
                   </Button>
                 </Grid.Col>
               </Grid>
@@ -197,13 +217,42 @@ export default function RoundPlayerCard({
                 Call {formatMoney(pokerGame.currentBet - pokerPlayer.currentBet, true, true)}
               </Button>
             )}
-            {pokerGame.currentBet == pokerPlayer.currentBet && (
+            {pokerGame.currentBet <= pokerPlayer.currentBet && (
               <Button fullWidth color="green" disabled={!active} onClick={checkAction}>
                 Check
               </Button>
             )}
-            <Button fullWidth color="red" disabled={!active}>
-              Fold
+            <Button
+              fullWidth
+              color="red"
+              disabled={!active}
+              style={{
+                // Make the background like a progress bar, showing how long until the fold confirm is reset
+                background: active
+                  ? `linear-gradient(to left, ${theme.colors.red[8]} ${Math.min(
+                      100,
+                      ((dateNow - (timerStart || 0)) / 3000) * 100
+                    )}%, ${theme.colors.red[9]} 0%)`
+                  : undefined,
+              }}
+              onClick={() => {
+                if (foldConfirm) {
+                  foldAction();
+                  setFoldConfirm(false);
+                  return;
+                } else {
+                  setFoldConfirm(true);
+
+                  // We wait 3 seconds to reset the fold confirm
+                  setTimerStart(Date.now());
+                  setTimeout(() => {
+                    setFoldConfirm(false);
+                    setTimerStart(null);
+                  }, 3000);
+                }
+              }}
+            >
+              {foldConfirm ? "Are you sure?" : "Fold"}
             </Button>
             {pokerGame.currentBet > 0 && (
               <Button

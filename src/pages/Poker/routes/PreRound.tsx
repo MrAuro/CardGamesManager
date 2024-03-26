@@ -9,7 +9,7 @@ import GenericPlayerCard from "@/components/GenericPlayerCard";
 import PlayerSelector, { PlayerSelectorHandles } from "@/components/PlayerSelector";
 import { PokerPlayer } from "@/types/Poker";
 import { EMPTY_CARD } from "@/utils/CardHelper";
-import { formatMoney } from "@/utils/MoneyHelper";
+import { formatMoney, round } from "@/utils/MoneyHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import { Draggable, DraggableStateSnapshot } from "@hello-pangea/dnd";
 import {
@@ -114,8 +114,8 @@ export default function PreRound() {
       draft.forEach((player) => {
         if (paymentsToTake[player.id]) {
           console.log(`Taking ${paymentsToTake[player.id]} from ${player.name}`);
-          player.balance -= paymentsToTake[player.id];
-          amountInPot += paymentsToTake[player.id];
+          player.balance = round(player.balance - paymentsToTake[player.id]);
+          amountInPot += round(paymentsToTake[player.id]);
         }
       });
     });
@@ -131,6 +131,14 @@ export default function PreRound() {
       firstTurn = pokerPlayers[(dealerIndex + 1) % pokerPlayers.length].id;
     }
 
+    let currentBets: { [key: string]: { amount: number; dontAddToPot: boolean } } = {};
+    for (const playerId in paymentsToTake) {
+      currentBets[playerId] = {
+        amount: paymentsToTake[playerId],
+        dontAddToPot: true,
+      };
+    }
+
     setPokerGame({
       ...pokerGame,
       communityCards: [EMPTY_CARD, EMPTY_CARD, EMPTY_CARD, EMPTY_CARD, EMPTY_CARD],
@@ -139,13 +147,13 @@ export default function PreRound() {
       currentTurn: firstTurn,
       pots: [
         {
-          type: "MAIN",
-          amount: {
-            ...paymentsToTake,
-          },
-          participants: Object.keys(paymentsToTake),
+          eligiblePlayers: Object.keys(paymentsToTake),
+          amount: round(amountInPot),
+          maximum: round(amountInPot),
+          closed: false,
         },
       ],
+      currentBets,
     });
   };
 
