@@ -26,6 +26,7 @@ export type PokerPlayer = {
   folded: boolean;
   currentBet: number;
   allIn: boolean;
+  beenOn: boolean; // Whether or not the player has acted in the current round
 };
 
 export type PokerSettings = {

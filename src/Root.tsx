@@ -125,6 +125,7 @@ export const POKER_GAME_STATE = atom<PokerGame>({
         currentTurn: "",
         communityCards: [],
         currentBet: 0,
+        currentBets: {},
       };
       await TAURI_STORE.set("pokerGame", game);
     }
