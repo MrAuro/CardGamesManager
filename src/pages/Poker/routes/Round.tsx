@@ -111,11 +111,22 @@ export default function Round() {
       .filter((player) => !player.folded && !player.allIn)
       .every((player) => player.beenOn);
 
-    let betsPending = tempPokerPlayers
-      .filter((player) => !player.folded && !player.allIn)
-      .some((player) => player.currentBet < tempPokerGame.currentBet);
+    let betsPending = false;
+    for (const player of tempPokerPlayers) {
+      if (!player.folded && !player.allIn) {
+        if (player.currentBet < tempPokerGame.currentBet) {
+          console.log(
+            `${player.displayName} has not bet enough, ${player.currentBet} vs ${tempPokerGame.currentBet}`
+          );
+          betsPending = true;
+          break;
+        }
+      }
+    }
 
-    if (everyoneBeenOn && !betsPending) {
+    console.log(`(ORDER) Everyone has been on: ${everyoneBeenOn}, Bets pending: ${betsPending}`);
+
+    const goNextRound = () => {
       console.log(`(ORDER) Everyone has been on`);
       let dealerIndex = tempPokerPlayers.findIndex(
         (player) => player.id == tempPokerGame.currentDealer
@@ -158,6 +169,10 @@ export default function Round() {
       const [_tempPokerGame, _tempPokerPlayers] = collectBets(tempPokerGame, tempPokerPlayers);
       tempPokerGame = _tempPokerGame;
       tempPokerPlayers = _tempPokerPlayers;
+    };
+
+    if (everyoneBeenOn && !betsPending) {
+      goNextRound();
     } else {
       let nextPlayerIndex = (currentPlayerIndex + 1) % tempPokerPlayers.length;
       let limit = tempPokerPlayers.length;
@@ -171,6 +186,26 @@ export default function Round() {
       }
 
       tempPokerGame.currentTurn = tempPokerPlayers[nextPlayerIndex].id;
+    }
+
+    let newBetsPending = false;
+    for (const player of tempPokerPlayers) {
+      console.log(`${player.displayName} has bet ${player.currentBet}`);
+      if (!player.folded && !player.allIn) {
+        if (player.currentBet < tempPokerGame.currentBet) {
+          console.log(
+            `${player.displayName} has not bet enough, ${player.currentBet} vs ${tempPokerGame.currentBet}`
+          );
+          newBetsPending = true;
+          break;
+        }
+      }
+    }
+
+    console.log(`(ORDER) Bets pending -> new: ${newBetsPending} | old: ${betsPending}`);
+
+    if (newBetsPending == false && betsPending == true) {
+      goNextRound();
     }
 
     return [tempPokerGame, tempPokerPlayers];
@@ -258,6 +293,12 @@ export default function Round() {
     tempPokerGame = _tempPokerGame;
     tempPokerPlayers = _tempPokerPlayers;
 
+    tempPokerPlayers.forEach((player) => {
+      player.beenOn = false;
+    });
+
+    tempPokerPlayers[currentPlayerIndex].beenOn = true;
+
     setPlayers(tempPlayers);
     setPokerGame(tempPokerGame);
     setPokerPlayers(tempPokerPlayers);
@@ -311,13 +352,13 @@ export default function Round() {
     }
 
     tempPokerGame.currentBets = currentBets;
-    console.log(`tempPokerPlayers before`, tempPokerPlayers);
+    pokerPlayer.currentBet = round(pokerPlayer.currentBet);
+    tempPokerPlayers[currentPlayerIndex] = pokerPlayer;
+
     const [_tempPokerGame, _tempPokerPlayers] = getNextTurnData(tempPokerGame, tempPokerPlayers);
     tempPokerGame = _tempPokerGame;
     tempPokerPlayers = _tempPokerPlayers;
-    console.log(`tempPokerPlayers after`, tempPokerPlayers);
 
-    pokerPlayer.currentBet = round(pokerPlayer.currentBet);
     tempPokerPlayers[currentPlayerIndex] = {
       ...pokerPlayer,
       beenOn: _tempPokerPlayers[currentPlayerIndex].beenOn,
@@ -363,16 +404,23 @@ export default function Round() {
         <CommunityCards />
         {pokerPlayers.map((pokerPlayer) => {
           return (
-            <RoundPlayerCard
-              player={getPlayer(pokerPlayer.id, players)!}
-              pokerPlayer={pokerPlayer}
-              active={pokerPlayer.id === pokerGame.currentTurn}
-              key={pokerPlayer.id}
-              checkAction={checkAction}
-              callAction={callAction}
-              betAction={betAction}
-              foldAction={foldAction}
-            />
+            <div
+              style={{
+                opacity: pokerPlayer.folded ? 0.25 : 1,
+                filter: pokerPlayer.folded ? "blur(1.5px)" : "none",
+              }}
+            >
+              <RoundPlayerCard
+                player={getPlayer(pokerPlayer.id, players)!}
+                pokerPlayer={pokerPlayer}
+                active={pokerPlayer.id === pokerGame.currentTurn}
+                key={pokerPlayer.id}
+                checkAction={checkAction}
+                callAction={callAction}
+                betAction={betAction}
+                foldAction={foldAction}
+              />
+            </div>
           );
         })}
       </Flex>
