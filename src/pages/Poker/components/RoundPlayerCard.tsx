@@ -95,9 +95,8 @@ export default function RoundPlayerCard({
               c={pokerPlayer.folded ? "dimmed" : undefined}
               fw={pokerPlayer.folded ? 600 : "bold"}
               td={pokerPlayer.folded ? "line-through" : undefined}
-              fs={pokerPlayer.folded ? "italic" : undefined}
             >
-              {pokerPlayer.displayName} {pokerPlayer.beenOn ? "✅" : "❌"}
+              {pokerPlayer.displayName}
             </Text>
             {pokerPlayer.allIn && <AllInBadge />}
             {pokerGame.currentDealer == player.id && <DealerBadge />}

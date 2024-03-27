@@ -11,8 +11,9 @@ export default function CommunityCards() {
 
   let temp: string[] = [];
 
+  let totalAmountToBePutInPot = 0;
   for (const [k, v] of Object.entries(pokerGame.currentBets)) {
-    temp.push(`${k}: ${v.amount} (${v.dontAddToPot})`);
+    totalAmountToBePutInPot += v.amount;
   }
 
   return (
@@ -29,14 +30,14 @@ export default function CommunityCards() {
         Community Cards ({pokerGame.gameState})
       </Title>
       <Text size="sm" ta="center" fw={500}>
-        {pokerGame.pots.map((pot) => {
-          return JSON.stringify(pot, null, 2);
+        {pokerGame.pots.map((pot, index) => {
+          return `${
+            pokerGame.pots.length > 0 ? (index == 0 ? "Main Pot" : `Pot #${index}`) : "Pot"
+          }: ${formatMoney(pot.amount)}`;
         })}
       </Text>
       <Text size="sm" ta="center" fw={500}>
-        {temp.map((bet) => {
-          return <div>{bet}</div>;
-        })}
+        {formatMoney(totalAmountToBePutInPot)} to be put in the pot
       </Text>
       <Divider my="xs" />
       <Flex justify="center" gap="sm">
