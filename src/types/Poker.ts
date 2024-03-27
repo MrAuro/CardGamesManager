@@ -39,6 +39,9 @@ export type PokerSettings = {
 export type PokerPot = {
   eligiblePlayers: string[];
   amount: number;
-  maximum: number;
+  /**
+   * @deprecated
+   */
+  maximum?: number;
   closed: boolean;
 };

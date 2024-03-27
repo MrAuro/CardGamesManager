@@ -83,6 +83,21 @@ export default function Players() {
       >
         Add Player
       </Button>
+      <Button
+        fullWidth
+        my="sm"
+        variant="light"
+        onClick={() => {
+          setPlayers((draft) => {
+            draft.forEach((player, i) => {
+              if (i == 0) player.balance = 50;
+              else player.balance = 100;
+            });
+          });
+        }}
+      >
+        Reset All Balances
+      </Button>
     </>
   );
 }

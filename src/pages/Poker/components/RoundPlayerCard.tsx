@@ -85,6 +85,8 @@ export default function RoundPlayerCard({
     setBetError(null);
   }, [bet]);
 
+  const mustGoAllIn = pokerGame.currentBet - pokerPlayer.currentBet > player.balance;
+
   return (
     <GenericPlayerCard
       header={
@@ -212,7 +214,14 @@ export default function RoundPlayerCard({
           <Group grow>
             {pokerGame.currentBet > pokerPlayer.currentBet && (
               <Button fullWidth color="green" disabled={!active} onClick={callAction}>
-                Call {formatMoney(pokerGame.currentBet - pokerPlayer.currentBet, true, true)}
+                Call{" "}
+                {mustGoAllIn
+                  ? `${formatMoney(player.balance)} (All In)`
+                  : formatMoney(
+                      Math.min(pokerGame.currentBet - pokerPlayer.currentBet, player.balance),
+                      true,
+                      true
+                    )}
               </Button>
             )}
             {pokerGame.currentBet <= pokerPlayer.currentBet && (
