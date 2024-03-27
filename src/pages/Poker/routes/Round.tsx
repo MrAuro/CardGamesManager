@@ -62,6 +62,12 @@ export default function Round() {
           ) {
             mainPot.amount -= pokerSettings.smallBlind;
             mainPot.amount += bet.amount;
+          } else if (
+            pokerGame.currentBigBlind == playerId &&
+            pokerSettings.forcedBetOption == "BLINDS"
+          ) {
+            mainPot.amount -= pokerSettings.bigBlind;
+            mainPot.amount += bet.amount;
           } else {
             continue;
           }
