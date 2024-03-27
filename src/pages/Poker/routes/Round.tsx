@@ -6,7 +6,7 @@ import {
   POKER_SETTINGS_STATE,
 } from "@/Root";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
-import { Button, Flex, useMantineTheme } from "@mantine/core";
+import { Button, CardSection, Flex, useMantineTheme } from "@mantine/core";
 import { useRecoilState } from "recoil";
 import CommunityCards from "../components/CommunityCards";
 import RoundPlayerCard from "../components/RoundPlayerCard";
@@ -379,19 +379,29 @@ export default function Round() {
         intitialCard={cardSelector.intitalCard}
         activeCardOverride={activeCardOverride}
         onSubmit={(card) => {
-          setPokerPlayers((pokerPlayers) => {
-            let playerIndex = pokerPlayers.findIndex(
-              (player) => player.id == cardSelector.onSubmitTarget
-            );
+          if (cardSelector.onSubmitTarget == "COMMUNITY_CARDS") {
+            const cards = cloneDeep(pokerGame.communityCards);
+            cards[cardSelector.onSubmitIndex] = card;
 
-            if (playerIndex == -1) {
-              console.warn("Player not found when submitting card", cardSelector.onSubmitTarget);
-            } else {
-              pokerPlayers[playerIndex].cards[cardSelector.onSubmitIndex] = card;
-            }
+            setPokerGame({
+              ...pokerGame,
+              communityCards: cards,
+            });
+          } else {
+            setPokerPlayers((pokerPlayers) => {
+              let playerIndex = pokerPlayers.findIndex(
+                (player) => player.id == cardSelector.onSubmitTarget
+              );
 
-            return pokerPlayers;
-          });
+              if (playerIndex == -1) {
+                console.warn("Player not found when submitting card", cardSelector.onSubmitTarget);
+              } else {
+                pokerPlayers[playerIndex].cards[cardSelector.onSubmitIndex] = card;
+              }
+
+              return pokerPlayers;
+            });
+          }
 
           setCardSelector({
             ...cardSelector,
