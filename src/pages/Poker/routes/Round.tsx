@@ -35,58 +35,63 @@ export default function Round() {
     tempPokerPlayers: PokerPlayer[]
   ): [PokerGame, PokerPlayer[]] => {
     // Puts all active bets into pots and sidepots
-    let currentBets = cloneDeep(pokerGame.currentBets);
-    let pots = cloneDeep(pokerGame.pots);
+    let currentBets = cloneDeep(tempPokerGame.currentBets);
+    let pots = cloneDeep(tempPokerGame.pots);
 
-    let smallestBet = Number.MAX_VALUE;
-    let largestBet = 0;
-    for (const [playerId, bet] of Object.entries(currentBets)) {
-      if (bet.amount < smallestBet) {
-        smallestBet = bet.amount;
+    // Function to handle the distribution of bets into pots
+    const distributeBetsToPots = (
+      bets: { [playerId: string]: { amount: number; dontAddToPot?: boolean } },
+      pots: PokerPot[]
+    ) => {
+      let smallestBet = Number.MAX_VALUE;
+      let playersWithBets = Object.entries(bets).filter(
+        ([_, bet]) => bet.amount > 0 && !bet.dontAddToPot
+      );
+
+      if (playersWithBets.length === 0) {
+        return; // No bets to distribute
       }
 
-      if (bet.amount > largestBet) {
-        largestBet = bet.amount;
-      }
-    }
-
-    if (smallestBet == largestBet) {
-      // All bets are the same, so just add them to the main pot, no need for side pots
-      let mainPot = pots[0];
-
-      for (const [playerId, bet] of Object.entries(currentBets)) {
-        if (bet.dontAddToPot) {
-          if (
-            pokerGame.currentSmallBlind == playerId &&
-            pokerSettings.forcedBetOption == "BLINDS"
-          ) {
-            mainPot.amount -= pokerSettings.smallBlind;
-            mainPot.amount += bet.amount;
-          } else if (
-            pokerGame.currentBigBlind == playerId &&
-            pokerSettings.forcedBetOption == "BLINDS"
-          ) {
-            mainPot.amount -= pokerSettings.bigBlind;
-            mainPot.amount += bet.amount;
-          } else {
-            continue;
-          }
-        } else {
-          mainPot.amount += bet.amount;
+      // Find the smallest bet among all players
+      playersWithBets.forEach(([_, bet]) => {
+        if (bet.amount < smallestBet) {
+          smallestBet = bet.amount;
         }
+      });
+
+      // Determine the main pot or create a new one if necessary
+      let mainPot = pots.find((pot) => !pot.closed) || {
+        amount: 0,
+        eligiblePlayers: [],
+        closed: false,
+      };
+      if (!pots.includes(mainPot)) {
+        pots.push(mainPot);
       }
-    } else {
-      // pepeLaugh good luck
-    }
 
-    tempPokerPlayers.forEach((pokerPlayer) => {
-      pokerPlayer.currentBet = 0;
-    });
+      // Distribute the smallest bet amount to the main pot
+      playersWithBets.forEach(([playerId, bet]) => {
+        mainPot.amount += smallestBet;
+        bet.amount -= smallestBet;
+        if (!mainPot.eligiblePlayers.includes(playerId)) {
+          mainPot.eligiblePlayers.push(playerId);
+        }
+      });
 
-    pots.forEach((pot) => {
-      pot.amount = round(pot.amount);
-    });
+      // Check if there's a need for a side pot
+      if (playersWithBets.some(([_, bet]) => bet.amount > 0)) {
+        mainPot.closed = true; // Close the current main pot
+        distributeBetsToPots(bets, pots); // Recursively distribute remaining bets
+      }
+    };
 
+    distributeBetsToPots(currentBets, pots);
+
+    // Reset player bets and round pot amounts
+    tempPokerPlayers.forEach((player) => (player.currentBet = 0));
+    pots.forEach((pot) => (pot.amount = round(pot.amount)));
+
+    // Clear current bets and update the game state
     tempPokerGame.currentBets = {};
     tempPokerGame.currentBet = 0;
     tempPokerGame.pots = pots;
@@ -133,7 +138,10 @@ export default function Round() {
       );
       let firstPlayerIndex = dealerIndex + 1;
       let limit = tempPokerPlayers.length;
-      while (tempPokerPlayers[firstPlayerIndex].folded) {
+      while (
+        tempPokerPlayers[firstPlayerIndex].folded ||
+        tempPokerPlayers[firstPlayerIndex].allIn
+      ) {
         firstPlayerIndex = (firstPlayerIndex + 1) % tempPokerPlayers.length;
         limit--;
 
@@ -317,7 +325,7 @@ export default function Round() {
     };
     let player = { ...getPlayer(pokerPlayer.id, tempPlayers)! };
 
-    const amountToCallTo = tempPokerGame.currentBet - pokerPlayer.currentBet;
+    let amountToCallTo = tempPokerGame.currentBet - pokerPlayer.currentBet;
 
     if (pokerPlayer.allIn) {
       console.error(
@@ -329,9 +337,14 @@ export default function Round() {
       return;
     }
 
-    if (player.balance < amountToCallTo) {
+    console.log(
+      `(CALL) Player ${pokerPlayer.displayName} calls ${amountToCallTo} (${player.balance})`
+    );
+    if (player.balance <= amountToCallTo) {
+      console.log(`Player ${pokerPlayer.displayName} is all in`);
       pokerPlayer.allIn = true;
       pokerPlayer.currentBet = player.balance;
+      amountToCallTo = player.balance;
     } else {
       pokerPlayer.currentBet = tempPokerGame.currentBet;
     }
