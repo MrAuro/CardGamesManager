@@ -9,7 +9,7 @@ export default function GenericPlayerCard({
   backgroundColor,
   styles,
 }: {
-  header: string;
+  header: string | JSX.Element;
   subtext?: string;
   subsection?: JSX.Element[] | JSX.Element;
   rightSection?: JSX.Element;
@@ -31,9 +31,13 @@ export default function GenericPlayerCard({
     >
       <Group justify="space-between">
         <div>
-          <Text size="xl" fw="bold">
-            {header}
-          </Text>
+          {typeof header === "string" ? (
+            <Text size="xl" fw="bold">
+              {header}
+            </Text>
+          ) : (
+            header
+          )}
 
           {subtext ? (
             <Text size="sm" c="dimmed">
@@ -47,7 +51,7 @@ export default function GenericPlayerCard({
             style={{
               display: "flex",
               justifyContent: "flex-end",
-              width: "80%",
+              width: "75%",
             }}
           >
             {rightSection}

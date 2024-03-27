@@ -6,6 +6,7 @@ import { IconPencil } from "@tabler/icons-react";
 import { useState } from "react";
 import { useRecoilState } from "recoil";
 import PlayerModal from "./components/PlayerModal";
+import { formatMoney } from "@/utils/MoneyHelper";
 
 export default function Players() {
   const [players, setPlayers] = useRecoilImmerState(PLAYERS_STATE);
@@ -51,7 +52,7 @@ export default function Players() {
         {players.map((player) => (
           <GenericPlayerCard
             header={player.name}
-            subtext={`$${player.balance.toFixed(2)}`}
+            subtext={formatMoney(player.balance)}
             key={player.id}
             rightSection={
               <ActionIcon
