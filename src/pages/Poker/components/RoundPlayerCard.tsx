@@ -40,7 +40,6 @@ export default function RoundPlayerCard({
   active,
   checkAction,
   callAction,
-  raiseAction,
   betAction,
   foldAction,
 }: {
@@ -49,7 +48,6 @@ export default function RoundPlayerCard({
   active: boolean;
   checkAction: () => void;
   callAction: () => void;
-  raiseAction: (raiseTo: number) => void;
   betAction: (amount: number) => void;
   foldAction: () => void;
 }) {

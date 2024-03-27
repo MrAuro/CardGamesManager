@@ -208,18 +208,6 @@ export default function Round() {
     setPokerPlayers(tempPokerPlayers);
   };
 
-  const raiseAction = (raiseTo: number) => {};
-
-  // const betAction = (amount: number) => {
-  //   let currentPlayerIndex = pokerPlayers.findIndex(
-  //     (player) => player.id === pokerGame.currentTurn
-  //   );
-
-  //   setPokerGame({
-  //     ...pokerGame,
-  //     currentBet: pokerGame.currentBet + amount,
-  //   })
-  // };
   const betAction = (amount: number) => {
     let tempPokerPlayers = cloneDeep(pokerPlayers);
     let tempPokerGame = cloneDeep(pokerGame);
@@ -382,7 +370,6 @@ export default function Round() {
               key={pokerPlayer.id}
               checkAction={checkAction}
               callAction={callAction}
-              raiseAction={raiseAction}
               betAction={betAction}
               foldAction={foldAction}
             />
