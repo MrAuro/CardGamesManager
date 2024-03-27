@@ -14,6 +14,8 @@ import {
 import { useRecoilState } from "recoil";
 import { CARD_SELECTOR_STATE } from "../routes/Round";
 import { getCardTotal } from "@/utils/BlackjackHelper";
+import { useScrollIntoView } from "@mantine/hooks";
+import { useEffect } from "react";
 
 export default function DealerCard({
   cards,
@@ -32,6 +34,18 @@ export default function DealerCard({
 }) {
   const theme = useMantineTheme();
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
+  const { scrollIntoView, targetRef } = useScrollIntoView<HTMLDivElement>({
+    offset: 100,
+    duration: 500,
+  });
+
+  useEffect(() => {
+    if (isActive) {
+      scrollIntoView({
+        alignment: "start",
+      });
+    }
+  }, [isActive]);
 
   const calculatedCardResult = getCardTotal(cards);
 
@@ -44,94 +58,96 @@ export default function DealerCard({
   }
 
   return (
-    <GenericPlayerCard
-      header="Dealer"
-      backgroundColor={isActive ? theme.colors.dark[6] : theme.colors.dark[7]}
-      rightSection={
-        <>
-          <Paper
-            style={{
-              width: "4.5rem",
-              height: "4.5rem",
-              backgroundColor: "transparent",
-            }}
-          >
-            <div
+    <div ref={targetRef}>
+      <GenericPlayerCard
+        header="Dealer"
+        backgroundColor={isActive ? theme.colors.dark[6] : theme.colors.dark[7]}
+        rightSection={
+          <>
+            <Paper
               style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "100%",
-                height: "100%",
+                width: "4.5rem",
+                height: "4.5rem",
+                backgroundColor: "transparent",
               }}
             >
-              <Text size={rem(14)} fw={600} tt="uppercase" ta="center">
-                {calculatedCardResult.ace !== "NONE" ? calculatedCardResult.ace : ""}
-              </Text>
-              <Text size={rem(30)} fw="bold" ta="center">
-                {calculatedCardResult.total}
-              </Text>
-              <Text size={rem(14)} fw={600} tt="uppercase" ta="center" mt="3">
-                {dealerAction}
-              </Text>
-            </div>
-          </Paper>
-          {cards.map((card, index) => (
-            <Container p={0} m={0} pl="xs" key={`${card}-${index}`}>
-              <PlayingCard
-                key={index}
-                card={card}
-                onClick={() => {
-                  setCardSelector({
-                    ...cardSelector,
-                    intitalCard: card,
-                    opened: true,
-                    onSubmitTarget: "DEALER",
-                    onSubmitIndex: index,
-                  });
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "100%",
+                  height: "100%",
                 }}
-                disabled={isActive}
-              />
-            </Container>
-          ))}
-        </>
-      }
-    >
-      <Divider my="xs" />
-      <Group grow>
-        {firstTurn ? (
+              >
+                <Text size={rem(14)} fw={600} tt="uppercase" ta="center">
+                  {calculatedCardResult.ace !== "NONE" ? calculatedCardResult.ace : ""}
+                </Text>
+                <Text size={rem(30)} fw="bold" ta="center">
+                  {calculatedCardResult.total}
+                </Text>
+                <Text size={rem(14)} fw={600} tt="uppercase" ta="center" mt="3">
+                  {dealerAction}
+                </Text>
+              </div>
+            </Paper>
+            {cards.map((card, index) => (
+              <Container p={0} m={0} pl="xs" key={`${card}-${index}`}>
+                <PlayingCard
+                  key={index}
+                  card={card}
+                  onClick={() => {
+                    setCardSelector({
+                      ...cardSelector,
+                      intitalCard: card,
+                      opened: true,
+                      onSubmitTarget: "DEALER",
+                      onSubmitIndex: index,
+                    });
+                  }}
+                  disabled={isActive}
+                />
+              </Container>
+            ))}
+          </>
+        }
+      >
+        <Divider my="xs" />
+        <Group grow>
+          {firstTurn ? (
+            <Button
+              disabled={!isActive}
+              fullWidth
+              onClick={() => {
+                nextTurn(false);
+              }}
+            >
+              Next Turn
+            </Button>
+          ) : (
+            <Button disabled={!isActive} fullWidth>
+              Add Card
+            </Button>
+          )}
           <Button
-            disabled={!isActive}
+            variant={isActive ? "filled" : "light"}
             fullWidth
-            onClick={() => {
-              nextTurn(false);
-            }}
+            color="red"
+            onClick={refundAndCancel}
           >
-            Next Turn
+            Refund & Cancel
           </Button>
-        ) : (
-          <Button disabled={!isActive} fullWidth>
-            Add Card
+          {!firstTurn && isActive && (
+            <Button fullWidth color="green">
+              Payout & End
+            </Button>
+          )}
+          <Button disabled={isActive} fullWidth color="gray" onClick={() => forceTurn("DEALER")}>
+            Force Turn
           </Button>
-        )}
-        <Button
-          variant={isActive ? "filled" : "light"}
-          fullWidth
-          color="red"
-          onClick={refundAndCancel}
-        >
-          Refund & Cancel
-        </Button>
-        {!firstTurn && isActive && (
-          <Button fullWidth color="green">
-            Payout & End
-          </Button>
-        )}
-        <Button disabled={isActive} fullWidth color="gray" onClick={() => forceTurn("DEALER")}>
-          Force Turn
-        </Button>
-      </Group>
-    </GenericPlayerCard>
+        </Group>
+      </GenericPlayerCard>
+    </div>
   );
 }

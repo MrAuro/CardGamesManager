@@ -26,6 +26,8 @@ import {
 } from "@mantine/core";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { CARD_SELECTOR_STATE } from "../routes/Round";
+import { useScrollIntoView } from "@mantine/hooks";
+import { useEffect } from "react";
 
 export default function RoundPlayerCard({
   player,
@@ -44,15 +46,25 @@ export default function RoundPlayerCard({
   splitHand: (playerId: string) => void;
   doubleDown: (blackjackPlayer: BlackjackPlayer, player: Player) => void;
 }) {
+  const theme = useMantineTheme();
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
   const [blackjackPlayers, setBlackjackPlayers] = useRecoilImmerState(BLACKJACK_PLAYERS_STATE);
   const blackjackSettings = useRecoilValue(BLACKJACK_SETTINGS);
   const blackjackGame = useRecoilValue(BLACKJACK_GAME_STATE);
-  const theme = useMantineTheme();
+  const { scrollIntoView, targetRef } = useScrollIntoView<HTMLDivElement>({
+    offset: 100,
+    duration: 500,
+  });
 
   const calculatedCardResult = getCardTotal(blackjackPlayer.cards);
   const isBust = calculatedCardResult.total > 21;
   const isBlackjack = calculatedCardResult.total == 21;
+
+  useEffect(() => {
+    if (isActive) {
+      scrollIntoView({ alignment: "end" });
+    }
+  }, [isActive]);
 
   let ppCards = [...blackjackPlayer.cards];
   if (blackjackPlayer.split && !blackjackPlayer.splitFrom) {
@@ -204,97 +216,157 @@ export default function RoundPlayerCard({
   }
 
   return (
-    <GenericPlayerCard
-      header={blackjackPlayer.displayName}
-      backgroundColor={isActive ? theme.colors.dark[6] : theme.colors.dark[7]}
-      styles={{
-        outline: nonDefaultOutline ? `2px solid ${outlineColor}` : undefined,
-      }}
-      subsection={
-        <>
-          <Text size="md" fw={600}>
-            {formatMoney(blackjackPlayer.bet)} {blackjackPlayer.doubledDown ? "(X2)" : ""}{" "}
-          </Text>
-          <Text size="sm" c="dimmed">
-            {formatMoney(player.balance)}
-          </Text>
-        </>
-      }
-      rightSection={
-        <>
-          {calculatedPerfectPairs && (
-            <Paper
-              style={{
-                width: "4.5rem",
-                height: "4.5rem",
-                backgroundColor: "transparent",
-              }}
-              ml="xs"
-            >
-              <div
+    <div ref={targetRef}>
+      <GenericPlayerCard
+        header={blackjackPlayer.displayName}
+        backgroundColor={isActive ? theme.colors.dark[6] : theme.colors.dark[7]}
+        styles={{
+          outline: nonDefaultOutline ? `2px solid ${outlineColor}` : undefined,
+        }}
+        subsection={
+          <>
+            <Text size="md" fw={600}>
+              {formatMoney(blackjackPlayer.bet)} {blackjackPlayer.doubledDown ? "(X2)" : ""}{" "}
+            </Text>
+            <Text size="sm" c="dimmed">
+              {formatMoney(player.balance)}
+            </Text>
+          </>
+        }
+        rightSection={
+          <>
+            {calculatedPerfectPairs && (
+              <Paper
                 style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: "100%",
-                  height: "100%",
+                  width: "4.5rem",
+                  height: "4.5rem",
+                  backgroundColor: "transparent",
                 }}
+                ml="xs"
               >
-                <Text size="xs" c="dimmed" fw={600} tt="capitalize" ta="center">
-                  Perfect Pairs
-                </Text>
-                {blackjackPlayer.cards.filter((card) => card != EMPTY_CARD).length > 0 ? (
-                  <>
-                    <Text size="md" fw="bold" ta="center">
-                      {calculatedPerfectPairs}
-                    </Text>
-                    <Text
-                      size="sm"
-                      fw={600}
-                      ta="center"
-                      c={perfectPairEarnings <= 0 ? "red" : "green"}
-                    >
-                      {perfectPairEarnings > 0 && "+"}
-                      {formatMoney(perfectPairEarnings)}
-                    </Text>
-                  </>
-                ) : (
-                  <>
-                    <Text size="md" fw="bold" ta="center">
-                      Pending
-                    </Text>
-                    <Text size="sm" fw={600} ta="center" c="dimmed">
-                      {formatMoney(blackjackPlayer.sidebets.perfectPairs)}
-                    </Text>
-                  </>
-                )}
-              </div>
-            </Paper>
-          )}
-          {calculatedTwentyOnePlusThree && (
-            <Paper
-              style={{
-                width: "4.5rem",
-                height: "4.5rem",
-                backgroundColor: "transparent",
-              }}
-              ml="xs"
-            >
-              <div
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "100%",
+                    height: "100%",
+                  }}
+                >
+                  <Text size="xs" c="dimmed" fw={600} tt="capitalize" ta="center">
+                    Perfect Pairs
+                  </Text>
+                  {blackjackPlayer.cards.filter((card) => card != EMPTY_CARD).length > 0 ? (
+                    <>
+                      <Text size="md" fw="bold" ta="center">
+                        {calculatedPerfectPairs}
+                      </Text>
+                      <Text
+                        size="sm"
+                        fw={600}
+                        ta="center"
+                        c={perfectPairEarnings <= 0 ? "red" : "green"}
+                      >
+                        {perfectPairEarnings > 0 && "+"}
+                        {formatMoney(perfectPairEarnings)}
+                      </Text>
+                    </>
+                  ) : (
+                    <>
+                      <Text size="md" fw="bold" ta="center">
+                        Pending
+                      </Text>
+                      <Text size="sm" fw={600} ta="center" c="dimmed">
+                        {formatMoney(blackjackPlayer.sidebets.perfectPairs)}
+                      </Text>
+                    </>
+                  )}
+                </div>
+              </Paper>
+            )}
+            {calculatedTwentyOnePlusThree && (
+              <Paper
                 style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: "100%",
-                  height: "100%",
+                  width: "4.5rem",
+                  height: "4.5rem",
+                  backgroundColor: "transparent",
                 }}
+                ml="xs"
               >
-                <Text size="xs" c="dimmed" fw={600} tt="capitalize" ta="center">
-                  21+3
-                </Text>
-                {blackjackPlayer.cards.filter((card) => card != EMPTY_CARD).length > 0 ? (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "100%",
+                    height: "100%",
+                  }}
+                >
+                  <Text size="xs" c="dimmed" fw={600} tt="capitalize" ta="center">
+                    21+3
+                  </Text>
+                  {blackjackPlayer.cards.filter((card) => card != EMPTY_CARD).length > 0 ? (
+                    <>
+                      <Text
+                        size="md"
+                        fw="bold"
+                        ta="center"
+                        style={{
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        {shortenTwentyOnePlusThree(calculatedTwentyOnePlusThree)}
+                      </Text>
+                      <Text
+                        size="sm"
+                        fw={600}
+                        ta="center"
+                        c={twentyOnePlusThreeEarnings <= 0 ? "red" : "green"}
+                      >
+                        {twentyOnePlusThreeEarnings > 0 && "+"}
+                        {formatMoney(twentyOnePlusThreeEarnings)}
+                      </Text>
+                    </>
+                  ) : (
+                    <>
+                      <Text size="md" fw="bold" ta="center">
+                        Pending
+                      </Text>
+                      <Text size="sm" fw={600} ta="center" c="dimmed">
+                        {formatMoney(blackjackPlayer.sidebets.twentyOnePlusThree)}
+                      </Text>
+                    </>
+                  )}
+                </div>
+              </Paper>
+            )}
+            {betBehindResult != "None" && (
+              <Paper
+                style={{
+                  width: "4.5rem",
+                  height: "4.5rem",
+                  backgroundColor: "transparent",
+                }}
+                ml="xs"
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "100%",
+                    height: "100%",
+                  }}
+                >
+                  <Text size="xs" c="dimmed" fw={600} tt="capitalize" ta="center">
+                    Bet Behind
+                  </Text>
+                  <Text size="xs" ta="center">
+                    {betBehindName}
+                  </Text>
                   <>
                     <Text
                       size="md"
@@ -304,32 +376,27 @@ export default function RoundPlayerCard({
                         lineHeight: 1.2,
                       }}
                     >
-                      {shortenTwentyOnePlusThree(calculatedTwentyOnePlusThree)}
+                      {betBehindResult}
                     </Text>
-                    <Text
-                      size="sm"
-                      fw={600}
-                      ta="center"
-                      c={twentyOnePlusThreeEarnings <= 0 ? "red" : "green"}
-                    >
-                      {twentyOnePlusThreeEarnings > 0 && "+"}
-                      {formatMoney(twentyOnePlusThreeEarnings)}
-                    </Text>
+                    {betBehindResult == "Pending" ? (
+                      <Text size="sm" fw={600} ta="center" c="dimmed">
+                        {formatMoney(blackjackPlayer.sidebets.betBehind.bet)}
+                      </Text>
+                    ) : (
+                      <Text
+                        size="sm"
+                        fw={600}
+                        ta="center"
+                        c={betBehindPayout <= 0 ? "red" : "green"}
+                      >
+                        {betBehindPayout > 0 && "+"}
+                        {formatMoney(betBehindPayout)}
+                      </Text>
+                    )}
                   </>
-                ) : (
-                  <>
-                    <Text size="md" fw="bold" ta="center">
-                      Pending
-                    </Text>
-                    <Text size="sm" fw={600} ta="center" c="dimmed">
-                      {formatMoney(blackjackPlayer.sidebets.twentyOnePlusThree)}
-                    </Text>
-                  </>
-                )}
-              </div>
-            </Paper>
-          )}
-          {betBehindResult != "None" && (
+                </div>
+              </Paper>
+            )}
             <Paper
               style={{
                 width: "4.5rem",
@@ -348,151 +415,103 @@ export default function RoundPlayerCard({
                   height: "100%",
                 }}
               >
-                <Text size="xs" c="dimmed" fw={600} tt="capitalize" ta="center">
-                  Bet Behind
+                <Text size={rem(14)} fw={600} tt="uppercase" ta="center">
+                  {calculatedCardResult.ace !== "NONE" ? calculatedCardResult.ace : ""}
                 </Text>
-                <Text size="xs" ta="center">
-                  {betBehindName}
+                <Text size={rem(30)} fw="bold" ta="center">
+                  {calculatedCardResult.total}
                 </Text>
-                <>
-                  <Text
-                    size="md"
-                    fw="bold"
-                    ta="center"
-                    style={{
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    {betBehindResult}
-                  </Text>
-                  {betBehindResult == "Pending" ? (
-                    <Text size="sm" fw={600} ta="center" c="dimmed">
-                      {formatMoney(blackjackPlayer.sidebets.betBehind.bet)}
-                    </Text>
-                  ) : (
-                    <Text size="sm" fw={600} ta="center" c={betBehindPayout <= 0 ? "red" : "green"}>
-                      {betBehindPayout > 0 && "+"}
-                      {formatMoney(betBehindPayout)}
-                    </Text>
-                  )}
-                </>
+                <Text size={rem(14)} fw={600} ta="center">
+                  {isBust && "BUST"}
+                  {isBlackjack && "BLACKJACK"}
+                </Text>
               </div>
             </Paper>
-          )}
-          <Paper
-            style={{
-              width: "4.5rem",
-              height: "4.5rem",
-              backgroundColor: "transparent",
-            }}
-            ml="xs"
-          >
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "100%",
-                height: "100%",
-              }}
-            >
-              <Text size={rem(14)} fw={600} tt="uppercase" ta="center">
-                {calculatedCardResult.ace !== "NONE" ? calculatedCardResult.ace : ""}
-              </Text>
-              <Text size={rem(30)} fw="bold" ta="center">
-                {calculatedCardResult.total}
-              </Text>
-              <Text size={rem(14)} fw={600} ta="center">
-                {isBust && "BUST"}
-                {isBlackjack && "BLACKJACK"}
-              </Text>
-            </div>
-          </Paper>
-          {blackjackPlayer.cards.map((card, index) => (
-            <Container p={0} m={0} pl="xs" key={`${card}-${index}`}>
-              <PlayingCard
-                key={index}
-                card={card}
-                onClick={() => {
-                  setCardSelector({
-                    ...cardSelector,
-                    intitalCard: card,
-                    opened: true,
-                    onSubmitTarget: blackjackPlayer.id,
-                    onSubmitIndex: index,
-                  });
-                }}
-                disabled={isActive}
-              />
-            </Container>
-          ))}
-        </>
-      }
-    >
-      <Divider my="xs" />
-      <Group grow>
-        <Button
-          disabled={
-            !isActive ||
-            blackjackPlayer.doubledDown ||
-            blackjackPlayer.cards.some((card) => card == EMPTY_CARD)
-          }
-          fullWidth
-          onClick={() => {
-            setBlackjackPlayers((draft) => {
-              draft.map((player) => {
-                if (player.id == blackjackPlayer.id) {
-                  if (!player.cards.some((card) => card == EMPTY_CARD)) {
-                    player.cards.push(EMPTY_CARD);
+            {blackjackPlayer.cards.map((card, index) => (
+              <Container p={0} m={0} pl="xs" key={`${card}-${index}`}>
+                <PlayingCard
+                  key={index}
+                  card={card}
+                  onClick={() => {
+                    setCardSelector({
+                      ...cardSelector,
+                      intitalCard: card,
+                      opened: true,
+                      onSubmitTarget: blackjackPlayer.id,
+                      onSubmitIndex: index,
+                    });
+                  }}
+                  disabled={isActive}
+                />
+              </Container>
+            ))}
+          </>
+        }
+      >
+        <Divider my="xs" />
+        <Group grow>
+          <Button
+            disabled={
+              !isActive ||
+              blackjackPlayer.doubledDown ||
+              blackjackPlayer.cards.some((card) => card == EMPTY_CARD)
+            }
+            fullWidth
+            onClick={() => {
+              setBlackjackPlayers((draft) => {
+                draft.map((player) => {
+                  if (player.id == blackjackPlayer.id) {
+                    if (!player.cards.some((card) => card == EMPTY_CARD)) {
+                      player.cards.push(EMPTY_CARD);
+                    }
                   }
-                }
+                });
               });
-            });
-          }}
-        >
-          Hit
-        </Button>
-        <Button disabled={!isActive} fullWidth color="green" onClick={nextTurn}>
-          Stand
-        </Button>
-        <Button
-          disabled={
-            !isActive || blackjackPlayer.doubledDown || player.balance < blackjackPlayer.bet
-          }
-          fullWidth
-          color="red"
-          onClick={() => {
-            doubleDown(blackjackPlayer, player);
-          }}
-        >
-          Double
-        </Button>
-        <Button
-          disabled={
-            !isActive ||
-            blackjackPlayer.cards.length != 2 ||
-            getCardValue(blackjackPlayer.cards[0]) != getCardValue(blackjackPlayer.cards[1])
-          }
-          fullWidth
-          color="grape"
-          onClick={() => {
-            splitHand(blackjackPlayer.id);
-          }}
-        >
-          Split
-        </Button>
-        <Button
-          disabled={isActive}
-          fullWidth
-          color="gray"
-          onClick={() => {
-            forceTurn(blackjackPlayer.id);
-          }}
-        >
-          Force Turn
-        </Button>
-      </Group>
-    </GenericPlayerCard>
+            }}
+          >
+            Hit
+          </Button>
+          <Button disabled={!isActive} fullWidth color="green" onClick={nextTurn}>
+            Stand
+          </Button>
+          <Button
+            disabled={
+              !isActive || blackjackPlayer.doubledDown || player.balance < blackjackPlayer.bet
+            }
+            fullWidth
+            color="red"
+            onClick={() => {
+              doubleDown(blackjackPlayer, player);
+            }}
+          >
+            Double
+          </Button>
+          <Button
+            disabled={
+              !isActive ||
+              blackjackPlayer.cards.length != 2 ||
+              getCardValue(blackjackPlayer.cards[0]) != getCardValue(blackjackPlayer.cards[1])
+            }
+            fullWidth
+            color="grape"
+            onClick={() => {
+              splitHand(blackjackPlayer.id);
+            }}
+          >
+            Split
+          </Button>
+          <Button
+            disabled={isActive}
+            fullWidth
+            color="gray"
+            onClick={() => {
+              forceTurn(blackjackPlayer.id);
+            }}
+          >
+            Force Turn
+          </Button>
+        </Group>
+      </GenericPlayerCard>
+    </div>
   );
 }
