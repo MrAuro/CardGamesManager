@@ -105,36 +105,28 @@ export default function GeneralSettings() {
       <Input.Wrapper mb="xl" label="UI Scale">
         <Slider
           defaultValue={settings.scale}
-          min={70}
-          max={130}
-          step={5}
+          min={50}
+          max={150}
           marks={[
             {
-              label: "70%",
-              value: 70,
+              label: "50%",
+              value: 50,
             },
             {
-              value: 80,
-            },
-            {
-              value: 90,
+              label: "75%",
+              value: 75,
             },
             {
               label: "100%",
               value: 100,
             },
             {
-              value: 110,
+              label: "125%",
+              value: 125,
             },
             {
-              value: 100,
-            },
-            {
-              value: 120,
-            },
-            {
-              label: "130%",
-              value: 130,
+              label: "150%",
+              value: 150,
             },
           ]}
           onChange={(value) => {
