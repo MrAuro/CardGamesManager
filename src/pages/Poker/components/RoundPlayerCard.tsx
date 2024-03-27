@@ -99,7 +99,7 @@ export default function RoundPlayerCard({
               td={pokerPlayer.folded ? "line-through" : undefined}
               fs={pokerPlayer.folded ? "italic" : undefined}
             >
-              {pokerPlayer.displayName}
+              {pokerPlayer.displayName} {pokerPlayer.beenOn ? "✅" : "❌"}
             </Text>
             {pokerPlayer.allIn && <AllInBadge />}
             {pokerGame.currentDealer == player.id && <DealerBadge />}
@@ -189,6 +189,7 @@ export default function RoundPlayerCard({
                     onClick={() => {
                       setBet(player.balance);
                       betAction(player.balance);
+                      betOpenedHandlers.close();
                     }}
                   >
                     All In ({formatMoney(player.balance, true, true)})

@@ -105,6 +105,7 @@ export default function PreRound() {
         pokerPlayer.currentBet = 0;
         pokerPlayer.folded = false;
         pokerPlayer.currentBet = paymentsToTake[pokerPlayer.id] || 0;
+        pokerPlayer.beenOn = false;
       });
     });
 

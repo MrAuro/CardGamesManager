@@ -141,6 +141,7 @@ const PlayerSelector = forwardRef<PlayerSelectorHandles, PropsType>(
                   currentBet: 0,
                   displayName: player!.name,
                   folded: false,
+                  beenOn: false,
                 });
               });
             }

@@ -16,7 +16,7 @@ import { CARD_SELECTOR_STATE } from "@/pages/Blackjack/routes/Round";
 import { useState } from "react";
 import { Card } from "@/types/Card";
 import cloneDeep from "lodash/cloneDeep";
-import { PokerGame, PokerPlayer, PokerPot } from "@/types/Poker";
+import { GameState, PokerGame, PokerPlayer, PokerPot } from "@/types/Poker";
 import { round } from "@/utils/MoneyHelper";
 import { Player } from "@/types/Player";
 
@@ -29,34 +29,6 @@ export default function Round() {
   const [keybindings] = useRecoilImmerState(KEYBINDINGS_STATE);
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
   const [activeCardOverride, setActiveCardOverride] = useState<Card | undefined>(undefined);
-
-  const getNextTurnData = (
-    _tempPokerGame: PokerGame,
-    _tempPokerPlayers: PokerPlayer[]
-  ): [PokerGame, PokerPlayer[]] => {
-    let tempPokerGame = cloneDeep(_tempPokerGame);
-    let tempPokerPlayers = cloneDeep(_tempPokerPlayers);
-
-    const playingPlayers = tempPokerPlayers.filter((player) => !player.folded && !player.allIn);
-    let currentPlayerIndex = playingPlayers.findIndex(
-      (player) => player.id === tempPokerGame.currentTurn
-    );
-
-    if (playingPlayers.length == 0) {
-      // TODO
-    }
-
-    let nextPlayerIndex = (currentPlayerIndex + 1) % playingPlayers.length;
-    let nextPlayer = playingPlayers[nextPlayerIndex];
-
-    if (playingPlayers.length == 1) {
-      // TODO
-    }
-
-    tempPokerGame.currentTurn = nextPlayer.id;
-
-    return [tempPokerGame, tempPokerPlayers];
-  };
 
   const collectBets = (
     tempPokerGame: PokerGame,
@@ -116,6 +88,88 @@ export default function Round() {
     return [tempPokerGame, tempPokerPlayers];
   };
 
+  const getNextTurnData = (
+    _tempPokerGame: PokerGame,
+    _tempPokerPlayers: PokerPlayer[]
+  ): [PokerGame, PokerPlayer[]] => {
+    console.log(`(ORDER) Getting next turn data`);
+    let tempPokerGame = cloneDeep(_tempPokerGame);
+    let tempPokerPlayers = cloneDeep(_tempPokerPlayers);
+
+    const currentPlayerIndex = tempPokerPlayers.findIndex(
+      (player) => player.id === tempPokerGame.currentTurn
+    );
+    tempPokerPlayers[currentPlayerIndex].beenOn = true;
+
+    let everyoneBeenOn = tempPokerPlayers
+      .filter((player) => !player.folded && !player.allIn)
+      .every((player) => player.beenOn);
+
+    let betsPending = tempPokerPlayers
+      .filter((player) => !player.folded && !player.allIn)
+      .some((player) => player.currentBet < tempPokerGame.currentBet);
+
+    if (everyoneBeenOn && !betsPending) {
+      console.log(`(ORDER) Everyone has been on`);
+      let dealerIndex = tempPokerPlayers.findIndex(
+        (player) => player.id == tempPokerGame.currentDealer
+      );
+      let firstPlayerIndex = dealerIndex + 1;
+      let limit = tempPokerPlayers.length;
+      while (tempPokerPlayers[firstPlayerIndex].folded) {
+        firstPlayerIndex = (firstPlayerIndex + 1) % tempPokerPlayers.length;
+        limit--;
+
+        if (limit <= 0) {
+          break;
+        }
+      }
+
+      tempPokerGame.currentTurn = tempPokerPlayers[firstPlayerIndex].id;
+      let state: GameState = "FLOP";
+      switch (tempPokerGame.gameState) {
+        case "PREFLOP":
+          state = "FLOP";
+          break;
+        case "FLOP":
+          state = "TURN";
+          break;
+        case "TURN":
+          state = "RIVER";
+          break;
+        case "RIVER":
+          state = "SHOWDOWN";
+          break;
+        default:
+          throw new Error(`Invalid game state ${tempPokerGame.gameState}`);
+      }
+
+      tempPokerGame.gameState = state;
+      tempPokerPlayers = tempPokerPlayers.map((player) => {
+        player.beenOn = false;
+        return player;
+      });
+      const [_tempPokerGame, _tempPokerPlayers] = collectBets(tempPokerGame, tempPokerPlayers);
+      tempPokerGame = _tempPokerGame;
+      tempPokerPlayers = _tempPokerPlayers;
+    } else {
+      let nextPlayerIndex = (currentPlayerIndex + 1) % tempPokerPlayers.length;
+      let limit = tempPokerPlayers.length;
+      while (tempPokerPlayers[nextPlayerIndex].folded || tempPokerPlayers[nextPlayerIndex].allIn) {
+        nextPlayerIndex = (nextPlayerIndex + 1) % tempPokerPlayers.length;
+        limit--;
+
+        if (limit <= 0) {
+          break;
+        }
+      }
+
+      tempPokerGame.currentTurn = tempPokerPlayers[nextPlayerIndex].id;
+    }
+
+    return [tempPokerGame, tempPokerPlayers];
+  };
+
   const foldAction = () => {
     console.log(`Player folds`);
     let tempPokerGame = cloneDeep(pokerGame);
@@ -161,11 +215,17 @@ export default function Round() {
   //   })
   // };
   const betAction = (amount: number) => {
-    let currentPlayerIndex = pokerPlayers.findIndex(
-      (player) => player.id === pokerGame.currentTurn
+    let tempPokerPlayers = cloneDeep(pokerPlayers);
+    let tempPokerGame = cloneDeep(pokerGame);
+    let tempPlayers = cloneDeep(players);
+
+    let currentPlayerIndex = tempPokerPlayers.findIndex(
+      (player) => player.id === tempPokerGame.currentTurn
     );
-    let pokerPlayer = { ...pokerPlayers.find((player) => player.id === pokerGame.currentTurn)! };
-    let player = { ...getPlayer(pokerPlayer.id, players)! };
+    let pokerPlayer = {
+      ...tempPokerPlayers.find((player) => player.id === tempPokerGame.currentTurn)!,
+    };
+    let player = { ...getPlayer(pokerPlayer.id, tempPlayers)! };
 
     if (pokerPlayer.allIn) {
       console.error(
@@ -183,7 +243,7 @@ export default function Round() {
     }
 
     pokerPlayer.currentBet = amount;
-    let currentBets = cloneDeep(pokerGame.currentBets);
+    let currentBets = cloneDeep(tempPokerGame.currentBets);
     if (!currentBets[pokerPlayer.id]) {
       currentBets[pokerPlayer.id] = {
         amount: 0,
@@ -191,32 +251,28 @@ export default function Round() {
       };
     }
     currentBets[pokerPlayer.id].amount = amount;
-    setPokerGame({
-      ...pokerGame,
-      currentBets: currentBets,
-      currentTurn: pokerPlayers[(currentPlayerIndex + 1) % pokerPlayers.length].id,
-      currentBet: Math.max(pokerGame.currentBet, amount),
-    });
 
-    setPokerPlayers((pokerPlayers) => {
-      pokerPlayers[currentPlayerIndex] = pokerPlayer;
-      return pokerPlayers;
-    });
+    tempPokerGame.currentBets = currentBets;
+    tempPokerGame.currentBet = Math.max(pokerGame.currentBet, amount);
 
-    // Prevent weird floating point errors
+    tempPokerPlayers[currentPlayerIndex] = pokerPlayer;
+
     player.balance = Math.round((player.balance - amount) * 100) / 100;
+    tempPlayers[tempPlayers.findIndex((p) => p.id === player.id)] = player;
 
-    setPlayers((players) => {
-      let playerIndex = players.findIndex((player) => player.id === pokerPlayer.id);
-      players[playerIndex] = player;
-      return players;
-    });
+    const [_tempPokerGame, _tempPokerPlayers] = getNextTurnData(tempPokerGame, tempPokerPlayers);
+    tempPokerGame = _tempPokerGame;
+    tempPokerPlayers = _tempPokerPlayers;
+
+    setPlayers(tempPlayers);
+    setPokerGame(tempPokerGame);
+    setPokerPlayers(tempPokerPlayers);
   };
 
   const callAction = () => {
-    const tempPokerPlayers = cloneDeep(pokerPlayers);
-    const tempPokerGame = cloneDeep(pokerGame);
-    const tempPlayers = cloneDeep(players);
+    let tempPokerPlayers = cloneDeep(pokerPlayers);
+    let tempPokerGame = cloneDeep(pokerGame);
+    let tempPlayers = cloneDeep(players);
 
     let currentPlayerIndex = tempPokerPlayers.findIndex(
       (player) => player.id === tempPokerGame.currentTurn
@@ -261,11 +317,17 @@ export default function Round() {
     }
 
     tempPokerGame.currentBets = currentBets;
-    tempPokerGame.currentTurn =
-      tempPokerPlayers[(currentPlayerIndex + 1) % tempPokerPlayers.length].id;
+    console.log(`tempPokerPlayers before`, tempPokerPlayers);
+    const [_tempPokerGame, _tempPokerPlayers] = getNextTurnData(tempPokerGame, tempPokerPlayers);
+    tempPokerGame = _tempPokerGame;
+    tempPokerPlayers = _tempPokerPlayers;
+    console.log(`tempPokerPlayers after`, tempPokerPlayers);
 
     pokerPlayer.currentBet = round(pokerPlayer.currentBet);
-    tempPokerPlayers[currentPlayerIndex] = pokerPlayer;
+    tempPokerPlayers[currentPlayerIndex] = {
+      ...pokerPlayer,
+      beenOn: _tempPokerPlayers[currentPlayerIndex].beenOn,
+    };
 
     player.balance = round(player.balance - amountToCallTo);
     tempPlayers[tempPlayers.findIndex((p) => p.id === player.id)] = player;
@@ -305,23 +367,21 @@ export default function Round() {
 
       <Flex direction="column" gap="xs">
         <CommunityCards />
-        {pokerPlayers
-          .filter((p) => !p.folded)
-          .map((pokerPlayer) => {
-            return (
-              <RoundPlayerCard
-                player={getPlayer(pokerPlayer.id, players)!}
-                pokerPlayer={pokerPlayer}
-                active={pokerPlayer.id === pokerGame.currentTurn}
-                key={pokerPlayer.id}
-                checkAction={checkAction}
-                callAction={callAction}
-                raiseAction={raiseAction}
-                betAction={betAction}
-                foldAction={foldAction}
-              />
-            );
-          })}
+        {pokerPlayers.map((pokerPlayer) => {
+          return (
+            <RoundPlayerCard
+              player={getPlayer(pokerPlayer.id, players)!}
+              pokerPlayer={pokerPlayer}
+              active={pokerPlayer.id === pokerGame.currentTurn}
+              key={pokerPlayer.id}
+              checkAction={checkAction}
+              callAction={callAction}
+              raiseAction={raiseAction}
+              betAction={betAction}
+              foldAction={foldAction}
+            />
+          );
+        })}
       </Flex>
       <Button
         onClick={() => {
