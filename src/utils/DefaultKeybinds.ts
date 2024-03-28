@@ -164,20 +164,14 @@ export const DefaultKeybinds: Keybinding[] = [
     key: "f",
   },
   {
-    id: "54",
-    scope: "Poker Round (Capturing Bets)",
-    action: "Confirm",
-    key: "enter",
-  },
-  {
     id: "55",
-    scope: "Poker Round (Capturing Bets)",
-    action: "Cancel",
+    scope: "Poker Round",
+    action: "Cancel Bet",
     key: "escape",
   },
   {
     id: "56",
-    scope: "Poker Round (Capturing Bets)",
+    scope: "Poker Round",
     action: "All In",
     key: "a",
   },

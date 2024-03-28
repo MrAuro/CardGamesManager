@@ -13,8 +13,7 @@ export type Scope =
   | "Blackjack Round"
   | "Blackjack PostRound"
   | "Poker PreRound"
-  | "Poker Round"
-  | "Poker Round (Capturing Bets)";
+  | "Poker Round";
 export const Scopes: Scope[] = [
   "None",
   "Blackjack PreRound",
@@ -22,7 +21,6 @@ export const Scopes: Scope[] = [
   "Blackjack PostRound",
   "Poker PreRound",
   "Poker Round",
-  "Poker Round (Capturing Bets)",
 ];
 
 export type BlackjackPreRoundActions = "Start Game";
@@ -41,9 +39,13 @@ export type PokerPreRoundActions =
   | "Shuffle Players"
   | "Random Dealer"
   | "Next Dealer";
-export type PokerRoundActions = CardInputs | "Check / Call" | "Fold" | "Bet / Raise";
-// TODO: Add ability for chip input when Chip mode is enabled
-export type PokerRoundCapturingBetsActions = "Cancel" | "Confirm" | "All In" | "Pot";
+export type PokerRoundActions =
+  | CardInputs
+  | "Check / Call"
+  | "Fold"
+  | "Bet / Raise"
+  | "All In"
+  | "Cancel Bet";
 
 export type Keybinding = {
   id: string;
@@ -68,10 +70,6 @@ export type Keybinding = {
   | {
       action: PokerRoundActions;
       scope: "Poker Round";
-    }
-  | {
-      action: PokerRoundCapturingBetsActions;
-      scope: "Poker Round (Capturing Bets)";
     }
   | {
       action: "None";
@@ -111,12 +109,12 @@ export function getActions(scope: Scope): string[] {
         "Check / Call",
         "Fold",
         "Bet / Raise",
+        "All In",
+        "Cancel Bet",
         ...availableRanks,
         ...availableSuits,
         ...availableCards,
       ];
-    case "Poker Round (Capturing Bets)":
-      return ["Cancel", "Confirm", "All In", "Pot"];
     case "None":
       return ["None"];
   }

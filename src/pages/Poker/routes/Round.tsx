@@ -1,17 +1,45 @@
-import { PLAYERS_STATE, POKER_GAME_STATE, POKER_PLAYERS_STATE } from "@/Root";
+import { KEYBINDINGS_STATE, PLAYERS_STATE, POKER_GAME_STATE, POKER_PLAYERS_STATE } from "@/Root";
 import CardSelector from "@/components/CardSelector";
 import { CARD_SELECTOR_STATE } from "@/pages/Blackjack/routes/Round";
 import { Card } from "@/types/Card";
 import { GameState, PokerGame, PokerPlayer, PokerPot } from "@/types/Poker";
-import { round } from "@/utils/MoneyHelper";
+import { formatMoney, round } from "@/utils/MoneyHelper";
 import { getPlayer } from "@/utils/PlayerHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import { Button, Flex } from "@mantine/core";
 import cloneDeep from "lodash/cloneDeep";
 import { useState } from "react";
-import { useRecoilState } from "recoil";
+import { atom, useRecoilState } from "recoil";
 import CommunityCards from "../components/CommunityCards";
 import RoundPlayerCard from "../components/RoundPlayerCard";
+import { useHotkeys } from "react-hotkeys-hook";
+import { isAnyEmpty } from "@/utils/CardHelper";
+import { notifications } from "@mantine/notifications";
+
+export const FOLD_CONFIRM = atom<boolean>({
+  key: "FOLD_CONFIRM",
+  default: false,
+});
+
+export const ALLIN_CONFIRM = atom<boolean>({
+  key: "ALLIN_CONFIRM",
+  default: false,
+});
+
+export const BETUI_OPEN = atom<boolean>({
+  key: "BETUI_OPEN",
+  default: false,
+});
+
+export const PLAYER_BET = atom<number>({
+  key: "PLAYER_BET",
+  default: 0,
+});
+
+export const TIMER_START = atom<number | null>({
+  key: "TIMER_START",
+  default: null,
+});
 
 export default function Round() {
   const [pokerGame, setPokerGame] = useRecoilState(POKER_GAME_STATE);
@@ -20,6 +48,35 @@ export default function Round() {
   const [players, setPlayers] = useRecoilImmerState(PLAYERS_STATE);
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
   const [activeCardOverride] = useState<Card | undefined>(undefined);
+  const [keybindings] = useRecoilImmerState(KEYBINDINGS_STATE);
+
+  // !
+  const [foldConfirm, setFoldConfirm] = useRecoilState(FOLD_CONFIRM);
+  const [allInConfirm, setAllInConfirm] = useRecoilState(ALLIN_CONFIRM);
+  const [bet, setBet] = useRecoilState(PLAYER_BET);
+  const [betUIOpen, setBetUIOpen] = useRecoilState(BETUI_OPEN);
+  const [timerStart, setTimerStart] = useRecoilState(TIMER_START);
+  // !
+
+  let cardsAllowed = 0;
+  switch (pokerGame.gameState) {
+    case "PREFLOP":
+      cardsAllowed = 0;
+      break;
+
+    case "FLOP":
+      cardsAllowed = 3;
+      break;
+
+    case "TURN":
+      cardsAllowed = 4;
+      break;
+
+    case "RIVER":
+    case "SHOWDOWN":
+      cardsAllowed = 5;
+      break;
+  }
 
   const collectBets = (
     tempPokerGame: PokerGame,
@@ -235,6 +292,15 @@ export default function Round() {
     let tempPokerGame = cloneDeep(pokerGame);
     let tempPokerPlayers = cloneDeep(pokerPlayers);
 
+    let pokerPlayer = {
+      ...tempPokerPlayers.find((player) => player.id === tempPokerGame.currentTurn)!,
+    };
+    let amountToCallTo = tempPokerGame.currentBet - pokerPlayer.currentBet;
+    if (amountToCallTo > 0) {
+      console.error(`Player ${pokerPlayer.displayName} must call ${amountToCallTo}, and not check`);
+      return;
+    }
+
     const [_tempPokerGame, _tempPokerPlayers] = getNextTurnData(tempPokerGame, tempPokerPlayers);
     tempPokerGame = _tempPokerGame;
     tempPokerPlayers = _tempPokerPlayers;
@@ -377,6 +443,111 @@ export default function Round() {
     setPokerPlayers(tempPokerPlayers);
   };
 
+  keybindings.forEach((keybinding) => {
+    if (keybinding.scope == "Poker Round") {
+      useHotkeys(keybinding.key, (e) => {
+        e.preventDefault();
+
+        switch (keybinding.action) {
+          case "Check / Call":
+            {
+              if (pokerGame.capturingCommunityCards) {
+                let notAllCardsUsed =
+                  pokerGame.communityCards.filter((card) => !isAnyEmpty(card)).length <
+                  cardsAllowed;
+                if (notAllCardsUsed) {
+                  notifications.show({
+                    message: "You must add all possible community cards",
+                    color: "red",
+                  });
+                  return;
+                } else {
+                  setPokerGame({
+                    ...pokerGame,
+                    capturingCommunityCards: false,
+                  });
+                }
+              } else {
+                let pokerPlayer = {
+                  ...pokerPlayers.find((player) => player.id === pokerGame.currentTurn)!,
+                };
+
+                let amountToCallTo = pokerGame.currentBet - pokerPlayer.currentBet;
+                if (amountToCallTo > 0) {
+                  callAction();
+                } else {
+                  checkAction();
+                }
+              }
+            }
+            break;
+
+          case "Bet / Raise":
+            {
+              if (pokerGame.capturingCommunityCards) return;
+              if (betUIOpen) {
+                betAction(bet);
+                setBetUIOpen(false);
+              } else {
+                setBetUIOpen(true);
+              }
+            }
+            break;
+
+          case "All In":
+            {
+              if (pokerGame.capturingCommunityCards) return;
+              if (allInConfirm) {
+                const pokerPlayer = pokerPlayers.find(
+                  (player) => player.id === pokerGame.currentTurn
+                )!;
+
+                const player = getPlayer(pokerPlayer.id, players)!;
+
+                setBet(player.balance);
+                betAction(player.balance);
+                setAllInConfirm(false);
+                setBetUIOpen(false);
+                setTimerStart(null);
+              } else {
+                setAllInConfirm(true);
+
+                setTimerStart(Date.now());
+                setTimeout(() => {
+                  setAllInConfirm(false);
+                }, 3000);
+              }
+            }
+            break;
+
+          case "Cancel Bet":
+            {
+              setBetUIOpen(false);
+            }
+            break;
+
+          case "Fold":
+            {
+              if (pokerGame.capturingCommunityCards) return;
+              if (foldConfirm) {
+                foldAction();
+                setFoldConfirm(false);
+                setTimerStart(null);
+              } else {
+                setFoldConfirm(true);
+
+                setTimerStart(Date.now());
+                setTimeout(() => {
+                  setFoldConfirm(false);
+                }, 3000);
+              }
+            }
+            break;
+        }
+      });
+    }
+  });
+
   return (
     <>
       <CardSelector
@@ -415,8 +586,13 @@ export default function Round() {
         }}
       />
 
+      <p>
+        {foldConfirm ? "Fold (true)" : "Fold (false)"}
+        {allInConfirm ? "All In (true)" : "All In (false)"}
+        {formatMoney(bet)}
+      </p>
       <Flex direction="column" gap="xs">
-        <CommunityCards />
+        <CommunityCards cardsAllowed={cardsAllowed} />
         {pokerPlayers.map((pokerPlayer) => {
           return (
             <div

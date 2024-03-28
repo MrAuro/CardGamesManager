@@ -16,11 +16,12 @@ import {
   Text,
   useMantineTheme,
 } from "@mantine/core";
-import { useDisclosure, useScrollIntoView } from "@mantine/hooks";
+import { getHotkeyHandler, useDisclosure, useScrollIntoView } from "@mantine/hooks";
 import { IconCurrencyDollar, IconTriangleFilled } from "@tabler/icons-react";
 import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { AllInBadge, BigBlindBadge, DealerBadge, SmallBlindBadge } from "../routes/PreRound";
+import { ALLIN_CONFIRM, BETUI_OPEN, FOLD_CONFIRM, PLAYER_BET, TIMER_START } from "../routes/Round";
 
 export default function RoundPlayerCard({
   player,
@@ -56,9 +57,9 @@ export default function RoundPlayerCard({
     }
   }, [active]);
 
-  const [foldConfirm, setFoldConfirm] = useState(false);
-  const [allInConfirm, setAllInConfirm] = useState(false);
-  const [timerStart, setTimerStart] = useState<number | null>(null);
+  const [foldConfirm, setFoldConfirm] = useRecoilState(FOLD_CONFIRM);
+  const [allInConfirm, setAllInConfirm] = useRecoilState(ALLIN_CONFIRM);
+  const [timerStart, setTimerStart] = useRecoilState(TIMER_START);
 
   const [dateNow, setDateNow] = useState(Date.now());
   useEffect(() => {
@@ -72,8 +73,8 @@ export default function RoundPlayerCard({
   }, [foldConfirm, allInConfirm]);
 
   const [betOrRaise, setBetOrRaise] = useState<"BET" | "RAISE">("BET");
-  const [betOpened, betOpenedHandlers] = useDisclosure(false);
-  const [bet, setBet] = useState(pokerGame.currentBet);
+  const [betOpened, setBetOpened] = useRecoilState(BETUI_OPEN);
+  const [bet, setBet] = useRecoilState(PLAYER_BET);
   const betInputRef = useRef<HTMLInputElement>(null);
 
   const [betError, setBetError] = useState<string | null>(null);
@@ -85,6 +86,14 @@ export default function RoundPlayerCard({
 
     setBetError(null);
   }, [bet]);
+
+  useEffect(() => {
+    if (active) {
+      setBet(pokerGame.currentBet);
+    } else {
+      setBetOpened(false);
+    }
+  }, [active]);
 
   const mustGoAllIn = pokerGame.currentBet - pokerPlayer.currentBet > player.balance;
 
@@ -147,7 +156,7 @@ export default function RoundPlayerCard({
       >
         <>
           <Divider my="xs" />
-          {betOpened ? (
+          {betOpened && active ? (
             <>
               <Group grow>
                 <Grid columns={24}>
@@ -166,6 +175,7 @@ export default function RoundPlayerCard({
                       onChange={(value) => {
                         setBet(parseFloat(`${value}`));
                       }}
+                      onKeyDown={getHotkeyHandler([["enter", () => betAction(bet)]])}
                     />
                   </Grid.Col>
                   <Grid.Col span={5}>
@@ -175,7 +185,7 @@ export default function RoundPlayerCard({
                       disabled={!active}
                       onClick={() => {
                         setBet(0);
-                        betOpenedHandlers.close();
+                        setBetOpened(false);
                       }}
                     >
                       Cancel
@@ -196,11 +206,12 @@ export default function RoundPlayerCard({
                       }}
                       leftSection={timerStart ? undefined : <IconTriangleFilled />}
                       onClick={() => {
-                        if (allInConfirm) {
+                        if (allInConfirm && active) {
                           setBet(player.balance);
                           betAction(player.balance);
-                          betOpenedHandlers.close();
+                          setBetOpened(false);
                           setAllInConfirm(false);
+                          setTimerStart(null);
                         } else {
                           setAllInConfirm(true);
 
@@ -213,7 +224,7 @@ export default function RoundPlayerCard({
                         }
                       }}
                     >
-                      {allInConfirm
+                      {allInConfirm && active
                         ? "Are you sure?"
                         : `All In (${formatMoney(player.balance, true, true)})`}
                     </Button>
@@ -225,7 +236,7 @@ export default function RoundPlayerCard({
                       disabled={!active || betError != null}
                       onClick={() => {
                         betAction(bet);
-                        betOpenedHandlers.close();
+                        setBetOpened(false);
                       }}
                     >
                       {betOrRaise == "BET" ? "Bet" : "Raise to"} {formatMoney(bet, true, false)}
@@ -267,9 +278,10 @@ export default function RoundPlayerCard({
                     : undefined,
                 }}
                 onClick={() => {
-                  if (foldConfirm) {
+                  if (foldConfirm && active) {
                     foldAction();
                     setFoldConfirm(false);
+                    setTimerStart(null);
                     return;
                   } else {
                     setFoldConfirm(true);
@@ -283,7 +295,7 @@ export default function RoundPlayerCard({
                   }
                 }}
               >
-                {foldConfirm ? "Are you sure?" : "Fold"}
+                {foldConfirm && active ? "Are you sure?" : "Fold"}
               </Button>
               {pokerGame.currentBet > 0 && (
                 <Button
@@ -292,7 +304,7 @@ export default function RoundPlayerCard({
                   disabled={!active || pokerPlayer.allIn}
                   onClick={() => {
                     setBetOrRaise("RAISE");
-                    betOpenedHandlers.open();
+                    setBetOpened(true);
 
                     // Focus and go to the beginning of the input
                     // We wait 100ms to make sure the input is rendered
@@ -312,7 +324,7 @@ export default function RoundPlayerCard({
                   disabled={!active || pokerPlayer.allIn}
                   onClick={() => {
                     setBetOrRaise("BET");
-                    betOpenedHandlers.open();
+                    setBetOpened(true);
 
                     // Focus and go to the beginning of the input
                     // We wait 100ms to make sure the input is rendered
