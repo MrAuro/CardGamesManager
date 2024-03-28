@@ -4,9 +4,10 @@ import { CARD_SELECTOR_STATE } from "@/pages/Blackjack/routes/Round";
 import { isAnyEmpty } from "@/utils/CardHelper";
 import { formatMoney } from "@/utils/MoneyHelper";
 import { Button, Card, Center, Divider, Flex, Text, Title, useMantineTheme } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import { useRecoilState } from "recoil";
 
-export default function CommunityCards() {
+export default function CommunityCards({ cardsAllowed }: { cardsAllowed: number }) {
   const theme = useMantineTheme();
   const [pokerGame, setPokerGame] = useRecoilState(POKER_GAME_STATE);
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
@@ -14,26 +15,6 @@ export default function CommunityCards() {
   let totalAmountToBePutInPot = 0;
   for (const [_, v] of Object.entries(pokerGame.currentBets)) {
     totalAmountToBePutInPot += v.amount;
-  }
-
-  let cardsAllowed = 0;
-  switch (pokerGame.gameState) {
-    case "PREFLOP":
-      cardsAllowed = 0;
-      break;
-
-    case "FLOP":
-      cardsAllowed = 3;
-      break;
-
-    case "TURN":
-      cardsAllowed = 4;
-      break;
-
-    case "RIVER":
-    case "SHOWDOWN":
-      cardsAllowed = 5;
-      break;
   }
 
   return (
@@ -88,17 +69,18 @@ export default function CommunityCards() {
         <Button
           mt="xs"
           w="10rem"
-          disabled={
-            !pokerGame.capturingCommunityCards ||
-            pokerGame.communityCards.filter((card) => !isAnyEmpty(card)).length < cardsAllowed
-          }
-          style={{
-            backgroundColor:
-              pokerGame.communityCards.filter((card) => !isAnyEmpty(card)).length < cardsAllowed
-                ? theme.colors.dark[5]
-                : undefined,
-          }}
+          disabled={!pokerGame.capturingCommunityCards}
           onClick={() => {
+            if (
+              pokerGame.communityCards.filter((card) => !isAnyEmpty(card)).length < cardsAllowed
+            ) {
+              notifications.show({
+                message: "You must add all possible community cards",
+                color: "red",
+              });
+              return;
+            }
+
             setPokerGame({
               ...pokerGame,
               capturingCommunityCards: false,
