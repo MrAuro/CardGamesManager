@@ -7,12 +7,22 @@ export type CardInputs =
   | CardSuit_NOEMPTY
   | `${CardRank_NOEMPTY}${CardSuit_NOEMPTY}`;
 
-export type Scope = "None" | "Blackjack PreRound" | "Blackjack Round" | "Blackjack PostRound";
+export type Scope =
+  | "None"
+  | "Blackjack PreRound"
+  | "Blackjack Round"
+  | "Blackjack PostRound"
+  | "Poker PreRound"
+  | "Poker Round"
+  | "Poker Round (Capturing Bets)";
 export const Scopes: Scope[] = [
   "None",
   "Blackjack PreRound",
   "Blackjack Round",
   "Blackjack PostRound",
+  "Poker PreRound",
+  "Poker Round",
+  "Poker Round (Capturing Bets)",
 ];
 
 export type BlackjackPreRoundActions = "Start Game";
@@ -25,6 +35,15 @@ export type BlackjackRoundActions =
   | "Split"
   | "Remove Last Card";
 export type BlackjackPostRoundActions = "Next Round";
+
+export type PokerPreRoundActions =
+  | "Start Game"
+  | "Shuffle Players"
+  | "Random Dealer"
+  | "Next Dealer";
+export type PokerRoundActions = CardInputs | "Check / Call" | "Fold" | "Bet / Raise";
+// TODO: Add ability for chip input when Chip mode is enabled
+export type PokerRoundCapturingBetsActions = "Cancel" | "Confirm" | "All In" | "Pot";
 
 export type Keybinding = {
   id: string;
@@ -41,6 +60,18 @@ export type Keybinding = {
   | {
       action: BlackjackPostRoundActions;
       scope: "Blackjack PostRound";
+    }
+  | {
+      action: PokerPreRoundActions;
+      scope: "Poker PreRound";
+    }
+  | {
+      action: PokerRoundActions;
+      scope: "Poker Round";
+    }
+  | {
+      action: PokerRoundCapturingBetsActions;
+      scope: "Poker Round (Capturing Bets)";
     }
   | {
       action: "None";
@@ -73,6 +104,19 @@ export function getActions(scope: Scope): string[] {
       ];
     case "Blackjack PostRound":
       return ["Next Round"];
+    case "Poker PreRound":
+      return ["Start Game", "Shuffle Players", "Random Dealer", "Next Dealer"];
+    case "Poker Round":
+      return [
+        "Check / Call",
+        "Fold",
+        "Bet / Raise",
+        ...availableRanks,
+        ...availableSuits,
+        ...availableCards,
+      ];
+    case "Poker Round (Capturing Bets)":
+      return ["Cancel", "Confirm", "All In", "Pot"];
     case "None":
       return ["None"];
   }
