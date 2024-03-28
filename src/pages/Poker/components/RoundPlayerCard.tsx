@@ -57,18 +57,19 @@ export default function RoundPlayerCard({
   const pokerSettings = useRecoilValue(POKER_SETTINGS_STATE);
 
   const [foldConfirm, setFoldConfirm] = useState(false);
+  const [allInConfirm, setAllInConfirm] = useState(false);
   const [timerStart, setTimerStart] = useState<number | null>(null);
 
   const [dateNow, setDateNow] = useState(Date.now());
   useEffect(() => {
     const interval = setInterval(() => {
-      if (foldConfirm) {
+      if (foldConfirm || allInConfirm) {
         setDateNow(Date.now());
       }
     }, 5);
 
     return () => clearInterval(interval);
-  }, [foldConfirm]);
+  }, [foldConfirm, allInConfirm]);
 
   const [betOrRaise, setBetOrRaise] = useState<"BET" | "RAISE">("BET");
   const [betOpened, betOpenedHandlers] = useDisclosure(false);
@@ -184,14 +185,36 @@ export default function RoundPlayerCard({
                     fullWidth
                     color="red"
                     disabled={!active || pokerPlayer.currentBet == player.balance}
-                    leftSection={<IconTriangleFilled />}
+                    style={{
+                      background: active
+                        ? `linear-gradient(to left, ${theme.colors.red[8]} ${Math.min(
+                            100,
+                            ((dateNow - (timerStart || 0)) / 3000) * 100
+                          )}%, ${theme.colors.red[9]} 0%)`
+                        : undefined,
+                    }}
+                    leftSection={timerStart ? undefined : <IconTriangleFilled />}
                     onClick={() => {
-                      setBet(player.balance);
-                      betAction(player.balance);
-                      betOpenedHandlers.close();
+                      if (allInConfirm) {
+                        setBet(player.balance);
+                        betAction(player.balance);
+                        betOpenedHandlers.close();
+                        setAllInConfirm(false);
+                      } else {
+                        setAllInConfirm(true);
+
+                        // We wait 3 seconds to reset the all in confirm
+                        setTimerStart(Date.now());
+                        setTimeout(() => {
+                          setAllInConfirm(false);
+                          setTimerStart(null);
+                        }, 3000);
+                      }
                     }}
                   >
-                    All In ({formatMoney(player.balance, true, true)})
+                    {allInConfirm
+                      ? "Are you sure?"
+                      : `All In (${formatMoney(player.balance, true, true)})`}
                   </Button>
                 </Grid.Col>
                 <Grid.Col span={5}>
