@@ -1,13 +1,29 @@
 import { POKER_GAME_STATE, POKER_PLAYERS_STATE } from "@/Root";
 import PlayingCard from "@/components/PlayingCard";
 import { CARD_SELECTOR_STATE } from "@/pages/Blackjack/routes/Round";
+import { isAnyEmpty } from "@/utils/CardHelper";
 import { formatMoney } from "@/utils/MoneyHelper";
-import { Card, Divider, Flex, Text, Title, useMantineTheme } from "@mantine/core";
+import {
+  ActionIcon,
+  Badge,
+  Button,
+  Card,
+  Center,
+  Container,
+  Divider,
+  Flex,
+  Paper,
+  Text,
+  Title,
+  useMantineTheme,
+} from "@mantine/core";
+import { useElementSize } from "@mantine/hooks";
+import { IconDeviceFloppy } from "@tabler/icons-react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
 export default function CommunityCards() {
   const theme = useMantineTheme();
-  const pokerGame = useRecoilValue(POKER_GAME_STATE);
+  const [pokerGame, setPokerGame] = useRecoilState(POKER_GAME_STATE);
   const pokerPlayers = useRecoilValue(POKER_PLAYERS_STATE);
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
 
@@ -45,11 +61,14 @@ export default function CommunityCards() {
       pt="xs"
       pb="xs"
       style={{
-        backgroundColor: theme.colors.dark[7],
+        backgroundColor: pokerGame.capturingCommunityCards
+          ? theme.colors.dark[6]
+          : theme.colors.dark[7],
       }}
     >
       <Title order={3} ta="center">
-        Community Cards ({pokerGame.gameState})
+        Community Cards ({pokerGame.gameState}) (
+        {pokerGame.capturingCommunityCards ? "Capturing" : "Not Capturing"})
       </Title>
       <Text size="sm" ta="center" fw={500}>
         {pokerGame.pots.map((pot, index) => {
@@ -62,10 +81,11 @@ export default function CommunityCards() {
         {formatMoney(totalAmountToBePutInPot)} to be put in the pot
       </Text>
       <Divider my="xs" />
-      <Flex justify="center" gap="sm">
+      <Flex justify="center" gap="sm" align="center">
         {pokerGame.communityCards.map((card, index) => {
           return (
             <PlayingCard
+              highContrast
               key={index}
               card={card}
               onClick={() => {
@@ -82,6 +102,31 @@ export default function CommunityCards() {
           );
         })}
       </Flex>
+      <Center>
+        <Button
+          mt="xs"
+          w="10rem"
+          disabled={
+            !(pokerGame.communityCards.filter((card) => isAnyEmpty(card)).length < cardsAllowed) ||
+            !pokerGame.capturingCommunityCards
+          }
+          style={{
+            backgroundColor: !(
+              pokerGame.communityCards.filter((card) => isAnyEmpty(card)).length < cardsAllowed
+            )
+              ? theme.colors.dark[5]
+              : undefined,
+          }}
+          onClick={() => {
+            setPokerGame({
+              ...pokerGame,
+              capturingCommunityCards: false,
+            });
+          }}
+        >
+          Save Cards
+        </Button>
+      </Center>
     </Card>
   );
 }

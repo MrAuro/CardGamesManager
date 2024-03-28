@@ -1,16 +1,18 @@
 import { Card } from "@/types/Card";
 import { getSuit, suitToIcon, getRank, EMPTY_CARD } from "@/utils/CardHelper";
-import { Paper, useMantineTheme, Text } from "@mantine/core";
+import { Paper, useMantineTheme, Text, darken } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 
 export default function PlayingCard({
   card,
   onClick,
   disabled,
+  highContrast,
 }: {
   card: Card;
   onClick: (card: Card) => void;
   disabled: boolean;
+  highContrast?: boolean;
 }) {
   const theme = useMantineTheme();
 
@@ -25,6 +27,17 @@ export default function PlayingCard({
     backgroundColor = theme.colors.dark[6];
   } else {
     backgroundColor = theme.colors.gray[0];
+  }
+
+  let iconColor = theme.colors.dark[3];
+
+  if (highContrast) {
+    if (card == EMPTY_CARD && !disabled) {
+      backgroundColor = darken(theme.colors.dark[6], 0.12);
+    } else if (card == EMPTY_CARD && disabled) {
+      backgroundColor = theme.colors.dark[5];
+      iconColor = theme.colors.gray[6];
+    }
   }
 
   return (
@@ -55,7 +68,7 @@ export default function PlayingCard({
               height: "100%",
             }}
           >
-            {disabled ? <IconPlus color={theme.colors.dark[3]} /> : null}
+            {disabled ? <IconPlus color={iconColor} /> : null}
           </Text>
         </>
       ) : (
