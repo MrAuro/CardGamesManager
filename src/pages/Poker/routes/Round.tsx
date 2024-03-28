@@ -1,7 +1,7 @@
 import { KEYBINDINGS_STATE, PLAYERS_STATE, POKER_GAME_STATE, POKER_PLAYERS_STATE } from "@/Root";
 import CardSelector from "@/components/CardSelector";
 import { CARD_SELECTOR_STATE } from "@/pages/Blackjack/routes/Round";
-import { Card } from "@/types/Card";
+import { Card, CardRank, CardSuit } from "@/types/Card";
 import { GameState, PokerGame, PokerPlayer, PokerPot } from "@/types/Poker";
 import { formatMoney, round } from "@/utils/MoneyHelper";
 import { getPlayer } from "@/utils/PlayerHelper";
@@ -13,8 +13,9 @@ import { atom, useRecoilState } from "recoil";
 import CommunityCards from "../components/CommunityCards";
 import RoundPlayerCard from "../components/RoundPlayerCard";
 import { useHotkeys } from "react-hotkeys-hook";
-import { isAnyEmpty } from "@/utils/CardHelper";
+import { EMPTY_CARD, isAnyEmpty } from "@/utils/CardHelper";
 import { notifications } from "@mantine/notifications";
+import { availableCards } from "@/types/Keybindings";
 
 export const FOLD_CONFIRM = atom<boolean>({
   key: "FOLD_CONFIRM",
@@ -47,7 +48,7 @@ export default function Round() {
   const [pokerPlayers, setPokerPlayers] = useRecoilImmerState(POKER_PLAYERS_STATE);
   const [players, setPlayers] = useRecoilImmerState(PLAYERS_STATE);
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
-  const [activeCardOverride] = useState<Card | undefined>(undefined);
+  const [activeCardOverride, setActiveCardOverride] = useState<Card | undefined>(undefined);
   const [keybindings] = useRecoilImmerState(KEYBINDINGS_STATE);
 
   // !
@@ -547,6 +548,187 @@ export default function Round() {
               }
             }
             break;
+
+          case "h":
+          case "s":
+          case "c":
+          case "d":
+            {
+              if (cardSelector.opened) {
+                setActiveCardOverride(`${"-"}${keybinding.action as CardSuit}`);
+              } else {
+                // Get the last non-empty card and change the suit
+                if (pokerGame.capturingCommunityCards) {
+                  let cards = [...pokerGame.communityCards];
+                  if (cards.includes(EMPTY_CARD)) {
+                    let lastCard = cards[cards.indexOf(EMPTY_CARD) - 1];
+                    cards[cards.indexOf(EMPTY_CARD) - 1] = `${lastCard[0]}${
+                      keybinding.action as CardSuit
+                    }` as Card;
+                  } else {
+                    let lastCard = cards[cards.length - 1];
+                    cards[cards.length - 1] = `${lastCard[0]}${
+                      keybinding.action as CardSuit
+                    }` as Card;
+                  }
+
+                  setPokerGame({
+                    ...pokerGame,
+                    communityCards: cards,
+                  });
+                } else {
+                  setPokerPlayers((draft) => {
+                    let pokerPlayer = draft.find((p) => p.id == pokerGame.currentTurn);
+
+                    if (pokerPlayer) {
+                      if (pokerPlayer.cards.includes(EMPTY_CARD)) {
+                        let lastCard = pokerPlayer.cards[pokerPlayer.cards.indexOf(EMPTY_CARD) - 1];
+                        pokerPlayer.cards[pokerPlayer.cards.indexOf(EMPTY_CARD) - 1] = `${
+                          lastCard[0]
+                        }${keybinding.action as CardSuit}` as Card;
+                      } else {
+                        let lastCard = pokerPlayer.cards[pokerPlayer.cards.length - 1];
+                        pokerPlayer.cards[pokerPlayer.cards.length - 1] = `${lastCard[0]}${
+                          keybinding.action as CardSuit
+                        }` as Card;
+                      }
+                    }
+                  });
+                }
+              }
+            }
+            break;
+
+          case "A":
+          case "2":
+          case "3":
+          case "4":
+          case "5":
+          case "6":
+          case "7":
+          case "8":
+          case "9":
+          case "T":
+          case "J":
+          case "Q":
+          case "K":
+            {
+              if (cardSelector.opened) {
+                setActiveCardOverride(`${keybinding.action as CardRank}${"-"}`);
+              } else {
+                // When we are dealing with Ranks, we add the card instead of modifying the last one
+                if (pokerGame.capturingCommunityCards) {
+                  let newCommunityCards = [...pokerGame.communityCards];
+                  if (newCommunityCards.includes(EMPTY_CARD)) {
+                    newCommunityCards[newCommunityCards.indexOf(EMPTY_CARD)] = `${
+                      keybinding.action as CardRank
+                    }${"-"}` as Card;
+                  }
+
+                  setPokerGame({
+                    ...pokerGame,
+                    communityCards: newCommunityCards,
+                  });
+                } else {
+                  setPokerPlayers((draft) => {
+                    let pokerPlayer = draft.find((p) => p.id == pokerGame.currentTurn);
+
+                    if (pokerPlayer) {
+                      if (pokerPlayer.cards.includes(EMPTY_CARD)) {
+                        pokerPlayer.cards[pokerPlayer.cards.indexOf(EMPTY_CARD)] = `${
+                          keybinding.action as CardRank
+                        }${"-"}` as Card;
+                      } else {
+                        // Texas Hold'em only allows 2 cards per player, however
+                        // if in the future we want to allow more cards, we can uncomment this
+                        // // blackjackPlayer.cards.push(
+                        // //   ${keybinding.action as CardRank}${"-"}` as Card
+                        // // );
+                      }
+                    }
+                  });
+                }
+              }
+            }
+            break;
+
+          case "Remove Last Card":
+            {
+              if (pokerGame.capturingCommunityCards) {
+                let cards = [...pokerGame.communityCards];
+                let lastIndex = cards.length - 1;
+                while (cards[lastIndex] == EMPTY_CARD) {
+                  lastIndex--;
+
+                  if (lastIndex < 0) {
+                    break;
+                  }
+                }
+
+                cards[lastIndex] = EMPTY_CARD;
+
+                setPokerGame({
+                  ...pokerGame,
+                  communityCards: cards,
+                });
+              } else {
+                setPokerPlayers((draft) => {
+                  let pokerPlayer = draft.find((p) => p.id == pokerGame.currentTurn);
+
+                  let cards = pokerPlayer!.cards;
+                  if (cards.length <= 2) {
+                    if (cards[1] == EMPTY_CARD) {
+                      cards[0] = EMPTY_CARD;
+                    } else {
+                      cards[1] = EMPTY_CARD;
+                    }
+                  } else {
+                    cards.pop();
+                  }
+                });
+              }
+            }
+            break;
+
+          // default will also cover the specific RankSuit combinations (e.g. "2h", "3s", "4c", "5d")
+          default:
+            {
+              for (let card of availableCards) {
+                if (keybinding.action == card) {
+                  if (cardSelector.opened) {
+                    setActiveCardOverride(card);
+                  } else {
+                    // Append the card to the player's hand
+                    if (pokerGame.capturingCommunityCards) {
+                      let cards = [...pokerGame.communityCards];
+                      if (cards.includes(EMPTY_CARD)) {
+                        cards[cards.indexOf(EMPTY_CARD)] = card;
+                      }
+
+                      setPokerGame({
+                        ...pokerGame,
+                        communityCards: cards,
+                      });
+                    } else {
+                      setPokerPlayers((draft) => {
+                        let pokerPlayer = draft.find((p) => p.id == pokerGame.currentTurn);
+
+                        if (pokerPlayer) {
+                          if (pokerPlayer.cards.includes(EMPTY_CARD)) {
+                            pokerPlayer.cards[pokerPlayer.cards.indexOf(EMPTY_CARD)] = card as Card;
+                          } else {
+                            // Texas Hold'em only allows 2 cards per player, however
+                            // if in the future we want to allow more cards, we can uncomment this
+                            // // pokerPlayer.cards.push(card as Card);
+                          }
+                        }
+                      });
+                    }
+                  }
+                }
+              }
+            }
+            break;
         }
       });
     }
@@ -590,11 +772,6 @@ export default function Round() {
         }}
       />
 
-      <p>
-        {foldConfirm ? "Fold (true)" : "Fold (false)"}
-        {allInConfirm ? "All In (true)" : "All In (false)"}
-        {formatMoney(bet)}
-      </p>
       <Flex direction="column" gap="xs">
         <CommunityCards cardsAllowed={cardsAllowed} />
         {pokerPlayers.map((pokerPlayer) => {

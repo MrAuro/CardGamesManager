@@ -30,8 +30,7 @@ export default function CommunityCards({ cardsAllowed }: { cardsAllowed: number 
       }}
     >
       <Title order={3} ta="center">
-        Community Cards ({pokerGame.gameState}) (
-        {pokerGame.capturingCommunityCards ? "Capturing" : "Not Capturing"})
+        Community Cards ({pokerGame.gameState})
       </Title>
       <Text size="sm" ta="center" fw={500}>
         {pokerGame.pots.map((pot, index) => {
@@ -49,6 +48,7 @@ export default function CommunityCards({ cardsAllowed }: { cardsAllowed: number 
           return (
             <PlayingCard
               highContrast
+              strict
               key={index}
               card={card}
               onClick={() => {

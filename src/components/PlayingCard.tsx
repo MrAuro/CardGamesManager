@@ -10,11 +10,13 @@ export default function PlayingCard({
   onClick,
   disabled,
   highContrast,
+  strict,
 }: {
   card: Card;
   onClick: (card: Card) => void;
   disabled: boolean;
   highContrast?: boolean;
+  strict?: boolean;
 }) {
   const theme = useMantineTheme();
   const settings = useRecoilValue(SETTINGS_STATE);
@@ -43,6 +45,12 @@ export default function PlayingCard({
     }
   }
 
+  const invalidCard = strict && getSuit(card) === "-" && getRank(card) !== "-";
+  if (invalidCard) {
+    // We have a rank but no suit
+    backgroundColor = theme.colors.red[8];
+  }
+
   let cardColor =
     getSuit(card) === "h" || getSuit(card) === "d" ? theme.colors.red[6] : theme.colors.dark[5];
 
@@ -62,6 +70,7 @@ export default function PlayingCard({
         width: "4.5rem",
         height: "4.5rem",
         backgroundColor: backgroundColor,
+        border: invalidCard ? `2px solid ${theme.colors.gray[0]}` : undefined,
 
         cursor: disabled ? "pointer" : "not-allowed",
       }}
