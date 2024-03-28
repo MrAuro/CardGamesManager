@@ -26,8 +26,6 @@ import {
 import {
   IconCircleLetterD,
   IconInfoTriangle,
-  IconSpade,
-  IconSpadeFilled,
   IconTriangleFilled,
   IconX,
 } from "@tabler/icons-react";

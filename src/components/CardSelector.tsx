@@ -1,4 +1,4 @@
-import { POKER_GAME_STATE, POKER_PLAYERS_STATE, SETTINGS_STATE } from "@/Root";
+import { SETTINGS_STATE } from "@/Root";
 import { Card, CardRank, CardSuit } from "@/types/Card";
 import { EMPTY_CARD, getRank, getSuit, isAnyEmpty, suitToIcon } from "@/utils/CardHelper";
 import {
