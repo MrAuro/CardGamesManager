@@ -468,6 +468,8 @@ export default function Round() {
                   });
                 }
               } else {
+                if (betUIOpen) return;
+
                 let pokerPlayer = {
                   ...pokerPlayers.find((player) => player.id === pokerGame.currentTurn)!,
                 };
@@ -497,6 +499,7 @@ export default function Round() {
           case "All In":
             {
               if (pokerGame.capturingCommunityCards) return;
+              if (!betUIOpen) return;
               if (allInConfirm) {
                 const pokerPlayer = pokerPlayers.find(
                   (player) => player.id === pokerGame.currentTurn
@@ -529,6 +532,7 @@ export default function Round() {
           case "Fold":
             {
               if (pokerGame.capturingCommunityCards) return;
+              if (betUIOpen) return;
               if (foldConfirm) {
                 foldAction();
                 setFoldConfirm(false);
