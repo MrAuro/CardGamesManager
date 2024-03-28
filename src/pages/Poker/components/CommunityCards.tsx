@@ -107,15 +107,14 @@ export default function CommunityCards() {
           mt="xs"
           w="10rem"
           disabled={
-            !(pokerGame.communityCards.filter((card) => isAnyEmpty(card)).length < cardsAllowed) ||
-            !pokerGame.capturingCommunityCards
+            !pokerGame.capturingCommunityCards ||
+            pokerGame.communityCards.filter((card) => !isAnyEmpty(card)).length < cardsAllowed
           }
           style={{
-            backgroundColor: !(
-              pokerGame.communityCards.filter((card) => isAnyEmpty(card)).length < cardsAllowed
-            )
-              ? theme.colors.dark[5]
-              : undefined,
+            backgroundColor:
+              pokerGame.communityCards.filter((card) => !isAnyEmpty(card)).length < cardsAllowed
+                ? theme.colors.dark[5]
+                : undefined,
           }}
           onClick={() => {
             setPokerGame({
