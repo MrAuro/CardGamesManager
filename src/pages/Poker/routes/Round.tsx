@@ -170,6 +170,7 @@ export default function Round() {
       }
 
       tempPokerGame.gameState = state;
+      tempPokerGame.capturingCommunityCards = state !== "SHOWDOWN";
       tempPokerPlayers = tempPokerPlayers.map((player) => {
         player.beenOn = false;
         return player;
@@ -436,7 +437,9 @@ export default function Round() {
               <RoundPlayerCard
                 player={getPlayer(pokerPlayer.id, players)!}
                 pokerPlayer={pokerPlayer}
-                active={pokerPlayer.id === pokerGame.currentTurn}
+                active={
+                  pokerPlayer.id === pokerGame.currentTurn && !pokerGame.capturingCommunityCards
+                }
                 key={pokerPlayer.id}
                 checkAction={checkAction}
                 callAction={callAction}

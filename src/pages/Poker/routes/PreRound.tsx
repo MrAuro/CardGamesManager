@@ -178,6 +178,7 @@ export default function PreRound() {
       currentBet: Math.max(...Object.values(paymentsToTake)),
       gameState: "PREFLOP",
       currentTurn: firstTurn,
+      capturingCommunityCards: false,
       pots: [
         {
           eligiblePlayers: Object.keys(paymentsToTake),

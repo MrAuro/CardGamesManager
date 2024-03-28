@@ -11,6 +11,7 @@ export type PokerGame = {
   currentSmallBlind: string;
   currentBigBlind: string;
   pots: PokerPot[];
+  capturingCommunityCards: boolean;
   currentBets: {
     [playerId: string]: {
       amount: number;
