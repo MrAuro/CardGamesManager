@@ -32,6 +32,7 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { useRef } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 import { useRecoilState } from "recoil";
 
 function getStyle(style: any, snapshot: DraggableStateSnapshot) {
@@ -56,6 +57,37 @@ export default function PreRound() {
   const [keybindings] = useRecoilImmerState(KEYBINDINGS_STATE);
 
   const playerSelectorRef = useRef<PlayerSelectorHandles>(null);
+
+  keybindings.forEach((keybinding) => {
+    if (keybinding.scope === "Poker PreRound") {
+      useHotkeys(keybinding.key, () => {
+        switch (keybinding.action) {
+          case "Start Game":
+            startGame();
+            break;
+
+          case "Next Dealer":
+            setDealer(
+              pokerPlayers[
+                (pokerPlayers.findIndex((player) => player.id == pokerGame.currentDealer) + 1) %
+                  pokerPlayers.length
+              ].id
+            );
+            break;
+
+          case "Random Dealer":
+            let dealerIndex = Math.floor(Math.random() * pokerPlayers.length);
+            setDealer(pokerPlayers[dealerIndex].id);
+            break;
+
+          case "Shuffle Players":
+            if (playerSelectorRef.current) playerSelectorRef.current.shuffleListState();
+            else console.error("PlayerSelectorRef is null when shuffling", playerSelectorRef);
+            break;
+        }
+      });
+    }
+  });
 
   const setDealer = (playerId: string) => {
     let playerIndex = pokerPlayers.findIndex((player) => player.id == playerId);
