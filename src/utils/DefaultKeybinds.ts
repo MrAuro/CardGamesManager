@@ -164,6 +164,12 @@ export const DefaultKeybinds: Keybinding[] = [
     key: "f",
   },
   {
+    id: "54",
+    scope: "Poker Round",
+    action: "Remove Last Card",
+    key: "backspace",
+  },
+  {
     id: "55",
     scope: "Poker Round",
     action: "Cancel Bet",

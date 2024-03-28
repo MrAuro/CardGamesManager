@@ -136,6 +136,7 @@ export default function RoundPlayerCard({
             {pokerPlayer.cards.map((card, index) => (
               <Container p={0} m={0} pl="xs" key={`${card}-${index}`}>
                 <PlayingCard
+                  strict
                   key={index}
                   card={card}
                   onClick={() => {
