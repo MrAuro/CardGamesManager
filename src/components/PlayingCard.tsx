@@ -1,7 +1,7 @@
 import { Card } from "@/types/Card";
 import { getSuit, suitToIcon, getRank, EMPTY_CARD } from "@/utils/CardHelper";
 import { Paper, useMantineTheme, Text, darken } from "@mantine/core";
-import { IconPlus } from "@tabler/icons-react";
+import { IconLock, IconPlus } from "@tabler/icons-react";
 
 export default function PlayingCard({
   card,
@@ -68,7 +68,11 @@ export default function PlayingCard({
               height: "100%",
             }}
           >
-            {disabled ? <IconPlus color={iconColor} /> : null}
+            {disabled ? (
+              <IconPlus color={iconColor} />
+            ) : highContrast ? (
+              <IconLock color={iconColor} />
+            ) : null}
           </Text>
         </>
       ) : (
