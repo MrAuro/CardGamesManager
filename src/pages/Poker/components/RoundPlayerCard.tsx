@@ -1,4 +1,4 @@
-import { PLAYERS_STATE, POKER_GAME_STATE, POKER_PLAYERS_STATE, POKER_SETTINGS_STATE } from "@/Root";
+import { POKER_GAME_STATE, POKER_SETTINGS_STATE } from "@/Root";
 import GenericPlayerCard from "@/components/GenericPlayerCard";
 import PlayingCard from "@/components/PlayingCard";
 import { CARD_SELECTOR_STATE } from "@/pages/Blackjack/routes/Round";
@@ -14,25 +14,13 @@ import {
   Group,
   NumberInput,
   Text,
-  Tooltip,
-  darken,
   useMantineTheme,
 } from "@mantine/core";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { DealerBadge, SmallBlindBadge, BigBlindBadge, AllInBadge } from "../routes/PreRound";
 import { useDisclosure, useScrollIntoView } from "@mantine/hooks";
-import {
-  IconCoin,
-  IconCoins,
-  IconCurrencyDollar,
-  IconSum,
-  IconTriangle,
-  IconTriangleFilled,
-  IconTrianglePlus,
-  IconTrianglePlus2,
-} from "@tabler/icons-react";
+import { IconCurrencyDollar, IconTriangleFilled } from "@tabler/icons-react";
 import { useEffect, useRef, useState } from "react";
-import { useRecoilImmerState } from "@/utils/RecoilImmer";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { AllInBadge, BigBlindBadge, DealerBadge, SmallBlindBadge } from "../routes/PreRound";
 
 export default function RoundPlayerCard({
   player,

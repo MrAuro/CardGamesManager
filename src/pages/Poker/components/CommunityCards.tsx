@@ -1,36 +1,18 @@
-import { POKER_GAME_STATE, POKER_PLAYERS_STATE } from "@/Root";
+import { POKER_GAME_STATE } from "@/Root";
 import PlayingCard from "@/components/PlayingCard";
 import { CARD_SELECTOR_STATE } from "@/pages/Blackjack/routes/Round";
 import { isAnyEmpty } from "@/utils/CardHelper";
 import { formatMoney } from "@/utils/MoneyHelper";
-import {
-  ActionIcon,
-  Badge,
-  Button,
-  Card,
-  Center,
-  Container,
-  Divider,
-  Flex,
-  Paper,
-  Text,
-  Title,
-  useMantineTheme,
-} from "@mantine/core";
-import { useElementSize } from "@mantine/hooks";
-import { IconDeviceFloppy } from "@tabler/icons-react";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { Button, Card, Center, Divider, Flex, Text, Title, useMantineTheme } from "@mantine/core";
+import { useRecoilState } from "recoil";
 
 export default function CommunityCards() {
   const theme = useMantineTheme();
   const [pokerGame, setPokerGame] = useRecoilState(POKER_GAME_STATE);
-  const pokerPlayers = useRecoilValue(POKER_PLAYERS_STATE);
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
 
-  let temp: string[] = [];
-
   let totalAmountToBePutInPot = 0;
-  for (const [k, v] of Object.entries(pokerGame.currentBets)) {
+  for (const [_, v] of Object.entries(pokerGame.currentBets)) {
     totalAmountToBePutInPot += v.amount;
   }
 
