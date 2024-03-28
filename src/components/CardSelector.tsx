@@ -1,3 +1,4 @@
+import { POKER_GAME_STATE, POKER_PLAYERS_STATE } from "@/Root";
 import { Card, CardRank, CardSuit } from "@/types/Card";
 import { EMPTY_CARD, getRank, getSuit, isAnyEmpty, suitToIcon } from "@/utils/CardHelper";
 import {
@@ -11,6 +12,7 @@ import {
 } from "@mantine/core";
 import { IconBan } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
+import { useRecoilValue } from "recoil";
 
 export default function CardSelector({
   opened,
@@ -122,24 +124,12 @@ function RankButton(props: {
   label?: React.ReactNode;
   onClick?: () => void;
 }) {
-  //   const usedCards = useRecoilValue(USED_CARDS);
   const theme = useMantineTheme();
 
   const [selected, setSelected] = useState(false);
-  const [disabled] = useState(
-    false
-    // usedCards.some(
-    //   (card) => card.rank == props.rank && card.suit == props.selectedCardSuit
-    // )
-  );
   useEffect(() => {
     setSelected(props.selectedCardRank == props.rank);
-    // setDisabled(
-    //   usedCards.some(
-    //     (card) => card.rank == props.rank && card.suit == props.selectedCardSuit
-    //   )
-    // );
-  }, [props.selectedCardSuit, props.selectedCardRank /* usedCards */]);
+  }, [props.selectedCardSuit, props.selectedCardRank]);
 
   return (
     <Button
@@ -151,7 +141,6 @@ function RankButton(props: {
       justify="center"
       color="gray.0"
       variant={selected ? "filled" : "outline"}
-      disabled={disabled}
       onClick={() => {
         props.setSelectedCardRank(props.rank);
         if (props.onClick) {
@@ -176,40 +165,24 @@ function SuitButton(props: {
   selectedCardSuit: CardSuit;
   setSelectedCardSuit: (suit: CardSuit) => void;
 }) {
-  //   const usedCards = useRecoilValue(USED_CARDS);
   const theme = useMantineTheme();
 
   const [selected, setSelected] = useState(false);
-  const [disabled] = useState(
-    false
-    /*usedCards.some(
-      (card) => card.rank == props.selectedCardRank && card.suit == props.suit
-    )*/
-  );
   useEffect(() => {
     setSelected(props.selectedCardSuit == props.suit);
-    // setDisabled(
-    //   usedCards.some(
-    //     (card) => card.rank == props.selectedCardRank && card.suit == props.suit
-    //   )
-    // );
-  }, [props.selectedCardSuit, props.selectedCardRank /*usedCards*/]);
+  }, [props.selectedCardSuit, props.selectedCardRank]);
 
   let color: "red" | "gray" = props.suit == "h" || props.suit == "d" ? "red" : "gray";
 
   let iconColor;
   if (color == "red") {
-    if (disabled) {
-      iconColor = theme.colors.gray[7];
-    } else if (selected) {
+    if (selected) {
       iconColor = theme.colors.gray[0];
     } else {
       iconColor = "#ff2626";
     }
   } else if (color == "gray") {
-    if (disabled) {
-      iconColor = theme.colors.gray[7];
-    } else if (selected) {
+    if (selected) {
       iconColor = theme.colors.gray[9];
     } else {
       iconColor = theme.colors.gray[0];
@@ -221,7 +194,6 @@ function SuitButton(props: {
       radius="sm"
       size="xl"
       variant={selected ? "filled" : "outline"}
-      disabled={disabled}
       onClick={() => {
         props.setSelectedCardSuit(props.suit);
       }}
