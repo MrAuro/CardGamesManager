@@ -1,4 +1,4 @@
-import { POKER_GAME_STATE, POKER_PLAYERS_STATE } from "@/Root";
+import { POKER_GAME_STATE, POKER_PLAYERS_STATE, SETTINGS_STATE } from "@/Root";
 import { Card, CardRank, CardSuit } from "@/types/Card";
 import { EMPTY_CARD, getRank, getSuit, isAnyEmpty, suitToIcon } from "@/utils/CardHelper";
 import {
@@ -166,13 +166,22 @@ function SuitButton(props: {
   setSelectedCardSuit: (suit: CardSuit) => void;
 }) {
   const theme = useMantineTheme();
+  const settings = useRecoilValue(SETTINGS_STATE);
 
   const [selected, setSelected] = useState(false);
   useEffect(() => {
     setSelected(props.selectedCardSuit == props.suit);
   }, [props.selectedCardSuit, props.selectedCardRank]);
 
-  let color: "red" | "gray" = props.suit == "h" || props.suit == "d" ? "red" : "gray";
+  let color: "red" | "gray" | "blue" | "green" =
+    props.suit == "h" || props.suit == "d" ? "red" : "gray";
+  if (settings.fourColorDeck) {
+    if (props.suit == "d") {
+      color = "blue";
+    } else if (props.suit == "c") {
+      color = "green";
+    }
+  }
 
   let iconColor;
   if (color == "red") {
@@ -187,6 +196,18 @@ function SuitButton(props: {
     } else {
       iconColor = theme.colors.gray[0];
     }
+  } else if (color == "blue") {
+    if (selected) {
+      iconColor = theme.colors.gray[0];
+    } else {
+      iconColor = theme.colors.blue[6];
+    }
+  } else if (color == "green") {
+    if (selected) {
+      iconColor = theme.colors.gray[0];
+    } else {
+      iconColor = theme.colors.green[7];
+    }
   }
 
   return (
@@ -197,7 +218,8 @@ function SuitButton(props: {
       onClick={() => {
         props.setSelectedCardSuit(props.suit);
       }}
-      color={props.suit == "h" || props.suit == "d" ? "#ff2626" : "gray.0"}
+      // Cheaty way to get the color to what is best here
+      color={color.replace("gray", "white").replace("red", "#ff2626")}
       styles={{
         icon: {
           color: `${iconColor}`,

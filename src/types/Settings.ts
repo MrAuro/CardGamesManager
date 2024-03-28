@@ -6,4 +6,5 @@ export type Settings = {
   activeTab: Page;
   cornerOfEyeMode: boolean;
   chipsMode: boolean;
+  fourColorDeck: boolean;
 };

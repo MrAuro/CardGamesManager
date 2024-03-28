@@ -23,6 +23,8 @@ import {
   IconEyeOff,
   IconKeyframe,
   IconKeyframeFilled,
+  IconLayoutColumns,
+  IconLayoutGrid,
   IconPencil,
   IconPlus,
   IconPokerChip,
@@ -91,6 +93,32 @@ export default function GeneralSettings() {
             leftSection={<IconEyeOff />}
             onClick={() => {
               setSettings({ ...settings, cornerOfEyeMode: false });
+            }}
+          >
+            Off
+          </Button>
+        </ButtonGroup>
+      </Input.Wrapper>
+      <Input.Wrapper
+        label="Four Color Deck"
+        description="Diamonds are blue and Clubs are green"
+        mt="sm"
+      >
+        <ButtonGroup mt={5}>
+          <Button
+            variant={settings.fourColorDeck ? "filled" : "default"}
+            leftSection={<IconLayoutGrid />}
+            onClick={() => {
+              setSettings({ ...settings, fourColorDeck: true });
+            }}
+          >
+            On
+          </Button>
+          <Button
+            variant={!settings.fourColorDeck ? "filled" : "default"}
+            leftSection={<IconLayoutColumns />}
+            onClick={() => {
+              setSettings({ ...settings, fourColorDeck: false });
             }}
           >
             Off

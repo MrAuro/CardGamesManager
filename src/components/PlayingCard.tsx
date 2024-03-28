@@ -1,7 +1,9 @@
+import { SETTINGS_STATE } from "@/Root";
 import { Card } from "@/types/Card";
 import { getSuit, suitToIcon, getRank, EMPTY_CARD } from "@/utils/CardHelper";
 import { Paper, useMantineTheme, Text, darken } from "@mantine/core";
 import { IconLock, IconPlus } from "@tabler/icons-react";
+import { useRecoilValue } from "recoil";
 
 export default function PlayingCard({
   card,
@@ -15,6 +17,7 @@ export default function PlayingCard({
   highContrast?: boolean;
 }) {
   const theme = useMantineTheme();
+  const settings = useRecoilValue(SETTINGS_STATE);
 
   let backgroundColor;
   if (!disabled) {
@@ -37,6 +40,17 @@ export default function PlayingCard({
     } else if (card == EMPTY_CARD && disabled) {
       backgroundColor = theme.colors.dark[5];
       iconColor = theme.colors.gray[6];
+    }
+  }
+
+  let cardColor =
+    getSuit(card) === "h" || getSuit(card) === "d" ? theme.colors.red[6] : theme.colors.dark[5];
+
+  if (settings.fourColorDeck) {
+    if (getSuit(card) === "d") {
+      cardColor = theme.colors.blue[6];
+    } else if (getSuit(card) === "c") {
+      cardColor = theme.colors.green[7];
     }
   }
 
@@ -88,11 +102,7 @@ export default function PlayingCard({
             size="2rem"
             fw={800}
             ta="center"
-            c={
-              getSuit(card) === "h" || getSuit(card) === "d"
-                ? theme.colors.red[6]
-                : theme.colors.dark[5]
-            }
+            c={cardColor}
             style={{
               verticalAlign: "middle",
               display: "flex",
