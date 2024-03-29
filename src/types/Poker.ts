@@ -12,6 +12,7 @@ export type PokerGame = {
   currentBigBlind: string;
   pots: PokerPot[];
   capturingCommunityCards: boolean;
+  runningThroughShowdown: boolean; // Everyone (or everyone minus one) has gone all in and we're just showing the cards
   currentBets: {
     [playerId: string]: {
       amount: number;

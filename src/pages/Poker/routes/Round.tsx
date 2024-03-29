@@ -161,6 +161,29 @@ export default function Round() {
     );
     tempPokerPlayers[currentPlayerIndex].beenOn = true;
 
+    if (tempPokerGame.gameState === "SHOWDOWN") {
+      // For showdown, we simply go through the list of non-folded players. Once
+      // there are no more players to go through, we can end the game (console.log it)
+
+      let showdownPlayerIndex = currentPlayerIndex + 1;
+      while (showdownPlayerIndex == -1 || tempPokerPlayers[showdownPlayerIndex].folded) {
+        showdownPlayerIndex++;
+
+        if (showdownPlayerIndex >= tempPokerPlayers.length) {
+          showdownPlayerIndex = -1;
+          break;
+        }
+      }
+
+      if (showdownPlayerIndex == -1) {
+        alert("Game over");
+        return [tempPokerGame, tempPokerPlayers];
+      } else {
+        tempPokerGame.currentTurn = tempPokerPlayers[showdownPlayerIndex].id;
+        return [tempPokerGame, tempPokerPlayers];
+      }
+    }
+
     let everyoneBeenOn = tempPokerPlayers
       .filter((player) => !player.folded && !player.allIn)
       .every((player) => player.beenOn);
@@ -199,27 +222,50 @@ export default function Round() {
         }
       }
 
-      tempPokerGame.currentTurn = tempPokerPlayers[firstPlayerIndex].id;
-      let state: GameState = "FLOP";
-      switch (tempPokerGame.gameState) {
-        case "PREFLOP":
-          state = "FLOP";
-          break;
-        case "FLOP":
-          state = "TURN";
-          break;
-        case "TURN":
-          state = "RIVER";
-          break;
-        case "RIVER":
-          state = "SHOWDOWN";
-          break;
-        default:
-          throw new Error(`Invalid game state ${tempPokerGame.gameState}`);
+      let ableToPlayPlayers = tempPokerPlayers.filter(
+        (player) => !player.folded && !player.allIn
+      ).length;
+      if (ableToPlayPlayers <= 1) {
+        tempPokerGame.gameState = "SHOWDOWN";
+        tempPokerGame.runningThroughShowdown = true;
       }
 
-      tempPokerGame.gameState = state;
-      tempPokerGame.capturingCommunityCards = state !== "SHOWDOWN";
+      if (!tempPokerGame.runningThroughShowdown) {
+        tempPokerGame.currentTurn = tempPokerPlayers[firstPlayerIndex].id;
+        let state: GameState = "FLOP";
+        switch (tempPokerGame.gameState) {
+          case "PREFLOP":
+            state = "FLOP";
+            break;
+          case "FLOP":
+            state = "TURN";
+            break;
+          case "TURN":
+            state = "RIVER";
+            break;
+          case "RIVER":
+            state = "SHOWDOWN";
+            break;
+          default:
+            throw new Error(`Invalid game state ${tempPokerGame.gameState}`);
+        }
+
+        tempPokerGame.gameState = state;
+        tempPokerGame.capturingCommunityCards = state !== "SHOWDOWN";
+      } else {
+        tempPokerGame.gameState = "SHOWDOWN";
+        tempPokerGame.capturingCommunityCards = true;
+
+        let showdownPlayerIndex = 0;
+        while (tempPokerPlayers[showdownPlayerIndex].folded) {
+          showdownPlayerIndex++;
+
+          if (showdownPlayerIndex >= tempPokerPlayers.length) {
+            break;
+          }
+        }
+      }
+
       tempPokerPlayers = tempPokerPlayers.map((player) => {
         player.beenOn = false;
         return player;

@@ -148,199 +148,203 @@ export default function RoundPlayerCard({
                       onSubmitIndex: index,
                     });
                   }}
-                  disabled={active}
+                  disabled={active || (pokerGame.gameState == "SHOWDOWN" && !pokerPlayer.folded)}
                 />
               </Container>
             ))}
           </>
         }
       >
-        <>
-          <Divider my="xs" />
-          {betOpened && active ? (
-            <>
-              <Group grow>
-                <Grid columns={24}>
-                  <Grid.Col span={9}>
-                    <NumberInput
-                      ref={betInputRef}
-                      radius="md"
-                      decimalScale={2}
-                      fixedDecimalScale
-                      thousandSeparator=","
-                      placeholder="0.00"
-                      error={betError}
-                      leftSection={<IconCurrencyDollar />}
-                      allowNegative={false}
-                      value={bet}
-                      onChange={(value) => {
-                        setBet(parseFloat(`${value}`));
-                      }}
-                      onKeyDown={getHotkeyHandler([["enter", () => betAction(bet)]])}
-                    />
-                  </Grid.Col>
-                  <Grid.Col span={5}>
-                    <Button
-                      fullWidth
-                      color="gray"
-                      disabled={!active}
-                      onClick={() => {
-                        setBet(0);
-                        setBetOpened(false);
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  </Grid.Col>
-                  <Grid.Col span={5}>
-                    <Button
-                      fullWidth
-                      color="red"
-                      disabled={!active || pokerPlayer.currentBet == player.balance}
-                      style={{
-                        background: active
-                          ? `linear-gradient(to left, ${theme.colors.red[8]} ${Math.min(
-                              100,
-                              ((dateNow - (timerStart || 0)) / 3000) * 100
-                            )}%, ${theme.colors.red[9]} 0%)`
-                          : undefined,
-                      }}
-                      leftSection={timerStart ? undefined : <IconTriangleFilled />}
-                      onClick={() => {
-                        if (allInConfirm && active) {
-                          setBet(player.balance);
-                          betAction(player.balance);
+        {pokerGame.gameState == "SHOWDOWN" && !pokerPlayer.folded ? (
+          <>{/* Add additional information here if needed */}</>
+        ) : (
+          <>
+            <Divider my="xs" />
+            {betOpened && active ? (
+              <>
+                <Group grow>
+                  <Grid columns={24}>
+                    <Grid.Col span={9}>
+                      <NumberInput
+                        ref={betInputRef}
+                        radius="md"
+                        decimalScale={2}
+                        fixedDecimalScale
+                        thousandSeparator=","
+                        placeholder="0.00"
+                        error={betError}
+                        leftSection={<IconCurrencyDollar />}
+                        allowNegative={false}
+                        value={bet}
+                        onChange={(value) => {
+                          setBet(parseFloat(`${value}`));
+                        }}
+                        onKeyDown={getHotkeyHandler([["enter", () => betAction(bet)]])}
+                      />
+                    </Grid.Col>
+                    <Grid.Col span={5}>
+                      <Button
+                        fullWidth
+                        color="gray"
+                        disabled={!active}
+                        onClick={() => {
+                          setBet(0);
                           setBetOpened(false);
-                          setAllInConfirm(false);
-                          setTimerStart(null);
-                        } else {
-                          setAllInConfirm(true);
-
-                          // We wait 3 seconds to reset the all in confirm
-                          setTimerStart(Date.now());
-                          setTimeout(() => {
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </Grid.Col>
+                    <Grid.Col span={5}>
+                      <Button
+                        fullWidth
+                        color="red"
+                        disabled={!active || pokerPlayer.currentBet == player.balance}
+                        style={{
+                          background: active
+                            ? `linear-gradient(to left, ${theme.colors.red[8]} ${Math.min(
+                                100,
+                                ((dateNow - (timerStart || 0)) / 3000) * 100
+                              )}%, ${theme.colors.red[9]} 0%)`
+                            : undefined,
+                        }}
+                        leftSection={timerStart ? undefined : <IconTriangleFilled />}
+                        onClick={() => {
+                          if (allInConfirm && active) {
+                            setBet(player.balance);
+                            betAction(player.balance);
+                            setBetOpened(false);
                             setAllInConfirm(false);
                             setTimerStart(null);
-                          }, 3000);
-                        }
-                      }}
-                    >
-                      {allInConfirm && active
-                        ? "Are you sure?"
-                        : `All In (${formatMoney(player.balance, true, true)})`}
-                    </Button>
-                  </Grid.Col>
-                  <Grid.Col span={5}>
-                    <Button
-                      fullWidth
-                      color="blue"
-                      disabled={!active || betError != null}
-                      onClick={() => {
-                        betAction(bet);
-                        setBetOpened(false);
-                      }}
-                    >
-                      {betOrRaise == "BET" ? "Bet" : "Raise to"} {formatMoney(bet, true, false)}
-                    </Button>
-                  </Grid.Col>
-                </Grid>
-              </Group>
-            </>
-          ) : (
-            <Group grow>
-              {pokerGame.currentBet > pokerPlayer.currentBet && (
-                <Button fullWidth color="green" disabled={!active} onClick={callAction}>
-                  Call{" "}
-                  {mustGoAllIn
-                    ? `${formatMoney(player.balance)} (All In)`
-                    : formatMoney(
-                        Math.min(pokerGame.currentBet - pokerPlayer.currentBet, player.balance),
-                        true,
-                        true
-                      )}
-                </Button>
-              )}
-              {pokerGame.currentBet <= pokerPlayer.currentBet && (
-                <Button fullWidth color="green" disabled={!active} onClick={checkAction}>
-                  Check
-                </Button>
-              )}
-              <Button
-                fullWidth
-                color="red"
-                disabled={!active}
-                style={{
-                  // Make the background like a progress bar, showing how long until the fold confirm is reset
-                  background: active
-                    ? `linear-gradient(to left, ${theme.colors.red[8]} ${Math.min(
-                        100,
-                        ((dateNow - (timerStart || 0)) / 3000) * 100
-                      )}%, ${theme.colors.red[9]} 0%)`
-                    : undefined,
-                }}
-                onClick={() => {
-                  if (foldConfirm && active) {
-                    foldAction();
-                    setFoldConfirm(false);
-                    setTimerStart(null);
-                    return;
-                  } else {
-                    setFoldConfirm(true);
+                          } else {
+                            setAllInConfirm(true);
 
-                    // We wait 3 seconds to reset the fold confirm
-                    setTimerStart(Date.now());
-                    setTimeout(() => {
+                            // We wait 3 seconds to reset the all in confirm
+                            setTimerStart(Date.now());
+                            setTimeout(() => {
+                              setAllInConfirm(false);
+                              setTimerStart(null);
+                            }, 3000);
+                          }
+                        }}
+                      >
+                        {allInConfirm && active
+                          ? "Are you sure?"
+                          : `All In (${formatMoney(player.balance, true, true)})`}
+                      </Button>
+                    </Grid.Col>
+                    <Grid.Col span={5}>
+                      <Button
+                        fullWidth
+                        color="blue"
+                        disabled={!active || betError != null}
+                        onClick={() => {
+                          betAction(bet);
+                          setBetOpened(false);
+                        }}
+                      >
+                        {betOrRaise == "BET" ? "Bet" : "Raise to"} {formatMoney(bet, true, false)}
+                      </Button>
+                    </Grid.Col>
+                  </Grid>
+                </Group>
+              </>
+            ) : (
+              <Group grow>
+                {pokerGame.currentBet > pokerPlayer.currentBet && (
+                  <Button fullWidth color="green" disabled={!active} onClick={callAction}>
+                    Call{" "}
+                    {mustGoAllIn
+                      ? `${formatMoney(player.balance)} (All In)`
+                      : formatMoney(
+                          Math.min(pokerGame.currentBet - pokerPlayer.currentBet, player.balance),
+                          true,
+                          true
+                        )}
+                  </Button>
+                )}
+                {pokerGame.currentBet <= pokerPlayer.currentBet && (
+                  <Button fullWidth color="green" disabled={!active} onClick={checkAction}>
+                    Check
+                  </Button>
+                )}
+                <Button
+                  fullWidth
+                  color="red"
+                  disabled={!active}
+                  style={{
+                    // Make the background like a progress bar, showing how long until the fold confirm is reset
+                    background: active
+                      ? `linear-gradient(to left, ${theme.colors.red[8]} ${Math.min(
+                          100,
+                          ((dateNow - (timerStart || 0)) / 3000) * 100
+                        )}%, ${theme.colors.red[9]} 0%)`
+                      : undefined,
+                  }}
+                  onClick={() => {
+                    if (foldConfirm && active) {
+                      foldAction();
                       setFoldConfirm(false);
                       setTimerStart(null);
-                    }, 3000);
-                  }
-                }}
-              >
-                {foldConfirm && active ? "Are you sure?" : "Fold"}
-              </Button>
-              {pokerGame.currentBet > 0 && (
-                <Button
-                  fullWidth
-                  color="blue"
-                  disabled={!active || pokerPlayer.allIn}
-                  onClick={() => {
-                    setBetOrRaise("RAISE");
-                    setBetOpened(true);
+                      return;
+                    } else {
+                      setFoldConfirm(true);
 
-                    // Focus and go to the beginning of the input
-                    // We wait 100ms to make sure the input is rendered
-                    setTimeout(() => {
-                      betInputRef.current?.focus();
-                      betInputRef.current?.setSelectionRange(0, 0);
-                    }, 100);
+                      // We wait 3 seconds to reset the fold confirm
+                      setTimerStart(Date.now());
+                      setTimeout(() => {
+                        setFoldConfirm(false);
+                        setTimerStart(null);
+                      }, 3000);
+                    }
                   }}
                 >
-                  Raise
+                  {foldConfirm && active ? "Are you sure?" : "Fold"}
                 </Button>
-              )}
-              {pokerGame.currentBet == 0 && (
-                <Button
-                  fullWidth
-                  color="blue"
-                  disabled={!active || pokerPlayer.allIn}
-                  onClick={() => {
-                    setBetOrRaise("BET");
-                    setBetOpened(true);
+                {pokerGame.currentBet > 0 && (
+                  <Button
+                    fullWidth
+                    color="blue"
+                    disabled={!active || pokerPlayer.allIn}
+                    onClick={() => {
+                      setBetOrRaise("RAISE");
+                      setBetOpened(true);
 
-                    // Focus and go to the beginning of the input
-                    // We wait 100ms to make sure the input is rendered
-                    setTimeout(() => {
-                      betInputRef.current?.focus();
-                      betInputRef.current?.setSelectionRange(0, 0);
-                    }, 100);
-                  }}
-                >
-                  Bet
-                </Button>
-              )}
-            </Group>
-          )}
-        </>
+                      // Focus and go to the beginning of the input
+                      // We wait 100ms to make sure the input is rendered
+                      setTimeout(() => {
+                        betInputRef.current?.focus();
+                        betInputRef.current?.setSelectionRange(0, 0);
+                      }, 100);
+                    }}
+                  >
+                    Raise
+                  </Button>
+                )}
+                {pokerGame.currentBet == 0 && (
+                  <Button
+                    fullWidth
+                    color="blue"
+                    disabled={!active || pokerPlayer.allIn}
+                    onClick={() => {
+                      setBetOrRaise("BET");
+                      setBetOpened(true);
+
+                      // Focus and go to the beginning of the input
+                      // We wait 100ms to make sure the input is rendered
+                      setTimeout(() => {
+                        betInputRef.current?.focus();
+                        betInputRef.current?.setSelectionRange(0, 0);
+                      }, 100);
+                    }}
+                  >
+                    Bet
+                  </Button>
+                )}
+              </Group>
+            )}
+          </>
+        )}
       </GenericPlayerCard>
     </div>
   );
