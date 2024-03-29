@@ -2,20 +2,20 @@ import { KEYBINDINGS_STATE, PLAYERS_STATE, POKER_GAME_STATE, POKER_PLAYERS_STATE
 import CardSelector from "@/components/CardSelector";
 import { CARD_SELECTOR_STATE } from "@/pages/Blackjack/routes/Round";
 import { Card, CardRank, CardSuit } from "@/types/Card";
+import { availableCards } from "@/types/Keybindings";
 import { GameState, PokerGame, PokerPlayer, PokerPot } from "@/types/Poker";
-import { formatMoney, round } from "@/utils/MoneyHelper";
+import { EMPTY_CARD, isAnyEmpty } from "@/utils/CardHelper";
+import { round } from "@/utils/MoneyHelper";
 import { getPlayer } from "@/utils/PlayerHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import { Button, Flex } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import cloneDeep from "lodash/cloneDeep";
 import { useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 import { atom, useRecoilState } from "recoil";
 import CommunityCards from "../components/CommunityCards";
 import RoundPlayerCard from "../components/RoundPlayerCard";
-import { useHotkeys } from "react-hotkeys-hook";
-import { EMPTY_CARD, isAnyEmpty } from "@/utils/CardHelper";
-import { notifications } from "@mantine/notifications";
-import { availableCards } from "@/types/Keybindings";
 
 export const FOLD_CONFIRM = atom<boolean>({
   key: "FOLD_CONFIRM",
@@ -56,7 +56,7 @@ export default function Round() {
   const [allInConfirm, setAllInConfirm] = useRecoilState(ALLIN_CONFIRM);
   const [bet, setBet] = useRecoilState(PLAYER_BET);
   const [betUIOpen, setBetUIOpen] = useRecoilState(BETUI_OPEN);
-  const [timerStart, setTimerStart] = useRecoilState(TIMER_START);
+  const [, setTimerStart] = useRecoilState(TIMER_START);
   // !
 
   let cardsAllowed = 0;
