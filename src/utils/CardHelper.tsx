@@ -11,6 +11,8 @@ export const isAnyEmpty = (card: Card): boolean => {
   return getSuit(card) === "-" || getRank(card) === "-";
 };
 
+export const isCardEmpty = (card: Card): boolean => card === EMPTY_CARD;
+
 export const suitToIcon = (suit: CardSuit): ReactNode => {
   let size = "1.7rem";
 
