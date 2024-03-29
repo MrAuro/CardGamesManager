@@ -1,4 +1,5 @@
 import { SETTINGS_STATE } from "@/Root";
+import { USED_CARDS } from "@/pages/Poker/routes/Round";
 import { Card, CardRank, CardSuit } from "@/types/Card";
 import { EMPTY_CARD, getRank, getSuit, isAnyEmpty, suitToIcon } from "@/utils/CardHelper";
 import {
@@ -19,11 +20,13 @@ export default function CardSelector({
   intitialCard,
   activeCardOverride,
   onSubmit,
+  strictCards,
 }: {
   opened: boolean;
   intitialCard?: Card;
   activeCardOverride?: Card;
   onSubmit: (card: Card) => void;
+  strictCards?: boolean;
 }) {
   const [selectedCardRank, setSelectedCardRank] = useState<CardRank>("-");
   const [selectedCardSuit, setSelectedCardSuit] = useState<CardSuit>("-");
@@ -126,10 +129,20 @@ function RankButton(props: {
 }) {
   const theme = useMantineTheme();
 
+  const usedCards = useRecoilValue(USED_CARDS);
+  const [disabled, setDisabled] = useState(
+    usedCards.some((card) => getRank(card) == props.rank && getSuit(card) == props.selectedCardSuit)
+  );
+
   const [selected, setSelected] = useState(false);
   useEffect(() => {
     setSelected(props.selectedCardRank == props.rank);
-  }, [props.selectedCardSuit, props.selectedCardRank]);
+    setDisabled(
+      usedCards.some(
+        (card) => getRank(card) == props.rank && getSuit(card) == props.selectedCardSuit
+      )
+    );
+  }, [props.selectedCardSuit, props.selectedCardRank, usedCards]);
 
   return (
     <Button
@@ -139,8 +152,9 @@ function RankButton(props: {
       p="xs"
       fw="bolder"
       justify="center"
-      color="gray.0"
+      color={selected ? "white" : disabled ? "dark" : "white"}
       variant={selected ? "filled" : "outline"}
+      disabled={!selected && disabled}
       onClick={() => {
         props.setSelectedCardRank(props.rank);
         if (props.onClick) {
@@ -149,7 +163,11 @@ function RankButton(props: {
       }}
       styles={{
         root: {
-          color: selected ? theme.colors.gray[9] : theme.colors.gray[0],
+          color: selected
+            ? theme.colors.gray[9]
+            : disabled
+            ? theme.colors.dark[4]
+            : theme.colors.indigo[0],
         },
         label: {},
       }}
@@ -168,10 +186,20 @@ function SuitButton(props: {
   const theme = useMantineTheme();
   const settings = useRecoilValue(SETTINGS_STATE);
 
+  const usedCards = useRecoilValue(USED_CARDS);
+  const [disabled, setDisabled] = useState(
+    usedCards.some((card) => getRank(card) == props.selectedCardRank && getSuit(card) == props.suit)
+  );
+
   const [selected, setSelected] = useState(false);
   useEffect(() => {
     setSelected(props.selectedCardSuit == props.suit);
-  }, [props.selectedCardSuit, props.selectedCardRank]);
+    setDisabled(
+      usedCards.some(
+        (card) => getRank(card) == props.selectedCardRank && getSuit(card) == props.suit
+      )
+    );
+  }, [props.selectedCardSuit, props.selectedCardRank, usedCards]);
 
   let color: "red" | "gray" | "blue" | "green" =
     props.suit == "h" || props.suit == "d" ? "red" : "gray";
@@ -215,14 +243,17 @@ function SuitButton(props: {
       radius="sm"
       size="xl"
       variant={selected ? "filled" : "outline"}
+      disabled={disabled}
       onClick={() => {
         props.setSelectedCardSuit(props.suit);
       }}
       // Cheaty way to get the color to what is best here
-      color={color.replace("gray", "white").replace("red", "#ff2626")}
+      color={
+        disabled ? theme.colors.dark[3] : color.replace("gray", "white").replace("red", "#ff2626")
+      }
       styles={{
         icon: {
-          color: `${iconColor}`,
+          color: disabled ? theme.colors.dark[4] : iconColor,
         },
       }}
       style={{

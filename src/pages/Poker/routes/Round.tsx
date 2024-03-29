@@ -4,18 +4,19 @@ import { CARD_SELECTOR_STATE } from "@/pages/Blackjack/routes/Round";
 import { Card, CardRank, CardSuit } from "@/types/Card";
 import { availableCards } from "@/types/Keybindings";
 import { GameState, PokerGame, PokerPlayer, PokerPot } from "@/types/Poker";
-import { EMPTY_CARD, isAnyEmpty } from "@/utils/CardHelper";
+import { EMPTY_CARD, isAnyEmpty, isCardEmpty } from "@/utils/CardHelper";
 import { round } from "@/utils/MoneyHelper";
 import { getPlayer } from "@/utils/PlayerHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import { Button, Flex } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import cloneDeep from "lodash/cloneDeep";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { atom, useRecoilState } from "recoil";
 import CommunityCards from "../components/CommunityCards";
 import RoundPlayerCard from "../components/RoundPlayerCard";
+import { TexasHoldem } from "poker-variants-odds-calculator";
 
 export const FOLD_CONFIRM = atom<boolean>({
   key: "FOLD_CONFIRM",
@@ -42,6 +43,11 @@ export const TIMER_START = atom<number | null>({
   default: null,
 });
 
+export const USED_CARDS = atom<Card[]>({
+  key: "USED_CARDS",
+  default: [],
+});
+
 export default function Round() {
   const [pokerGame, setPokerGame] = useRecoilState(POKER_GAME_STATE);
 
@@ -50,6 +56,7 @@ export default function Round() {
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
   const [activeCardOverride, setActiveCardOverride] = useState<Card | undefined>(undefined);
   const [keybindings] = useRecoilImmerState(KEYBINDINGS_STATE);
+  const [usedCards, setUsedCards] = useRecoilState(USED_CARDS);
 
   // !
   const [foldConfirm, setFoldConfirm] = useRecoilState(FOLD_CONFIRM);
@@ -78,6 +85,34 @@ export default function Round() {
       cardsAllowed = 5;
       break;
   }
+
+  useEffect(() => {
+    let usedCards: Card[] = [];
+    pokerPlayers.forEach((player) => {
+      player.cards.forEach((card) => {
+        if (!isAnyEmpty(card)) {
+          usedCards.push(card);
+        }
+      });
+    });
+
+    pokerGame.communityCards.forEach((card) => {
+      if (!isAnyEmpty(card)) {
+        usedCards.push(card);
+      }
+    });
+
+    if (new Set(usedCards).size !== usedCards.length) {
+      notifications.show({
+        message: "Duplicate cards are not allowed, removing duplicates",
+        color: "red",
+      });
+
+      usedCards = [...new Set(usedCards)];
+    }
+
+    setUsedCards(usedCards);
+  }, [pokerGame.communityCards, pokerPlayers]);
 
   const collectBets = (
     tempPokerGame: PokerGame,
@@ -601,18 +636,36 @@ export default function Round() {
           case "d":
             {
               if (cardSelector.opened) {
-                setActiveCardOverride(`${"-"}${keybinding.action as CardSuit}`);
+                // This functionality is not available for Poker for simplicity
               } else {
                 // Get the last non-empty card and change the suit
                 if (pokerGame.capturingCommunityCards) {
                   let cards = [...pokerGame.communityCards];
                   if (cards.includes(EMPTY_CARD)) {
                     let lastCard = cards[cards.indexOf(EMPTY_CARD) - 1];
+                    if (
+                      usedCards.includes(`${lastCard[0]}${keybinding.action as CardSuit}` as Card)
+                    ) {
+                      notifications.show({
+                        message: "This card is already in use",
+                        color: "red",
+                      });
+                      return;
+                    }
                     cards[cards.indexOf(EMPTY_CARD) - 1] = `${lastCard[0]}${
                       keybinding.action as CardSuit
                     }` as Card;
                   } else {
                     let lastCard = cards[cards.length - 1];
+                    if (
+                      usedCards.includes(`${lastCard[0]}${keybinding.action as CardSuit}` as Card)
+                    ) {
+                      notifications.show({
+                        message: "This card is already in use",
+                        color: "red",
+                      });
+                      return;
+                    }
                     cards[cards.length - 1] = `${lastCard[0]}${
                       keybinding.action as CardSuit
                     }` as Card;
@@ -629,11 +682,33 @@ export default function Round() {
                     if (pokerPlayer) {
                       if (pokerPlayer.cards.includes(EMPTY_CARD)) {
                         let lastCard = pokerPlayer.cards[pokerPlayer.cards.indexOf(EMPTY_CARD) - 1];
+                        if (
+                          usedCards.includes(
+                            `${lastCard[0]}${keybinding.action as CardSuit}` as Card
+                          )
+                        ) {
+                          notifications.show({
+                            message: "This card is already in use",
+                            color: "red",
+                          });
+                          return;
+                        }
                         pokerPlayer.cards[pokerPlayer.cards.indexOf(EMPTY_CARD) - 1] = `${
                           lastCard[0]
                         }${keybinding.action as CardSuit}` as Card;
                       } else {
                         let lastCard = pokerPlayer.cards[pokerPlayer.cards.length - 1];
+                        if (
+                          usedCards.includes(
+                            `${lastCard[0]}${keybinding.action as CardSuit}` as Card
+                          )
+                        ) {
+                          notifications.show({
+                            message: "This card is already in use",
+                            color: "red",
+                          });
+                          return;
+                        }
                         pokerPlayer.cards[pokerPlayer.cards.length - 1] = `${lastCard[0]}${
                           keybinding.action as CardSuit
                         }` as Card;
@@ -660,7 +735,7 @@ export default function Round() {
           case "K":
             {
               if (cardSelector.opened) {
-                setActiveCardOverride(`${keybinding.action as CardRank}${"-"}`);
+                // This functionality is not available for Poker for simplicity
               } else {
                 // When we are dealing with Ranks, we add the card instead of modifying the last one
                 if (pokerGame.capturingCommunityCards) {
@@ -669,6 +744,41 @@ export default function Round() {
                     newCommunityCards[newCommunityCards.indexOf(EMPTY_CARD)] = `${
                       keybinding.action as CardRank
                     }${"-"}` as Card;
+                  }
+
+                  // Dont allow more cards than the allowed amount
+                  if (
+                    newCommunityCards.filter((card) => !isCardEmpty(card)).length > cardsAllowed
+                  ) {
+                    notifications.show({
+                      message: "You have already added the maximum amount of cards",
+                      color: "red",
+                    });
+                    return;
+                  } else {
+                    console.log(
+                      `(debug) ${
+                        newCommunityCards.filter((card) => !isAnyEmpty(card)).length
+                      } vs ${cardsAllowed}`
+                    );
+                  }
+
+                  // Check all of them [h, s, c, d] instead of just one
+                  let allUsed = true;
+                  for (let suit of ["h", "s", "c", "d"] as CardSuit[]) {
+                    if (!usedCards.includes(`${keybinding.action as CardRank}${suit}` as Card)) {
+                      allUsed = false;
+                      break;
+                    }
+                  }
+
+                  if (allUsed) {
+                    notifications.show({
+                      message: "All suits for this card are already in use",
+                      color: "red",
+                    });
+
+                    return;
                   }
 
                   setPokerGame({
@@ -681,6 +791,13 @@ export default function Round() {
 
                     if (pokerPlayer) {
                       if (pokerPlayer.cards.includes(EMPTY_CARD)) {
+                        if (usedCards.includes(`${keybinding.action as CardRank}${"-"}` as Card)) {
+                          notifications.show({
+                            message: "This card is already in use",
+                            color: "red",
+                          });
+                          return;
+                        }
                         pokerPlayer.cards[pokerPlayer.cards.indexOf(EMPTY_CARD)] = `${
                           keybinding.action as CardRank
                         }${"-"}` as Card;
@@ -783,6 +900,7 @@ export default function Round() {
   return (
     <>
       <CardSelector
+        strictCards
         opened={cardSelector.opened}
         intitialCard={cardSelector.intitalCard}
         activeCardOverride={activeCardOverride}
