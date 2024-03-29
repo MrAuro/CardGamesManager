@@ -16,7 +16,7 @@ import {
   Text,
   useMantineTheme,
 } from "@mantine/core";
-import { getHotkeyHandler, useDisclosure, useScrollIntoView } from "@mantine/hooks";
+import { getHotkeyHandler, useScrollIntoView } from "@mantine/hooks";
 import { IconCurrencyDollar, IconTriangleFilled } from "@tabler/icons-react";
 import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
