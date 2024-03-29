@@ -177,6 +177,7 @@ export default function PreRound() {
       gameState: "PREFLOP",
       currentTurn: firstTurn,
       capturingCommunityCards: false,
+      runningThroughShowdown: false,
       pots: [
         {
           eligiblePlayers: Object.keys(paymentsToTake),
