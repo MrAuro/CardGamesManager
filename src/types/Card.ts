@@ -32,3 +32,4 @@ export type CardRank_NOEMPTY =
 export type CardSuit_NOEMPTY = "h" | "s" | "d" | "c";
 
 export type Card = `${CardRank}${CardSuit}`;
+export type Card_NOEMPTY = `${CardRank_NOEMPTY}${CardSuit_NOEMPTY}`;

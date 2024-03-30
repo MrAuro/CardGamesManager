@@ -6,6 +6,7 @@ import { Player } from "@/types/Player";
 import { PokerPlayer } from "@/types/Poker";
 import { formatMoney } from "@/utils/MoneyHelper";
 import {
+  Badge,
   Button,
   Container,
   Divider,
@@ -13,6 +14,7 @@ import {
   Grid,
   Group,
   NumberInput,
+  Paper,
   Text,
   useMantineTheme,
 } from "@mantine/core";
@@ -21,7 +23,16 @@ import { IconCurrencyDollar, IconTriangleFilled } from "@tabler/icons-react";
 import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { AllInBadge, BigBlindBadge, DealerBadge, SmallBlindBadge } from "../routes/PreRound";
-import { ALLIN_CONFIRM, BETUI_OPEN, FOLD_CONFIRM, PLAYER_BET, TIMER_START } from "../routes/Round";
+import {
+  ALLIN_CONFIRM,
+  BETUI_OPEN,
+  PLAYER_HAND_RESULTS,
+  FOLD_CONFIRM,
+  PLAYER_BET,
+  TIMER_START,
+} from "../routes/Round";
+import { rankingToName } from "@/utils/PokerHelper";
+import { isAnyEmpty } from "@/utils/CardHelper";
 
 export default function RoundPlayerCard({
   player,
@@ -44,6 +55,9 @@ export default function RoundPlayerCard({
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
   const pokerGame = useRecoilValue(POKER_GAME_STATE);
   const pokerSettings = useRecoilValue(POKER_SETTINGS_STATE);
+  const handResult = useRecoilValue(PLAYER_HAND_RESULTS)?.find(
+    (result) => result.id == pokerPlayer.id
+  );
   const { scrollIntoView, targetRef } = useScrollIntoView<HTMLDivElement>({
     offset: 100,
     duration: 500,
@@ -133,6 +147,37 @@ export default function RoundPlayerCard({
         }
         rightSection={
           <>
+            <Paper
+              style={{
+                width: "10rem",
+                height: "4.5rem",
+                backgroundColor: "transparent",
+              }}
+            >
+              <Flex direction="column" align="center" justify="center" style={{ height: "100%" }}>
+                <Text fw="bold" ta="center" style={{}}>
+                  {rankingToName(handResult?.result.handRank || "")}
+                </Text>
+                {pokerGame.communityCards.filter((card) => isAnyEmpty(card)).length != 5 && (
+                  <Text c="dimmed" size="sm" ta="center" style={{}}>
+                    <>{handResult?.result.winPercentage}</>
+                  </Text>
+                )}
+                {handResult?.result.win == 1 && <Badge color="yellow">Winner</Badge>}
+                {handResult?.result.ties == 1 && (
+                  <Badge
+                    color="gray.7"
+                    styles={{
+                      label: {
+                        color: "white",
+                      },
+                    }}
+                  >
+                    Tie
+                  </Badge>
+                )}
+              </Flex>
+            </Paper>
             {pokerPlayer.cards.map((card, index) => (
               <Container p={0} m={0} pl="xs" key={`${card}-${index}`}>
                 <PlayingCard
