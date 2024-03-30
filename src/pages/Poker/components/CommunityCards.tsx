@@ -7,7 +7,13 @@ import { Button, Card, Center, Divider, Flex, Text, Title, useMantineTheme } fro
 import { notifications } from "@mantine/notifications";
 import { useRecoilState } from "recoil";
 
-export default function CommunityCards({ cardsAllowed }: { cardsAllowed: number }) {
+export default function CommunityCards({
+  cardsAllowed,
+  calculateHands,
+}: {
+  cardsAllowed: number;
+  calculateHands: (store: boolean) => any;
+}) {
   const theme = useMantineTheme();
   const [pokerGame, setPokerGame] = useRecoilState(POKER_GAME_STATE);
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
@@ -65,10 +71,9 @@ export default function CommunityCards({ cardsAllowed }: { cardsAllowed: number 
           );
         })}
       </Flex>
-      <Center>
+      <Flex justify="center" gap="sm" align="center" mt="xs">
         <Button
-          mt="xs"
-          w="10rem"
+          fullWidth
           disabled={!pokerGame.capturingCommunityCards}
           onClick={() => {
             if (
@@ -89,7 +94,18 @@ export default function CommunityCards({ cardsAllowed }: { cardsAllowed: number 
         >
           Save Cards
         </Button>
-      </Center>
+        <Button
+          fullWidth
+          onClick={() => {
+            calculateHands(true);
+          }}
+        >
+          Calculate Hands
+        </Button>
+        <Button color="green" fullWidth>
+          Distribute Pots
+        </Button>
+      </Flex>
     </Card>
   );
 }

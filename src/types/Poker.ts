@@ -21,6 +21,20 @@ export type PokerGame = {
   };
 };
 
+export type PlayerResult = {
+  handRank: string | null;
+  hand: string | null;
+  ties: number;
+  tiesPercentage: string;
+  win: number;
+  winPercentage: string;
+};
+
+export type StoredPlayerResult = {
+  id: string;
+  result: PlayerResult;
+};
+
 export type PokerPlayer = {
   id: string;
   cards: Card[];

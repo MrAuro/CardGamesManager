@@ -1,10 +1,17 @@
 import { KEYBINDINGS_STATE, PLAYERS_STATE, POKER_GAME_STATE, POKER_PLAYERS_STATE } from "@/Root";
 import CardSelector from "@/components/CardSelector";
 import { CARD_SELECTOR_STATE } from "@/pages/Blackjack/routes/Round";
-import { Card, CardRank, CardSuit } from "@/types/Card";
+import { Card, CardRank, CardSuit, Card_NOEMPTY } from "@/types/Card";
 import { availableCards } from "@/types/Keybindings";
-import { GameState, PokerGame, PokerPlayer, PokerPot } from "@/types/Poker";
-import { EMPTY_CARD, isAnyEmpty, isCardEmpty } from "@/utils/CardHelper";
+import {
+  GameState,
+  PlayerResult,
+  PokerGame,
+  PokerPlayer,
+  PokerPot,
+  StoredPlayerResult,
+} from "@/types/Poker";
+import { EMPTY_CARD, getRank, getRankInt, isAnyEmpty, isCardEmpty } from "@/utils/CardHelper";
 import { round } from "@/utils/MoneyHelper";
 import { getPlayer } from "@/utils/PlayerHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
@@ -17,6 +24,8 @@ import { atom, useRecoilState } from "recoil";
 import CommunityCards from "../components/CommunityCards";
 import RoundPlayerCard from "../components/RoundPlayerCard";
 import { TexasHoldem } from "poker-variants-odds-calculator";
+import Result from "poker-variants-odds-calculator/dts/lib/Result";
+import { joinedStringToCards, rankToNumber } from "@/utils/PokerHelper";
 
 export const FOLD_CONFIRM = atom<boolean>({
   key: "FOLD_CONFIRM",
@@ -43,6 +52,16 @@ export const TIMER_START = atom<number | null>({
   default: null,
 });
 
+export const HOLDEM_TABLE = atom<TexasHoldem | null>({
+  key: "ODDS_CALCULATION",
+  default: null,
+});
+
+export const PLAYER_HAND_RESULTS = atom<StoredPlayerResult[] | null>({
+  key: "PLAYER_HAND_RESULTS",
+  default: null,
+});
+
 export const USED_CARDS = atom<Card[]>({
   key: "USED_CARDS",
   default: [],
@@ -56,6 +75,8 @@ export default function Round() {
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
   const [activeCardOverride, setActiveCardOverride] = useState<Card | undefined>(undefined);
   const [keybindings] = useRecoilImmerState(KEYBINDINGS_STATE);
+  // const [holdemTable, setHoldemTable] = useRecoilState(HOLDEM_TABLE);
+  const [playerHandResults, setPlayerHandResults] = useRecoilState(PLAYER_HAND_RESULTS);
   const [usedCards, setUsedCards] = useRecoilState(USED_CARDS);
 
   // !
@@ -65,6 +86,101 @@ export default function Round() {
   const [betUIOpen, setBetUIOpen] = useRecoilState(BETUI_OPEN);
   const [, setTimerStart] = useRecoilState(TIMER_START);
   // !
+
+  const calculateHands = (store: boolean = false): StoredPlayerResult[] | undefined => {
+    const table = new TexasHoldem(pokerPlayers.length);
+
+    const playingPlayers = pokerPlayers.filter((player) => !player.folded);
+    if (playingPlayers.length == 0) {
+      notifications.show({
+        message: "No players are playing",
+        color: "red",
+      });
+      return;
+    }
+
+    if (playingPlayers.some((player) => player.cards.some(isAnyEmpty))) {
+      notifications.show({
+        message: "Some players have not selected their cards",
+        color: "red",
+      });
+      return;
+    }
+
+    for (const player of playingPlayers) {
+      table.addPlayer([player.cards[0], player.cards[1]]);
+    }
+
+    table.setBoard(pokerGame.communityCards.filter((card) => !isAnyEmpty(card)) as Card[]);
+
+    const calculation = table.calculate();
+    const tablePlayers = calculation.getPlayers();
+    let highestCard = 0;
+
+    for (const player of tablePlayers) {
+      for (const card of joinedStringToCards(player.getHand()!)) {
+        const rank = rankToNumber(getRank(card as Card_NOEMPTY));
+        if (rank > highestCard) {
+          highestCard = rank;
+        }
+      }
+    }
+
+    const results: StoredPlayerResult[] = [];
+    for (const [index, player] of tablePlayers.entries()) {
+      let corrospondingPokerPlayerId;
+      for (const pokerPlayer of pokerPlayers) {
+        if (pokerPlayer.cards[0] == joinedStringToCards(player.getHand()!)[0]) {
+          corrospondingPokerPlayerId = pokerPlayer.id;
+          break;
+        }
+      }
+
+      if (!corrospondingPokerPlayerId) {
+        notifications.show({
+          message: "Could not find a corrosponding player",
+          color: "red",
+        });
+        return;
+      }
+
+      let handRanking: string | null = null;
+      let highestRank = 0;
+      for (let [rank, value] of Object.entries(calculation.toJson().players[index].ranks)) {
+        if (value > highestRank) {
+          handRanking = rank;
+        }
+      }
+
+      let hasHighestCard = false;
+      joinedStringToCards(player.getHand()!).forEach((card) => {
+        if (rankToNumber(getRank(card as Card_NOEMPTY)) == highestCard) {
+          hasHighestCard = true;
+        }
+      });
+
+      const result: PlayerResult = {
+        handRank:
+          handRanking == "HIGH_CARDS" ? (hasHighestCard ? "HIGH_CARDS" : null) : handRanking,
+        hand: null,
+        ties: player.getTies(),
+        tiesPercentage: player.getTiesPercentageString(),
+        win: player.getWins(),
+        winPercentage: player.getWinsPercentageString(),
+      };
+
+      results.push({
+        id: corrospondingPokerPlayerId,
+        result: result,
+      });
+    }
+
+    if (store) {
+      setPlayerHandResults(results);
+    } else {
+      return results;
+    }
+  };
 
   let cardsAllowed = 0;
   switch (pokerGame.gameState) {
@@ -201,7 +317,7 @@ export default function Round() {
       // there are no more players to go through, we can end the game (console.log it)
 
       let showdownPlayerIndex = currentPlayerIndex + 1;
-      while (showdownPlayerIndex == -1 || tempPokerPlayers[showdownPlayerIndex].folded) {
+      while (showdownPlayerIndex == -1 || tempPokerPlayers[showdownPlayerIndex]?.folded) {
         showdownPlayerIndex++;
 
         if (showdownPlayerIndex >= tempPokerPlayers.length) {
@@ -937,7 +1053,7 @@ export default function Round() {
       />
 
       <Flex direction="column" gap="xs">
-        <CommunityCards cardsAllowed={cardsAllowed} />
+        <CommunityCards calculateHands={calculateHands} cardsAllowed={cardsAllowed} />
         {pokerPlayers.map((pokerPlayer) => {
           return (
             <div
