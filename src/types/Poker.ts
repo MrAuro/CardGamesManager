@@ -13,6 +13,7 @@ export type PokerGame = {
   pots: PokerPot[];
   capturingCommunityCards: boolean;
   runningThroughShowdown: boolean; // Everyone (or everyone minus one) has gone all in and we're just showing the cards
+  runningItTwice: boolean;
   currentBets: {
     [playerId: string]: {
       amount: number;
