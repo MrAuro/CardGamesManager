@@ -386,19 +386,15 @@ export default function Round() {
       let dealerIndex = tempPokerPlayers.findIndex(
         (player) => player.id == tempPokerGame.currentDealer
       );
-      let firstPlayerIndex = dealerIndex + 1;
-      let limit = tempPokerPlayers.length;
-      while (
-        tempPokerPlayers[firstPlayerIndex].folded ||
-        tempPokerPlayers[firstPlayerIndex].allIn
-      ) {
-        firstPlayerIndex = (firstPlayerIndex + 1) % tempPokerPlayers.length;
-        limit--;
-
-        if (limit <= 0) {
+      let firstPlayerIndex;
+      while (true) {
+        dealerIndex = (dealerIndex + 1) % tempPokerPlayers.length;
+        if (!tempPokerPlayers[dealerIndex].folded) {
+          firstPlayerIndex = dealerIndex;
           break;
         }
       }
+      console.log(`(ORDER) First player index: ${firstPlayerIndex}`);
 
       let ableToPlayPlayers = tempPokerPlayers.filter(
         (player) => !player.folded && !player.allIn
@@ -711,6 +707,12 @@ export default function Round() {
       console.log(`(POT) Winner:`, winner);
 
       if (isNaN(totalAmount)) throw new Error(`Total amount is NaN`);
+
+      if (pot.eligiblePlayers.length == 1) {
+        console.log(`(POT) Only one player eligible for this pot`);
+        amountToPay[pot.eligiblePlayers[0]] += totalAmount;
+        continue;
+      }
 
       if (winner.result.win == 0) {
         console.log(`(POT) No winner`);
@@ -1197,11 +1199,7 @@ export default function Round() {
       />
 
       <Flex direction="column" gap="xs">
-        <CommunityCards
-          calculateHands={calculateHands}
-          cardsAllowed={cardsAllowed}
-          distributePot={distributePot}
-        />
+        <CommunityCards cardsAllowed={cardsAllowed} distributePot={distributePot} />
         {pokerPlayers.map((pokerPlayer) => {
           return (
             <div
