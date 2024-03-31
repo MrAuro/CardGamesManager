@@ -128,7 +128,6 @@ const RoundPlayerCard = forwardRef(
                     size="xl"
                     c={pokerPlayer.folded ? "dimmed" : undefined}
                     fw={pokerPlayer.folded ? 600 : "bold"}
-                    td={pokerPlayer.folded ? "line-through" : undefined}
                   >
                     {pokerPlayer.displayName}
                   </Text>
