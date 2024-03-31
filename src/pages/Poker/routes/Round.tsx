@@ -22,7 +22,21 @@ import {
 import { formatMoney, round } from "@/utils/MoneyHelper";
 import { getPlayer } from "@/utils/PlayerHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
-import { Button, Flex } from "@mantine/core";
+import {
+  Button,
+  Container,
+  Divider,
+  Flex,
+  Group,
+  Paper,
+  ScrollArea,
+  Stack,
+  Table,
+  Text,
+  Title,
+  darken,
+  useMantineTheme,
+} from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import cloneDeep from "lodash/cloneDeep";
 import { useEffect, useRef, useState } from "react";
@@ -33,6 +47,7 @@ import RoundPlayerCard from "../components/RoundPlayerCard";
 import { TexasHoldem } from "poker-variants-odds-calculator";
 import Result from "poker-variants-odds-calculator/dts/lib/Result";
 import { joinedStringToCards, rankToNumber } from "@/utils/PokerHelper";
+import { modals } from "@mantine/modals";
 
 export const FOLD_CONFIRM = atom<boolean>({
   key: "FOLD_CONFIRM",
@@ -75,6 +90,8 @@ export const USED_CARDS = atom<Card[]>({
 });
 
 export default function Round() {
+  const theme = useMantineTheme();
+
   const [pokerGame, setPokerGame] = useRecoilState(POKER_GAME_STATE);
 
   const [pokerPlayers, setPokerPlayers] = useRecoilImmerState(POKER_PLAYERS_STATE);
@@ -682,13 +699,22 @@ export default function Round() {
     // Start with the outside pots then work inwards
     let pots = cloneDeep(tempPokerGame.pots);
 
-    const amountToPay: { [playerId: string]: number } = {};
+    const amountWon: { [playerId: string]: number } = {};
     for (const player of tempPokerPlayers) {
-      amountToPay[player.id] = 0;
+      amountWon[player.id] = 0;
     }
+
+    let potResults: {
+      [key: number]: {
+        // Pot number (0 is Main)
+        [playerId: string]: number; // How much each player gets from the pot
+      };
+    } = {};
 
     for (let i = pots.length - 1; i >= 0; i--) {
       console.log(`(POT) Distributing pot ${i}`, pots[i]);
+      potResults[i] = {};
+
       let pot = pots[i];
       let eligiblePlayers = pot.eligiblePlayers;
       let totalAmount = pot.amount;
@@ -710,7 +736,8 @@ export default function Round() {
 
       if (pot.eligiblePlayers.length == 1) {
         console.log(`(POT) Only one player eligible for this pot`);
-        amountToPay[pot.eligiblePlayers[0]] += totalAmount;
+        potResults[i][pot.eligiblePlayers[0]] = totalAmount;
+        amountWon[pot.eligiblePlayers[0]] += totalAmount;
         continue;
       }
 
@@ -721,7 +748,8 @@ export default function Round() {
           let tiedAmount = totalAmount / tiedHands.length;
 
           for (const hand of tiedHands) {
-            amountToPay[hand.id] += tiedAmount;
+            potResults[i][hand.id] = tiedAmount;
+            amountWon[hand.id] += tiedAmount;
           }
         }
       } else {
@@ -730,17 +758,75 @@ export default function Round() {
             totalAmount ?? 0
           )}`
         );
-        amountToPay[winner.id] += totalAmount;
+        potResults[i][winner.id] = totalAmount;
+        amountWon[winner.id] += totalAmount;
       }
     }
 
-    console.log(`(POT) Amount to pay:`, amountToPay);
+    console.log(`(POT) Amount to pay:`, amountWon);
 
-    for (const playerId in amountToPay) {
+    for (const playerId in amountWon) {
       let player = getPlayer(playerId, tempPlayers)!;
-      player.balance = round(player.balance + amountToPay[playerId]);
+      player.balance = round(player.balance + amountWon[playerId]);
       tempPlayers[tempPlayers.findIndex((p) => p.id === playerId)] = player;
     }
+
+    modals.open({
+      title: "Pot Distribution",
+      onKeyDown: (event) => {
+        if (event.key === "Enter") {
+          modals.closeAll();
+        }
+
+        // Prevent keybindings from being triggered
+        event.stopPropagation();
+      },
+      children: (
+        <>
+          <Stack>
+            {Object.entries(potResults).map(([potNumber, results]) => {
+              return (
+                <Container mx={0} px={0}>
+                  <Divider
+                    my={3}
+                    label={potNumber == "0" ? "Main Pot" : `Side Pot ${potNumber}`}
+                    labelPosition="left"
+                    styles={{
+                      label: {
+                        fontSize: 14,
+                        fontWeight: 600,
+                      },
+                    }}
+                  />
+                  {Object.entries(results).map(([playerId, amount]) => {
+                    let player = getPlayer(playerId, tempPlayers)!;
+                    return (
+                      <Paper
+                        py={4}
+                        px={6}
+                        key={playerId}
+                        radius="md"
+                        style={{
+                          backgroundColor: darken(theme.colors.dark[6], 0.2),
+                        }}
+                      >
+                        <Group justify="space-between">
+                          <Text>{player.name}</Text>
+
+                          <Text c="green" fw={600}>
+                            +{formatMoney(amount)}
+                          </Text>
+                        </Group>
+                      </Paper>
+                    );
+                  })}
+                </Container>
+              );
+            })}
+          </Stack>
+        </>
+      ),
+    });
 
     setPlayerHandResults(null);
     setPokerGame({
@@ -749,7 +835,7 @@ export default function Round() {
       // gameState: "PREROUND",
     });
     setPlayers(tempPlayers);
-    console.log(amountToPay);
+    console.log(amountWon);
   };
 
   keybindings.forEach((keybinding) => {

@@ -178,6 +178,7 @@ export default function PreRound() {
       currentTurn: firstTurn,
       capturingCommunityCards: false,
       runningThroughShowdown: false,
+      runningItTwice: false,
       pots: [
         {
           eligiblePlayers: Object.keys(paymentsToTake),
