@@ -10,9 +10,11 @@ import { useRecoilState } from "recoil";
 export default function CommunityCards({
   cardsAllowed,
   calculateHands,
+  distributePot,
 }: {
   cardsAllowed: number;
   calculateHands: (store: boolean) => any;
+  distributePot: () => void;
 }) {
   const theme = useMantineTheme();
   const [pokerGame, setPokerGame] = useRecoilState(POKER_GAME_STATE);
@@ -102,7 +104,7 @@ export default function CommunityCards({
         >
           Calculate Hands
         </Button>
-        <Button color="green" fullWidth>
+        <Button color="green" fullWidth onClick={distributePot}>
           Distribute Pots
         </Button>
       </Flex>

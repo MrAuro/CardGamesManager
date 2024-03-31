@@ -46,7 +46,8 @@ export type PokerRoundActions =
   | "Bet / Raise"
   | "All In"
   | "Cancel Bet"
-  | "Remove Last Card";
+  | "Remove Last Card"
+  | "Draw Random Card";
 
 export type Keybinding = {
   id: string;
@@ -113,6 +114,7 @@ export function getActions(scope: Scope): string[] {
         "All In",
         "Cancel Bet",
         "Remove Last Card",
+        "Draw Random Card",
         ...availableRanks,
         ...availableSuits,
         ...availableCards,

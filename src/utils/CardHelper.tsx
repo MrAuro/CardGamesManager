@@ -44,3 +44,25 @@ export const getRankInt = (card: Card): number => {
   if (rank === "A") return 1;
   return parseInt(rank);
 };
+
+export const getRandomCard = (usedCards: Card[] = []): Card => {
+  const suits: CardSuit[] = ["h", "d", "c", "s"];
+  const ranks: CardRank[] = ["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"];
+  const availableCards: Card[] = [];
+
+  suits.forEach((suit) => {
+    ranks.forEach((rank) => {
+      const card: Card = `${rank}${suit}`;
+      if (!usedCards.includes(card)) {
+        availableCards.push(card);
+      }
+    });
+  });
+
+  if (availableCards.length === 0) {
+    throw new Error("No more cards available");
+  }
+
+  const randomIndex = Math.floor(Math.random() * availableCards.length);
+  return availableCards[randomIndex];
+};

@@ -101,7 +101,7 @@ export const DefaultKeybinds: Keybinding[] = [
     id: "15",
     scope: "Blackjack Round",
     action: "J",
-    key: "-",
+    key: "minus",
   },
   {
     id: "16",
@@ -245,7 +245,13 @@ export const DefaultKeybinds: Keybinding[] = [
     id: "75",
     scope: "Poker Round",
     action: "J",
-    key: "-",
+    key: "minus",
+  },
+  {
+    id: "99",
+    scope: "Poker Round",
+    action: "Draw Random Card",
+    key: "d",
   },
   {
     id: "76",
