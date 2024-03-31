@@ -16,6 +16,7 @@ import {
   NumberInput,
   Paper,
   Text,
+  Tooltip,
   useMantineTheme,
 } from "@mantine/core";
 import { getHotkeyHandler, useScrollIntoView } from "@mantine/hooks";
@@ -117,14 +118,16 @@ export default function RoundPlayerCard({
         header={
           <>
             <Flex align="center" mr="sm" gap="xs">
-              <Text
-                size="xl"
-                c={pokerPlayer.folded ? "dimmed" : undefined}
-                fw={pokerPlayer.folded ? 600 : "bold"}
-                td={pokerPlayer.folded ? "line-through" : undefined}
-              >
-                {pokerPlayer.displayName}
-              </Text>
+              <Tooltip label={pokerPlayer.id} openDelay={1000}>
+                <Text
+                  size="xl"
+                  c={pokerPlayer.folded ? "dimmed" : undefined}
+                  fw={pokerPlayer.folded ? 600 : "bold"}
+                  td={pokerPlayer.folded ? "line-through" : undefined}
+                >
+                  {pokerPlayer.displayName}
+                </Text>
+              </Tooltip>
               {pokerPlayer.allIn && <AllInBadge />}
               {pokerGame.currentDealer == player.id && <DealerBadge />}
               {pokerSettings.forcedBetOption == "BLINDS" &&
@@ -158,7 +161,7 @@ export default function RoundPlayerCard({
                 <Text fw="bold" ta="center" style={{}}>
                   {rankingToName(handResult?.result.handRank || "")}
                 </Text>
-                {pokerGame.communityCards.filter((card) => isAnyEmpty(card)).length != 5 && (
+                {pokerGame.communityCards.filter((card) => isAnyEmpty(card)).length != 0 && (
                   <Text c="dimmed" size="sm" ta="center" style={{}}>
                     <>{handResult?.result.winPercentage}</>
                   </Text>
@@ -166,6 +169,7 @@ export default function RoundPlayerCard({
                 {handResult?.result.win == 1 && <Badge color="yellow">Winner</Badge>}
                 {handResult?.result.ties == 1 && (
                   <Badge
+                    mt="xs"
                     color="gray.7"
                     styles={{
                       label: {

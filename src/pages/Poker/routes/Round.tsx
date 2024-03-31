@@ -11,14 +11,21 @@ import {
   PokerPot,
   StoredPlayerResult,
 } from "@/types/Poker";
-import { EMPTY_CARD, getRank, getRankInt, isAnyEmpty, isCardEmpty } from "@/utils/CardHelper";
-import { round } from "@/utils/MoneyHelper";
+import {
+  EMPTY_CARD,
+  getRandomCard,
+  getRank,
+  getRankInt,
+  isAnyEmpty,
+  isCardEmpty,
+} from "@/utils/CardHelper";
+import { formatMoney, round } from "@/utils/MoneyHelper";
 import { getPlayer } from "@/utils/PlayerHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import { Button, Flex } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import cloneDeep from "lodash/cloneDeep";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { atom, useRecoilState } from "recoil";
 import CommunityCards from "../components/CommunityCards";
@@ -107,6 +114,14 @@ export default function Round() {
       return;
     }
 
+    if (pokerGame.communityCards.filter((card) => !isAnyEmpty(card)).length < 3) {
+      notifications.show({
+        message: "Not enough community cards",
+        color: "red",
+      });
+      return;
+    }
+
     for (const player of playingPlayers) {
       table.addPlayer([player.cards[0], player.cards[1]]);
     }
@@ -175,12 +190,23 @@ export default function Round() {
       });
     }
 
+    console.log(`(CALC):`, results);
+
     if (store) {
       setPlayerHandResults(results);
     } else {
       return results;
     }
   };
+
+  useEffect(() => {
+    calculateHands(true);
+  }, [
+    pokerGame.capturingCommunityCards,
+    pokerGame.communityCards,
+    pokerGame.gameState,
+    pokerPlayers,
+  ]);
 
   let cardsAllowed = 0;
   switch (pokerGame.gameState) {
@@ -641,6 +667,88 @@ export default function Round() {
     setPokerPlayers(tempPokerPlayers);
   };
 
+  const distributePot = () => {
+    if (pokerGame.gameState !== "SHOWDOWN") {
+      console.error(`Game state is not SHOWDOWN`);
+      return;
+    }
+
+    if (!playerHandResults || playerHandResults?.length == 0) {
+      console.error(`No player hand results`);
+      return;
+    }
+
+    let tempPokerPlayers = cloneDeep(pokerPlayers);
+    let tempPokerGame = cloneDeep(pokerGame);
+    let tempPlayers = cloneDeep(players);
+
+    // Start with the outside pots then work inwards
+    let pots = cloneDeep(tempPokerGame.pots);
+
+    const amountToPay: { [playerId: string]: number } = {};
+    for (const player of tempPokerPlayers) {
+      amountToPay[player.id] = 0;
+    }
+
+    for (let i = pots.length - 1; i >= 0; i--) {
+      console.log(`(POT) Distributing pot ${i}`, pots[i]);
+      let pot = pots[i];
+      let eligiblePlayers = pot.eligiblePlayers;
+      let totalAmount = pot.amount;
+
+      let activeHands = playerHandResults.filter((result) => eligiblePlayers.includes(result.id));
+      console.log(`(POT) Eligible players:`, eligiblePlayers);
+
+      let winner = activeHands.reduce((prev, current) => {
+        if (prev.result.win > current.result.win) {
+          return prev;
+        } else {
+          return current;
+        }
+      });
+
+      console.log(`(POT) Winner:`, winner);
+
+      if (isNaN(totalAmount)) throw new Error(`Total amount is NaN`);
+
+      if (winner.result.win == 0) {
+        console.log(`(POT) No winner`);
+        if (activeHands.some((hand) => hand.result.ties > 0)) {
+          let tiedHands = activeHands.filter((hand) => hand.result.ties > 0);
+          let tiedAmount = totalAmount / tiedHands.length;
+
+          for (const hand of tiedHands) {
+            amountToPay[hand.id] += tiedAmount;
+          }
+        }
+      } else {
+        console.log(
+          `(POT) Winner: ${winner.id} (${winner.result.winPercentage}) won ${formatMoney(
+            totalAmount ?? 0
+          )}`
+        );
+        amountToPay[winner.id] += totalAmount;
+      }
+    }
+
+    console.log(`(POT) Amount to pay:`, amountToPay);
+
+    for (const playerId in amountToPay) {
+      let player = getPlayer(playerId, tempPlayers)!;
+      player.balance = round(player.balance + amountToPay[playerId]);
+      tempPlayers[tempPlayers.findIndex((p) => p.id === playerId)] = player;
+    }
+
+    setPlayerHandResults(null);
+    setPokerGame({
+      ...tempPokerGame,
+      // pots: [],
+      // gameState: "PREROUND",
+    });
+    setPlayers(tempPlayers);
+    console.log(amountToPay);
+  };
+
   keybindings.forEach((keybinding) => {
     if (keybinding.scope == "Poker Round") {
       useHotkeys(keybinding.key, (e) => {
@@ -969,13 +1077,43 @@ export default function Round() {
             }
             break;
 
+          case "Draw Random Card":
+            {
+              if (pokerGame.capturingCommunityCards) {
+                let cards = [...pokerGame.communityCards];
+                if (cards.includes(EMPTY_CARD)) {
+                  cards[cards.indexOf(EMPTY_CARD)] = getRandomCard(usedCards);
+                }
+
+                setPokerGame({
+                  ...pokerGame,
+                  communityCards: cards,
+                });
+              } else {
+                setPokerPlayers((draft) => {
+                  let pokerPlayer = draft.find((p) => p.id == pokerGame.currentTurn);
+
+                  if (pokerPlayer) {
+                    if (pokerPlayer.cards.includes(EMPTY_CARD)) {
+                      pokerPlayer.cards[pokerPlayer.cards.indexOf(EMPTY_CARD)] =
+                        getRandomCard(usedCards);
+                    } else {
+                      // Texas Hold'em only allows 2 cards per player, however
+                      // if in the future we want to allow more cards, we can uncomment this
+                      // // pokerPlayer.cards.push(card as Card);
+                    }
+                  }
+                });
+              }
+            }
+            break;
           // default will also cover the specific RankSuit combinations (e.g. "2h", "3s", "4c", "5d")
           default:
             {
               for (let card of availableCards) {
                 if (keybinding.action == card) {
                   if (cardSelector.opened) {
-                    setActiveCardOverride(card);
+                    // This functionality is not available for Poker for simplicity
                   } else {
                     // Append the card to the player's hand
                     if (pokerGame.capturingCommunityCards) {
@@ -1053,7 +1191,11 @@ export default function Round() {
       />
 
       <Flex direction="column" gap="xs">
-        <CommunityCards calculateHands={calculateHands} cardsAllowed={cardsAllowed} />
+        <CommunityCards
+          calculateHands={calculateHands}
+          cardsAllowed={cardsAllowed}
+          distributePot={distributePot}
+        />
         {pokerPlayers.map((pokerPlayer) => {
           return (
             <div
