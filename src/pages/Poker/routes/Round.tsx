@@ -92,6 +92,7 @@ export default function Round() {
   const [bet, setBet] = useRecoilState(PLAYER_BET);
   const [betUIOpen, setBetUIOpen] = useRecoilState(BETUI_OPEN);
   const [, setTimerStart] = useRecoilState(TIMER_START);
+  const betInputRef = useRef<HTMLInputElement>(null);
   // !
 
   const calculateHands = (store: boolean = false): StoredPlayerResult[] | undefined => {
@@ -798,6 +799,11 @@ export default function Round() {
                 setBetUIOpen(false);
               } else {
                 setBetUIOpen(true);
+
+                setTimeout(() => {
+                  (betInputRef as any).current?.focus();
+                  (betInputRef as any).current?.setSelectionRange(0, 0);
+                }, 100);
               }
             }
             break;
@@ -1205,6 +1211,7 @@ export default function Round() {
               }}
             >
               <RoundPlayerCard
+                ref={betInputRef}
                 player={getPlayer(pokerPlayer.id, players)!}
                 pokerPlayer={pokerPlayer}
                 active={
