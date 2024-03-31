@@ -38,13 +38,14 @@ export default function CommunityCards({
       <Title order={3} ta="center">
         Community Cards ({pokerGame.gameState})
       </Title>
-      <Text size="sm" ta="center" fw={500}>
-        {pokerGame.pots.map((pot, index) => {
-          return `${
-            pokerGame.pots.length > 0 ? (index == 0 ? "Main Pot" : `Pot #${index}`) : "Pot"
-          }: ${formatMoney(pot.amount)}`;
-        })}
-      </Text>
+      {pokerGame.pots.map((pot, index) => {
+        return (
+          <Text size="sm" fw={500} ta="center">
+            {pokerGame.pots.length > 0 ? (index == 0 ? "Main Pot" : `Sidepot #${index}`) : "Pot"}:{" "}
+            {formatMoney(pot.amount)}
+          </Text>
+        );
+      })}
       <Text size="sm" ta="center" fw={500}>
         {formatMoney(totalAmountToBePutInPot)} to be put in the pot
       </Text>
