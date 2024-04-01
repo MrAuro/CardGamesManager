@@ -1,4 +1,10 @@
-import { KEYBINDINGS_STATE, PLAYERS_STATE, POKER_GAME_STATE, POKER_PLAYERS_STATE } from "@/Root";
+import {
+  KEYBINDINGS_STATE,
+  PLAYERS_STATE,
+  POKER_GAME_STATE,
+  POKER_PLAYERS_STATE,
+  POKER_SETTINGS_STATE,
+} from "@/Root";
 import CardSelector from "@/components/CardSelector";
 import { CARD_SELECTOR_STATE } from "@/pages/Blackjack/routes/Round";
 import { Card, CardRank, CardSuit, Card_NOEMPTY } from "@/types/Card";
@@ -11,16 +17,10 @@ import {
   PokerPot,
   StoredPlayerResult,
 } from "@/types/Poker";
-import {
-  EMPTY_CARD,
-  getRandomCard,
-  getRank,
-  getRankInt,
-  isAnyEmpty,
-  isCardEmpty,
-} from "@/utils/CardHelper";
+import { EMPTY_CARD, getRandomCard, getRank, isAnyEmpty, isCardEmpty } from "@/utils/CardHelper";
 import { formatMoney, round } from "@/utils/MoneyHelper";
 import { getPlayer } from "@/utils/PlayerHelper";
+import { joinedStringToCards, rankToNumber } from "@/utils/PokerHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import {
   Button,
@@ -29,25 +29,21 @@ import {
   Flex,
   Group,
   Paper,
-  ScrollArea,
   Stack,
-  Table,
   Text,
-  Title,
   darken,
   useMantineTheme,
 } from "@mantine/core";
+import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import cloneDeep from "lodash/cloneDeep";
+import { TexasHoldem } from "poker-variants-odds-calculator";
 import { useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { atom, useRecoilState } from "recoil";
 import CommunityCards from "../components/CommunityCards";
 import RoundPlayerCard from "../components/RoundPlayerCard";
-import { TexasHoldem } from "poker-variants-odds-calculator";
-import Result from "poker-variants-odds-calculator/dts/lib/Result";
-import { joinedStringToCards, rankToNumber } from "@/utils/PokerHelper";
-import { modals } from "@mantine/modals";
+import { getDealerData } from "./PreRound";
 
 export const FOLD_CONFIRM = atom<boolean>({
   key: "FOLD_CONFIRM",
@@ -95,9 +91,10 @@ export default function Round() {
   const [pokerGame, setPokerGame] = useRecoilState(POKER_GAME_STATE);
 
   const [pokerPlayers, setPokerPlayers] = useRecoilImmerState(POKER_PLAYERS_STATE);
+  const [pokerSettings] = useRecoilState(POKER_SETTINGS_STATE);
   const [players, setPlayers] = useRecoilImmerState(PLAYERS_STATE);
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
-  const [activeCardOverride, setActiveCardOverride] = useState<Card | undefined>(undefined);
+  const [activeCardOverride] = useState<Card | undefined>(undefined);
   const [keybindings] = useRecoilImmerState(KEYBINDINGS_STATE);
   // const [holdemTable, setHoldemTable] = useRecoilState(HOLDEM_TABLE);
   const [playerHandResults, setPlayerHandResults] = useRecoilState(PLAYER_HAND_RESULTS);
@@ -829,12 +826,28 @@ export default function Round() {
     });
 
     setPlayerHandResults(null);
-    setPokerGame({
-      ...tempPokerGame,
-      // pots: [],
-      // gameState: "PREROUND",
-    });
     setPlayers(tempPlayers);
+    // End the game
+    setPokerGame({
+      ...pokerGame,
+      communityCards: [EMPTY_CARD, EMPTY_CARD, EMPTY_CARD, EMPTY_CARD, EMPTY_CARD],
+      currentBet: 0,
+      gameState: "PREROUND",
+      currentTurn: "",
+      capturingCommunityCards: false,
+      runningThroughShowdown: false,
+      runningItTwice: false,
+      pots: [],
+      ...getDealerData(
+        pokerPlayers[
+          (pokerPlayers.findIndex((player) => player.id == pokerGame.currentDealer) + 1) %
+            pokerPlayers.length
+        ].id,
+        pokerSettings,
+        pokerPlayers
+      ),
+    });
+
     console.log(amountWon);
   };
 

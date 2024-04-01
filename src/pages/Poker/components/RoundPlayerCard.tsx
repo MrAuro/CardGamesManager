@@ -21,7 +21,7 @@ import {
 } from "@mantine/core";
 import { getHotkeyHandler, useScrollIntoView } from "@mantine/hooks";
 import { IconCurrencyDollar, IconTriangleFilled } from "@tabler/icons-react";
-import { forwardRef, useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { AllInBadge, BigBlindBadge, DealerBadge, SmallBlindBadge } from "../routes/PreRound";
 import {
