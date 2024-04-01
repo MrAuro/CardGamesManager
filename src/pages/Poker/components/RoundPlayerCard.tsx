@@ -99,6 +99,10 @@ const RoundPlayerCard = forwardRef(
 
     const [betError, setBetError] = useState<string | null>(null);
     useEffect(() => {
+      if (isNaN(bet)) {
+        setBet(0);
+      }
+
       if (bet < pokerGame.currentBet) {
         setBetError("Bet must be greater than the current bet");
         return;
