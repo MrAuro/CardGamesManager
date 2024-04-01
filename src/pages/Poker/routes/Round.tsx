@@ -1261,7 +1261,6 @@ export default function Round() {
   return (
     <>
       <CardSelector
-        strictCards
         opened={cardSelector.opened}
         intitialCard={cardSelector.intitalCard}
         activeCardOverride={activeCardOverride}
