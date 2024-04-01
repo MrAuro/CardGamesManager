@@ -853,153 +853,383 @@ export default function Round() {
 
   keybindings.forEach((keybinding) => {
     if (keybinding.scope == "Poker Round") {
-      useHotkeys(keybinding.key, (e) => {
-        e.preventDefault();
+      useHotkeys(
+        keybinding.key,
+        (e) => {
+          if (betUIOpen) {
+            // Disable any keybindings that are used for number input
+            if (
+              [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "0",
+                "backspace",
+                "period",
+              ].includes(keybinding.key)
+            ) {
+              return;
+            }
+          }
 
-        switch (keybinding.action) {
-          case "Check / Call":
-            {
-              if (pokerGame.capturingCommunityCards) {
-                let notAllCardsUsed =
-                  pokerGame.communityCards.filter((card) => !isAnyEmpty(card)).length <
-                  cardsAllowed;
-                if (notAllCardsUsed) {
-                  notifications.show({
-                    message: "You must add all possible community cards",
-                    color: "red",
-                  });
-                  return;
-                } else {
-                  setPokerGame({
-                    ...pokerGame,
-                    capturingCommunityCards: false,
-                  });
-                }
-              } else {
+          e.preventDefault();
+
+          switch (keybinding.action) {
+            case "Check / Call":
+              {
                 if (betUIOpen) return;
 
-                let pokerPlayer = {
-                  ...pokerPlayers.find((player) => player.id === pokerGame.currentTurn)!,
-                };
-
-                let amountToCallTo = pokerGame.currentBet - pokerPlayer.currentBet;
-                if (amountToCallTo > 0) {
-                  callAction();
+                if (pokerGame.capturingCommunityCards) {
+                  let notAllCardsUsed =
+                    pokerGame.communityCards.filter((card) => !isAnyEmpty(card)).length <
+                    cardsAllowed;
+                  if (notAllCardsUsed) {
+                    notifications.show({
+                      message: "You must add all possible community cards",
+                      color: "red",
+                    });
+                    return;
+                  } else {
+                    setPokerGame({
+                      ...pokerGame,
+                      capturingCommunityCards: false,
+                    });
+                  }
                 } else {
-                  checkAction();
+                  if (betUIOpen) return;
+
+                  let pokerPlayer = {
+                    ...pokerPlayers.find((player) => player.id === pokerGame.currentTurn)!,
+                  };
+
+                  let amountToCallTo = pokerGame.currentBet - pokerPlayer.currentBet;
+                  if (amountToCallTo > 0) {
+                    callAction();
+                  } else {
+                    checkAction();
+                  }
                 }
               }
-            }
-            break;
+              break;
 
-          case "Bet / Raise":
-            {
-              if (pokerGame.capturingCommunityCards) return;
-              if (betUIOpen) {
-                betAction(bet);
-                setBetUIOpen(false);
-              } else {
-                setBetUIOpen(true);
+            case "Bet / Raise":
+              {
+                if (pokerGame.capturingCommunityCards) return;
+                if (betUIOpen) {
+                  betAction(bet);
+                  setBetUIOpen(false);
+                } else {
+                  setBetUIOpen(true);
 
-                setTimeout(() => {
-                  (betInputRef as any).current?.focus();
-                  (betInputRef as any).current?.setSelectionRange(0, 0);
-                }, 100);
+                  setTimeout(() => {
+                    (betInputRef as any).current?.focus();
+                    (betInputRef as any).current?.setSelectionRange(0, 0);
+                  }, 100);
+                }
               }
-            }
-            break;
+              break;
 
-          case "All In":
-            {
-              if (pokerGame.capturingCommunityCards) return;
-              if (!betUIOpen) return;
-              if (allInConfirm) {
-                const pokerPlayer = pokerPlayers.find(
-                  (player) => player.id === pokerGame.currentTurn
-                )!;
+            case "All In":
+              {
+                if (pokerGame.capturingCommunityCards) return;
+                if (!betUIOpen) return;
+                if (allInConfirm) {
+                  const pokerPlayer = pokerPlayers.find(
+                    (player) => player.id === pokerGame.currentTurn
+                  )!;
 
-                const player = getPlayer(pokerPlayer.id, players)!;
+                  const player = getPlayer(pokerPlayer.id, players)!;
 
-                setBet(player.balance);
-                betAction(player.balance);
-                setAllInConfirm(false);
-                setBetUIOpen(false);
-                setTimerStart(null);
-              } else {
-                setAllInConfirm(true);
-
-                setTimerStart(Date.now());
-                setTimeout(() => {
+                  setBet(player.balance);
+                  betAction(player.balance);
                   setAllInConfirm(false);
-                }, 3000);
+                  setBetUIOpen(false);
+                  setTimerStart(null);
+                } else {
+                  setAllInConfirm(true);
+
+                  setTimerStart(Date.now());
+                  setTimeout(() => {
+                    setAllInConfirm(false);
+                  }, 3000);
+                }
               }
-            }
-            break;
+              break;
 
-          case "Cancel Bet":
-            {
-              setBetUIOpen(false);
-            }
-            break;
+            case "Cancel Bet":
+              {
+                if (!betUIOpen) return;
 
-          case "Fold":
-            {
-              if (pokerGame.capturingCommunityCards) return;
-              if (betUIOpen) return;
-              if (foldConfirm) {
-                foldAction();
-                setFoldConfirm(false);
-                setTimerStart(null);
-              } else {
-                setFoldConfirm(true);
+                setBetUIOpen(false);
+              }
+              break;
 
-                setTimerStart(Date.now());
-                setTimeout(() => {
+            case "Fold":
+              {
+                if (pokerGame.capturingCommunityCards) return;
+                if (betUIOpen) return;
+                if (foldConfirm) {
+                  foldAction();
                   setFoldConfirm(false);
-                }, 3000);
-              }
-            }
-            break;
+                  setTimerStart(null);
+                } else {
+                  setFoldConfirm(true);
 
-          case "h":
-          case "s":
-          case "c":
-          case "d":
-            {
-              if (cardSelector.opened) {
-                // This functionality is not available for Poker for simplicity
-              } else {
-                // Get the last non-empty card and change the suit
+                  setTimerStart(Date.now());
+                  setTimeout(() => {
+                    setFoldConfirm(false);
+                  }, 3000);
+                }
+              }
+              break;
+
+            case "h":
+            case "s":
+            case "c":
+            case "d":
+              {
+                if (betUIOpen) return;
+
+                if (cardSelector.opened) {
+                  // This functionality is not available for Poker for simplicity
+                } else {
+                  // Get the last non-empty card and change the suit
+                  if (pokerGame.capturingCommunityCards) {
+                    let cards = [...pokerGame.communityCards];
+                    if (cards.includes(EMPTY_CARD)) {
+                      let lastCard = cards[cards.indexOf(EMPTY_CARD) - 1];
+                      if (
+                        usedCards.includes(`${lastCard[0]}${keybinding.action as CardSuit}` as Card)
+                      ) {
+                        notifications.show({
+                          message: "This card is already in use",
+                          color: "red",
+                        });
+                        return;
+                      }
+                      cards[cards.indexOf(EMPTY_CARD) - 1] = `${lastCard[0]}${
+                        keybinding.action as CardSuit
+                      }` as Card;
+                    } else {
+                      let lastCard = cards[cards.length - 1];
+                      if (
+                        usedCards.includes(`${lastCard[0]}${keybinding.action as CardSuit}` as Card)
+                      ) {
+                        notifications.show({
+                          message: "This card is already in use",
+                          color: "red",
+                        });
+                        return;
+                      }
+                      cards[cards.length - 1] = `${lastCard[0]}${
+                        keybinding.action as CardSuit
+                      }` as Card;
+                    }
+
+                    setPokerGame({
+                      ...pokerGame,
+                      communityCards: cards,
+                    });
+                  } else {
+                    setPokerPlayers((draft) => {
+                      let pokerPlayer = draft.find((p) => p.id == pokerGame.currentTurn);
+
+                      if (pokerPlayer) {
+                        if (pokerPlayer.cards.includes(EMPTY_CARD)) {
+                          let lastCard =
+                            pokerPlayer.cards[pokerPlayer.cards.indexOf(EMPTY_CARD) - 1];
+                          if (
+                            usedCards.includes(
+                              `${lastCard[0]}${keybinding.action as CardSuit}` as Card
+                            )
+                          ) {
+                            notifications.show({
+                              message: "This card is already in use",
+                              color: "red",
+                            });
+                            return;
+                          }
+                          pokerPlayer.cards[pokerPlayer.cards.indexOf(EMPTY_CARD) - 1] = `${
+                            lastCard[0]
+                          }${keybinding.action as CardSuit}` as Card;
+                        } else {
+                          let lastCard = pokerPlayer.cards[pokerPlayer.cards.length - 1];
+                          if (
+                            usedCards.includes(
+                              `${lastCard[0]}${keybinding.action as CardSuit}` as Card
+                            )
+                          ) {
+                            notifications.show({
+                              message: "This card is already in use",
+                              color: "red",
+                            });
+                            return;
+                          }
+                          pokerPlayer.cards[pokerPlayer.cards.length - 1] = `${lastCard[0]}${
+                            keybinding.action as CardSuit
+                          }` as Card;
+                        }
+                      }
+                    });
+                  }
+                }
+              }
+              break;
+
+            case "A":
+            case "2":
+            case "3":
+            case "4":
+            case "5":
+            case "6":
+            case "7":
+            case "8":
+            case "9":
+            case "T":
+            case "J":
+            case "Q":
+            case "K":
+              {
+                if (betUIOpen) return;
+
+                if (cardSelector.opened) {
+                  // This functionality is not available for Poker for simplicity
+                } else {
+                  // When we are dealing with Ranks, we add the card instead of modifying the last one
+                  if (pokerGame.capturingCommunityCards) {
+                    let newCommunityCards = [...pokerGame.communityCards];
+                    if (newCommunityCards.includes(EMPTY_CARD)) {
+                      newCommunityCards[newCommunityCards.indexOf(EMPTY_CARD)] = `${
+                        keybinding.action as CardRank
+                      }${"-"}` as Card;
+                    }
+
+                    // Dont allow more cards than the allowed amount
+                    if (
+                      newCommunityCards.filter((card) => !isCardEmpty(card)).length > cardsAllowed
+                    ) {
+                      notifications.show({
+                        message: "You have already added the maximum amount of cards",
+                        color: "red",
+                      });
+                      return;
+                    } else {
+                      console.log(
+                        `(debug) ${
+                          newCommunityCards.filter((card) => !isAnyEmpty(card)).length
+                        } vs ${cardsAllowed}`
+                      );
+                    }
+
+                    // Check all of them [h, s, c, d] instead of just one
+                    let allUsed = true;
+                    for (let suit of ["h", "s", "c", "d"] as CardSuit[]) {
+                      if (!usedCards.includes(`${keybinding.action as CardRank}${suit}` as Card)) {
+                        allUsed = false;
+                        break;
+                      }
+                    }
+
+                    if (allUsed) {
+                      notifications.show({
+                        message: "All suits for this card are already in use",
+                        color: "red",
+                      });
+
+                      return;
+                    }
+
+                    setPokerGame({
+                      ...pokerGame,
+                      communityCards: newCommunityCards,
+                    });
+                  } else {
+                    setPokerPlayers((draft) => {
+                      let pokerPlayer = draft.find((p) => p.id == pokerGame.currentTurn);
+
+                      if (pokerPlayer) {
+                        if (pokerPlayer.cards.includes(EMPTY_CARD)) {
+                          if (
+                            usedCards.includes(`${keybinding.action as CardRank}${"-"}` as Card)
+                          ) {
+                            notifications.show({
+                              message: "This card is already in use",
+                              color: "red",
+                            });
+                            return;
+                          }
+                          pokerPlayer.cards[pokerPlayer.cards.indexOf(EMPTY_CARD)] = `${
+                            keybinding.action as CardRank
+                          }${"-"}` as Card;
+                        } else {
+                          // Texas Hold'em only allows 2 cards per player, however
+                          // if in the future we want to allow more cards, we can uncomment this
+                          // // blackjackPlayer.cards.push(
+                          // //   ${keybinding.action as CardRank}${"-"}` as Card
+                          // // );
+                        }
+                      }
+                    });
+                  }
+                }
+              }
+              break;
+
+            case "Remove Last Card":
+              {
+                if (betUIOpen) return;
+
+                if (pokerGame.capturingCommunityCards) {
+                  let cards = [...pokerGame.communityCards];
+                  let lastIndex = cards.length - 1;
+                  while (cards[lastIndex] == EMPTY_CARD) {
+                    lastIndex--;
+
+                    if (lastIndex < 0) {
+                      break;
+                    }
+                  }
+
+                  cards[lastIndex] = EMPTY_CARD;
+
+                  setPokerGame({
+                    ...pokerGame,
+                    communityCards: cards,
+                  });
+                } else {
+                  setPokerPlayers((draft) => {
+                    let pokerPlayer = draft.find((p) => p.id == pokerGame.currentTurn);
+
+                    let cards = pokerPlayer!.cards;
+                    if (cards.length <= 2) {
+                      if (cards[1] == EMPTY_CARD) {
+                        cards[0] = EMPTY_CARD;
+                      } else {
+                        cards[1] = EMPTY_CARD;
+                      }
+                    } else {
+                      cards.pop();
+                    }
+                  });
+                }
+              }
+              break;
+
+            case "Draw Random Card":
+              {
+                if (betUIOpen) return;
+
                 if (pokerGame.capturingCommunityCards) {
                   let cards = [...pokerGame.communityCards];
                   if (cards.includes(EMPTY_CARD)) {
-                    let lastCard = cards[cards.indexOf(EMPTY_CARD) - 1];
-                    if (
-                      usedCards.includes(`${lastCard[0]}${keybinding.action as CardSuit}` as Card)
-                    ) {
-                      notifications.show({
-                        message: "This card is already in use",
-                        color: "red",
-                      });
-                      return;
-                    }
-                    cards[cards.indexOf(EMPTY_CARD) - 1] = `${lastCard[0]}${
-                      keybinding.action as CardSuit
-                    }` as Card;
-                  } else {
-                    let lastCard = cards[cards.length - 1];
-                    if (
-                      usedCards.includes(`${lastCard[0]}${keybinding.action as CardSuit}` as Card)
-                    ) {
-                      notifications.show({
-                        message: "This card is already in use",
-                        color: "red",
-                      });
-                      return;
-                    }
-                    cards[cards.length - 1] = `${lastCard[0]}${
-                      keybinding.action as CardSuit
-                    }` as Card;
+                    cards[cards.indexOf(EMPTY_CARD)] = getRandomCard(usedCards);
                   }
 
                   setPokerGame({
@@ -1012,249 +1242,66 @@ export default function Round() {
 
                     if (pokerPlayer) {
                       if (pokerPlayer.cards.includes(EMPTY_CARD)) {
-                        let lastCard = pokerPlayer.cards[pokerPlayer.cards.indexOf(EMPTY_CARD) - 1];
-                        if (
-                          usedCards.includes(
-                            `${lastCard[0]}${keybinding.action as CardSuit}` as Card
-                          )
-                        ) {
-                          notifications.show({
-                            message: "This card is already in use",
-                            color: "red",
-                          });
-                          return;
-                        }
-                        pokerPlayer.cards[pokerPlayer.cards.indexOf(EMPTY_CARD) - 1] = `${
-                          lastCard[0]
-                        }${keybinding.action as CardSuit}` as Card;
-                      } else {
-                        let lastCard = pokerPlayer.cards[pokerPlayer.cards.length - 1];
-                        if (
-                          usedCards.includes(
-                            `${lastCard[0]}${keybinding.action as CardSuit}` as Card
-                          )
-                        ) {
-                          notifications.show({
-                            message: "This card is already in use",
-                            color: "red",
-                          });
-                          return;
-                        }
-                        pokerPlayer.cards[pokerPlayer.cards.length - 1] = `${lastCard[0]}${
-                          keybinding.action as CardSuit
-                        }` as Card;
-                      }
-                    }
-                  });
-                }
-              }
-            }
-            break;
-
-          case "A":
-          case "2":
-          case "3":
-          case "4":
-          case "5":
-          case "6":
-          case "7":
-          case "8":
-          case "9":
-          case "T":
-          case "J":
-          case "Q":
-          case "K":
-            {
-              if (cardSelector.opened) {
-                // This functionality is not available for Poker for simplicity
-              } else {
-                // When we are dealing with Ranks, we add the card instead of modifying the last one
-                if (pokerGame.capturingCommunityCards) {
-                  let newCommunityCards = [...pokerGame.communityCards];
-                  if (newCommunityCards.includes(EMPTY_CARD)) {
-                    newCommunityCards[newCommunityCards.indexOf(EMPTY_CARD)] = `${
-                      keybinding.action as CardRank
-                    }${"-"}` as Card;
-                  }
-
-                  // Dont allow more cards than the allowed amount
-                  if (
-                    newCommunityCards.filter((card) => !isCardEmpty(card)).length > cardsAllowed
-                  ) {
-                    notifications.show({
-                      message: "You have already added the maximum amount of cards",
-                      color: "red",
-                    });
-                    return;
-                  } else {
-                    console.log(
-                      `(debug) ${
-                        newCommunityCards.filter((card) => !isAnyEmpty(card)).length
-                      } vs ${cardsAllowed}`
-                    );
-                  }
-
-                  // Check all of them [h, s, c, d] instead of just one
-                  let allUsed = true;
-                  for (let suit of ["h", "s", "c", "d"] as CardSuit[]) {
-                    if (!usedCards.includes(`${keybinding.action as CardRank}${suit}` as Card)) {
-                      allUsed = false;
-                      break;
-                    }
-                  }
-
-                  if (allUsed) {
-                    notifications.show({
-                      message: "All suits for this card are already in use",
-                      color: "red",
-                    });
-
-                    return;
-                  }
-
-                  setPokerGame({
-                    ...pokerGame,
-                    communityCards: newCommunityCards,
-                  });
-                } else {
-                  setPokerPlayers((draft) => {
-                    let pokerPlayer = draft.find((p) => p.id == pokerGame.currentTurn);
-
-                    if (pokerPlayer) {
-                      if (pokerPlayer.cards.includes(EMPTY_CARD)) {
-                        if (usedCards.includes(`${keybinding.action as CardRank}${"-"}` as Card)) {
-                          notifications.show({
-                            message: "This card is already in use",
-                            color: "red",
-                          });
-                          return;
-                        }
-                        pokerPlayer.cards[pokerPlayer.cards.indexOf(EMPTY_CARD)] = `${
-                          keybinding.action as CardRank
-                        }${"-"}` as Card;
+                        pokerPlayer.cards[pokerPlayer.cards.indexOf(EMPTY_CARD)] =
+                          getRandomCard(usedCards);
                       } else {
                         // Texas Hold'em only allows 2 cards per player, however
                         // if in the future we want to allow more cards, we can uncomment this
-                        // // blackjackPlayer.cards.push(
-                        // //   ${keybinding.action as CardRank}${"-"}` as Card
-                        // // );
+                        // // pokerPlayer.cards.push(card as Card);
                       }
                     }
                   });
                 }
               }
-            }
-            break;
+              break;
+            // default will also cover the specific RankSuit combinations (e.g. "2h", "3s", "4c", "5d")
+            default:
+              {
+                if (betUIOpen) return;
 
-          case "Remove Last Card":
-            {
-              if (pokerGame.capturingCommunityCards) {
-                let cards = [...pokerGame.communityCards];
-                let lastIndex = cards.length - 1;
-                while (cards[lastIndex] == EMPTY_CARD) {
-                  lastIndex--;
-
-                  if (lastIndex < 0) {
-                    break;
-                  }
-                }
-
-                cards[lastIndex] = EMPTY_CARD;
-
-                setPokerGame({
-                  ...pokerGame,
-                  communityCards: cards,
-                });
-              } else {
-                setPokerPlayers((draft) => {
-                  let pokerPlayer = draft.find((p) => p.id == pokerGame.currentTurn);
-
-                  let cards = pokerPlayer!.cards;
-                  if (cards.length <= 2) {
-                    if (cards[1] == EMPTY_CARD) {
-                      cards[0] = EMPTY_CARD;
+                for (let card of availableCards) {
+                  if (keybinding.action == card) {
+                    if (cardSelector.opened) {
+                      // This functionality is not available for Poker for simplicity
                     } else {
-                      cards[1] = EMPTY_CARD;
-                    }
-                  } else {
-                    cards.pop();
-                  }
-                });
-              }
-            }
-            break;
-
-          case "Draw Random Card":
-            {
-              if (pokerGame.capturingCommunityCards) {
-                let cards = [...pokerGame.communityCards];
-                if (cards.includes(EMPTY_CARD)) {
-                  cards[cards.indexOf(EMPTY_CARD)] = getRandomCard(usedCards);
-                }
-
-                setPokerGame({
-                  ...pokerGame,
-                  communityCards: cards,
-                });
-              } else {
-                setPokerPlayers((draft) => {
-                  let pokerPlayer = draft.find((p) => p.id == pokerGame.currentTurn);
-
-                  if (pokerPlayer) {
-                    if (pokerPlayer.cards.includes(EMPTY_CARD)) {
-                      pokerPlayer.cards[pokerPlayer.cards.indexOf(EMPTY_CARD)] =
-                        getRandomCard(usedCards);
-                    } else {
-                      // Texas Hold'em only allows 2 cards per player, however
-                      // if in the future we want to allow more cards, we can uncomment this
-                      // // pokerPlayer.cards.push(card as Card);
-                    }
-                  }
-                });
-              }
-            }
-            break;
-          // default will also cover the specific RankSuit combinations (e.g. "2h", "3s", "4c", "5d")
-          default:
-            {
-              for (let card of availableCards) {
-                if (keybinding.action == card) {
-                  if (cardSelector.opened) {
-                    // This functionality is not available for Poker for simplicity
-                  } else {
-                    // Append the card to the player's hand
-                    if (pokerGame.capturingCommunityCards) {
-                      let cards = [...pokerGame.communityCards];
-                      if (cards.includes(EMPTY_CARD)) {
-                        cards[cards.indexOf(EMPTY_CARD)] = card;
-                      }
-
-                      setPokerGame({
-                        ...pokerGame,
-                        communityCards: cards,
-                      });
-                    } else {
-                      setPokerPlayers((draft) => {
-                        let pokerPlayer = draft.find((p) => p.id == pokerGame.currentTurn);
-
-                        if (pokerPlayer) {
-                          if (pokerPlayer.cards.includes(EMPTY_CARD)) {
-                            pokerPlayer.cards[pokerPlayer.cards.indexOf(EMPTY_CARD)] = card as Card;
-                          } else {
-                            // Texas Hold'em only allows 2 cards per player, however
-                            // if in the future we want to allow more cards, we can uncomment this
-                            // // pokerPlayer.cards.push(card as Card);
-                          }
+                      // Append the card to the player's hand
+                      if (pokerGame.capturingCommunityCards) {
+                        let cards = [...pokerGame.communityCards];
+                        if (cards.includes(EMPTY_CARD)) {
+                          cards[cards.indexOf(EMPTY_CARD)] = card;
                         }
-                      });
+
+                        setPokerGame({
+                          ...pokerGame,
+                          communityCards: cards,
+                        });
+                      } else {
+                        setPokerPlayers((draft) => {
+                          let pokerPlayer = draft.find((p) => p.id == pokerGame.currentTurn);
+
+                          if (pokerPlayer) {
+                            if (pokerPlayer.cards.includes(EMPTY_CARD)) {
+                              pokerPlayer.cards[pokerPlayer.cards.indexOf(EMPTY_CARD)] =
+                                card as Card;
+                            } else {
+                              // Texas Hold'em only allows 2 cards per player, however
+                              // if in the future we want to allow more cards, we can uncomment this
+                              // // pokerPlayer.cards.push(card as Card);
+                            }
+                          }
+                        });
+                      }
                     }
                   }
                 }
               }
-            }
-            break;
+              break;
+          }
+        },
+        {
+          enableOnFormTags: ["INPUT"],
         }
-      });
+      );
     }
   });
 
