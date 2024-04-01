@@ -1344,6 +1344,7 @@ export default function Round() {
                 opacity: pokerPlayer.folded ? 0.25 : 1,
                 filter: pokerPlayer.folded ? "blur(1.5px)" : "none",
               }}
+              key={pokerPlayer.id}
             >
               <RoundPlayerCard
                 ref={betInputRef}
@@ -1352,7 +1353,6 @@ export default function Round() {
                 active={
                   pokerPlayer.id === pokerGame.currentTurn && !pokerGame.capturingCommunityCards
                 }
-                key={pokerPlayer.id}
                 checkAction={checkAction}
                 callAction={callAction}
                 betAction={betAction}
