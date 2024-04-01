@@ -122,18 +122,10 @@ export default function Round() {
     }
 
     if (playingPlayers.some((player) => player.cards.some(isAnyEmpty))) {
-      notifications.show({
-        message: "Some players have not selected their cards",
-        color: "red",
-      });
       return;
     }
 
     if (pokerGame.communityCards.filter((card) => !isAnyEmpty(card)).length < 3) {
-      notifications.show({
-        message: "Not enough community cards",
-        color: "red",
-      });
       return;
     }
 

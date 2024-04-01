@@ -36,7 +36,7 @@ export default function CommunityCards({
       }}
     >
       <Title order={3} ta="center">
-        Community Cards ({pokerGame.gameState})
+        Community Cards
       </Title>
       {pokerGame.pots.map((pot, index) => {
         return (
@@ -46,8 +46,11 @@ export default function CommunityCards({
           </Text>
         );
       })}
-      <Text size="sm" ta="center" fw={500}>
-        {formatMoney(totalAmountToBePutInPot)} to be put in the pot
+      <Text c="dimmed" size="sm" ta="center" fw={500}>
+        {formatMoney(totalAmountToBePutInPot)} pending
+      </Text>
+      <Text c="dimmed" size="xs" ta="center" tt="uppercase">
+        {pokerGame.gameState}
       </Text>
       <Divider my="xs" />
       <Flex justify="center" gap="sm" align="center">
@@ -95,7 +98,12 @@ export default function CommunityCards({
         >
           Save Cards
         </Button>
-        <Button color="green" fullWidth onClick={distributePot}>
+        <Button
+          color="green"
+          fullWidth
+          onClick={distributePot}
+          disabled={pokerGame.gameState !== "SHOWDOWN"}
+        >
           Distribute Pots
         </Button>
       </Flex>
