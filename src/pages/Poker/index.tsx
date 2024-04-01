@@ -5,7 +5,6 @@ import Round from "./routes/Round";
 
 export default function Poker() {
   const [gameState] = useRecoilState(POKER_GAME_STATE);
-
   let component;
 
   if (gameState.gameState == "PREROUND") {

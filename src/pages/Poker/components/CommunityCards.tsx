@@ -3,7 +3,7 @@ import PlayingCard from "@/components/PlayingCard";
 import { CARD_SELECTOR_STATE } from "@/pages/Blackjack/routes/Round";
 import { isAnyEmpty } from "@/utils/CardHelper";
 import { formatMoney } from "@/utils/MoneyHelper";
-import { Button, Card, Center, Divider, Flex, Text, Title, useMantineTheme } from "@mantine/core";
+import { Button, Card, Divider, Flex, Text, Title, useMantineTheme } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useRecoilState } from "recoil";
 

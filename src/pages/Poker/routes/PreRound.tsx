@@ -7,7 +7,7 @@ import {
 } from "@/Root";
 import GenericPlayerCard from "@/components/GenericPlayerCard";
 import PlayerSelector, { PlayerSelectorHandles } from "@/components/PlayerSelector";
-import { PokerPlayer } from "@/types/Poker";
+import { PokerPlayer, PokerSettings } from "@/types/Poker";
 import { EMPTY_CARD } from "@/utils/CardHelper";
 import { formatMoney, round } from "@/utils/MoneyHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
@@ -46,6 +46,28 @@ function getStyle(style: any, snapshot: DraggableStateSnapshot) {
   };
 }
 
+export const getDealerData = (
+  dealerId: string,
+  pokerSettings: PokerSettings,
+  pokerPlayers: PokerPlayer[]
+): {
+  currentDealer: string;
+  currentSmallBlind: string;
+  currentBigBlind: string;
+} => {
+  let playerIndex = pokerPlayers.findIndex((player) => player.id == dealerId);
+  if (playerIndex == -1) throw new Error(`Player with ID ${dealerId} not found in pokerPlayers`);
+
+  let sbIndex = (playerIndex + 1) % pokerPlayers.length;
+  let bbIndex = (playerIndex + 2) % pokerPlayers.length;
+
+  return {
+    currentDealer: dealerId,
+    currentSmallBlind: pokerSettings.forcedBetOption === "BLINDS" ? pokerPlayers[sbIndex].id : "",
+    currentBigBlind: pokerSettings.forcedBetOption === "BLINDS" ? pokerPlayers[bbIndex].id : "",
+  };
+};
+
 export default function PreRound() {
   const theme = useMantineTheme();
   const [pokerSettings] = useRecoilState(POKER_SETTINGS_STATE);
@@ -65,17 +87,25 @@ export default function PreRound() {
             break;
 
           case "Next Dealer":
-            setDealer(
-              pokerPlayers[
-                (pokerPlayers.findIndex((player) => player.id == pokerGame.currentDealer) + 1) %
-                  pokerPlayers.length
-              ].id
-            );
+            setPokerGame({
+              ...pokerGame,
+              ...getDealerData(
+                pokerPlayers[
+                  (pokerPlayers.findIndex((player) => player.id == pokerGame.currentDealer) + 1) %
+                    pokerPlayers.length
+                ].id,
+                pokerSettings,
+                pokerPlayers
+              ),
+            });
             break;
 
           case "Random Dealer":
             let dealerIndex = Math.floor(Math.random() * pokerPlayers.length);
-            setDealer(pokerPlayers[dealerIndex].id);
+            setPokerGame({
+              ...pokerGame,
+              ...getDealerData(pokerPlayers[dealerIndex].id, pokerSettings, pokerPlayers),
+            });
             break;
 
           case "Shuffle Players":
@@ -86,21 +116,6 @@ export default function PreRound() {
       });
     }
   });
-
-  const setDealer = (playerId: string) => {
-    let playerIndex = pokerPlayers.findIndex((player) => player.id == playerId);
-    if (playerIndex == -1) return;
-
-    let sbIndex = (playerIndex + 1) % pokerPlayers.length;
-    let bbIndex = (playerIndex + 2) % pokerPlayers.length;
-
-    setPokerGame({
-      ...pokerGame,
-      currentDealer: playerId,
-      currentSmallBlind: pokerSettings.forcedBetOption === "BLINDS" ? pokerPlayers[sbIndex].id : "",
-      currentBigBlind: pokerSettings.forcedBetOption === "BLINDS" ? pokerPlayers[bbIndex].id : "",
-    });
-  };
 
   const anyNegativeBalance = players
     .filter((player) => pokerPlayers.some((p) => p.id == player.id))
@@ -232,7 +247,10 @@ export default function PreRound() {
         fullWidth
         onClick={() => {
           let dealerIndex = Math.floor(Math.random() * pokerPlayers.length);
-          setDealer(pokerPlayers[dealerIndex].id);
+          setPokerGame({
+            ...pokerGame,
+            ...getDealerData(pokerPlayers[dealerIndex].id, pokerSettings, pokerPlayers),
+          });
         }}
       >
         Pick Random Dealer
@@ -305,7 +323,10 @@ export default function PreRound() {
                                     : undefined,
                               }}
                               onClick={() => {
-                                setDealer(player.id);
+                                setPokerGame({
+                                  ...pokerGame,
+                                  ...getDealerData(player.id, pokerSettings, pokerPlayers),
+                                });
                               }}
                             >
                               <IconCircleLetterD size="1.25rem" />
