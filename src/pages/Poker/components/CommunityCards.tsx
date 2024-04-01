@@ -40,7 +40,7 @@ export default function CommunityCards({
       </Title>
       {pokerGame.pots.map((pot, index) => {
         return (
-          <Text size="sm" fw={500} ta="center">
+          <Text size="sm" fw={500} ta="center" key={index}>
             {pokerGame.pots.length > 0 ? (index == 0 ? "Main Pot" : `Sidepot #${index}`) : "Pot"}:{" "}
             {formatMoney(pot.amount)}
           </Text>
