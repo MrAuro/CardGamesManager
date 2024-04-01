@@ -20,13 +20,11 @@ export default function CardSelector({
   intitialCard,
   activeCardOverride,
   onSubmit,
-  strictCards,
 }: {
   opened: boolean;
   intitialCard?: Card;
   activeCardOverride?: Card;
   onSubmit: (card: Card) => void;
-  strictCards?: boolean;
 }) {
   const [selectedCardRank, setSelectedCardRank] = useState<CardRank>("-");
   const [selectedCardSuit, setSelectedCardSuit] = useState<CardSuit>("-");
