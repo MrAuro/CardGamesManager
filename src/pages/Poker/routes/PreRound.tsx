@@ -63,8 +63,14 @@ export const getDealerData = (
 
   return {
     currentDealer: dealerId,
-    currentSmallBlind: pokerSettings.forcedBetOption === "BLINDS" ? pokerPlayers[sbIndex].id : "",
-    currentBigBlind: pokerSettings.forcedBetOption === "BLINDS" ? pokerPlayers[bbIndex].id : "",
+    currentSmallBlind:
+      pokerSettings.forcedBetOption === "BLINDS" || pokerSettings.forcedBetOption === "BLINDS+ANTE"
+        ? pokerPlayers[sbIndex].id
+        : "",
+    currentBigBlind:
+      pokerSettings.forcedBetOption === "BLINDS" || pokerSettings.forcedBetOption === "BLINDS+ANTE"
+        ? pokerPlayers[bbIndex].id
+        : "",
   };
 };
 
@@ -119,7 +125,15 @@ export default function PreRound() {
 
   const anyNegativeBalance = players
     .filter((player) => pokerPlayers.some((p) => p.id == player.id))
-    .some((player) => player.balance <= 0);
+    .some(
+      (player) =>
+        player.balance <=
+        (pokerSettings.forcedBetOption == "BLINDS"
+          ? pokerSettings.bigBlind
+          : pokerSettings.forcedBetOption == "BLINDS+ANTE"
+          ? pokerSettings.ante + pokerSettings.bigBlind
+          : pokerSettings.ante)
+    );
 
   const cantStart =
     pokerPlayers.length < 2 ||
@@ -134,12 +148,23 @@ export default function PreRound() {
 
     let amountInPot = 0;
     let paymentsToTake: { [key: string]: number } = {};
-    if (pokerSettings.forcedBetOption === "BLINDS") {
-      paymentsToTake[pokerGame.currentSmallBlind] = pokerSettings.smallBlind;
-      paymentsToTake[pokerGame.currentBigBlind] = pokerSettings.bigBlind;
-    } else {
+    for (const player of pokerPlayers) {
+      paymentsToTake[player.id] = 0;
+    }
+    if (
+      pokerSettings.forcedBetOption === "BLINDS" ||
+      pokerSettings.forcedBetOption == "BLINDS+ANTE"
+    ) {
+      paymentsToTake[pokerGame.currentSmallBlind] += pokerSettings.smallBlind;
+      paymentsToTake[pokerGame.currentBigBlind] += pokerSettings.bigBlind;
+    }
+
+    if (
+      pokerSettings.forcedBetOption === "ANTE" ||
+      pokerSettings.forcedBetOption === "BLINDS+ANTE"
+    ) {
       pokerPlayers.forEach((player) => {
-        paymentsToTake[player.id] = pokerSettings.ante;
+        paymentsToTake[player.id] += pokerSettings.ante;
       });
     }
 
@@ -167,7 +192,10 @@ export default function PreRound() {
     });
 
     let firstTurn;
-    if (pokerSettings.forcedBetOption === "BLINDS") {
+    if (
+      pokerSettings.forcedBetOption == "BLINDS" ||
+      pokerSettings.forcedBetOption == "BLINDS+ANTE"
+    ) {
       // To the left of the big blind
       const bbIndex = pokerPlayers.findIndex((player) => player.id == pokerGame.currentBigBlind);
       firstTurn = pokerPlayers[(bbIndex + 1) % pokerPlayers.length].id;
@@ -179,9 +207,10 @@ export default function PreRound() {
 
     let currentBets: { [key: string]: { amount: number; dontAddToPot: boolean } } = {};
     for (const playerId in paymentsToTake) {
+      console.log(`Setting current bet for ${playerId} to ${paymentsToTake[playerId]} (true)`);
       currentBets[playerId] = {
         amount: paymentsToTake[playerId],
-        dontAddToPot: true,
+        dontAddToPot: paymentsToTake[playerId] == 0 ? false : true,
       };
     }
 
@@ -223,21 +252,27 @@ export default function PreRound() {
         anyNegativeBalance && (
           <Alert color="red" title="Insufficient Balances" icon={<IconInfoTriangle />}>
             <Flex direction="column" gap="sm">
-              Some players have zero or negative balances, please top up their balances before
-              starting the game
+              Some players have insufficient balances to play the game. Please top up their balances
+              before starting the game.
             </Flex>
           </Alert>
         )
       }
       <Button fullWidth mt="sm" onClick={startGame} disabled={cantStart}>
         Start Game (
-        {pokerSettings.forcedBetOption == "BLINDS"
-          ? `${formatMoney(pokerSettings.smallBlind, true, true)}/${formatMoney(
-              pokerSettings.bigBlind,
-              true,
-              true
-            )}`
-          : `${formatMoney(pokerSettings.ante, true, true)}`}
+        {pokerSettings.forcedBetOption == "BLINDS" &&
+          `${formatMoney(pokerSettings.smallBlind, true, true)}/${formatMoney(
+            pokerSettings.bigBlind,
+            true,
+            true
+          )}`}
+        {pokerSettings.forcedBetOption == "ANTE" && `${formatMoney(pokerSettings.ante, true)}`}
+        {pokerSettings.forcedBetOption == "BLINDS+ANTE" &&
+          `${formatMoney(pokerSettings.smallBlind, true, true)}/${formatMoney(
+            pokerSettings.bigBlind,
+            true,
+            true
+          )} + ${formatMoney(pokerSettings.ante, true, true)}`}
         )
       </Button>
       <Button
@@ -300,9 +335,11 @@ export default function PreRound() {
                       <>
                         <Flex align="center" mr="sm">
                           {pokerGame.currentDealer == player.id && <DealerBadge />}
-                          {pokerSettings.forcedBetOption == "BLINDS" &&
+                          {(pokerSettings.forcedBetOption == "BLINDS" ||
+                            pokerSettings.forcedBetOption == "BLINDS+ANTE") &&
                             pokerGame.currentSmallBlind == player.id && <SmallBlindBadge />}
-                          {pokerSettings.forcedBetOption == "BLINDS" &&
+                          {(pokerSettings.forcedBetOption == "BLINDS" ||
+                            pokerSettings.forcedBetOption == "BLINDS+ANTE") &&
                             pokerGame.currentBigBlind == player.id && <BigBlindBadge />}
                         </Flex>
                         <ButtonGroup>
