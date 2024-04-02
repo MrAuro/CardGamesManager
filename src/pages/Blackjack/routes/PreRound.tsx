@@ -15,6 +15,7 @@ import { useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useRecoilState } from "recoil";
 import PreRoundPlayerCard from "../components/PreRoundPlayerCard";
+import { PLAYER_HAND_RESULTS } from "@/pages/Poker/routes/Round";
 
 function getStyle(style: any, snapshot: DraggableStateSnapshot) {
   if (!snapshot.isDropAnimating) {
@@ -36,6 +37,7 @@ export default function PreRound() {
   const [blackjackGame, setBlackjackGame] = useRecoilState(BLACKJACK_GAME_STATE);
   const [, setPlayers] = useRecoilImmerState(PLAYERS_STATE);
   const [keybindings] = useRecoilImmerState(KEYBINDINGS_STATE);
+  const [playerHandResults, setPlayerHandResults] = useRecoilState(PLAYER_HAND_RESULTS);
 
   const [sidebetsOpen, setSidebetsOpen] = useState<string[]>([]);
   const [gameErrors, setGameErrors] = useState<string[]>([]);
@@ -99,6 +101,8 @@ export default function PreRound() {
         blackjackPlayer.splitFrom = undefined;
       });
     });
+
+    setPlayerHandResults([]);
   };
 
   return (
