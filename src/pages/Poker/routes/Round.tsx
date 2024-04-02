@@ -871,7 +871,18 @@ export default function Round() {
             }
           }
 
+          console.log(`Executing keybinding ${keybinding.key} (${keybinding.action})`);
+
           e.preventDefault();
+
+          if (betUIOpen && betInputRef.current && document.activeElement === betInputRef.current) {
+            if (keybinding.key == "enter") {
+              // Bet input is focused and we just got the enter key, so confirm the bet
+              betAction(bet);
+              setBetUIOpen(false);
+              return;
+            }
+          }
 
           switch (keybinding.action) {
             case "Check / Call":
