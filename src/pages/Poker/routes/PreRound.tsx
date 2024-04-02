@@ -119,7 +119,7 @@ export default function PreRound() {
 
   const anyNegativeBalance = players
     .filter((player) => pokerPlayers.some((p) => p.id == player.id))
-    .some((player) => player.balance < 0);
+    .some((player) => player.balance <= 0);
 
   const cantStart =
     pokerPlayers.length < 2 ||
@@ -221,10 +221,10 @@ export default function PreRound() {
       {
         //
         anyNegativeBalance && (
-          <Alert color="red" title="Negative Balances" icon={<IconInfoTriangle />}>
+          <Alert color="red" title="Insufficient Balances" icon={<IconInfoTriangle />}>
             <Flex direction="column" gap="sm">
-              Some players have negative balances, please top up their balances before starting the
-              game
+              Some players have zero or negative balances, please top up their balances before
+              starting the game
             </Flex>
           </Alert>
         )
