@@ -271,6 +271,27 @@ export default function Round() {
     let currentBets = cloneDeep(tempPokerGame.currentBets);
     let pots = cloneDeep(tempPokerGame.pots);
 
+    if (pokerGame.gameState === "PREFLOP") {
+      let amountToSubtract = 0;
+      if (
+        pokerSettings.forcedBetOption === "BLINDS" ||
+        pokerSettings.forcedBetOption === "BLINDS+ANTE"
+      ) {
+        amountToSubtract += pokerSettings.bigBlind;
+        amountToSubtract += pokerSettings.smallBlind;
+      }
+
+      if (
+        pokerSettings.forcedBetOption === "ANTE" ||
+        pokerSettings.forcedBetOption === "BLINDS+ANTE"
+      ) {
+        amountToSubtract += pokerSettings.ante * tempPokerPlayers.length;
+      }
+
+      console.log(`Subtracting ${amountToSubtract} from the total pot amount`);
+      pots[0].amount -= amountToSubtract;
+    }
+
     // Function to handle the distribution of bets into pots
     const distributeBetsToPots = (
       bets: { [playerId: string]: { amount: number; dontAddToPot?: boolean } },
@@ -278,7 +299,7 @@ export default function Round() {
     ) => {
       let smallestBet = Number.MAX_VALUE;
       let playersWithBets = Object.entries(bets).filter(
-        ([_, bet]) => bet.amount > 0 && !bet.dontAddToPot
+        ([_, bet]) => bet.amount > 0 /* && !bet.dontAddToPot */
       );
 
       if (playersWithBets.length === 0) {
@@ -286,9 +307,14 @@ export default function Round() {
       }
 
       // Find the smallest bet among all players
-      playersWithBets.forEach(([_, bet]) => {
-        if (bet.amount < smallestBet) {
-          smallestBet = bet.amount;
+      playersWithBets.forEach(([playerId, bet]) => {
+        // chcek if the player folded
+        if (tempPokerPlayers.find((player) => player.id === playerId)?.folded) {
+          console.log(`Skipped bet ${bet.amount} from ${playerId} because they folded`);
+        } else {
+          if (bet.amount < smallestBet) {
+            smallestBet = bet.amount;
+          }
         }
       });
 
@@ -303,16 +329,43 @@ export default function Round() {
       }
 
       // Distribute the smallest bet amount to the main pot
-      playersWithBets.forEach(([playerId, bet]) => {
-        mainPot.amount += smallestBet;
-        bet.amount -= smallestBet;
-        if (!mainPot.eligiblePlayers.includes(playerId)) {
-          mainPot.eligiblePlayers.push(playerId);
-        }
-      });
+      playersWithBets
+        .filter(
+          ([playerId, _]) =>
+            tempPokerPlayers.find((player) => player.id === playerId)?.folded === false
+        )
+        .forEach(([playerId, bet]) => {
+          mainPot.amount += smallestBet;
+          bet.amount -= smallestBet;
+          if (!mainPot.eligiblePlayers.includes(playerId)) {
+            mainPot.eligiblePlayers.push(playerId);
+          }
+        });
+
+      playersWithBets
+        .filter(
+          ([playerId, _]) =>
+            tempPokerPlayers.find((player) => player.id === playerId)?.folded === true
+        )
+        .forEach(([playerId, bet]) => {
+          mainPot.amount += bet.amount;
+          console.log(
+            `Took ${bet.amount} from ${playerId} because they folded, now ${mainPot.amount} (was ${
+              mainPot.amount - bet.amount
+            })`
+          );
+          bet.amount = 0;
+        });
 
       // Check if there's a need for a side pot
-      if (playersWithBets.some(([_, bet]) => bet.amount > 0)) {
+      if (
+        playersWithBets
+          .filter(
+            ([playerId, _]) =>
+              tempPokerPlayers.find((player) => player.id === playerId)?.folded === false
+          )
+          .some(([_, bet]) => bet.amount > 0)
+      ) {
         mainPot.closed = true; // Close the current main pot
         distributeBetsToPots(bets, pots); // Recursively distribute remaining bets
       }
@@ -396,6 +449,14 @@ export default function Round() {
 
     const goNextRound = () => {
       console.log(`(ORDER) Everyone has been on`);
+
+      tempPokerGame.pots = tempPokerGame.pots.map((pot) => {
+        pot.eligiblePlayers = tempPokerPlayers
+          .filter((player) => !player.folded)
+          .map((player) => player.id);
+        return pot;
+      });
+
       let dealerIndex = tempPokerPlayers.findIndex(
         (player) => player.id == tempPokerGame.currentDealer
       );
@@ -520,6 +581,16 @@ export default function Round() {
 
     tempPokerGame = tempData[0];
     tempPokerPlayers = tempData[1];
+
+    // Remove the folded player from the pots
+    let pots = cloneDeep(tempPokerGame.pots);
+    pots.forEach((pot) => {
+      pot.eligiblePlayers = pot.eligiblePlayers.filter(
+        (playerId) => playerId !== tempPokerGame.currentTurn
+      );
+    });
+
+    tempPokerGame.pots = pots;
 
     setPokerGame(tempPokerGame);
     setPokerPlayers(tempPokerPlayers);
