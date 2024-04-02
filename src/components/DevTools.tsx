@@ -127,6 +127,18 @@ export default function DevTools() {
       </Button>
       <Button
         onClick={() => {
+          setPlayers((draft) => {
+            draft.forEach((player) => {
+              // Between $20 and $100
+              player.balance = Math.floor(Math.random() * 80) + 20;
+            });
+          });
+        }}
+      >
+        Set Random Balances
+      </Button>
+      <Button
+        onClick={() => {
           setKeybindings([...DefaultKeybinds]);
         }}
       >

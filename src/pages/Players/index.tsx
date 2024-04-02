@@ -90,8 +90,7 @@ export default function Players() {
         onClick={() => {
           setPlayers((draft) => {
             draft.forEach((player, i) => {
-              if (i == 0) player.balance = 50;
-              else player.balance = 100;
+              player.balance = 100;
             });
           });
         }}
