@@ -113,9 +113,9 @@ export default function Round() {
     const table = new TexasHoldem(pokerPlayers.length);
 
     const playingPlayers = pokerPlayers.filter((player) => !player.folded);
-    if (playingPlayers.length == 0) {
+    if (playingPlayers.length < 2) {
       notifications.show({
-        message: "No players are playing",
+        message: "Not enough players are playing",
         color: "red",
       });
       return;
@@ -335,7 +335,7 @@ export default function Round() {
   const getNextTurnData = (
     _tempPokerGame: PokerGame,
     _tempPokerPlayers: PokerPlayer[]
-  ): [PokerGame, PokerPlayer[]] => {
+  ): [PokerGame, PokerPlayer[]] | null => {
     console.log(`(ORDER) Getting next turn data`);
     let tempPokerGame = cloneDeep(_tempPokerGame);
     let tempPokerPlayers = cloneDeep(_tempPokerPlayers);
@@ -350,18 +350,25 @@ export default function Round() {
       // there are no more players to go through, we can end the game (console.log it)
 
       let showdownPlayerIndex = currentPlayerIndex + 1;
-      while (showdownPlayerIndex == -1 || tempPokerPlayers[showdownPlayerIndex]?.folded) {
-        showdownPlayerIndex++;
-
-        if (showdownPlayerIndex >= tempPokerPlayers.length) {
+      let availablePlayers = tempPokerPlayers.filter((player) => !player.folded);
+      while (true) {
+        if (showdownPlayerIndex >= availablePlayers.length) {
           showdownPlayerIndex = -1;
           break;
         }
+
+        if (!availablePlayers[showdownPlayerIndex].folded) {
+          break;
+        }
+
+        showdownPlayerIndex++;
       }
 
       if (showdownPlayerIndex == -1) {
-        alert("Game over");
-        return [tempPokerGame, tempPokerPlayers];
+        distributePot();
+
+        // We return null so that we don't set the state twice, causing a desync
+        return null;
       } else {
         tempPokerGame.currentTurn = tempPokerPlayers[showdownPlayerIndex].id;
         return [tempPokerGame, tempPokerPlayers];
@@ -424,6 +431,7 @@ export default function Round() {
             state = "RIVER";
             break;
           case "RIVER":
+            tempPokerGame.currentTurn = tempPokerPlayers.filter((player) => !player.folded)[0].id;
             state = "SHOWDOWN";
             break;
           default:
@@ -507,9 +515,11 @@ export default function Round() {
 
       return player;
     });
-    const [_tempPokerGame, _tempPokerPlayers] = getNextTurnData(tempPokerGame, tempPokerPlayers);
-    tempPokerGame = _tempPokerGame;
-    tempPokerPlayers = _tempPokerPlayers;
+    const tempData = getNextTurnData(tempPokerGame, tempPokerPlayers);
+    if (!tempData) return;
+
+    tempPokerGame = tempData[0];
+    tempPokerPlayers = tempData[1];
 
     setPokerGame(tempPokerGame);
     setPokerPlayers(tempPokerPlayers);
@@ -528,9 +538,11 @@ export default function Round() {
       return;
     }
 
-    const [_tempPokerGame, _tempPokerPlayers] = getNextTurnData(tempPokerGame, tempPokerPlayers);
-    tempPokerGame = _tempPokerGame;
-    tempPokerPlayers = _tempPokerPlayers;
+    const tempData = getNextTurnData(tempPokerGame, tempPokerPlayers);
+    if (!tempData) return;
+
+    tempPokerGame = tempData[0];
+    tempPokerPlayers = tempData[1];
 
     setPokerGame(tempPokerGame);
     setPokerPlayers(tempPokerPlayers);
@@ -582,9 +594,11 @@ export default function Round() {
     player.balance = Math.round((player.balance - amount) * 100) / 100;
     tempPlayers[tempPlayers.findIndex((p) => p.id === player.id)] = player;
 
-    const [_tempPokerGame, _tempPokerPlayers] = getNextTurnData(tempPokerGame, tempPokerPlayers);
-    tempPokerGame = _tempPokerGame;
-    tempPokerPlayers = _tempPokerPlayers;
+    const tempData = getNextTurnData(tempPokerGame, tempPokerPlayers);
+    if (!tempData) return;
+
+    tempPokerGame = tempData[0];
+    tempPokerPlayers = tempData[1];
 
     tempPokerPlayers.forEach((player) => {
       player.beenOn = false;
@@ -653,13 +667,14 @@ export default function Round() {
     pokerPlayer.currentBet = round(pokerPlayer.currentBet);
     tempPokerPlayers[currentPlayerIndex] = pokerPlayer;
 
-    const [_tempPokerGame, _tempPokerPlayers] = getNextTurnData(tempPokerGame, tempPokerPlayers);
-    tempPokerGame = _tempPokerGame;
-    tempPokerPlayers = _tempPokerPlayers;
+    const tempData = getNextTurnData(tempPokerGame, tempPokerPlayers);
+    if (!tempData) return;
+    tempPokerGame = tempData[0];
+    tempPokerPlayers = tempData[1];
 
     tempPokerPlayers[currentPlayerIndex] = {
       ...pokerPlayer,
-      beenOn: _tempPokerPlayers[currentPlayerIndex].beenOn,
+      beenOn: tempData[1][currentPlayerIndex].beenOn,
     };
 
     player.balance = round(player.balance - amountToCallTo);
