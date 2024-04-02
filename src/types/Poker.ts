@@ -47,7 +47,7 @@ export type PokerPlayer = {
 };
 
 export type PokerSettings = {
-  forcedBetOption: "BLINDS" | "ANTE";
+  forcedBetOption: "BLINDS" | "ANTE" | "BLINDS+ANTE";
   smallBlind: number;
   bigBlind: number;
   ante: number;

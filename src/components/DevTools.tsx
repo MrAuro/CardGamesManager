@@ -130,7 +130,7 @@ export default function DevTools() {
           setPlayers((draft) => {
             draft.forEach((player) => {
               // Between $20 and $100
-              player.balance = Math.floor(Math.random() * 80) + 20;
+              player.balance = Math.floor(Math.random() * 50) + 50;
             });
           });
         }}

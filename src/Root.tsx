@@ -156,7 +156,7 @@ export const POKER_SETTINGS_STATE = atom<PokerSettings>({
         forcedBetOption: "BLINDS",
         smallBlind: 5,
         bigBlind: 10,
-        ante: 0,
+        ante: 1,
       };
       await TAURI_STORE.set("pokerSettings", settings);
     }

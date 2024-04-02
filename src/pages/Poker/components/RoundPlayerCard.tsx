@@ -4,7 +4,9 @@ import PlayingCard from "@/components/PlayingCard";
 import { CARD_SELECTOR_STATE } from "@/pages/Blackjack/routes/Round";
 import { Player } from "@/types/Player";
 import { PokerPlayer } from "@/types/Poker";
+import { isAnyEmpty } from "@/utils/CardHelper";
 import { formatMoney } from "@/utils/MoneyHelper";
+import { rankingToName } from "@/utils/PokerHelper";
 import {
   Badge,
   Button,
@@ -19,7 +21,7 @@ import {
   Tooltip,
   useMantineTheme,
 } from "@mantine/core";
-import { getHotkeyHandler, useScrollIntoView } from "@mantine/hooks";
+import { useScrollIntoView } from "@mantine/hooks";
 import { IconCurrencyDollar, IconTriangleFilled } from "@tabler/icons-react";
 import { forwardRef, useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -27,13 +29,11 @@ import { AllInBadge, BigBlindBadge, DealerBadge, SmallBlindBadge } from "../rout
 import {
   ALLIN_CONFIRM,
   BETUI_OPEN,
-  PLAYER_HAND_RESULTS,
   FOLD_CONFIRM,
   PLAYER_BET,
+  PLAYER_HAND_RESULTS,
   TIMER_START,
 } from "../routes/Round";
-import { rankingToName } from "@/utils/PokerHelper";
-import { isAnyEmpty } from "@/utils/CardHelper";
 
 type RoundPlayerCardProps = {
   player: Player;
@@ -138,9 +138,11 @@ const RoundPlayerCard = forwardRef(
                 </Tooltip>
                 {pokerPlayer.allIn && <AllInBadge />}
                 {pokerGame.currentDealer == player.id && <DealerBadge />}
-                {pokerSettings.forcedBetOption == "BLINDS" &&
+                {(pokerSettings.forcedBetOption == "BLINDS" ||
+                  pokerSettings.forcedBetOption == "BLINDS+ANTE") &&
                   pokerGame.currentSmallBlind == player.id && <SmallBlindBadge />}
-                {pokerSettings.forcedBetOption == "BLINDS" &&
+                {(pokerSettings.forcedBetOption == "BLINDS" ||
+                  pokerSettings.forcedBetOption == "BLINDS+ANTE") &&
                   pokerGame.currentBigBlind == player.id && <BigBlindBadge />}
               </Flex>
             </>
