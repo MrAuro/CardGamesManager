@@ -236,7 +236,6 @@ const RoundPlayerCard = forwardRef(
                           onChange={(value) => {
                             setBet(parseFloat(`${value}`));
                           }}
-                          onKeyDown={getHotkeyHandler([["enter", () => betAction(bet)]])}
                         />
                       </Grid.Col>
                       <Grid.Col span={5}>
