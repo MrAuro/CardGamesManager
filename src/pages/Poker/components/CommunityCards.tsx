@@ -1,11 +1,11 @@
-import { POKER_GAME_STATE } from "@/Root";
+import { POKER_GAME_STATE, POKER_PLAYERS_STATE, POKER_SETTINGS_STATE } from "@/Root";
 import PlayingCard from "@/components/PlayingCard";
 import { CARD_SELECTOR_STATE } from "@/pages/Blackjack/routes/Round";
 import { isAnyEmpty } from "@/utils/CardHelper";
 import { formatMoney } from "@/utils/MoneyHelper";
 import { Button, Card, Divider, Flex, Text, Title, useMantineTheme } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 
 export default function CommunityCards({
   cardsAllowed,
@@ -16,11 +16,30 @@ export default function CommunityCards({
 }) {
   const theme = useMantineTheme();
   const [pokerGame, setPokerGame] = useRecoilState(POKER_GAME_STATE);
+  const pokerSettings = useRecoilValue(POKER_SETTINGS_STATE);
+  const pokerPlayers = useRecoilValue(POKER_PLAYERS_STATE);
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
 
   let totalAmountToBePutInPot = 0;
   for (const [_, v] of Object.entries(pokerGame.currentBets)) {
     totalAmountToBePutInPot += v.amount;
+  }
+
+  if (pokerGame.gameState == "PREFLOP") {
+    if (
+      pokerSettings.forcedBetOption === "BLINDS" ||
+      pokerSettings.forcedBetOption === "BLINDS+ANTE"
+    ) {
+      totalAmountToBePutInPot -= pokerSettings.bigBlind;
+      totalAmountToBePutInPot -= pokerSettings.smallBlind;
+    }
+
+    if (
+      pokerSettings.forcedBetOption === "ANTE" ||
+      pokerSettings.forcedBetOption === "BLINDS+ANTE"
+    ) {
+      totalAmountToBePutInPot -= pokerSettings.ante * pokerPlayers.length;
+    }
   }
 
   return (
