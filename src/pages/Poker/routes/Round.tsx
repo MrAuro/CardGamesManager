@@ -113,12 +113,40 @@ export default function Round() {
     const table = new TexasHoldem(pokerPlayers.length);
 
     const playingPlayers = pokerPlayers.filter((player) => !player.folded);
-    if (playingPlayers.length < 2) {
-      notifications.show({
-        message: "Not enough players are playing",
-        color: "red",
-      });
-      return;
+    if (playingPlayers.length <= 1) {
+      console.log(`Not enough players to calculate hands, forcing player to win`);
+      // The only player left is the winner
+      if (store) {
+        setPlayerHandResults([
+          {
+            id: playingPlayers[0].id,
+            result: {
+              handRank: "WINNER",
+              hand: null,
+              ties: 0,
+              tiesPercentage: "0%",
+              win: 1,
+              winPercentage: "100%",
+            },
+          },
+        ]);
+
+        return;
+      } else {
+        return [
+          {
+            id: playingPlayers[0].id,
+            result: {
+              handRank: "WINNER",
+              hand: null,
+              ties: 0,
+              tiesPercentage: "0%",
+              win: 1,
+              winPercentage: "100%",
+            },
+          },
+        ];
+      }
     }
 
     if (playingPlayers.some((player) => player.cards.some(isAnyEmpty))) {
