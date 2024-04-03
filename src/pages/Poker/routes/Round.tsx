@@ -399,31 +399,40 @@ export default function Round() {
     tempPokerPlayers[currentPlayerIndex].beenOn = true;
 
     if (tempPokerGame.gameState === "SHOWDOWN") {
+      let nextShowdownPlayerIndex;
+
+      if (!tempPokerPlayers.filter((player) => !player.folded)[0].beenOn) {
+        nextShowdownPlayerIndex = tempPokerPlayers.findIndex(
+          (player) => player.id == tempPokerPlayers.filter((player) => !player.folded)[0].id
+        );
+      } else {
+        nextShowdownPlayerIndex = currentPlayerIndex + 1;
+      }
+
       // For showdown, we simply go through the list of non-folded players. Once
       // there are no more players to go through, we can end the game (console.log it)
 
-      let showdownPlayerIndex = currentPlayerIndex + 1;
       let availablePlayers = tempPokerPlayers.filter((player) => !player.folded);
       while (true) {
-        if (showdownPlayerIndex >= availablePlayers.length) {
-          showdownPlayerIndex = -1;
+        if (nextShowdownPlayerIndex >= availablePlayers.length) {
+          nextShowdownPlayerIndex = -1;
           break;
         }
 
-        if (!availablePlayers[showdownPlayerIndex].folded) {
+        if (!availablePlayers[nextShowdownPlayerIndex].folded) {
           break;
         }
 
-        showdownPlayerIndex++;
+        nextShowdownPlayerIndex++;
       }
 
-      if (showdownPlayerIndex == -1) {
+      if (nextShowdownPlayerIndex == -1) {
         distributePot();
 
         // We return null so that we don't set the state twice, causing a desync
         return null;
       } else {
-        tempPokerGame.currentTurn = tempPokerPlayers[showdownPlayerIndex].id;
+        tempPokerGame.currentTurn = tempPokerPlayers[nextShowdownPlayerIndex].id;
         return [tempPokerGame, tempPokerPlayers];
       }
     }
