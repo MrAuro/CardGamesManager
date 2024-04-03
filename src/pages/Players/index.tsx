@@ -89,7 +89,7 @@ export default function Players() {
         variant="light"
         onClick={() => {
           setPlayers((draft) => {
-            draft.forEach((player, i) => {
+            draft.forEach((player) => {
               player.balance = 100;
             });
           });

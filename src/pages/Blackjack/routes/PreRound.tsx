@@ -37,7 +37,7 @@ export default function PreRound() {
   const [blackjackGame, setBlackjackGame] = useRecoilState(BLACKJACK_GAME_STATE);
   const [, setPlayers] = useRecoilImmerState(PLAYERS_STATE);
   const [keybindings] = useRecoilImmerState(KEYBINDINGS_STATE);
-  const [playerHandResults, setPlayerHandResults] = useRecoilState(PLAYER_HAND_RESULTS);
+  const [_, setPlayerHandResults] = useRecoilState(PLAYER_HAND_RESULTS);
 
   const [sidebetsOpen, setSidebetsOpen] = useState<string[]>([]);
   const [gameErrors, setGameErrors] = useState<string[]>([]);
