@@ -1019,7 +1019,7 @@ export default function Round() {
 
                   setTimeout(() => {
                     (betInputRef as any).current?.focus();
-                    (betInputRef as any).current?.setSelectionRange(0, 0);
+                    (betInputRef as any).current?.setSelectionRange(0, 9999);
                   }, 100);
                 }
               }

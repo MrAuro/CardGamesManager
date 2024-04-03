@@ -372,7 +372,7 @@ const RoundPlayerCard = forwardRef(
                         // We wait 100ms to make sure the input is rendered
                         setTimeout(() => {
                           (ref as any).current?.focus();
-                          (ref as any).current?.setSelectionRange(0, 0);
+                          (ref as any).current?.setSelectionRange(0, 9999);
                         }, 100);
                       }}
                     >
@@ -392,7 +392,7 @@ const RoundPlayerCard = forwardRef(
                         // We wait 100ms to make sure the input is rendered
                         setTimeout(() => {
                           (ref as any).current?.focus();
-                          (ref as any).current?.setSelectionRange(0, 0);
+                          (ref as any).current?.setSelectionRange(0, 9999);
                         }, 100);
                       }}
                     >
