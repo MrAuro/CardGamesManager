@@ -11,7 +11,7 @@ import {
 } from "@/Root";
 import { Container, Divider, Text, useMantineTheme } from "@mantine/core";
 import { useEffect, useState } from "react";
-import { useRecoilState } from "recoil";
+import { atom, useRecoilState } from "recoil";
 import { TAURI_STORE } from "./Root";
 import Header from "./components/Header";
 import Blackjack from "./pages/Blackjack";
@@ -22,6 +22,17 @@ import Settings from "./pages/Settings";
 import "@/styles/App.css";
 
 import DevTools from "./components/DevTools";
+import { useHotkeys } from "react-hotkeys-hook";
+
+export const HOTKEY_SELECTOR_A_ENABLED = atom({
+  key: "hotkeySelectorA",
+  default: false,
+});
+
+export const HOTKEY_SELECTOR_B_ENABLED = atom({
+  key: "hotkeySelectorB",
+  default: false,
+});
 
 export default function App() {
   const [players] = useRecoilState(PLAYERS_STATE);
@@ -42,6 +53,60 @@ export default function App() {
   const [pokerSettingsLastSaved, setPokerSettingsLastSaved] = useState(0);
   const [pokerPlayers] = useRecoilState(POKER_PLAYERS_STATE);
   const [pokerPlayersLastSaved, setPokerPlayersLastSaved] = useState(0);
+
+  const [hotkeySelectorAEnabled, setHotkeySelectorAEnabled] =
+    useRecoilState(HOTKEY_SELECTOR_A_ENABLED);
+  const [hotkeySelectorBEnabled, setHotkeySelectorBEnabled] =
+    useRecoilState(HOTKEY_SELECTOR_B_ENABLED);
+
+  // Instead of doing this in a for each loop, we have to do it like this to prevent out of order hooks
+  let keyAHold = keybindings.find((k) => k.action === "A (hold)");
+  useHotkeys(
+    keyAHold?.key || "F19", // super obscure key that is not used by anything (we disable it anyway)
+    (e) => {
+      if (e.type === "keydown" && !hotkeySelectorAEnabled) {
+        setHotkeySelectorAEnabled(true);
+      } else if (e.type === "keyup" && hotkeySelectorAEnabled) {
+        setHotkeySelectorAEnabled(false);
+      }
+    },
+    { keydown: true, keyup: true, enabled: keyAHold?.key ? true : false }
+  );
+
+  let keyAToggle = keybindings.find((k) => k.action === "A (toggle)");
+  useHotkeys(
+    keyAToggle?.key || "F19",
+    (e) => {
+      if (e.type === "keydown") {
+        setHotkeySelectorAEnabled(!hotkeySelectorAEnabled);
+      }
+    },
+    { keydown: true, enabled: keyAToggle?.key ? true : false }
+  );
+
+  let keyBHold = keybindings.find((k) => k.action === "B (hold)");
+  useHotkeys(
+    keyBHold?.key || "F19",
+    (e) => {
+      if (e.type === "keydown" && !hotkeySelectorBEnabled) {
+        setHotkeySelectorBEnabled(true);
+      } else if (e.type === "keyup" && hotkeySelectorBEnabled) {
+        setHotkeySelectorBEnabled(false);
+      }
+    },
+    { keydown: true, keyup: true, enabled: keyBHold?.key ? true : false }
+  );
+
+  let keyBToggle = keybindings.find((k) => k.action === "B (toggle)");
+  useHotkeys(
+    keyBToggle?.key || "F19",
+    (e) => {
+      if (e.type === "keydown") {
+        setHotkeySelectorBEnabled(!hotkeySelectorBEnabled);
+      }
+    },
+    { keydown: true, enabled: keyBToggle?.key ? true : false }
+  );
 
   const theme = useMantineTheme();
 

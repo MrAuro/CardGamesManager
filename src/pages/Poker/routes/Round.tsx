@@ -40,10 +40,11 @@ import cloneDeep from "lodash/cloneDeep";
 import { TexasHoldem } from "poker-variants-odds-calculator";
 import { useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { atom, useRecoilState } from "recoil";
+import { atom, useRecoilState, useRecoilValue } from "recoil";
 import CommunityCards from "../components/CommunityCards";
 import RoundPlayerCard from "../components/RoundPlayerCard";
 import { getDealerData } from "./PreRound";
+import { HOTKEY_SELECTOR_A_ENABLED, HOTKEY_SELECTOR_B_ENABLED } from "@/App";
 
 export const FOLD_CONFIRM = atom<boolean>({
   key: "FOLD_CONFIRM",
@@ -981,11 +982,17 @@ export default function Round() {
     console.log(amountWon);
   };
 
+  const selectorA = useRecoilValue(HOTKEY_SELECTOR_A_ENABLED);
+  const selectorB = useRecoilValue(HOTKEY_SELECTOR_B_ENABLED);
+
   keybindings.forEach((keybinding) => {
     if (keybinding.scope == "Poker Round") {
       useHotkeys(
         keybinding.key,
         (e) => {
+          if (keybinding.selector == "A" && !selectorA) return;
+          if (keybinding.selector == "B" && !selectorB) return;
+
           if (betUIOpen) {
             // Disable any keybindings that are used for number input
             if (

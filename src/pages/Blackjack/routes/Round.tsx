@@ -25,9 +25,10 @@ import { ScrollArea, Stack, Table, Text, Title, useMantineTheme } from "@mantine
 import { modals } from "@mantine/modals";
 import { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { atom, useRecoilState } from "recoil";
+import { atom, useRecoilState, useRecoilValue } from "recoil";
 import DealerCard from "../components/DealerCard";
 import RoundPlayerCard from "../components/RoundPlayerCard";
+import { HOTKEY_SELECTOR_A_ENABLED, HOTKEY_SELECTOR_B_ENABLED } from "@/App";
 
 export const CARD_SELECTOR_STATE = atom<{
   opened: boolean;
@@ -94,9 +95,15 @@ export default function Round() {
     }
   }, [blackjackGame.currentTurn, blackjackGame.dealerCards, blackjackPlayers]);
 
+  const selectorA = useRecoilValue(HOTKEY_SELECTOR_A_ENABLED);
+  const selectorB = useRecoilValue(HOTKEY_SELECTOR_B_ENABLED);
+
   keybindings.forEach((keybinding) => {
     if (keybinding.scope === "Blackjack Round") {
       useHotkeys(keybinding.key, (e) => {
+        if (keybinding.selector == "A" && !selectorA) return;
+        if (keybinding.selector == "B" && !selectorB) return;
+
         e.preventDefault();
 
         switch (keybinding.action) {

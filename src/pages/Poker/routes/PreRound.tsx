@@ -1,3 +1,4 @@
+import { HOTKEY_SELECTOR_A_ENABLED, HOTKEY_SELECTOR_B_ENABLED } from "@/App";
 import {
   KEYBINDINGS_STATE,
   PLAYERS_STATE,
@@ -31,7 +32,7 @@ import {
 } from "@tabler/icons-react";
 import { useRef } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 
 function getStyle(style: any, snapshot: DraggableStateSnapshot) {
   if (!snapshot.isDropAnimating) {
@@ -84,9 +85,15 @@ export default function PreRound() {
 
   const playerSelectorRef = useRef<PlayerSelectorHandles>(null);
 
+  const selectorA = useRecoilValue(HOTKEY_SELECTOR_A_ENABLED);
+  const selectorB = useRecoilValue(HOTKEY_SELECTOR_B_ENABLED);
+
   keybindings.forEach((keybinding) => {
     if (keybinding.scope === "Poker PreRound") {
       useHotkeys(keybinding.key, () => {
+        if (keybinding.selector == "A" && !selectorA) return;
+        if (keybinding.selector == "B" && !selectorB) return;
+
         switch (keybinding.action) {
           case "Start Game":
             startGame();

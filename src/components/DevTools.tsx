@@ -144,6 +144,17 @@ export default function DevTools() {
       >
         Set Default Keybindings
       </Button>
+      <Button
+        onClick={() => {
+          setKeybindings((draft) => {
+            draft.forEach((keybinding) => {
+              keybinding.selector = "None";
+            });
+          });
+        }}
+      >
+        Migrate Keybindings to Selector
+      </Button>
 
       <Button
         onClick={() => {

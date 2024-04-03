@@ -9,6 +9,7 @@ export type CardInputs =
 
 export type Scope =
   | "None"
+  | "Selectors"
   | "Blackjack PreRound"
   | "Blackjack Round"
   | "Blackjack PostRound"
@@ -16,12 +17,15 @@ export type Scope =
   | "Poker Round";
 export const Scopes: Scope[] = [
   "None",
+  "Selectors",
   "Blackjack PreRound",
   "Blackjack Round",
   "Blackjack PostRound",
   "Poker PreRound",
   "Poker Round",
 ];
+
+export type SelectorsActions = "A (hold)" | "A (toggle)" | "B (hold)" | "B (toggle)";
 
 export type BlackjackPreRoundActions = "Start Game";
 export type BlackjackRoundActions =
@@ -52,7 +56,12 @@ export type PokerRoundActions =
 export type Keybinding = {
   id: string;
   key: string;
+  selector: "A" | "B" | "None";
 } & (
+  | {
+      action: SelectorsActions;
+      scope: "Selectors";
+    }
   | {
       action: BlackjackPreRoundActions;
       scope: "Blackjack PreRound";
@@ -88,6 +97,8 @@ export const availableCards = availableRanks.flatMap((rank) =>
 
 export function getActions(scope: Scope): string[] {
   switch (scope) {
+    case "Selectors":
+      return ["A (hold)", "A (toggle)", "B (hold)", "B (toggle)"];
     case "Blackjack PreRound":
       return ["Start Game"];
     case "Blackjack Round":

@@ -209,6 +209,7 @@ export default function GeneralSettings() {
               <Table.Th>Keybinding</Table.Th>
               <Table.Th>Scope</Table.Th>
               <Table.Th>Action</Table.Th>
+              <Table.Th>Selector</Table.Th>
               <Table.Th
                 style={{
                   width: "80px",
@@ -318,6 +319,26 @@ export default function GeneralSettings() {
                       </Text>
                     )}
                   </Table.Td>
+                  <Table.Td>
+                    {keyEditing === keybinding.id ? (
+                      <Select
+                        searchable
+                        data={["A", "B", "None"]}
+                        defaultValue={keybinding.selector}
+                        allowDeselect={false}
+                        onChange={(value) => {
+                          setKeybindings((draft) => {
+                            const index = draft.findIndex((kb) => kb.id === keybinding.id);
+                            draft[index].selector = value as any;
+                          });
+                        }}
+                      />
+                    ) : (
+                      <Text size="sm" c="dimmed">
+                        {keybinding.selector}
+                      </Text>
+                    )}
+                  </Table.Td>
                   <Table.Td
                     py={0}
                     style={{
@@ -372,6 +393,7 @@ export default function GeneralSettings() {
                     key: "",
                     action: "None",
                     scope: "None",
+                    selector: "None",
                   });
                 });
               }}

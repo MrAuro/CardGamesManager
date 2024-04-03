@@ -13,9 +13,10 @@ import { Alert, Button, Divider, Text, Title, useMantineTheme } from "@mantine/c
 import { IconInfoTriangle } from "@tabler/icons-react";
 import { useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import PreRoundPlayerCard from "../components/PreRoundPlayerCard";
 import { PLAYER_HAND_RESULTS } from "@/pages/Poker/routes/Round";
+import { HOTKEY_SELECTOR_A_ENABLED, HOTKEY_SELECTOR_B_ENABLED } from "@/App";
 
 function getStyle(style: any, snapshot: DraggableStateSnapshot) {
   if (!snapshot.isDropAnimating) {
@@ -42,9 +43,15 @@ export default function PreRound() {
   const [sidebetsOpen, setSidebetsOpen] = useState<string[]>([]);
   const [gameErrors, setGameErrors] = useState<string[]>([]);
 
+  const selectorA = useRecoilValue(HOTKEY_SELECTOR_A_ENABLED);
+  const selectorB = useRecoilValue(HOTKEY_SELECTOR_B_ENABLED);
+
   keybindings.forEach((keybinding) => {
     if (keybinding.scope === "Blackjack PreRound") {
       useHotkeys(keybinding.key, () => {
+        if (keybinding.selector == "A" && !selectorA) return;
+        if (keybinding.selector == "B" && !selectorB) return;
+
         switch (keybinding.action) {
           case "Start Game":
             startGame();
