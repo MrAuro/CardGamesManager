@@ -161,9 +161,24 @@ export default function Round() {
       table.addPlayer([player.cards[0], player.cards[1]]);
     }
 
+    // Get non-playing players
+    let deadCards: Card[] = [];
+    pokerPlayers
+      .filter((player) => player.folded)
+      .forEach((player) => {
+        for (const card of player.cards) {
+          if (!isAnyEmpty(card)) {
+            deadCards.push(card);
+          }
+        }
+      });
+
+    table.setDeadCards(deadCards);
+
     table.setBoard(pokerGame.communityCards.filter((card) => !isAnyEmpty(card)) as Card[]);
 
     const calculation = table.calculate();
+    console.log(`(CALC):`, calculation.toJson());
     const tablePlayers = calculation.getPlayers();
     let highestCard = 0;
 
