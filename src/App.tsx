@@ -23,6 +23,7 @@ import "@/styles/App.css";
 
 import DevTools from "./components/DevTools";
 import { useHotkeys } from "react-hotkeys-hook";
+import { notifications } from "@mantine/notifications";
 
 export const HOTKEY_SELECTOR_A_ENABLED = atom({
   key: "hotkeySelectorA",
@@ -107,6 +108,60 @@ export default function App() {
     },
     { keydown: true, enabled: keyBToggle?.key ? true : false }
   );
+
+  useEffect(() => {
+    if (hotkeySelectorAEnabled) {
+      notifications.show({
+        id: "hotkeySelectorA-enabled",
+        withCloseButton: false,
+        autoClose: false,
+        title: "Hotkey Selector A Enabled",
+        message: null,
+        radius: "md",
+        color: "violet",
+        withBorder: true,
+        styles: {
+          root: {
+            backgroundColor: theme.colors.violet[8],
+            padding: "10px",
+            border: `5px solid white`,
+          },
+          title: {
+            fontSize: "20px",
+            textAlign: "center",
+          },
+        },
+      });
+    } else {
+      notifications.hide("hotkeySelectorA-enabled");
+    }
+
+    if (hotkeySelectorBEnabled) {
+      notifications.show({
+        id: "hotkeySelectorB-enabled",
+        withCloseButton: false,
+        autoClose: false,
+        title: "Hotkey Selector B Enabled",
+        message: null,
+        radius: "md",
+        color: "teal",
+        withBorder: true,
+        styles: {
+          root: {
+            backgroundColor: theme.colors.teal[8],
+            padding: "10px",
+            border: `5px solid white`,
+          },
+          title: {
+            fontSize: "20px",
+            textAlign: "center",
+          },
+        },
+      });
+    } else {
+      notifications.hide("hotkeySelectorB-enabled");
+    }
+  }, [hotkeySelectorAEnabled, hotkeySelectorBEnabled]);
 
   const theme = useMantineTheme();
 
