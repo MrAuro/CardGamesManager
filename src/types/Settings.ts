@@ -8,3 +8,8 @@ export type Settings = {
   chipsMode: boolean;
   fourColorDeck: boolean;
 };
+
+export type Chip = {
+  color: string;
+  denomination: number;
+};
