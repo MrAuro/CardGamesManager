@@ -2,6 +2,7 @@ import {
   BLACKJACK_GAME_STATE,
   BLACKJACK_PLAYERS_STATE,
   BLACKJACK_SETTINGS,
+  CHIPS_STATE,
   KEYBINDINGS_STATE,
   PLAYERS_STATE,
   POKER_GAME_STATE,
@@ -54,6 +55,8 @@ export default function App() {
   const [pokerSettingsLastSaved, setPokerSettingsLastSaved] = useState(0);
   const [pokerPlayers] = useRecoilState(POKER_PLAYERS_STATE);
   const [pokerPlayersLastSaved, setPokerPlayersLastSaved] = useState(0);
+  const [chips] = useRecoilState(CHIPS_STATE);
+  const [chipsLastSaved, setChipsLastSaved] = useState(0);
 
   const [hotkeySelectorAEnabled, setHotkeySelectorAEnabled] =
     useRecoilState(HOTKEY_SELECTOR_A_ENABLED);
@@ -228,6 +231,13 @@ export default function App() {
       TAURI_STORE.set("pokerPlayers", pokerPlayers);
     }
   }, [pokerPlayers]);
+
+  useEffect(() => {
+    if (chipsLastSaved < Date.now() - 100) {
+      setChipsLastSaved(Date.now());
+      TAURI_STORE.set("chips", chips);
+    }
+  }, [chips]);
 
   useEffect(() => {
     if (!settings.cornerOfEyeMode) {

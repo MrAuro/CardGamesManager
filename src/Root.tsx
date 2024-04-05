@@ -10,7 +10,7 @@ import { RecoilRoot } from "recoil";
 import App from "./App";
 import { Store } from "tauri-plugin-store-api";
 import { atom } from "recoil";
-import { Settings } from "@/types/Settings";
+import { Chip, Settings } from "@/types/Settings";
 import { BlackjackGame, BlackjackPlayer, BlackjackSettings } from "./types/Blackjack";
 import { Player } from "./types/Player";
 import { EMPTY_CARD } from "./utils/CardHelper";
@@ -176,11 +176,25 @@ export const SETTINGS_STATE = atom<Settings>({
         activeTab: "Players",
         cornerOfEyeMode: false,
         chipsMode: false,
+        chips: [],
       };
       await TAURI_STORE.set("settings", settings);
     }
 
     resolve(settings as Settings);
+  }),
+});
+
+export const CHIPS_STATE = atom<Chip[]>({
+  key: "CHIPS",
+  default: new Promise(async (resolve) => {
+    let chips = await TAURI_STORE.get("chips");
+    if (!chips) {
+      chips = [];
+      await TAURI_STORE.set("chips", chips);
+    }
+
+    resolve(chips as Chip[]);
   }),
 });
 

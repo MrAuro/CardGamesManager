@@ -1,4 +1,4 @@
-import { KEYBINDINGS_STATE, SETTINGS_STATE } from "@/Root";
+import { CHIPS_STATE, KEYBINDINGS_STATE, SETTINGS_STATE } from "@/Root";
 import { Scope, Scopes, getActions } from "@/types/Keybindings";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import {
@@ -7,17 +7,23 @@ import {
   ButtonGroup,
   Code,
   Collapse,
+  ColorInput,
+  Container,
   Grid,
   Input,
+  NumberInput,
   Select,
   Slider,
   Table,
   Text,
   Title,
+  useMantineTheme,
 } from "@mantine/core";
+import cloneDeep from "lodash/cloneDeep";
 import { useDisclosure } from "@mantine/hooks";
 import {
   IconCash,
+  IconCurrencyDollar,
   IconDeviceFloppy,
   IconEye,
   IconEyeOff,
@@ -37,6 +43,9 @@ import { useRecoilState } from "recoil";
 export default function GeneralSettings() {
   const [settings, setSettings] = useRecoilState(SETTINGS_STATE);
   const [keybindings, setKeybindings] = useRecoilImmerState(KEYBINDINGS_STATE);
+  const [chips, setChips] = useRecoilImmerState(CHIPS_STATE);
+
+  const theme = useMantineTheme();
 
   const [opened, { toggle }] = useDisclosure(false);
   const [keylistening, setKeylistening] = useState("");
@@ -126,13 +135,12 @@ export default function GeneralSettings() {
         </ButtonGroup>
       </Input.Wrapper>
       <Input.Wrapper
-        label="Poker Chips Mode (coming soon)"
+        label="Chips Mode"
         description="Use poker chips instead of cash for the UI"
         mt="sm"
       >
         <ButtonGroup mt={5}>
           <Button
-            disabled // TODO
             variant={settings.chipsMode ? "filled" : "default"}
             leftSection={<IconCash />}
             onClick={() => {
@@ -142,7 +150,6 @@ export default function GeneralSettings() {
             On
           </Button>
           <Button
-            disabled // TODO
             variant={!settings.chipsMode ? "filled" : "default"}
             leftSection={<IconPokerChip />}
             onClick={() => {
@@ -153,6 +160,120 @@ export default function GeneralSettings() {
           </Button>
         </ButtonGroup>
       </Input.Wrapper>
+      <Collapse in={settings.chipsMode}>
+        <Table
+          withColumnBorders
+          withTableBorder
+          mt="xs"
+          style={{
+            tableLayout: "fixed",
+            width: "50%",
+          }}
+        >
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>Chip Color</Table.Th>
+              <Table.Th>Denomination</Table.Th>
+              <Table.Th
+                style={{
+                  width: "80px",
+                }}
+              ></Table.Th>
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
+            {chips.map((chip, index) => {
+              return (
+                <Table.Tr key={index}>
+                  <Table.Td>
+                    <ColorInput
+                      defaultValue={chip.color}
+                      format="hex"
+                      withEyeDropper={false}
+                      swatchesPerRow={5}
+                      closeOnColorSwatchClick
+                      swatches={[
+                        theme.colors.gray[0],
+                        theme.colors.red[8],
+                        theme.colors.green[8],
+                        theme.colors.blue[9],
+                        theme.colors.dark[9],
+                      ]}
+                      onChangeEnd={(color) => {
+                        setChips((draft) => {
+                          draft[index].color = color;
+                        });
+                      }}
+                    />
+                  </Table.Td>
+                  <Table.Td>
+                    <NumberInput
+                      radius="md"
+                      allowNegative={false}
+                      thousandSeparator=","
+                      leftSection={<IconCurrencyDollar />}
+                      placeholder="0"
+                      value={chip.denomination}
+                      decimalScale={2}
+                      fixedDecimalScale
+                      onChange={(value) =>
+                        setChips((draft) => {
+                          draft[index].denomination = parseFloat(`${value}`);
+                        })
+                      }
+                    />
+                  </Table.Td>
+                  <Table.Td
+                    py={0}
+                    style={{
+                      width: "80px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        gap: 5,
+                      }}
+                    >
+                      <ActionIcon
+                        tabIndex={-1}
+                        variant="transparent"
+                        c="red"
+                        onClick={() => {
+                          setChips((draft) => {
+                            draft.splice(index, 1);
+                          });
+                        }}
+                      >
+                        <IconTrash />
+                      </ActionIcon>
+                    </div>
+                  </Table.Td>
+                </Table.Tr>
+              );
+            })}
+          </Table.Tbody>
+          <Table.Caption>
+            <Button
+              leftSection={<IconPlus />}
+              variant="subtle"
+              size="compact-sm"
+              onClick={() => {
+                setChips((draft) => {
+                  draft.push({
+                    color: theme.colors.gray[0],
+                    denomination: 0,
+                  });
+                });
+              }}
+            >
+              Add Chip
+            </Button>
+          </Table.Caption>
+        </Table>
+      </Collapse>
       <Input.Wrapper mb="xl" label="UI Scale" mt="sm">
         <Slider
           defaultValue={settings.scale}
