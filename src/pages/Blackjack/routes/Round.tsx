@@ -104,6 +104,8 @@ export default function Round() {
         if (keybinding.selector == "A" && !selectorA) return;
         if (keybinding.selector == "B" && !selectorB) return;
 
+        if (keybinding.selector == "None" && (selectorA || selectorB)) return;
+
         e.preventDefault();
 
         switch (keybinding.action) {

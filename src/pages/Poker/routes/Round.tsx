@@ -993,6 +993,8 @@ export default function Round() {
           if (keybinding.selector == "A" && !selectorA) return;
           if (keybinding.selector == "B" && !selectorB) return;
 
+          if (keybinding.selector == "None" && (selectorA || selectorB)) return;
+
           if (betUIOpen) {
             // Disable any keybindings that are used for number input
             if (

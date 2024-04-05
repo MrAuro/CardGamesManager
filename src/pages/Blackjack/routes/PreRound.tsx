@@ -52,6 +52,8 @@ export default function PreRound() {
         if (keybinding.selector == "A" && !selectorA) return;
         if (keybinding.selector == "B" && !selectorB) return;
 
+        if (keybinding.selector == "None" && (selectorA || selectorB)) return;
+
         switch (keybinding.action) {
           case "Start Game":
             startGame();
