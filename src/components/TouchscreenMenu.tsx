@@ -379,7 +379,15 @@ export default function TouchscreenMenu() {
           })}
         </SimpleGrid>
       </Paper>
-      <Paper withBorder p="xs" mt="xs">
+      <Paper
+        mt="xs"
+        withBorder
+        p="xs"
+        pt={2}
+        style={{
+          backgroundColor: theme.colors.dark[7],
+        }}
+      >
         <Flex direction="row" align="center" gap="xs">
           <Text
             size="xl"
@@ -416,7 +424,6 @@ export default function TouchscreenMenu() {
             })}
           </Flex>
         </Flex>
-        <Divider my="xs" />
         <SimpleGrid cols={4}>
           <Button
             size="xl"
