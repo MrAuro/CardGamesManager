@@ -1,5 +1,14 @@
-import { CHIPS_STATE } from "@/Root";
+import {
+  BLACKJACK_GAME_STATE,
+  CHIPS_STATE,
+  KEYBINDINGS_STATE,
+  POKER_GAME_STATE,
+  SETTINGS_STATE,
+} from "@/Root";
+import { CardRank, CardSuit } from "@/types/Card";
+import { Scope } from "@/types/Keybindings";
 import { Chip } from "@/types/Settings";
+import { suitToIcon } from "@/utils/CardHelper";
 import { formatMoney } from "@/utils/MoneyHelper";
 import {
   ActionIcon,
@@ -10,12 +19,15 @@ import {
   ColorSwatch,
   Divider,
   Flex,
+  Grid,
   Group,
   Modal,
   Paper,
   SimpleGrid,
   Stack,
   Text,
+  darken,
+  lighten,
   useMantineTheme,
 } from "@mantine/core";
 import { IconMinus, IconPlus } from "@tabler/icons-react";
@@ -53,6 +65,12 @@ export default function TouchscreenMenu() {
 
   const [chipBreakdownOpen, setChipBreakdownOpen] = useState(false);
   const [chipBreakdown, setChipBreakdown] = useState<{ [key: string]: number }>({});
+
+  const settings = useRecoilValue(SETTINGS_STATE);
+  const keybindings = useRecoilValue(KEYBINDINGS_STATE);
+
+  const blackjackGameState = useRecoilValue(BLACKJACK_GAME_STATE).gameState;
+  const pokerGameState = useRecoilValue(POKER_GAME_STATE).gameState;
 
   useEffect(() => {
     if (Object.keys(chipCount).length !== chips.length) {
@@ -104,7 +122,7 @@ export default function TouchscreenMenu() {
   }, [calculatorHistory]);
 
   return (
-    <Box m="xs">
+    <Box m="xs" style={{}}>
       <Modal
         title="Chip Breakdown"
         opened={chipBreakdownOpen}
@@ -250,7 +268,7 @@ export default function TouchscreenMenu() {
           </Button>
         </Group>
         <Divider my="xs" />
-        <SimpleGrid cols={3}>
+        <SimpleGrid cols={3} spacing="xs">
           {chips.map((chip) => {
             return (
               <Paper
@@ -504,6 +522,117 @@ export default function TouchscreenMenu() {
             Clear
           </Button>
         </SimpleGrid>
+      </Paper>
+      <Paper withBorder p="xs" mt="xs">
+        <Grid columns={4} grow>
+          {["h", "s", "d", "c"].map((suit) => {
+            let color: "red" | "dark" | "blue" | "green" =
+              suit == "h" || suit == "d" ? "red" : "dark";
+            if (settings.fourColorDeck) {
+              if (suit == "d") {
+                color = "blue";
+              } else if (suit == "c") {
+                color = "green";
+              }
+            }
+
+            return (
+              <Grid.Col span={1}>
+                <Button
+                  size="xl"
+                  p="xs"
+                  color={color}
+                  fullWidth
+                  onClick={() => {
+                    // This is hacky, but it works
+                    // We emulate a keydown event to trigger the keybinding, rather than adding a ton of
+                    // additional logic to multiple components
+
+                    let targetScope: Scope = "None";
+                    if (settings.activeTab == "Poker" && pokerGameState != "PREROUND") {
+                      targetScope = "Poker Round";
+                    } else if (settings.activeTab == "Blackjack" && blackjackGameState == "ROUND") {
+                      targetScope = "Blackjack Round";
+                    }
+                    let keybinding = keybindings.find((keybinding) => {
+                      if (
+                        keybinding.action == suit &&
+                        keybinding.scope == targetScope &&
+                        keybinding.selector == "None"
+                      ) {
+                        return true;
+                      } else {
+                        return false;
+                      }
+                    });
+
+                    if (keybinding) {
+                      document.dispatchEvent(new KeyboardEvent("keydown", { key: keybinding.key }));
+                    } else {
+                      alert(
+                        `Missing keybinding for scope: "${targetScope}" and action: "${suit}" and selector: "None". Add before using this button.`
+                      );
+                    }
+                  }}
+                >
+                  {suitToIcon(suit as CardSuit)}
+                </Button>
+              </Grid.Col>
+            );
+          })}
+        </Grid>
+        <Divider my="xs" />
+        <Grid columns={12} grow gutter="xs">
+          {["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"].map((rank) => {
+            return (
+              <Grid.Col span={["2", "3", "4", "5", "6", "7", "8", "9"].includes(rank) ? 3 : 2}>
+                <Button
+                  size="xl"
+                  p="xs"
+                  color="gray"
+                  fullWidth
+                  style={{
+                    fontSize: "1.75rem",
+                    fontWeight: 700,
+                  }}
+                  onClick={() => {
+                    // This is hacky, but it works
+                    // We emulate a keydown event to trigger the keybinding, rather than adding a ton of
+                    // additional logic to multiple components
+
+                    let targetScope: Scope = "None";
+                    if (settings.activeTab == "Poker" && pokerGameState != "PREROUND") {
+                      targetScope = "Poker Round";
+                    } else if (settings.activeTab == "Blackjack" && blackjackGameState == "ROUND") {
+                      targetScope = "Blackjack Round";
+                    }
+                    let keybinding = keybindings.find((keybinding) => {
+                      if (
+                        keybinding.action == rank &&
+                        keybinding.scope == targetScope &&
+                        keybinding.selector == "None"
+                      ) {
+                        return true;
+                      } else {
+                        return false;
+                      }
+                    });
+
+                    if (keybinding) {
+                      document.dispatchEvent(new KeyboardEvent("keydown", { key: keybinding.key }));
+                    } else {
+                      alert(
+                        `Missing keybinding for scope: "${targetScope}" and action: "${rank}" and selector: "None". Add before using this button.`
+                      );
+                    }
+                  }}
+                >
+                  {rank}
+                </Button>
+              </Grid.Col>
+            );
+          })}
+        </Grid>
       </Paper>
     </Box>
   );
