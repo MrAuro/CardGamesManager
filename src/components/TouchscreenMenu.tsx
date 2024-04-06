@@ -7,18 +7,21 @@ import {
   Button,
   Center,
   Chip,
+  Container,
   Divider,
   Flex,
   Grid,
+  Group,
   NumberInput,
   Paper,
+  ScrollArea,
   SimpleGrid,
   Stack,
   Text,
   Title,
   useMantineTheme,
 } from "@mantine/core";
-import { IconMinus, IconPlus } from "@tabler/icons-react";
+import { IconMinus, IconPlus, IconX } from "@tabler/icons-react";
 import { useEffect, useRef } from "react";
 import { atom, useRecoilState, useRecoilValue } from "recoil";
 
@@ -27,11 +30,17 @@ const CHIP_COUNT = atom<{ [key: string]: number }>({
   default: {},
 });
 
+const CHIP_TOTAL_HISTORY = atom<number[]>({
+  key: "CHIP_TOTAL_HISTORY",
+  default: [],
+});
+
 const MONOSPACE = "Fira Code, Fira Mono, Cascadia Code, monospace";
 
 export default function TouchscreenMenu() {
   const chips = useRecoilValue(CHIPS_STATE);
   const [chipCount, setChipCount] = useRecoilState(CHIP_COUNT);
+  const [chipTotalHistory, setChipTotalHistory] = useRecoilState(CHIP_TOTAL_HISTORY);
   const theme = useMantineTheme();
 
   useEffect(() => {
@@ -48,6 +57,12 @@ export default function TouchscreenMenu() {
     }
   }, [chipCount]);
 
+  useEffect(() => {
+    if (chipTotalHistory.length > 5) {
+      setChipTotalHistory(chipTotalHistory.slice(1));
+    }
+  }, [chipTotalHistory]);
+
   return (
     <Box m="xs">
       <Text size="xl" fw={500} c="dimmed">
@@ -56,22 +71,58 @@ export default function TouchscreenMenu() {
       <Paper
         withBorder
         p="xs"
+        pt={2}
         style={{
           backgroundColor: theme.colors.dark[7],
         }}
       >
-        <Text
-          size="xl"
-          fw={500}
-          style={{
-            fontFamily: "monospace",
+        <Flex direction="row" align="center" gap="xs">
+          <Text
+            size="xl"
+            fw={800}
+            style={{
+              fontFamily: "monospace",
+              fontSize: "1.65rem",
+            }}
+          >
+            {formatMoney(
+              chips.reduce((acc, chip) => acc + chip.denomination * chipCount[chip.color], 0)
+            )}
+          </Text>
+          <Flex direction="row-reverse" gap="xs">
+            {chipTotalHistory.map((total, index) => {
+              return (
+                <Badge
+                  key={index}
+                  size="lg"
+                  variant="light"
+                  style={{
+                    cursor: "pointer",
+                    userSelect: "none",
+                  }}
+                  onClick={() => {
+                    setChipTotalHistory(chipTotalHistory.filter((_, i) => i !== index));
+                  }}
+                >
+                  {formatMoney(total)}
+                </Badge>
+              );
+            })}
+          </Flex>
+        </Flex>
+
+        <Button
+          fullWidth
+          onClick={() => {
+            setChipTotalHistory([
+              ...chipTotalHistory,
+              chips.reduce((acc, chip) => acc + chip.denomination * chipCount[chip.color], 0),
+            ]);
+            setChipCount(Object.fromEntries(chips.map((chip) => [chip.color, 0])));
           }}
         >
-          Total:{" "}
-          {formatMoney(
-            chips.reduce((acc, chip) => acc + chip.denomination * chipCount[chip.color], 0)
-          )}
-        </Text>
+          Clear
+        </Button>
         <Divider my="xs" />
         <SimpleGrid cols={3}>
           {chips.map((chip) => {
@@ -84,16 +135,23 @@ export default function TouchscreenMenu() {
                 }}
               >
                 <Center>
-                  <Badge
-                    size="lg"
+                  <Button
+                    size="xs"
                     color={chip.color}
                     autoContrast
                     style={{
                       fontFamily: MONOSPACE,
                     }}
+                    onClick={() => {
+                      setChipCount({
+                        ...chipCount,
+                        [chip.color]: chipCount[chip.color] + 20,
+                      });
+                    }}
                   >
-                    {formatMoney(chip.denomination, false, true)}
-                  </Badge>
+                    {formatMoney(chip.denomination, false, true)} (
+                    {formatMoney(chip.denomination * 20, false, true)})
+                  </Button>
                 </Center>
                 <Center>
                   <Button
