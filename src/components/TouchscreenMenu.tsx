@@ -7,27 +7,19 @@ import {
   Box,
   Button,
   Center,
-  Code,
   ColorSwatch,
-  Container,
   Divider,
   Flex,
-  Grid,
   Group,
   Modal,
-  NumberInput,
   Paper,
-  ScrollArea,
   SimpleGrid,
   Stack,
   Text,
-  Title,
   useMantineTheme,
 } from "@mantine/core";
-import { useElementSize } from "@mantine/hooks";
-import { modals } from "@mantine/modals";
-import { IconMinus, IconPlus, IconX } from "@tabler/icons-react";
-import { useEffect, useRef, useState } from "react";
+import { IconMinus, IconPlus } from "@tabler/icons-react";
+import { useEffect, useState } from "react";
 import { atom, useRecoilState, useRecoilValue } from "recoil";
 
 const CHIP_COUNT = atom<{ [key: string]: number }>({
