@@ -8,7 +8,6 @@ import {
   Code,
   Collapse,
   ColorInput,
-  Container,
   Grid,
   Input,
   NumberInput,
@@ -19,7 +18,6 @@ import {
   Title,
   useMantineTheme,
 } from "@mantine/core";
-import cloneDeep from "lodash/cloneDeep";
 import { useDisclosure } from "@mantine/hooks";
 import {
   IconCash,
