@@ -268,11 +268,25 @@ export default function App() {
       break;
   }
 
+  let asideWidth: number | string = 0;
+  let navbarWidth: number | string = 0;
+  if (settings?.touchscreenMenu) {
+    if (settings?.touchscreenMenuPosition == "left") {
+      navbarWidth = `${settings?.touchscreenMenuWidth}%`;
+    } else {
+      asideWidth = `${settings?.touchscreenMenuWidth}%`;
+    }
+  }
+
   return (
     <>
       <AppShell
         aside={{
-          width: settings?.touchscreenMenu ? "30%" : 0,
+          width: asideWidth,
+          breakpoint: 0,
+        }}
+        navbar={{
+          width: navbarWidth,
           breakpoint: 0,
         }}
       >
@@ -292,11 +306,16 @@ export default function App() {
           ) : null}
           <Container>{content}</Container>
         </AppShell.Main>
-        {settings?.touchscreenMenu && (
-          <AppShell.Aside>
-            <TouchscreenMenu />
-          </AppShell.Aside>
-        )}
+        {settings?.touchscreenMenu &&
+          (settings?.touchscreenMenuPosition == "left" ? (
+            <AppShell.Navbar>
+              <TouchscreenMenu />
+            </AppShell.Navbar>
+          ) : (
+            <AppShell.Aside>
+              <TouchscreenMenu />
+            </AppShell.Aside>
+          ))}
       </AppShell>
     </>
   );

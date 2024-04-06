@@ -8,6 +8,8 @@ export type Settings = {
   chipsMode: boolean;
   fourColorDeck: boolean;
   touchscreenMenu: boolean;
+  touchscreenMenuPosition: "left" | "right";
+  touchscreenMenuWidth: number;
 };
 
 export type Chip = {
