@@ -199,6 +199,11 @@ export const CHIPS_STATE = atom<Chip[]>({
   }),
 });
 
+setInterval(() => {
+  console.log(`Autosaving...`);
+  TAURI_STORE.save();
+}, 1000 * 60);
+
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <MantineProvider
