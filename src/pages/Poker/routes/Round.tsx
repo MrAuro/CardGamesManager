@@ -1520,16 +1520,6 @@ export default function Round() {
           );
         })}
       </Flex>
-      <Button
-        onClick={() => {
-          setPokerGame({
-            ...pokerGame,
-            gameState: "PREROUND",
-          });
-        }}
-      >
-        set preround
-      </Button>
     </>
   );
 }
