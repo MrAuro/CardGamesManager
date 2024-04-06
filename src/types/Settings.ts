@@ -7,6 +7,7 @@ export type Settings = {
   cornerOfEyeMode: boolean;
   chipsMode: boolean;
   fourColorDeck: boolean;
+  touchscreenMenu: boolean;
 };
 
 export type Chip = {

@@ -176,6 +176,7 @@ export const SETTINGS_STATE = atom<Settings>({
         activeTab: "Players",
         cornerOfEyeMode: false,
         chipsMode: false,
+        touchscreenMenu: false,
         chips: [],
       };
       await TAURI_STORE.set("settings", settings);
