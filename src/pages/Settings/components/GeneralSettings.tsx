@@ -10,6 +10,7 @@ import {
   ColorInput,
   Grid,
   Input,
+  InputWrapper,
   NumberInput,
   Select,
   Slider,
@@ -31,6 +32,9 @@ import {
   IconKeyframeFilled,
   IconLayoutColumns,
   IconLayoutGrid,
+  IconLayoutSidebarLeftCollapse,
+  IconLayoutSidebarLeftCollapseFilled,
+  IconLayoutSidebarRightCollapseFilled,
   IconPencil,
   IconPlus,
   IconPokerChip,
@@ -134,6 +138,76 @@ export default function GeneralSettings() {
           </Button>
         </ButtonGroup>
       </Input.Wrapper>
+
+      <Input.Wrapper
+        label="Touchscreen Menu Position"
+        description="Should the menu be on the left or right side of the screen"
+        mt="sm"
+      >
+        <ButtonGroup mt={5}>
+          <Button
+            variant={settings.touchscreenMenuPosition == "left" ? "filled" : "default"}
+            leftSection={<IconLayoutSidebarLeftCollapseFilled />}
+            onClick={() => {
+              setSettings({ ...settings, touchscreenMenuPosition: "left" });
+            }}
+          >
+            Left
+          </Button>
+          <Button
+            variant={settings.touchscreenMenuPosition == "right" ? "filled" : "default"}
+            leftSection={<IconLayoutSidebarRightCollapseFilled />}
+            onClick={() => {
+              setSettings({ ...settings, touchscreenMenuPosition: "right" });
+            }}
+          >
+            Right
+          </Button>
+        </ButtonGroup>
+      </Input.Wrapper>
+      <Input.Wrapper
+        mb="xl"
+        label="Touchscreen Menu Width"
+        description="Certain UI elements may look weird at low and high percents"
+        mt="sm"
+      >
+        <Slider
+          mt="xs"
+          defaultValue={settings.touchscreenMenuWidth}
+          min={15}
+          max={85}
+          step={5}
+          marks={[
+            {
+              label: "15%",
+              value: 15,
+            },
+            {
+              label: "30%",
+              value: 30,
+            },
+            {
+              label: "45%",
+              value: 45,
+            },
+            {
+              label: "60%",
+              value: 60,
+            },
+            {
+              label: "75%",
+              value: 75,
+            },
+            {
+              label: "85%",
+              value: 85,
+            },
+          ]}
+          onChangeEnd={(value) => {
+            setSettings({ ...settings, touchscreenMenuWidth: value });
+          }}
+        />
+      </Input.Wrapper>
       <Input.Wrapper
         label="Four Color Deck"
         description="Diamonds are blue and Clubs are green"
@@ -160,33 +234,12 @@ export default function GeneralSettings() {
           </Button>
         </ButtonGroup>
       </Input.Wrapper>
+
       <Input.Wrapper
-        label="Chips Mode"
-        description="Use poker chips instead of cash for the UI. Best used when touchscreen menu is enabled."
+        label="Poker Chips"
+        description="Poker chips are only available when the Touchscreen menu is enabled"
         mt="sm"
       >
-        <ButtonGroup mt={5}>
-          <Button
-            variant={settings.chipsMode ? "filled" : "default"}
-            leftSection={<IconCash />}
-            onClick={() => {
-              setSettings({ ...settings, chipsMode: true });
-            }}
-          >
-            On
-          </Button>
-          <Button
-            variant={!settings.chipsMode ? "filled" : "default"}
-            leftSection={<IconPokerChip />}
-            onClick={() => {
-              setSettings({ ...settings, chipsMode: false });
-            }}
-          >
-            Off
-          </Button>
-        </ButtonGroup>
-      </Input.Wrapper>
-      <Collapse in={settings.chipsMode}>
         <Table
           withColumnBorders
           withTableBorder
@@ -299,12 +352,19 @@ export default function GeneralSettings() {
             </Button>
           </Table.Caption>
         </Table>
-      </Collapse>
-      <Input.Wrapper mb="xl" label="UI Scale" mt="sm">
+      </Input.Wrapper>
+      <Input.Wrapper
+        mb="xl"
+        label="UI Scale"
+        description="Certain UI elements may look weird at low and high percents"
+        mt="sm"
+      >
         <Slider
+          mt="xs"
           defaultValue={settings.scale}
           min={50}
           max={150}
+          step={5}
           marks={[
             {
               label: "50%",
