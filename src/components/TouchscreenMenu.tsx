@@ -120,7 +120,8 @@ export default function TouchscreenMenu() {
                     component="button"
                     size={50}
                     style={{
-                      opacity: chipChecked[chip.color] ? 1 : 0.35,
+                      opacity: chipChecked[chip.color] ? 1 : 0.1,
+                      cursor: "pointer",
                     }}
                     onClick={() => {
                       setChipChecked({
