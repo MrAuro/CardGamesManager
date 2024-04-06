@@ -23,6 +23,7 @@ import {
   Group,
   Modal,
   Paper,
+  ScrollArea,
   SimpleGrid,
   Stack,
   Text,
@@ -122,7 +123,7 @@ export default function TouchscreenMenu() {
   }, [calculatorHistory]);
 
   return (
-    <Box m="xs" style={{}}>
+    <ScrollArea m="xs" scrollbars="y" type="never">
       <Modal
         title="Chip Breakdown"
         opened={chipBreakdownOpen}
@@ -218,13 +219,13 @@ export default function TouchscreenMenu() {
         <Group grow>
           <Button
             color="red"
-            variant="light"
             size="xl"
             onClick={() => {
-              setChipTotalHistory([
-                ...chipTotalHistory,
-                chips.reduce((acc, chip) => acc + chip.denomination * chipCount[chip.color], 0),
-              ]);
+              let total = chips.reduce(
+                (acc, chip) => acc + chip.denomination * chipCount[chip.color],
+                0
+              );
+              if (total !== 0) setChipTotalHistory([...chipTotalHistory, total]);
               setChipCount(Object.fromEntries(chips.map((chip) => [chip.color, 0])));
             }}
           >
@@ -232,7 +233,6 @@ export default function TouchscreenMenu() {
           </Button>
           <Button
             color="blue"
-            variant="light"
             size="xl"
             p="xs"
             style={{
@@ -243,7 +243,7 @@ export default function TouchscreenMenu() {
                 (acc, chip) => acc + chip.denomination * chipCount[chip.color],
                 0
               );
-              setChipTotalHistory([...chipTotalHistory, total]);
+              if (total !== 0) setChipTotalHistory([...chipTotalHistory, total]);
               setCalculatorValue(total);
               setInitialCalculatorValue(total);
             }}
@@ -252,7 +252,6 @@ export default function TouchscreenMenu() {
           </Button>
           <Button
             color="green"
-            variant="light"
             size="xl"
             p="xs"
             onClick={() => {
@@ -264,7 +263,7 @@ export default function TouchscreenMenu() {
               //   Todo: interact with poker game
             }}
           >
-            Bet/Raise
+            Bet
           </Button>
         </Group>
         <Divider my="xs" />
@@ -530,7 +529,14 @@ export default function TouchscreenMenu() {
           </Button>
         </SimpleGrid>
       </Paper>
-      <Paper withBorder p="xs" mt="xs">
+      <Paper
+        withBorder
+        p="xs"
+        mt="xs"
+        style={{
+          backgroundColor: theme.colors.dark[7],
+        }}
+      >
         <Grid columns={4} grow>
           {["h", "s", "d", "c"].map((suit) => {
             let color: "red" | "dark" | "blue" | "green" =
@@ -641,7 +647,21 @@ export default function TouchscreenMenu() {
           })}
         </Grid>
       </Paper>
-    </Box>
+      <Paper
+        withBorder
+        p="xs"
+        mt="xs"
+        style={{
+          backgroundColor: theme.colors.dark[7],
+        }}
+      >
+        <Stack>
+          {new Array(100).fill(0).map((_, index) => (
+            <Text>xd</Text>
+          ))}
+        </Stack>
+      </Paper>
+    </ScrollArea>
   );
 }
 
