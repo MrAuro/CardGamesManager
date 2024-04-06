@@ -118,6 +118,17 @@ export default function CommunityCards({
           Save Cards
         </Button>
         <Button
+          fullWidth
+          onClick={() => {
+            setPokerGame({
+              ...pokerGame,
+              capturingCommunityCards: true,
+            });
+          }}
+        >
+          Focus
+        </Button>
+        <Button
           color="green"
           fullWidth
           onClick={distributePot}

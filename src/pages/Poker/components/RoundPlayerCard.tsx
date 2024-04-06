@@ -60,7 +60,7 @@ const RoundPlayerCard = forwardRef(
   ) => {
     const theme = useMantineTheme();
     const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
-    const pokerGame = useRecoilValue(POKER_GAME_STATE);
+    const [pokerGame, setPokerGame] = useRecoilState(POKER_GAME_STATE);
     const pokerSettings = useRecoilValue(POKER_SETTINGS_STATE);
     const handResult = useRecoilValue(PLAYER_HAND_RESULTS)?.find(
       (result) => result.id == pokerPlayer.id
@@ -399,6 +399,18 @@ const RoundPlayerCard = forwardRef(
                       Bet
                     </Button>
                   )}
+                  <Button
+                    color="gray"
+                    disabled={active}
+                    onClick={() => {
+                      setPokerGame({
+                        ...pokerGame,
+                        currentTurn: pokerPlayer.id,
+                      });
+                    }}
+                  >
+                    Force Turn
+                  </Button>
                 </Group>
               )}
             </>
