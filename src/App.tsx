@@ -10,7 +10,7 @@ import {
   POKER_SETTINGS_STATE,
   SETTINGS_STATE,
 } from "@/Root";
-import { Container, Divider, Text, useMantineTheme } from "@mantine/core";
+import { AppShell, Container, Divider, Text, useMantineTheme } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { atom, useRecoilState } from "recoil";
 import { TAURI_STORE } from "./Root";
@@ -25,6 +25,7 @@ import "@/styles/App.css";
 import DevTools from "./components/DevTools";
 import { useHotkeys } from "react-hotkeys-hook";
 import { notifications } from "@mantine/notifications";
+import TouchscreenMenu from "./components/TouchscreenMenu";
 
 export const HOTKEY_SELECTOR_A_ENABLED = atom({
   key: "hotkeySelectorA",
@@ -236,6 +237,7 @@ export default function App() {
     if (chipsLastSaved < Date.now() - 100) {
       setChipsLastSaved(Date.now());
       TAURI_STORE.set("chips", chips);
+      console.log(`Chips:`, chips);
     }
   }, [chips]);
 
@@ -268,22 +270,34 @@ export default function App() {
 
   return (
     <>
-      <Container>
-        <Header
-          active={settings.activeTab}
-          setActive={(tab) => {
-            setSettings({ ...settings, activeTab: tab });
-          }}
-        />
-        <Divider my="xs" />
-        {settings.debug ? (
-          <>
-            <DevTools />
-            <Divider my="xs" />
-          </>
-        ) : null}
-        <Container>{content}</Container>
-      </Container>
+      <AppShell
+        aside={{
+          width: settings?.touchscreenMenu ? "30%" : 0,
+          breakpoint: 0,
+        }}
+      >
+        <AppShell.Main>
+          <Header
+            active={settings.activeTab}
+            setActive={(tab) => {
+              setSettings({ ...settings, activeTab: tab });
+            }}
+          />
+          <Divider my="xs" />
+          {settings.debug ? (
+            <>
+              <DevTools />
+              <Divider my="xs" />
+            </>
+          ) : null}
+          <Container>{content}</Container>
+        </AppShell.Main>
+        {settings?.touchscreenMenu && (
+          <AppShell.Aside>
+            <TouchscreenMenu />
+          </AppShell.Aside>
+        )}
+      </AppShell>
     </>
   );
 }

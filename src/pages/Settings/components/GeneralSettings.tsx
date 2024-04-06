@@ -27,6 +27,8 @@ import {
   IconDeviceFloppy,
   IconEye,
   IconEyeOff,
+  IconHandFinger,
+  IconHandFingerOff,
   IconKeyframe,
   IconKeyframeFilled,
   IconLayoutColumns,
@@ -109,6 +111,32 @@ export default function GeneralSettings() {
         </ButtonGroup>
       </Input.Wrapper>
       <Input.Wrapper
+        label="Enable Touchscreen Menu"
+        description="Displays a menu of the right side of the screen with helpful actions"
+        mt="sm"
+      >
+        <ButtonGroup mt={5}>
+          <Button
+            variant={settings?.touchscreenMenu ? "filled" : "default"}
+            leftSection={<IconHandFinger />}
+            onClick={() => {
+              setSettings({ ...settings, touchscreenMenu: true });
+            }}
+          >
+            On
+          </Button>
+          <Button
+            variant={!settings?.touchscreenMenu ? "filled" : "default"}
+            leftSection={<IconHandFingerOff />}
+            onClick={() => {
+              setSettings({ ...settings, touchscreenMenu: false });
+            }}
+          >
+            Off
+          </Button>
+        </ButtonGroup>
+      </Input.Wrapper>
+      <Input.Wrapper
         label="Four Color Deck"
         description="Diamonds are blue and Clubs are green"
         mt="sm"
@@ -136,7 +164,7 @@ export default function GeneralSettings() {
       </Input.Wrapper>
       <Input.Wrapper
         label="Chips Mode"
-        description="Use poker chips instead of cash for the UI"
+        description="Use poker chips instead of cash for the UI. Best used when touchscreen menu is enabled."
         mt="sm"
       >
         <ButtonGroup mt={5}>
