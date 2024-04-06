@@ -329,7 +329,7 @@ export default function GeneralSettings() {
               value: 150,
             },
           ]}
-          onChange={(value) => {
+          onChangeEnd={(value) => {
             setSettings({ ...settings, scale: value });
           }}
         />
