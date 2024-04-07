@@ -1528,8 +1528,17 @@ export default function Round() {
               style={{
                 opacity: pokerPlayer.folded ? 0.25 : 1,
                 filter: pokerPlayer.folded ? "blur(1.5px)" : "none",
+                cursor: pokerGame.gameState === "SHOWDOWN" ? "pointer" : "default",
               }}
               key={pokerPlayer.id}
+              onClick={() => {
+                if (pokerGame.gameState === "SHOWDOWN") {
+                  setPokerGame({
+                    ...pokerGame,
+                    currentTurn: pokerPlayer.id,
+                  });
+                }
+              }}
             >
               <RoundPlayerCard
                 ref={betInputRef}
