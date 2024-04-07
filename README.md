@@ -1,5 +1,7 @@
 # Card Games Manager
 
+[![CC BY-NC-SA 4.0][cc-by-nc-sa-image]][cc-by-nc-sa]
+
 Manage your various card games with this app (in development).
 
 ---
