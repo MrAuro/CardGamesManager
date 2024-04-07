@@ -5,6 +5,7 @@ import {
   POKER_GAME_STATE,
   SETTINGS_STATE,
 } from "@/Root";
+import { emitBjAction } from "@/pages/Blackjack/routes/Round";
 import { emitPokerAction } from "@/pages/Poker/routes/Round";
 import { CardRank, CardSuit } from "@/types/Card";
 import { Scope } from "@/types/Keybindings";
@@ -663,7 +664,7 @@ export default function TouchscreenMenu() {
           <Group grow>
             <Button
               size="xl"
-              color="blue"
+              color="green"
               onClick={() => {
                 emitPokerAction("check");
               }}
@@ -672,7 +673,7 @@ export default function TouchscreenMenu() {
             </Button>
             <Button
               size="xl"
-              color="green"
+              color="blue"
               onClick={() => {
                 emitPokerAction("call");
               }}
@@ -697,7 +698,37 @@ export default function TouchscreenMenu() {
             </Button>
           </Group>
         )}
-        {settings.activeTab == "Blackjack" && "bj"}
+        {settings.activeTab == "Blackjack" && (
+          <Group grow>
+            <Button
+              size="xl"
+              color="green"
+              onClick={() => {
+                emitBjAction("stand");
+              }}
+            >
+              Stand
+            </Button>
+            <Button
+              size="xl"
+              color="red"
+              onClick={() => {
+                emitBjAction("double");
+              }}
+            >
+              Double
+            </Button>
+            <Button
+              size="xl"
+              color="grape"
+              onClick={() => {
+                emitBjAction("split");
+              }}
+            >
+              Split
+            </Button>
+          </Group>
+        )}
       </Paper>
     </ScrollArea>
   );
