@@ -33,6 +33,7 @@ import {
 import { IconBackspace, IconBackspaceFilled, IconMinus, IconPlus } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { atom, useRecoilState, useRecoilValue } from "recoil";
+import { CHIP_BREAKDOWN_AMOUNT, CHIP_BREAKDOWN_OPEN } from "./ChipBreakdown";
 
 const CHIP_COUNT = atom<{ [key: string]: number }>({
   key: "CHIP_COUNT",
@@ -44,12 +45,17 @@ const CHIP_TOTAL_HISTORY = atom<number[]>({
   default: [],
 });
 
+const CALCULATOR_VALUE = atom<number>({
+  key: "CALCULATOR_VALUE",
+  default: 0,
+});
+
 const CALCULATOR_HISTORY = atom<number[]>({
   key: "CALCULATOR_HISTORY",
   default: [],
 });
 
-const MONOSPACE = "Fira Code, Fira Mono, Cascadia Code, monospace";
+export const MONOSPACE = "Fira Code, Fira Mono, Cascadia Code, monospace";
 
 export default function TouchscreenMenu() {
   const chips = useRecoilValue(CHIPS_STATE);
@@ -57,14 +63,12 @@ export default function TouchscreenMenu() {
   const [chipTotalHistory, setChipTotalHistory] = useRecoilState(CHIP_TOTAL_HISTORY);
   const theme = useMantineTheme();
 
-  const [calculatorValue, setCalculatorValue] = useState(0);
+  const [calculatorValue, setCalculatorValue] = useRecoilState(CALCULATOR_VALUE);
   const [intitalCalculatorValue, setInitialCalculatorValue] = useState(0);
   const [calculatorHistory, setCalculatorHistory] = useRecoilState(CALCULATOR_HISTORY);
 
-  const [chipChecked, setChipChecked] = useState<{ [key: string]: boolean }>({});
-
-  const [chipBreakdownOpen, setChipBreakdownOpen] = useState(false);
-  const [chipBreakdown, setChipBreakdown] = useState<{ [key: string]: number }>({});
+  const [chipBreakdownOpen, setChipBreakdownOpen] = useRecoilState(CHIP_BREAKDOWN_OPEN);
+  const [chipBreakdownAmount, setChipBreakdownAmount] = useRecoilState(CHIP_BREAKDOWN_AMOUNT);
 
   const settings = useRecoilValue(SETTINGS_STATE);
   const keybindings = useRecoilValue(KEYBINDINGS_STATE);
@@ -89,29 +93,6 @@ export default function TouchscreenMenu() {
   }, [chipCount]);
 
   useEffect(() => {
-    if (Object.keys(chipChecked).length !== chips.length) {
-      const newChipChecked: { [key: string]: boolean } = {};
-      chips.forEach((chip) => {
-        if (!chipChecked[chip.color]) {
-          newChipChecked[chip.color] = true;
-        } else {
-          newChipChecked[chip.color] = chipChecked[chip.color];
-        }
-      });
-      setChipChecked(newChipChecked);
-    }
-  }, [chipChecked]);
-
-  useEffect(() => {
-    setChipBreakdown(
-      getChipBreakdown(
-        chips.filter((chip) => chipChecked[chip.color]),
-        calculatorValue
-      )
-    );
-  }, [chipChecked, chipBreakdownOpen]);
-
-  useEffect(() => {
     if (chipTotalHistory.length > 5) {
       setChipTotalHistory(chipTotalHistory.slice(1));
     }
@@ -125,55 +106,6 @@ export default function TouchscreenMenu() {
 
   return (
     <ScrollArea m="xs" scrollbars="y" type="never">
-      <Modal
-        title="Chip Breakdown"
-        opened={chipBreakdownOpen}
-        onClose={() => setChipBreakdownOpen(false)}
-      >
-        <>
-          <Stack>
-            {chips.map((chip) => {
-              return (
-                <Flex direction="row" gap="xs" align="center">
-                  <ColorSwatch
-                    color={chip.color}
-                    component="button"
-                    size={50}
-                    style={{
-                      opacity: chipChecked[chip.color] ? 1 : 0.1,
-                      cursor: "pointer",
-                    }}
-                    onClick={() => {
-                      setChipChecked({
-                        ...chipChecked,
-                        [chip.color]: !chipChecked[chip.color],
-                      });
-                    }}
-                  >
-                    <Badge
-                      autoContrast
-                      color={chip.color}
-                      p={0}
-                      size="xl"
-                      td={chipChecked[chip.color] ? undefined : "line-through"}
-                    >
-                      {formatMoney(chip.denomination, true, true)}
-                    </Badge>
-                  </ColorSwatch>
-                  <Text size="xl" style={{ fontFamily: MONOSPACE }}>
-                    {chipBreakdown[chip.color] || ""}
-                  </Text>
-                </Flex>
-              );
-            })}
-            {chipBreakdown["Remaining"] ? (
-              <Text>
-                Could not break down remaining {formatMoney(chipBreakdown["Remaining"], true, true)}
-              </Text>
-            ) : null}
-          </Stack>
-        </>
-      </Modal>
       <Paper
         withBorder
         p="xs"
@@ -262,7 +194,12 @@ export default function TouchscreenMenu() {
               );
               setChipTotalHistory([...chipTotalHistory, total]);
               setChipCount(Object.fromEntries(chips.map((chip) => [chip.color, 0])));
-              emitPokerAction(total);
+
+              if (settings.activeTab == "Poker" && pokerGameState != "PREROUND") {
+                emitPokerAction(total);
+              } else if (settings.activeTab == "Blackjack" && blackjackGameState == "ROUND") {
+                emitBjAction(total);
+              }
             }}
           >
             Bet
@@ -400,6 +337,7 @@ export default function TouchscreenMenu() {
             }}
             onClick={() => {
               setChipBreakdownOpen(true);
+              setChipBreakdownAmount(calculatorValue);
             }}
           >
             {formatMoney(calculatorValue)}
@@ -482,7 +420,11 @@ export default function TouchscreenMenu() {
             size="xl"
             color="green"
             onClick={() => {
-              emitPokerAction(calculatorValue);
+              if (settings.activeTab == "Poker" && pokerGameState != "PREROUND") {
+                emitPokerAction(calculatorValue);
+              } else if (settings.activeTab == "Blackjack" && blackjackGameState == "ROUND") {
+                emitBjAction(calculatorValue);
+              }
             }}
           >
             Bet
@@ -783,19 +725,4 @@ export default function TouchscreenMenu() {
       )}
     </ScrollArea>
   );
-}
-
-function getChipBreakdown(chips: Chip[], amount: number): { [key: string]: number } {
-  const sortedChips = chips.sort((a, b) => b.denomination - a.denomination);
-  const breakdown: { [key: string]: number } = {};
-  let remaining = amount;
-  sortedChips.forEach((chip) => {
-    breakdown[chip.color] = Math.floor(remaining / chip.denomination);
-    remaining -= breakdown[chip.color] * chip.denomination;
-  });
-
-  if (remaining > 0) {
-    breakdown["Remaining"] = remaining;
-  }
-  return breakdown;
 }

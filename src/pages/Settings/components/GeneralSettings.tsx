@@ -233,7 +233,7 @@ export default function GeneralSettings() {
 
       <Input.Wrapper
         label="Poker Chips"
-        description="Poker chips are only available when the Touchscreen menu is enabled"
+        description="Poker chips are only available when the Touchscreen menu is enabled. IMPORTANT: Refresh the page after changing chips to prevent issues."
         mt="sm"
       >
         <Table

@@ -10,7 +10,7 @@ import {
   POKER_SETTINGS_STATE,
   SETTINGS_STATE,
 } from "@/Root";
-import { AppShell, Container, Divider, Text, useMantineTheme } from "@mantine/core";
+import { AppShell, Container, Divider, Modal, Text, useMantineTheme } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { atom, useRecoilState } from "recoil";
 import { TAURI_STORE } from "./Root";
@@ -26,6 +26,7 @@ import DevTools from "./components/DevTools";
 import { useHotkeys } from "react-hotkeys-hook";
 import { notifications } from "@mantine/notifications";
 import TouchscreenMenu from "./components/TouchscreenMenu";
+import ChipBreakdown, { CHIP_BREAKDOWN_OPEN } from "./components/ChipBreakdown";
 
 export const HOTKEY_SELECTOR_A_ENABLED = atom({
   key: "hotkeySelectorA",
@@ -58,6 +59,8 @@ export default function App() {
   const [pokerPlayersLastSaved, setPokerPlayersLastSaved] = useState(0);
   const [chips] = useRecoilState(CHIPS_STATE);
   const [chipsLastSaved, setChipsLastSaved] = useState(0);
+
+  const [chipBreakdownOpen, setChipBreakdownOpen] = useRecoilState(CHIP_BREAKDOWN_OPEN);
 
   const [hotkeySelectorAEnabled, setHotkeySelectorAEnabled] =
     useRecoilState(HOTKEY_SELECTOR_A_ENABLED);
@@ -280,6 +283,13 @@ export default function App() {
 
   return (
     <>
+      <Modal
+        title="Chip Breakdown"
+        opened={chipBreakdownOpen}
+        onClose={() => setChipBreakdownOpen(false)}
+      >
+        <ChipBreakdown />
+      </Modal>
       <AppShell
         aside={{
           width: asideWidth,

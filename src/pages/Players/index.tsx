@@ -97,6 +97,20 @@ export default function Players() {
       >
         Reset All Balances
       </Button>
+      <Button
+        fullWidth
+        my="sm"
+        variant="light"
+        onClick={() => {
+          setPlayers((draft) => {
+            draft.forEach((player) => {
+              player.balance = Math.pow(10, 8);
+            });
+          });
+        }}
+      >
+        Set Max Balances
+      </Button>
     </>
   );
 }

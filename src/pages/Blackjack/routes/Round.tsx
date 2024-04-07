@@ -21,7 +21,17 @@ import { EMPTY_CARD, getRankInt } from "@/utils/CardHelper";
 import { formatMoney } from "@/utils/MoneyHelper";
 import { getPlayer } from "@/utils/PlayerHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
-import { ScrollArea, Stack, Table, Text, Title, useMantineTheme } from "@mantine/core";
+import {
+  Button,
+  Divider,
+  Paper,
+  ScrollArea,
+  Stack,
+  Table,
+  Text,
+  Title,
+  useMantineTheme,
+} from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -30,6 +40,7 @@ import DealerCard from "../components/DealerCard";
 import RoundPlayerCard from "../components/RoundPlayerCard";
 import { HOTKEY_SELECTOR_A_ENABLED, HOTKEY_SELECTOR_B_ENABLED } from "@/App";
 import { createEvent } from "react-event-hook";
+import ChipBreakdown, { CHIP_BREAKDOWN_AMOUNT } from "@/components/ChipBreakdown";
 
 export const CARD_SELECTOR_STATE = atom<{
   opened: boolean;
@@ -49,7 +60,7 @@ export const CARD_SELECTOR_STATE = atom<{
 });
 
 export const { useBjActionListener, emitBjAction } = createEvent("bjAction")<
-  "stand" | "double" | "split"
+  "stand" | "double" | "split" | number
 >();
 
 export default function Round() {
@@ -61,6 +72,7 @@ export default function Round() {
   const [keybindings] = useRecoilImmerState(KEYBINDINGS_STATE);
   const [activeCardOverride, setActiveCardOverride] = useState<Card | undefined>(undefined);
   const [settings] = useRecoilState(SETTINGS_STATE);
+  const [chipBreakdownAmount, setChipBreakdownAmount] = useRecoilState(CHIP_BREAKDOWN_AMOUNT);
   const theme = useMantineTheme();
 
   useBjActionListener((action) => {
@@ -79,6 +91,16 @@ export default function Round() {
     if (action === "split") {
       splitHand(blackjackGame.currentTurn);
       return;
+    }
+
+    if (typeof action === "number") {
+      setBlackjackPlayers((draft) => {
+        let blackjackPlayer = draft.find((p) => p.id == blackjackGame.currentTurn);
+
+        if (blackjackPlayer) {
+          blackjackPlayer.bet = action;
+        }
+      });
     }
   });
 
@@ -967,9 +989,27 @@ export default function Round() {
                       </Table.Tr>
                     </Table.Tbody>
                   </Table>
+                  {settings.touchscreenMenu && (
+                    <Button
+                      fullWidth
+                      variant="light"
+                      mt="sm"
+                      onClick={() => {
+                        setChipBreakdownAmount(total);
+                      }}
+                    >
+                      Chip Breakdown
+                    </Button>
+                  )}
+                  <Divider mt="sm" />
                 </div>
               );
             })}
+            {settings.touchscreenMenu && (
+              <Paper withBorder p="sm" mt="sm">
+                <ChipBreakdown />
+              </Paper>
+            )}
           </ScrollArea>
         </>
       ),

@@ -7,7 +7,9 @@ export function parseMoney(value: string | number): number {
 }
 
 export function formatMoney(value: number, useCents = false, noLeadingZeros = false): string {
+  if (!value) return "$0.00";
   if (isNaN(value)) return "$0.00";
+  if (value > 1000000) return `$${(value / 1000000).toFixed(0)}M`;
 
   if (value > -1 && value < 1 && useCents) {
     // 0.50 -> 50c, 0.05 -> 5c
