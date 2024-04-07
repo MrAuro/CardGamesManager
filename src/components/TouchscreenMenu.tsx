@@ -7,7 +7,7 @@ import {
 } from "@/Root";
 import { emitBjAction } from "@/pages/Blackjack/routes/Round";
 import { emitPokerAction } from "@/pages/Poker/routes/Round";
-import { CardRank, CardSuit } from "@/types/Card";
+import { CardSuit } from "@/types/Card";
 import { Scope } from "@/types/Keybindings";
 import { Chip } from "@/types/Settings";
 import { suitToIcon } from "@/utils/CardHelper";
@@ -15,7 +15,6 @@ import { formatMoney } from "@/utils/MoneyHelper";
 import {
   ActionIcon,
   Badge,
-  Box,
   Button,
   Center,
   ColorSwatch,
@@ -29,8 +28,6 @@ import {
   SimpleGrid,
   Stack,
   Text,
-  darken,
-  lighten,
   useMantineTheme,
 } from "@mantine/core";
 import { IconMinus, IconPlus } from "@tabler/icons-react";

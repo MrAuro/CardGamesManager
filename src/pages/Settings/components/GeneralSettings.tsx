@@ -10,7 +10,6 @@ import {
   ColorInput,
   Grid,
   Input,
-  InputWrapper,
   NumberInput,
   Select,
   Slider,
@@ -21,7 +20,6 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
-  IconCash,
   IconCurrencyDollar,
   IconDeviceFloppy,
   IconEye,
@@ -32,12 +30,10 @@ import {
   IconKeyframeFilled,
   IconLayoutColumns,
   IconLayoutGrid,
-  IconLayoutSidebarLeftCollapse,
   IconLayoutSidebarLeftCollapseFilled,
   IconLayoutSidebarRightCollapseFilled,
   IconPencil,
   IconPlus,
-  IconPokerChip,
   IconTrash,
 } from "@tabler/icons-react";
 import { useState } from "react";
