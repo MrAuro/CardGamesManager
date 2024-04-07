@@ -1,6 +1,8 @@
 # Card Games Manager
 
-[![CC BY-NC-SA 4.0][cc-by-nc-sa-image]][cc-by-nc-sa]
+<!-- https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg -->
+
+[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 Manage your various card games with this app (in development).
 
