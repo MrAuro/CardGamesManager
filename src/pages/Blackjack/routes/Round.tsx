@@ -1032,6 +1032,7 @@ export default function Round() {
           nextTurn={nextTurn}
           forceTurn={forceTurn}
           refundAndCancel={refundAndCancel}
+          payoutAndEnd={payoutAndEnd}
         />
         {blackjackPlayers.map((blackjackPlayer) => {
           return (
