@@ -40,7 +40,7 @@ const CHIP_COUNT = atom<{ [key: string]: number }>({
   default: {},
 });
 
-const CHIP_TOTAL_HISTORY = atom<number[]>({
+const CHIP_HISTORY = atom<{ [key: string]: number }[]>({
   key: "CHIP_TOTAL_HISTORY",
   default: [],
 });
@@ -60,7 +60,7 @@ export const MONOSPACE = "Fira Code, Fira Mono, Cascadia Code, monospace";
 export default function TouchscreenMenu() {
   const chips = useRecoilValue(CHIPS_STATE);
   const [chipCount, setChipCount] = useRecoilState(CHIP_COUNT);
-  const [chipTotalHistory, setChipTotalHistory] = useRecoilState(CHIP_TOTAL_HISTORY);
+  const [chipHistory, setChipHistory] = useRecoilState(CHIP_HISTORY);
   const theme = useMantineTheme();
 
   const [calculatorValue, setCalculatorValue] = useRecoilState(CALCULATOR_VALUE);
@@ -93,13 +93,13 @@ export default function TouchscreenMenu() {
   }, [chipCount]);
 
   useEffect(() => {
-    if (chipTotalHistory.length > 5) {
-      setChipTotalHistory(chipTotalHistory.slice(1));
+    if (chipHistory.length > 8) {
+      setChipHistory(chipHistory.slice(1));
     }
-  }, [chipTotalHistory]);
+  }, [chipHistory]);
 
   useEffect(() => {
-    if (calculatorHistory.length > 5) {
+    if (calculatorHistory.length > 8) {
       setCalculatorHistory(calculatorHistory.slice(1));
     }
   }, [calculatorHistory]);
@@ -128,7 +128,12 @@ export default function TouchscreenMenu() {
             )}
           </Text>
           <Flex direction="row-reverse" gap="xs">
-            {chipTotalHistory.map((total, index) => {
+            {chipHistory.map((_chips: { [key: string]: number }, index) => {
+              let total = 0;
+              for (const chip in _chips) {
+                total += chips.find((c) => c.color === chip)!.denomination * _chips[chip];
+              }
+
               return (
                 <Badge
                   key={index}
@@ -139,7 +144,7 @@ export default function TouchscreenMenu() {
                     userSelect: "none",
                   }}
                   onClick={() => {
-                    setChipTotalHistory(chipTotalHistory.filter((_, i) => i !== index));
+                    setChipCount(_chips);
                   }}
                 >
                   {formatMoney(total)}
@@ -154,11 +159,14 @@ export default function TouchscreenMenu() {
             color="red"
             size="xl"
             onClick={() => {
-              let total = chips.reduce(
-                (acc, chip) => acc + chip.denomination * chipCount[chip.color],
-                0
-              );
-              if (total !== 0) setChipTotalHistory([...chipTotalHistory, total]);
+              // Check if we have an identical chip count in history. If we don't, then add it.
+              if (
+                !chipHistory.find(
+                  (history) => JSON.stringify(history) === JSON.stringify(chipCount)
+                )
+              ) {
+                setChipHistory([...chipHistory, chipCount]);
+              }
               setChipCount(Object.fromEntries(chips.map((chip) => [chip.color, 0])));
             }}
           >
@@ -176,7 +184,8 @@ export default function TouchscreenMenu() {
                 (acc, chip) => acc + chip.denomination * chipCount[chip.color],
                 0
               );
-              if (total !== 0) setChipTotalHistory([...chipTotalHistory, total]);
+              // todo
+              // if (!chipHistory.includes(chipCount)) setChipHistory([...chipHistory, chipCount]);
               setCalculatorValue(total);
               setInitialCalculatorValue(total);
             }}
@@ -192,7 +201,7 @@ export default function TouchscreenMenu() {
                 (acc, chip) => acc + chip.denomination * chipCount[chip.color],
                 0
               );
-              setChipTotalHistory([...chipTotalHistory, total]);
+              setChipHistory([...chipHistory, chipCount]);
               setChipCount(Object.fromEntries(chips.map((chip) => [chip.color, 0])));
 
               if (settings.activeTab == "Poker" && pokerGameState != "PREROUND") {
