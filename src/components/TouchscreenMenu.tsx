@@ -5,6 +5,7 @@ import {
   POKER_GAME_STATE,
   SETTINGS_STATE,
 } from "@/Root";
+import { emitPokerAction } from "@/pages/Poker/routes/Round";
 import { CardRank, CardSuit } from "@/types/Card";
 import { Scope } from "@/types/Keybindings";
 import { Chip } from "@/types/Settings";
@@ -72,6 +73,8 @@ export default function TouchscreenMenu() {
 
   const blackjackGameState = useRecoilValue(BLACKJACK_GAME_STATE).gameState;
   const pokerGameState = useRecoilValue(POKER_GAME_STATE).gameState;
+
+  const [foldConfirm, setFoldConfirm] = useState(false);
 
   useEffect(() => {
     if (Object.keys(chipCount).length !== chips.length) {
@@ -255,12 +258,13 @@ export default function TouchscreenMenu() {
             size="xl"
             p="xs"
             onClick={() => {
-              setChipTotalHistory([
-                ...chipTotalHistory,
-                chips.reduce((acc, chip) => acc + chip.denomination * chipCount[chip.color], 0),
-              ]);
+              let total = chips.reduce(
+                (acc, chip) => acc + chip.denomination * chipCount[chip.color],
+                0
+              );
+              setChipTotalHistory([...chipTotalHistory, total]);
               setChipCount(Object.fromEntries(chips.map((chip) => [chip.color, 0])));
-              //   Todo: interact with poker game
+              emitPokerAction(total);
             }}
           >
             Bet
@@ -480,7 +484,7 @@ export default function TouchscreenMenu() {
             size="xl"
             color="green"
             onClick={() => {
-              // TODO
+              emitPokerAction(calculatorValue);
             }}
           >
             Bet
@@ -655,11 +659,45 @@ export default function TouchscreenMenu() {
           backgroundColor: theme.colors.dark[7],
         }}
       >
-        <Stack>
-          {new Array(100).fill(0).map((_, index) => (
-            <Text>xd</Text>
-          ))}
-        </Stack>
+        {settings.activeTab == "Poker" && (
+          <Group grow>
+            <Button
+              size="xl"
+              color="blue"
+              onClick={() => {
+                emitPokerAction("check");
+              }}
+            >
+              Check
+            </Button>
+            <Button
+              size="xl"
+              color="green"
+              onClick={() => {
+                emitPokerAction("call");
+              }}
+            >
+              Call
+            </Button>
+            <Button
+              size="xl"
+              color="red"
+              onClick={() => {
+                if (foldConfirm) {
+                  emitPokerAction("fold");
+                } else {
+                  setFoldConfirm(true);
+                  setTimeout(() => {
+                    setFoldConfirm(false);
+                  }, 5000);
+                }
+              }}
+            >
+              {foldConfirm ? "Really?" : "Fold"}
+            </Button>
+          </Group>
+        )}
+        {settings.activeTab == "Blackjack" && "bj"}
       </Paper>
     </ScrollArea>
   );

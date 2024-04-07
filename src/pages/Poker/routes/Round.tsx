@@ -8,6 +8,7 @@ import {
 import CardSelector from "@/components/CardSelector";
 import { CARD_SELECTOR_STATE } from "@/pages/Blackjack/routes/Round";
 import { Card, CardRank, CardSuit, Card_NOEMPTY } from "@/types/Card";
+import { createEvent } from "react-event-hook";
 import { availableCards } from "@/types/Keybindings";
 import {
   GameState,
@@ -86,6 +87,10 @@ export const USED_CARDS = atom<Card[]>({
   default: [],
 });
 
+export const { usePokerActionListener, emitPokerAction } = createEvent("pokerAction")<
+  "check" | "call" | "fold" | number
+>();
+
 export default function Round() {
   const theme = useMantineTheme();
 
@@ -109,6 +114,28 @@ export default function Round() {
   const [, setTimerStart] = useRecoilState(TIMER_START);
   const betInputRef = useRef<HTMLInputElement>(null);
   // !
+
+  usePokerActionListener((msg) => {
+    if (msg == "check") {
+      checkAction();
+      return;
+    }
+
+    if (msg == "fold") {
+      foldAction();
+      return;
+    }
+
+    if (msg == "call") {
+      callAction();
+      return;
+    }
+
+    if (typeof msg == "number") {
+      betAction(msg);
+      return;
+    }
+  });
 
   const calculateHands = (store: boolean = false): StoredPlayerResult[] | undefined => {
     const table = new TexasHoldem(pokerPlayers.length);
