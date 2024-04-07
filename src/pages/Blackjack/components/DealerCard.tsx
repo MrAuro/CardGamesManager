@@ -24,6 +24,7 @@ export default function DealerCard({
   nextTurn,
   forceTurn,
   refundAndCancel,
+  payoutAndEnd,
 }: {
   cards: Card[];
   isActive: boolean;
@@ -31,6 +32,7 @@ export default function DealerCard({
   nextTurn: (dealerFirstTurn: boolean) => void;
   forceTurn: (playerId: string) => void;
   refundAndCancel: () => void;
+  payoutAndEnd: () => void;
 }) {
   const theme = useMantineTheme();
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
@@ -139,7 +141,7 @@ export default function DealerCard({
             Refund & Cancel
           </Button>
           {!firstTurn && isActive && (
-            <Button fullWidth color="green">
+            <Button fullWidth color="green" onClick={payoutAndEnd}>
               Payout & End
             </Button>
           )}
