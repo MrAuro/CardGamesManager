@@ -29,6 +29,7 @@ import { atom, useRecoilState, useRecoilValue } from "recoil";
 import DealerCard from "../components/DealerCard";
 import RoundPlayerCard from "../components/RoundPlayerCard";
 import { HOTKEY_SELECTOR_A_ENABLED, HOTKEY_SELECTOR_B_ENABLED } from "@/App";
+import { createEvent } from "react-event-hook";
 
 export const CARD_SELECTOR_STATE = atom<{
   opened: boolean;
@@ -47,6 +48,10 @@ export const CARD_SELECTOR_STATE = atom<{
   },
 });
 
+export const { useBjActionListener, emitBjAction } = createEvent("bjAction")<
+  "stand" | "double" | "split"
+>();
+
 export default function Round() {
   const [blackjackSettings] = useRecoilState(BLACKJACK_SETTINGS);
   const [blackjackPlayers, setBlackjackPlayers] = useRecoilImmerState(BLACKJACK_PLAYERS_STATE);
@@ -57,6 +62,25 @@ export default function Round() {
   const [activeCardOverride, setActiveCardOverride] = useState<Card | undefined>(undefined);
   const [settings] = useRecoilState(SETTINGS_STATE);
   const theme = useMantineTheme();
+
+  useBjActionListener((action) => {
+    if (action === "stand") {
+      nextTurn();
+      return;
+    }
+
+    if (action === "double") {
+      const player = blackjackPlayers.find((p) => p.id == blackjackGame.currentTurn);
+      const playerObj = players.find((p) => p.id == blackjackGame.currentTurn);
+      doubleDown(player!, playerObj!);
+      return;
+    }
+
+    if (action === "split") {
+      splitHand(blackjackGame.currentTurn);
+      return;
+    }
+  });
 
   useEffect(() => {
     if (!settings.cornerOfEyeMode) return;

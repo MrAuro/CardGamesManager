@@ -78,10 +78,10 @@ export default function PreRound() {
 
     setBlackjackGame({
       ...blackjackGame,
-      currentTurn: "DEALER",
+      currentTurn: blackjackPlayers[0].id,
       gameState: "ROUND",
       dealerCards: [EMPTY_CARD, EMPTY_CARD],
-      dealerFirstTime: true,
+      dealerFirstTime: false,
     });
 
     setPlayers((draft) => {
