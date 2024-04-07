@@ -30,7 +30,7 @@ import {
   Text,
   useMantineTheme,
 } from "@mantine/core";
-import { IconMinus, IconPlus } from "@tabler/icons-react";
+import { IconBackspace, IconBackspaceFilled, IconMinus, IconPlus } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { atom, useRecoilState, useRecoilValue } from "recoil";
 
@@ -539,10 +539,10 @@ export default function TouchscreenMenu() {
           backgroundColor: theme.colors.dark[7],
         }}
       >
-        <Grid columns={12} grow gutter="xs">
-          {["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"].map((rank) => {
+        <Grid columns={9} grow gutter="xs">
+          {["A", "2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K"].map((rank) => {
             return (
-              <Grid.Col span={["2", "3", "4", "5", "6", "7", "8", "9"].includes(rank) ? 3 : 2}>
+              <Grid.Col span={["A", "2", "3", "4", "5", "6", "7", "8", "9"].includes(rank) ? 3 : 2}>
                 <Button
                   size="xl"
                   p="xs"
@@ -591,7 +591,7 @@ export default function TouchscreenMenu() {
           })}
         </Grid>
         <Divider my="xs" />
-        <Grid columns={4} grow>
+        <Grid columns={5} grow>
           {["h", "s", "d", "c"].map((suit) => {
             let color: "red" | "dark" | "blue" | "green" =
               suit == "h" || suit == "d" ? "red" : "dark";
@@ -647,6 +647,51 @@ export default function TouchscreenMenu() {
               </Grid.Col>
             );
           })}
+          <Grid.Col span={1}>
+            <Button
+              size="xl"
+              p="xs"
+              color="white"
+              autoContrast
+              fullWidth
+              onClick={() => {
+                // This is hacky, but it works
+                // We emulate a keydown event to trigger the keybinding, rather than adding a ton of
+                // additional logic to multiple components
+
+                let targetScope: Scope = "None";
+                if (settings.activeTab == "Poker" && pokerGameState != "PREROUND") {
+                  targetScope = "Poker Round";
+                } else if (settings.activeTab == "Blackjack" && blackjackGameState == "ROUND") {
+                  targetScope = "Blackjack Round";
+                } else {
+                  alert("Current tab does not support this action.");
+                  return;
+                }
+                let keybinding = keybindings.find((keybinding) => {
+                  if (
+                    keybinding.action == "Remove Last Card" &&
+                    keybinding.scope == targetScope &&
+                    keybinding.selector == "None"
+                  ) {
+                    return true;
+                  } else {
+                    return false;
+                  }
+                });
+
+                if (keybinding) {
+                  document.dispatchEvent(new KeyboardEvent("keydown", { key: keybinding.key }));
+                } else {
+                  alert(
+                    `Missing keybinding for scope: "${targetScope}" and action: "Remove Last Card" and selector: "None". Add before using this button.`
+                  );
+                }
+              }}
+            >
+              <IconBackspaceFilled size="2rem" />
+            </Button>
+          </Grid.Col>
         </Grid>
       </Paper>
       {settings.activeTab == "Poker" && (
