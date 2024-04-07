@@ -649,15 +649,15 @@ export default function TouchscreenMenu() {
           })}
         </Grid>
       </Paper>
-      <Paper
-        withBorder
-        p="xs"
-        mt="xs"
-        style={{
-          backgroundColor: theme.colors.dark[7],
-        }}
-      >
-        {settings.activeTab == "Poker" && (
+      {settings.activeTab == "Poker" && (
+        <Paper
+          withBorder
+          p="xs"
+          mt="xs"
+          style={{
+            backgroundColor: theme.colors.dark[7],
+          }}
+        >
           <Group grow>
             <Button
               size="xl"
@@ -694,8 +694,17 @@ export default function TouchscreenMenu() {
               {foldConfirm ? "Really?" : "Fold"}
             </Button>
           </Group>
-        )}
-        {settings.activeTab == "Blackjack" && (
+        </Paper>
+      )}
+      {settings.activeTab == "Blackjack" && (
+        <Paper
+          withBorder
+          p="xs"
+          mt="xs"
+          style={{
+            backgroundColor: theme.colors.dark[7],
+          }}
+        >
           <Group grow>
             <Button
               size="xl"
@@ -725,8 +734,8 @@ export default function TouchscreenMenu() {
               Split
             </Button>
           </Group>
-        )}
-      </Paper>
+        </Paper>
+      )}
     </ScrollArea>
   );
 }
