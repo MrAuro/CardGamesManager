@@ -541,6 +541,58 @@ export default function TouchscreenMenu() {
           backgroundColor: theme.colors.dark[7],
         }}
       >
+        <Grid columns={12} grow gutter="xs">
+          {["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"].map((rank) => {
+            return (
+              <Grid.Col span={["2", "3", "4", "5", "6", "7", "8", "9"].includes(rank) ? 3 : 2}>
+                <Button
+                  size="xl"
+                  p="xs"
+                  color="gray"
+                  fullWidth
+                  style={{
+                    fontSize: "1.75rem",
+                    fontWeight: 700,
+                  }}
+                  onClick={() => {
+                    // This is hacky, but it works
+                    // We emulate a keydown event to trigger the keybinding, rather than adding a ton of
+                    // additional logic to multiple components
+
+                    let targetScope: Scope = "None";
+                    if (settings.activeTab == "Poker" && pokerGameState != "PREROUND") {
+                      targetScope = "Poker Round";
+                    } else if (settings.activeTab == "Blackjack" && blackjackGameState == "ROUND") {
+                      targetScope = "Blackjack Round";
+                    }
+                    let keybinding = keybindings.find((keybinding) => {
+                      if (
+                        keybinding.action == rank &&
+                        keybinding.scope == targetScope &&
+                        keybinding.selector == "None"
+                      ) {
+                        return true;
+                      } else {
+                        return false;
+                      }
+                    });
+
+                    if (keybinding) {
+                      document.dispatchEvent(new KeyboardEvent("keydown", { key: keybinding.key }));
+                    } else {
+                      alert(
+                        `Missing keybinding for scope: "${targetScope}" and action: "${rank}" and selector: "None". Add before using this button.`
+                      );
+                    }
+                  }}
+                >
+                  {rank}
+                </Button>
+              </Grid.Col>
+            );
+          })}
+        </Grid>
+        <Divider my="xs" />
         <Grid columns={4} grow>
           {["h", "s", "d", "c"].map((suit) => {
             let color: "red" | "dark" | "blue" | "green" =
@@ -593,58 +645,6 @@ export default function TouchscreenMenu() {
                   }}
                 >
                   {suitToIcon(suit as CardSuit)}
-                </Button>
-              </Grid.Col>
-            );
-          })}
-        </Grid>
-        <Divider my="xs" />
-        <Grid columns={12} grow gutter="xs">
-          {["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"].map((rank) => {
-            return (
-              <Grid.Col span={["2", "3", "4", "5", "6", "7", "8", "9"].includes(rank) ? 3 : 2}>
-                <Button
-                  size="xl"
-                  p="xs"
-                  color="gray"
-                  fullWidth
-                  style={{
-                    fontSize: "1.75rem",
-                    fontWeight: 700,
-                  }}
-                  onClick={() => {
-                    // This is hacky, but it works
-                    // We emulate a keydown event to trigger the keybinding, rather than adding a ton of
-                    // additional logic to multiple components
-
-                    let targetScope: Scope = "None";
-                    if (settings.activeTab == "Poker" && pokerGameState != "PREROUND") {
-                      targetScope = "Poker Round";
-                    } else if (settings.activeTab == "Blackjack" && blackjackGameState == "ROUND") {
-                      targetScope = "Blackjack Round";
-                    }
-                    let keybinding = keybindings.find((keybinding) => {
-                      if (
-                        keybinding.action == rank &&
-                        keybinding.scope == targetScope &&
-                        keybinding.selector == "None"
-                      ) {
-                        return true;
-                      } else {
-                        return false;
-                      }
-                    });
-
-                    if (keybinding) {
-                      document.dispatchEvent(new KeyboardEvent("keydown", { key: keybinding.key }));
-                    } else {
-                      alert(
-                        `Missing keybinding for scope: "${targetScope}" and action: "${rank}" and selector: "None". Add before using this button.`
-                      );
-                    }
-                  }}
-                >
-                  {rank}
                 </Button>
               </Grid.Col>
             );
