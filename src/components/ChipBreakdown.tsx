@@ -1,6 +1,6 @@
 import { CHIPS_STATE } from "@/Root";
 import { formatMoney } from "@/utils/MoneyHelper";
-import { Modal, Stack, Flex, ColorSwatch, Badge, Text } from "@mantine/core";
+import { Stack, Flex, ColorSwatch, Badge, Text } from "@mantine/core";
 import { atom, useRecoilState, useRecoilValue } from "recoil";
 import { MONOSPACE } from "./TouchscreenMenu";
 import { Chip } from "@/types/Settings";
@@ -23,7 +23,7 @@ export const CHIP_BREAKDOWN_AMOUNT = atom<number>({
 
 export default function ChipBreakdown() {
   const chips = useRecoilValue(CHIPS_STATE);
-  const [chipBreakdownOpen, setChipBreakdownOpen] = useRecoilState(CHIP_BREAKDOWN_OPEN);
+  const chipBreakdownOpen = useRecoilValue(CHIP_BREAKDOWN_OPEN);
   const [chipChecked, setChipChecked] = useRecoilState(CHIPS_CHECKED);
   const [amount] = useRecoilState(CHIP_BREAKDOWN_AMOUNT);
 

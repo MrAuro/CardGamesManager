@@ -9,7 +9,6 @@ import { emitBjAction } from "@/pages/Blackjack/routes/Round";
 import { emitPokerAction } from "@/pages/Poker/routes/Round";
 import { CardSuit } from "@/types/Card";
 import { Scope } from "@/types/Keybindings";
-import { Chip } from "@/types/Settings";
 import { suitToIcon } from "@/utils/CardHelper";
 import { formatMoney } from "@/utils/MoneyHelper";
 import {
@@ -17,20 +16,17 @@ import {
   Badge,
   Button,
   Center,
-  ColorSwatch,
   Divider,
   Flex,
   Grid,
   Group,
-  Modal,
   Paper,
   ScrollArea,
   SimpleGrid,
-  Stack,
   Text,
   useMantineTheme,
 } from "@mantine/core";
-import { IconBackspace, IconBackspaceFilled, IconMinus, IconPlus } from "@tabler/icons-react";
+import { IconBackspaceFilled, IconMinus, IconPlus } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { atom, useRecoilState, useRecoilValue } from "recoil";
 import { CHIP_BREAKDOWN_AMOUNT, CHIP_BREAKDOWN_OPEN } from "./ChipBreakdown";
@@ -67,8 +63,8 @@ export default function TouchscreenMenu() {
   const [intitalCalculatorValue, setInitialCalculatorValue] = useState(0);
   const [calculatorHistory, setCalculatorHistory] = useRecoilState(CALCULATOR_HISTORY);
 
-  const [chipBreakdownOpen, setChipBreakdownOpen] = useRecoilState(CHIP_BREAKDOWN_OPEN);
-  const [chipBreakdownAmount, setChipBreakdownAmount] = useRecoilState(CHIP_BREAKDOWN_AMOUNT);
+  const [, setChipBreakdownOpen] = useRecoilState(CHIP_BREAKDOWN_OPEN);
+  const [, setChipBreakdownAmount] = useRecoilState(CHIP_BREAKDOWN_AMOUNT);
 
   const settings = useRecoilValue(SETTINGS_STATE);
   const keybindings = useRecoilValue(KEYBINDINGS_STATE);

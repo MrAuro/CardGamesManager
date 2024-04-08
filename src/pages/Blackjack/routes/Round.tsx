@@ -1,3 +1,4 @@
+import { HOTKEY_SELECTOR_A_ENABLED, HOTKEY_SELECTOR_B_ENABLED } from "@/App";
 import {
   BLACKJACK_GAME_STATE,
   BLACKJACK_PLAYERS_STATE,
@@ -7,6 +8,7 @@ import {
   SETTINGS_STATE,
 } from "@/Root";
 import CardSelector from "@/components/CardSelector";
+import ChipBreakdown, { CHIP_BREAKDOWN_AMOUNT } from "@/components/ChipBreakdown";
 import { BlackjackPlayer, EarningsResultType } from "@/types/Blackjack";
 import { Card, CardRank, CardSuit } from "@/types/Card";
 import { availableCards } from "@/types/Keybindings";
@@ -34,13 +36,11 @@ import {
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { useEffect, useState } from "react";
+import { createEvent } from "react-event-hook";
 import { useHotkeys } from "react-hotkeys-hook";
 import { atom, useRecoilState, useRecoilValue } from "recoil";
 import DealerCard from "../components/DealerCard";
 import RoundPlayerCard from "../components/RoundPlayerCard";
-import { HOTKEY_SELECTOR_A_ENABLED, HOTKEY_SELECTOR_B_ENABLED } from "@/App";
-import { createEvent } from "react-event-hook";
-import ChipBreakdown, { CHIP_BREAKDOWN_AMOUNT } from "@/components/ChipBreakdown";
 
 export const CARD_SELECTOR_STATE = atom<{
   opened: boolean;
@@ -72,7 +72,7 @@ export default function Round() {
   const [keybindings] = useRecoilImmerState(KEYBINDINGS_STATE);
   const [activeCardOverride, setActiveCardOverride] = useState<Card | undefined>(undefined);
   const [settings] = useRecoilState(SETTINGS_STATE);
-  const [chipBreakdownAmount, setChipBreakdownAmount] = useRecoilState(CHIP_BREAKDOWN_AMOUNT);
+  const [_, setChipBreakdownAmount] = useRecoilState(CHIP_BREAKDOWN_AMOUNT);
   const theme = useMantineTheme();
 
   useBjActionListener((action) => {
