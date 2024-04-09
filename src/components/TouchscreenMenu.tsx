@@ -31,13 +31,14 @@ import { IconBackspaceFilled, IconMinus, IconPlus } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { atom, useRecoilState, useRecoilValue } from "recoil";
 import { CHIP_BREAKDOWN_AMOUNT, CHIP_BREAKDOWN_OPEN } from "./ChipBreakdown";
+import { UUID } from "crypto";
 
-const CHIP_COUNT = atom<{ [key: string]: number }>({
+const CHIP_COUNT = atom<{ [key: UUID]: number }>({
   key: "CHIP_COUNT",
   default: {},
 });
 
-const CHIP_HISTORY = atom<{ [key: string]: number }[]>({
+const CHIP_HISTORY = atom<{ [key: UUID]: number }[]>({
   key: "CHIP_TOTAL_HISTORY",
   default: [],
 });
@@ -104,10 +105,10 @@ export default function TouchscreenMenu() {
     if (Object.keys(chipCount).length !== chips.length) {
       const newChipCount: { [key: string]: number } = {};
       chips.forEach((chip) => {
-        if (!chipCount[chip.color]) {
-          newChipCount[chip.color] = 0;
+        if (!chipCount[chip.id]) {
+          newChipCount[chip.id] = 0;
         } else {
-          newChipCount[chip.color] = chipCount[chip.color];
+          newChipCount[chip.id] = chipCount[chip.id];
         }
       });
       setChipCount(newChipCount);
@@ -146,7 +147,7 @@ export default function TouchscreenMenu() {
             }}
           >
             {formatMoney(
-              chips.reduce((acc, chip) => acc + chip.denomination * chipCount[chip.color], 0)
+              chips.reduce((acc, chip) => acc + chip.denomination * chipCount[chip.id], 0)
             )}
           </Text>
           <Flex direction="row-reverse" gap="xs">
@@ -189,7 +190,7 @@ export default function TouchscreenMenu() {
               ) {
                 setChipHistory([...chipHistory, chipCount]);
               }
-              setChipCount(Object.fromEntries(chips.map((chip) => [chip.color, 0])));
+              setChipCount(Object.fromEntries(chips.map((chip) => [chip.id, 0])));
             }}
           >
             Clear
@@ -203,7 +204,7 @@ export default function TouchscreenMenu() {
             }}
             onClick={() => {
               let total = chips.reduce(
-                (acc, chip) => acc + chip.denomination * chipCount[chip.color],
+                (acc, chip) => acc + chip.denomination * chipCount[chip.id],
                 0
               );
               // todo
@@ -220,11 +221,11 @@ export default function TouchscreenMenu() {
             p="xs"
             onClick={() => {
               let total = chips.reduce(
-                (acc, chip) => acc + chip.denomination * chipCount[chip.color],
+                (acc, chip) => acc + chip.denomination * chipCount[chip.id],
                 0
               );
               setChipHistory([...chipHistory, chipCount]);
-              setChipCount(Object.fromEntries(chips.map((chip) => [chip.color, 0])));
+              setChipCount(Object.fromEntries(chips.map((chip) => [chip.id, 0])));
 
               if (settings.activeTab == "Poker" && pokerGameState != "PREROUND") {
                 emitPokerAction(total);
@@ -241,7 +242,7 @@ export default function TouchscreenMenu() {
           {chips.map((chip) => {
             return (
               <Paper
-                key={chip.color}
+                key={chip.id}
                 p={5}
                 style={{
                   backgroundColor: chip.color,
@@ -259,7 +260,7 @@ export default function TouchscreenMenu() {
                     onClick={() => {
                       setChipCount({
                         ...chipCount,
-                        [chip.color]: chipCount[chip.color] + 20,
+                        [chip.id]: chipCount[chip.id] + 20,
                       });
                     }}
                   >
@@ -275,16 +276,16 @@ export default function TouchscreenMenu() {
                       fontSize: "1.5rem",
                       fontWeight: 600,
                       fontFamily: MONOSPACE,
-                      opacity: chipCount[chip.color] === 0 ? 0.5 : 1,
+                      opacity: chipCount[chip.id] === 0 ? 0.5 : 1,
                     }}
                     onClick={() => {
                       setChipCount({
                         ...chipCount,
-                        [chip.color]: chipCount[chip.color] + 5,
+                        [chip.id]: chipCount[chip.id] + 5,
                       });
                     }}
                   >
-                    {formatMoney(chip.denomination * chipCount[chip.color])}
+                    {formatMoney(chip.denomination * chipCount[chip.id])}
                   </Button>
                 </Center>
                 <Flex direction="row" align="center" justify="center">
@@ -299,7 +300,7 @@ export default function TouchscreenMenu() {
                       onClick={() => {
                         setChipCount({
                           ...chipCount,
-                          [chip.color]: chipCount[chip.color] + 1,
+                          [chip.id]: chipCount[chip.id] + 1,
                         });
                       }}
                     >
@@ -314,16 +315,16 @@ export default function TouchscreenMenu() {
                         fontSize: "1.5rem",
                         fontWeight: 500,
                         fontFamily: MONOSPACE,
-                        opacity: chipCount[chip.color] === 0 ? 0.5 : 1,
+                        opacity: chipCount[chip.id] === 0 ? 0.5 : 1,
                       }}
                       onClick={() => {
                         setChipCount({
                           ...chipCount,
-                          [chip.color]: 0,
+                          [chip.id]: 0,
                         });
                       }}
                     >
-                      {chipCount[chip.color]}
+                      {chipCount[chip.id]}
                     </ActionIcon>
                     <ActionIcon
                       size="xl"
@@ -335,7 +336,7 @@ export default function TouchscreenMenu() {
                       onClick={() => {
                         setChipCount({
                           ...chipCount,
-                          [chip.color]: Math.max(chipCount[chip.color] - 1, 0),
+                          [chip.id]: Math.max(chipCount[chip.id] - 1, 0),
                         });
                       }}
                     >
@@ -400,7 +401,7 @@ export default function TouchscreenMenu() {
             onClick={() => {
               if (calculatorValue === 0) {
                 let total = chips.reduce(
-                  (acc, chip) => acc + chip.denomination * chipCount[chip.color],
+                  (acc, chip) => acc + chip.denomination * chipCount[chip.id],
                   0
                 );
                 setInitialCalculatorValue(total);
@@ -417,7 +418,7 @@ export default function TouchscreenMenu() {
             onClick={() => {
               if (calculatorValue === 0) {
                 let total = chips.reduce(
-                  (acc, chip) => acc + chip.denomination * chipCount[chip.color],
+                  (acc, chip) => acc + chip.denomination * chipCount[chip.id],
                   0
                 );
                 setInitialCalculatorValue(total);
@@ -435,7 +436,7 @@ export default function TouchscreenMenu() {
             onClick={() => {
               if (calculatorValue === 0) {
                 let total = chips.reduce(
-                  (acc, chip) => acc + chip.denomination * chipCount[chip.color],
+                  (acc, chip) => acc + chip.denomination * chipCount[chip.id],
                   0
                 );
                 setInitialCalculatorValue(total);
@@ -524,6 +525,7 @@ export default function TouchscreenMenu() {
             .map((rank) => {
               return (
                 <Grid.Col
+                  key={rank}
                   span={
                     !isTJQKDistinctionNeeded
                       ? rank == "T"
@@ -600,7 +602,7 @@ export default function TouchscreenMenu() {
             }
 
             return (
-              <Grid.Col span={1}>
+              <Grid.Col span={1} key={suit}>
                 <Button
                   size="xl"
                   p="xs"

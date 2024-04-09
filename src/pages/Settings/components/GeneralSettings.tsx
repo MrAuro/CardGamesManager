@@ -259,7 +259,7 @@ export default function GeneralSettings() {
           <Table.Tbody>
             {chips.map((chip, index) => {
               return (
-                <Table.Tr key={index}>
+                <Table.Tr key={chip.id}>
                   <Table.Td>
                     <ColorInput
                       defaultValue={chip.color}
@@ -340,6 +340,7 @@ export default function GeneralSettings() {
                   draft.push({
                     color: theme.colors.gray[0],
                     denomination: 0,
+                    id: crypto.randomUUID(),
                   });
                 });
               }}

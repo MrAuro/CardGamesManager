@@ -1,3 +1,4 @@
+import { UUID } from "crypto";
 import { Page } from "./State";
 
 export type Settings = {
@@ -13,6 +14,7 @@ export type Settings = {
 };
 
 export type Chip = {
+  id: UUID;
   color: string;
   denomination: number;
 };
