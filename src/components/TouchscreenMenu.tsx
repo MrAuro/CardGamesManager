@@ -151,10 +151,10 @@ export default function TouchscreenMenu() {
             )}
           </Text>
           <Flex direction="row-reverse" gap="xs">
-            {chipHistory.map((_chips: { [key: string]: number }, index) => {
+            {chipHistory.map((_chips: { [key: UUID]: number }, index) => {
               let total = 0;
-              for (const chip in _chips) {
-                total += chips.find((c) => c.color === chip)!.denomination * _chips[chip];
+              for (const [key, value] of Object.entries(_chips)) {
+                total += chips.find((chip) => chip.id === key)!.denomination * value;
               }
 
               return (
