@@ -78,22 +78,34 @@ export default function Players() {
             header={player.name}
             subtext={formatMoney(player.balance)}
             key={player.id}
-            backgroundColor={focusedPlayer === player.id ? "gray.2" : undefined}
+            styles={{
+              filter: focusedPlayer
+                ? focusedPlayer
+                  ? `opacity(${focusedPlayer === player.id ? 1 : 0.4}) blur(${
+                      focusedPlayer === player.id ? 0 : 3
+                    }px)`
+                  : undefined
+                : undefined,
+            }}
             rightSection={
               <>
                 {settings.touchscreenMenu && (
-                  <Tooltip openDelay={300} label="Focus Player">
+                  <Tooltip
+                    openDelay={300}
+                    label={focusedPlayer ? "Unfocus" : "Focus"}
+                    position="left"
+                  >
                     <ActionIcon
                       variant="transparent"
                       color="dark.0"
                       size="xl"
                       radius="md"
-                      disabled={focusedPlayer === player.id}
                       onClick={() => {
-                        setFocusedPlayer(player.id);
+                        if (focusedPlayer === player.id) setFocusedPlayer(null);
+                        else setFocusedPlayer(player.id);
                       }}
                     >
-                      <IconTarget />
+                      {focusedPlayer === player.id ? <IconTargetOff /> : <IconTarget />}
                     </ActionIcon>
                   </Tooltip>
                 )}

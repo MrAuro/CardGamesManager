@@ -78,8 +78,8 @@ export default function TouchscreenMenu() {
   const pokerGameState = useRecoilValue(POKER_GAME_STATE).gameState;
 
   const blackjackPlayers = useRecoilValue(BLACKJACK_PLAYERS_STATE);
-  const [players, setPlayers] = useRecoilImmerState(PLAYERS_STATE);
-  const focusedPlayer = useRecoilValue(FOCUSED_PLAYER);
+  const [, setPlayers] = useRecoilImmerState(PLAYERS_STATE);
+  const [focusedPlayer, setFocusedPlayer] = useRecoilState(FOCUSED_PLAYER);
 
   const [foldConfirm, setFoldConfirm] = useState(false);
 
@@ -241,6 +241,7 @@ export default function TouchscreenMenu() {
                       player.balance = total;
                     }
                   });
+                  setFocusedPlayer(null);
                 } else {
                   alert(`Focus a player before setting their balance.`);
                 }
