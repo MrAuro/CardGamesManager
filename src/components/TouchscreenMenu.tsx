@@ -1,5 +1,6 @@
 import {
   BLACKJACK_GAME_STATE,
+  BLACKJACK_PLAYERS_STATE,
   CHIPS_STATE,
   KEYBINDINGS_STATE,
   POKER_GAME_STATE,
@@ -72,7 +73,32 @@ export default function TouchscreenMenu() {
   const blackjackGameState = useRecoilValue(BLACKJACK_GAME_STATE).gameState;
   const pokerGameState = useRecoilValue(POKER_GAME_STATE).gameState;
 
+  const blackjackPlayers = useRecoilValue(BLACKJACK_PLAYERS_STATE);
+
   const [foldConfirm, setFoldConfirm] = useState(false);
+
+  let isTJQKDistinctionNeeded = false;
+  if (settings.activeTab == "Poker") {
+    isTJQKDistinctionNeeded = true;
+  }
+
+  if (settings.activeTab == "Blackjack") {
+    if (
+      blackjackPlayers.some((player) => {
+        if (
+          player.sidebets.betBehind?.bet > 0 ||
+          player.sidebets.perfectPairs > 0 ||
+          player.sidebets.twentyOnePlusThree > 0
+        ) {
+          return true;
+        } else {
+          return false;
+        }
+      })
+    ) {
+      isTJQKDistinctionNeeded = true;
+    }
+  }
 
   useEffect(() => {
     if (Object.keys(chipCount).length !== chips.length) {
@@ -487,55 +513,78 @@ export default function TouchscreenMenu() {
         }}
       >
         <Grid columns={9} grow gutter="xs">
-          {["A", "2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K"].map((rank) => {
-            return (
-              <Grid.Col span={["A", "2", "3", "4", "5", "6", "7", "8", "9"].includes(rank) ? 3 : 2}>
-                <Button
-                  size="xl"
-                  p="xs"
-                  color="gray"
-                  fullWidth
-                  style={{
-                    fontSize: "1.75rem",
-                    fontWeight: 700,
-                  }}
-                  onClick={() => {
-                    // This is hacky, but it works
-                    // We emulate a keydown event to trigger the keybinding, rather than adding a ton of
-                    // additional logic to multiple components
-
-                    let targetScope: Scope = "None";
-                    if (settings.activeTab == "Poker" && pokerGameState != "PREROUND") {
-                      targetScope = "Poker Round";
-                    } else if (settings.activeTab == "Blackjack" && blackjackGameState == "ROUND") {
-                      targetScope = "Blackjack Round";
-                    }
-                    let keybinding = keybindings.find((keybinding) => {
-                      if (
-                        keybinding.action == rank &&
-                        keybinding.scope == targetScope &&
-                        keybinding.selector == "None"
-                      ) {
-                        return true;
-                      } else {
-                        return false;
-                      }
-                    });
-
-                    if (keybinding) {
-                      document.dispatchEvent(new KeyboardEvent("keydown", { key: keybinding.key }));
-                    } else {
-                      alert(
-                        `Missing keybinding for scope: "${targetScope}" and action: "${rank}" and selector: "None". Add before using this button.`
-                      );
-                    }
-                  }}
+          {["A", "2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K"]
+            .filter((suit) => {
+              if (!isTJQKDistinctionNeeded && ["J", "Q", "K"].includes(suit)) {
+                return false;
+              } else {
+                return true;
+              }
+            })
+            .map((rank) => {
+              return (
+                <Grid.Col
+                  span={
+                    !isTJQKDistinctionNeeded
+                      ? rank == "T"
+                        ? 9
+                        : 3
+                      : ["A", "2", "3", "4", "5", "6", "7", "8", "9"].includes(rank)
+                      ? 3
+                      : 2
+                  }
                 >
-                  {rank}
-                </Button>
-              </Grid.Col>
-            );
-          })}
+                  <Button
+                    size="xl"
+                    p="xs"
+                    color="gray"
+                    fullWidth
+                    style={{
+                      fontSize: "1.75rem",
+                      fontWeight: 700,
+                    }}
+                    onClick={() => {
+                      // This is hacky, but it works
+                      // We emulate a keydown event to trigger the keybinding, rather than adding a ton of
+                      // additional logic to multiple components
+
+                      let targetScope: Scope = "None";
+                      if (settings.activeTab == "Poker" && pokerGameState != "PREROUND") {
+                        targetScope = "Poker Round";
+                      } else if (
+                        settings.activeTab == "Blackjack" &&
+                        blackjackGameState == "ROUND"
+                      ) {
+                        targetScope = "Blackjack Round";
+                      }
+                      let keybinding = keybindings.find((keybinding) => {
+                        if (
+                          keybinding.action == rank &&
+                          keybinding.scope == targetScope &&
+                          keybinding.selector == "None"
+                        ) {
+                          return true;
+                        } else {
+                          return false;
+                        }
+                      });
+
+                      if (keybinding) {
+                        document.dispatchEvent(
+                          new KeyboardEvent("keydown", { key: keybinding.key })
+                        );
+                      } else {
+                        alert(
+                          `Missing keybinding for scope: "${targetScope}" and action: "${rank}" and selector: "None". Add before using this button.`
+                        );
+                      }
+                    }}
+                  >
+                    {rank}
+                  </Button>
+                </Grid.Col>
+              );
+            })}
         </Grid>
         <Divider my="xs" />
         <Grid columns={5} grow>
