@@ -4,15 +4,22 @@ import {
   PLAYERS_STATE,
   POKER_GAME_STATE,
   POKER_PLAYERS_STATE,
+  SETTINGS_STATE,
 } from "@/Root";
 import GenericPlayerCard from "@/components/GenericPlayerCard";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
-import { ActionIcon, Button, Flex } from "@mantine/core";
-import { IconPencil } from "@tabler/icons-react";
+import { ActionIcon, Button, Flex, Tooltip } from "@mantine/core";
+import { IconPencil, IconTarget, IconTargetOff } from "@tabler/icons-react";
 import { useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { atom, useRecoilState, useRecoilValue } from "recoil";
 import PlayerModal from "./components/PlayerModal";
 import { formatMoney } from "@/utils/MoneyHelper";
+import { UUID } from "crypto";
+
+export const FOCUSED_PLAYER = atom<UUID | null>({
+  key: "FOCUSED_PLAYER",
+  default: null,
+});
 
 export default function Players() {
   const [players, setPlayers] = useRecoilImmerState(PLAYERS_STATE);
@@ -27,6 +34,8 @@ export default function Players() {
   const blackjackGame = useRecoilValue(BLACKJACK_GAME_STATE);
 
   const [removeAllConfirm, setRemoveAllConfirm] = useState(false);
+  const [focusedPlayer, setFocusedPlayer] = useRecoilState(FOCUSED_PLAYER);
+  const settings = useRecoilValue(SETTINGS_STATE);
 
   return (
     <>
@@ -69,20 +78,39 @@ export default function Players() {
             header={player.name}
             subtext={formatMoney(player.balance)}
             key={player.id}
+            backgroundColor={focusedPlayer === player.id ? "gray.2" : undefined}
             rightSection={
-              <ActionIcon
-                variant="transparent"
-                color="dark.0"
-                size="xl"
-                radius="md"
-                onClick={() => {
-                  setPlayerIdToEdit(player.id);
-                  setPlayerModalTitle("Edit Player");
-                  setPlayerModalOpened(true);
-                }}
-              >
-                <IconPencil />
-              </ActionIcon>
+              <>
+                {settings.touchscreenMenu && (
+                  <Tooltip openDelay={300} label="Focus Player">
+                    <ActionIcon
+                      variant="transparent"
+                      color="dark.0"
+                      size="xl"
+                      radius="md"
+                      disabled={focusedPlayer === player.id}
+                      onClick={() => {
+                        setFocusedPlayer(player.id);
+                      }}
+                    >
+                      <IconTarget />
+                    </ActionIcon>
+                  </Tooltip>
+                )}
+                <ActionIcon
+                  variant="transparent"
+                  color="dark.0"
+                  size="xl"
+                  radius="md"
+                  onClick={() => {
+                    setPlayerIdToEdit(player.id);
+                    setPlayerModalTitle("Edit Player");
+                    setPlayerModalOpened(true);
+                  }}
+                >
+                  <IconPencil />
+                </ActionIcon>
+              </>
             }
           />
         ))}

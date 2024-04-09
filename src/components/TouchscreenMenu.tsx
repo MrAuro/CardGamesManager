@@ -3,6 +3,7 @@ import {
   BLACKJACK_PLAYERS_STATE,
   CHIPS_STATE,
   KEYBINDINGS_STATE,
+  PLAYERS_STATE,
   POKER_GAME_STATE,
   SETTINGS_STATE,
 } from "@/Root";
@@ -32,6 +33,8 @@ import { useEffect, useState } from "react";
 import { atom, useRecoilState, useRecoilValue } from "recoil";
 import { CHIP_BREAKDOWN_AMOUNT, CHIP_BREAKDOWN_OPEN } from "./ChipBreakdown";
 import { UUID } from "crypto";
+import { useRecoilImmerState } from "@/utils/RecoilImmer";
+import { FOCUSED_PLAYER } from "@/pages/Players";
 
 const CHIP_COUNT = atom<{ [key: UUID]: number }>({
   key: "CHIP_COUNT",
@@ -75,6 +78,8 @@ export default function TouchscreenMenu() {
   const pokerGameState = useRecoilValue(POKER_GAME_STATE).gameState;
 
   const blackjackPlayers = useRecoilValue(BLACKJACK_PLAYERS_STATE);
+  const [players, setPlayers] = useRecoilImmerState(PLAYERS_STATE);
+  const focusedPlayer = useRecoilValue(FOCUSED_PLAYER);
 
   const [foldConfirm, setFoldConfirm] = useState(false);
 
@@ -219,6 +224,7 @@ export default function TouchscreenMenu() {
             color="green"
             size="xl"
             p="xs"
+            disabled={settings.activeTab == "Players" && !focusedPlayer}
             onClick={() => {
               let total = chips.reduce(
                 (acc, chip) => acc + chip.denomination * chipCount[chip.id],
@@ -227,14 +233,25 @@ export default function TouchscreenMenu() {
               setChipHistory([...chipHistory, chipCount]);
               setChipCount(Object.fromEntries(chips.map((chip) => [chip.id, 0])));
 
-              if (settings.activeTab == "Poker" && pokerGameState != "PREROUND") {
+              if (settings.activeTab == "Players") {
+                if (focusedPlayer) {
+                  setPlayers((draft) => {
+                    const player = draft.find((p) => p.id === focusedPlayer);
+                    if (player) {
+                      player.balance = total;
+                    }
+                  });
+                } else {
+                  alert(`Focus a player before setting their balance.`);
+                }
+              } else if (settings.activeTab == "Poker" && pokerGameState != "PREROUND") {
                 emitPokerAction(total);
               } else if (settings.activeTab == "Blackjack" && blackjackGameState == "ROUND") {
                 emitBjAction(total);
               }
             }}
           >
-            Bet
+            {settings.activeTab == "Players" ? "Set Balance" : "Bet"}
           </Button>
         </Group>
         <Divider my="xs" />
