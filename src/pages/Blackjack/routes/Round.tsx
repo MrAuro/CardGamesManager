@@ -60,7 +60,7 @@ export const CARD_SELECTOR_STATE = atom<{
 });
 
 export const { useBjActionListener, emitBjAction } = createEvent("bjAction")<
-  "stand" | "double" | "split" | number
+  "stand" | "double" | "split" | "forcebust" | "forceblackjack" | number
 >();
 
 export default function Round() {
@@ -91,6 +91,30 @@ export default function Round() {
     if (action === "split") {
       splitHand(blackjackGame.currentTurn);
       return;
+    }
+
+    if (action === "forcebust") {
+      setBlackjackPlayers((draft) => {
+        let blackjackPlayer = draft.find((p) => p.id == blackjackGame.currentTurn);
+
+        if (blackjackPlayer) {
+          blackjackPlayer.cards = ["T-", "T-", "T-"];
+        }
+      });
+
+      nextTurn();
+    }
+
+    if (action === "forceblackjack") {
+      setBlackjackPlayers((draft) => {
+        let blackjackPlayer = draft.find((p) => p.id == blackjackGame.currentTurn);
+
+        if (blackjackPlayer) {
+          blackjackPlayer.cards = ["A-", "T-"];
+        }
+      });
+
+      nextTurn();
     }
 
     if (typeof action === "number") {

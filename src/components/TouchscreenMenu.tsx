@@ -726,6 +726,28 @@ export default function TouchscreenMenu() {
               Split
             </Button>
           </Group>
+          <Group grow mt="sm">
+            <Button
+              size="xl"
+              color="red"
+              variant="light"
+              onClick={() => {
+                emitBjAction("forcebust");
+              }}
+            >
+              Bust
+            </Button>
+            <Button
+              size="xl"
+              color="yellow"
+              variant="light"
+              onClick={() => {
+                emitBjAction("forceblackjack");
+              }}
+            >
+              Blackjack
+            </Button>
+          </Group>
         </Paper>
       )}
     </ScrollArea>
