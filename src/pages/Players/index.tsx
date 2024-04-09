@@ -1,10 +1,16 @@
-import { BLACKJACK_PLAYERS_STATE, PLAYERS_STATE } from "@/Root";
+import {
+  BLACKJACK_GAME_STATE,
+  BLACKJACK_PLAYERS_STATE,
+  PLAYERS_STATE,
+  POKER_GAME_STATE,
+  POKER_PLAYERS_STATE,
+} from "@/Root";
 import GenericPlayerCard from "@/components/GenericPlayerCard";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import { ActionIcon, Button, Flex } from "@mantine/core";
 import { IconPencil } from "@tabler/icons-react";
 import { useState } from "react";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import PlayerModal from "./components/PlayerModal";
 import { formatMoney } from "@/utils/MoneyHelper";
 
@@ -16,6 +22,11 @@ export default function Players() {
   const [playerModalTitle, setPlayerModalTitle] = useState("Add Player");
 
   const [blackjackPlayers] = useRecoilState(BLACKJACK_PLAYERS_STATE);
+  const [pokerPlayers] = useRecoilState(POKER_PLAYERS_STATE);
+  const pokerGame = useRecoilValue(POKER_GAME_STATE);
+  const blackjackGame = useRecoilValue(BLACKJACK_GAME_STATE);
+
+  const [removeAllConfirm, setRemoveAllConfirm] = useState(false);
 
   return (
     <>
@@ -40,7 +51,11 @@ export default function Players() {
         }}
         onDelete={() => {
           setPlayerModalOpened(false);
-          if (playerIdToEdit && blackjackPlayers.every((p) => p.id !== playerIdToEdit))
+          if (
+            playerIdToEdit &&
+            blackjackPlayers.every((p) => p.id !== playerIdToEdit) &&
+            pokerPlayers.every((p) => p.id !== playerIdToEdit)
+          )
             setPlayers((draft) => {
               const index = draft.findIndex((p) => p.id === playerIdToEdit);
               draft.splice(index, 1);
@@ -110,6 +125,21 @@ export default function Players() {
         }}
       >
         Set Max Balances
+      </Button>
+      <Button
+        fullWidth
+        my="sm"
+        variant="light"
+        color="red"
+        disabled={pokerGame.gameState !== "PREROUND" || blackjackGame.gameState !== "PREROUND"}
+        onClick={() => {
+          if (removeAllConfirm) {
+            setPlayers([]);
+            setRemoveAllConfirm(false);
+          } else setRemoveAllConfirm(true);
+        }}
+      >
+        {removeAllConfirm ? "Are you sure?" : "Remove All Players"}
       </Button>
     </>
   );
