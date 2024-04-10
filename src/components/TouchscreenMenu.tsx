@@ -504,6 +504,7 @@ export default function TouchscreenMenu() {
                   <Button
                     color={chip.color}
                     autoContrast
+                    p={2}
                     style={{
                       fontSize: "1.5rem",
                       fontWeight: 600,
@@ -728,7 +729,9 @@ export default function TouchscreenMenu() {
             disabled={calculatorValue === 0}
             p={0}
             onClick={() => {
-              setCalculatorHistory([...calculatorHistory, calculatorValue]);
+              if (!calculatorHistory.includes(calculatorValue)) {
+                setCalculatorHistory([...calculatorHistory, calculatorValue]);
+              }
               setCalculatorValue(0);
               setInitialCalculatorValue(0);
             }}
