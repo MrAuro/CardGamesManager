@@ -1,7 +1,6 @@
 import { HOTKEY_SELECTOR_A_ENABLED, HOTKEY_SELECTOR_B_ENABLED } from "@/App";
 import {
   BLACKJACK_GAME_STATE,
-  BLACKJACK_PLAYERS_STATE,
   CHIPS_STATE,
   KEYBINDINGS_STATE,
   PLAYERS_STATE,
@@ -13,7 +12,6 @@ import { FOCUSED_PLAYER } from "@/pages/Players";
 import { emitPokerAction } from "@/pages/Poker/routes/Round";
 import { CardRank, CardSuit } from "@/types/Card";
 import { Scope } from "@/types/Keybindings";
-import { suitToIcon } from "@/utils/CardHelper";
 import { formatMoney } from "@/utils/MoneyHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import {
@@ -87,7 +85,6 @@ export default function TouchscreenMenu() {
   const blackjackGameState = useRecoilValue(BLACKJACK_GAME_STATE).gameState;
   const pokerGameState = useRecoilValue(POKER_GAME_STATE).gameState;
 
-  const blackjackPlayers = useRecoilValue(BLACKJACK_PLAYERS_STATE);
   const [, setPlayers] = useRecoilImmerState(PLAYERS_STATE);
   const [focusedPlayer, setFocusedPlayer] = useRecoilState(FOCUSED_PLAYER);
 
@@ -223,29 +220,6 @@ export default function TouchscreenMenu() {
       });
     }
   });
-
-  let isTJQKDistinctionNeeded = false;
-  if (settings.activeTab == "Poker") {
-    isTJQKDistinctionNeeded = true;
-  }
-
-  if (settings.activeTab == "Blackjack") {
-    if (
-      blackjackPlayers.some((player) => {
-        if (
-          player.sidebets.betBehind?.bet > 0 ||
-          player.sidebets.perfectPairs > 0 ||
-          player.sidebets.twentyOnePlusThree > 0
-        ) {
-          return true;
-        } else {
-          return false;
-        }
-      })
-    ) {
-      isTJQKDistinctionNeeded = true;
-    }
-  }
 
   useEffect(() => {
     if (Object.keys(chipCount).length !== chips.length) {
