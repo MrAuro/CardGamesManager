@@ -1,3 +1,4 @@
+import { HOTKEY_SELECTOR_A_ENABLED, HOTKEY_SELECTOR_B_ENABLED } from "@/App";
 import {
   BLACKJACK_GAME_STATE,
   BLACKJACK_PLAYERS_STATE,
@@ -8,17 +9,18 @@ import {
   SETTINGS_STATE,
 } from "@/Root";
 import { emitBjAction } from "@/pages/Blackjack/routes/Round";
+import { FOCUSED_PLAYER } from "@/pages/Players";
 import { emitPokerAction } from "@/pages/Poker/routes/Round";
 import { CardSuit } from "@/types/Card";
 import { Scope } from "@/types/Keybindings";
 import { suitToIcon } from "@/utils/CardHelper";
 import { formatMoney } from "@/utils/MoneyHelper";
+import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import {
   ActionIcon,
   Badge,
   Button,
   Center,
-  Container,
   Divider,
   Flex,
   Grid,
@@ -30,16 +32,12 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { IconBackspaceFilled, IconMinus, IconPlus } from "@tabler/icons-react";
+import { UUID } from "crypto";
+import cloneDeep from "lodash/cloneDeep";
 import { useEffect, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 import { atom, useRecoilState, useRecoilValue } from "recoil";
 import { CHIP_BREAKDOWN_AMOUNT, CHIP_BREAKDOWN_OPEN } from "./ChipBreakdown";
-import { UUID } from "crypto";
-import { useRecoilImmerState } from "@/utils/RecoilImmer";
-import { FOCUSED_PLAYER } from "@/pages/Players";
-import { useHotkeys } from "react-hotkeys-hook";
-import { HOTKEY_SELECTOR_A_ENABLED, HOTKEY_SELECTOR_B_ENABLED } from "@/App";
-import findLastIndex from "lodash/findLastIndex";
-import cloneDeep from "lodash/cloneDeep";
 
 const CHIP_COUNT = atom<{ [key: UUID]: number }>({
   key: "CHIP_COUNT",
