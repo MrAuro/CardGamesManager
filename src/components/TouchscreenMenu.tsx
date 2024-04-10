@@ -18,6 +18,7 @@ import {
   Badge,
   Button,
   Center,
+  Container,
   Divider,
   Flex,
   Grid,
@@ -35,6 +36,10 @@ import { CHIP_BREAKDOWN_AMOUNT, CHIP_BREAKDOWN_OPEN } from "./ChipBreakdown";
 import { UUID } from "crypto";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import { FOCUSED_PLAYER } from "@/pages/Players";
+import { useHotkeys } from "react-hotkeys-hook";
+import { HOTKEY_SELECTOR_A_ENABLED, HOTKEY_SELECTOR_B_ENABLED } from "@/App";
+import findLastIndex from "lodash/findLastIndex";
+import cloneDeep from "lodash/cloneDeep";
 
 const CHIP_COUNT = atom<{ [key: UUID]: number }>({
   key: "CHIP_COUNT",
@@ -53,6 +58,13 @@ const CALCULATOR_VALUE = atom<number>({
 
 const CALCULATOR_HISTORY = atom<number[]>({
   key: "CALCULATOR_HISTORY",
+  default: [],
+});
+
+// When adding chips via hotkeys, we allow the user to add duplicates, so like
+// 5w3b1g3g => 5 white, 3 blue, 4 green
+const HOTKEY_CHIP_COUNT = atom<{ chipId: UUID; amount: number }[]>({
+  key: "HOTKEY_CHIP_COUNT",
   default: [],
 });
 
@@ -82,6 +94,137 @@ export default function TouchscreenMenu() {
   const [focusedPlayer, setFocusedPlayer] = useRecoilState(FOCUSED_PLAYER);
 
   const [foldConfirm, setFoldConfirm] = useState(false);
+
+  const [hotkeyChipCount, setHotkeyChipCount] = useRecoilState(HOTKEY_CHIP_COUNT);
+
+  const selectorA = useRecoilValue(HOTKEY_SELECTOR_A_ENABLED);
+  const selectorB = useRecoilValue(HOTKEY_SELECTOR_B_ENABLED);
+
+  keybindings.forEach((keybinding) => {
+    if (keybinding.scope == "Chips Menu") {
+      useHotkeys(keybinding.key, () => {
+        if (settings.activeTab == "Settings") return;
+        if (keybinding.selector == "A" && !selectorA) return;
+        if (keybinding.selector == "B" && !selectorB) return;
+
+        if (keybinding.selector == "None" && (selectorA || selectorB)) return;
+
+        switch (keybinding.action) {
+          case "Remove Last Chip":
+            {
+              let lastChipIndex = hotkeyChipCount.length - 1;
+              if (lastChipIndex !== -1) {
+                setHotkeyChipCount((draft) => {
+                  let newDraft = cloneDeep(draft);
+                  if (newDraft[lastChipIndex].amount == 1) {
+                    newDraft.splice(lastChipIndex, 1);
+                  } else {
+                    newDraft[lastChipIndex].amount = Math.trunc(
+                      newDraft[lastChipIndex].amount / 10
+                    );
+
+                    if (newDraft[lastChipIndex].amount == 0) {
+                      newDraft.splice(lastChipIndex, 1);
+                    }
+                  }
+                  return newDraft;
+                });
+              } else {
+                setHotkeyChipCount((draft) => {
+                  let newDraft = cloneDeep(draft);
+                  newDraft.pop();
+                  return newDraft;
+                });
+              }
+            }
+            break;
+
+          case "Flatten":
+            {
+              let tempChipCount: { [key: UUID]: number } = {};
+              hotkeyChipCount.forEach((c) => {
+                tempChipCount[c.chipId] = 0;
+              });
+
+              hotkeyChipCount.forEach((c) => {
+                tempChipCount[c.chipId] += Math.abs(c.amount);
+              });
+              setChipCount(tempChipCount);
+              setHotkeyChipCount([]);
+            }
+            break;
+
+          case "Clear":
+            {
+              setChipCount(Object.fromEntries(chips.map((chip) => [chip.id, 0])));
+              setHotkeyChipCount([]);
+            }
+            break;
+
+          case "0":
+          case "1":
+          case "2":
+          case "3":
+          case "4":
+          case "5":
+          case "6":
+          case "7":
+          case "8":
+          case "9":
+            {
+              let tempHotkeyChipCount = cloneDeep(hotkeyChipCount);
+              let lastEmpty = tempHotkeyChipCount.length - 1;
+              if (lastEmpty !== -1) {
+                if (tempHotkeyChipCount[lastEmpty].amount != -1) {
+                  tempHotkeyChipCount[lastEmpty].amount =
+                    (tempHotkeyChipCount[lastEmpty].amount as number) * 10 +
+                    parseInt(keybinding.action);
+                } else {
+                  if (keybinding.action == "0") {
+                    tempHotkeyChipCount[lastEmpty].amount = 10;
+                  } else {
+                    tempHotkeyChipCount[lastEmpty].amount = parseInt(keybinding.action);
+                  }
+                }
+              }
+              setHotkeyChipCount(tempHotkeyChipCount);
+            }
+            break;
+
+          default: {
+            // #f8f9fa ($3) (36a518d4-f37c-41f4-a2e7-026c3b9da6c8) and we want: 36a518d4-f37c-41f4-a2e7-026c3b9da6c8
+            const uuidParseRegex = /^#[0123456789abcdef]{6}\s\(\$.+\)\s\((.+)\)$/;
+            let key = keybinding.action.match(uuidParseRegex)![1] as UUID;
+            let chip = chips.find((chip) => chip.id === key);
+            if (chip) {
+              let tempHotkeyChipCount = cloneDeep(hotkeyChipCount);
+              let lastEmpty = tempHotkeyChipCount.length - 1;
+
+              if (lastEmpty == -1) {
+                lastEmpty = hotkeyChipCount.length;
+                tempHotkeyChipCount.push({
+                  chipId: key,
+                  amount: -1,
+                });
+              } else {
+                if (tempHotkeyChipCount[lastEmpty].chipId == key) {
+                  tempHotkeyChipCount[lastEmpty].amount =
+                    Math.abs(tempHotkeyChipCount[lastEmpty].amount as number) + 1;
+                } else {
+                  lastEmpty = hotkeyChipCount.length;
+                  tempHotkeyChipCount.push({
+                    chipId: key,
+                    amount: -1,
+                  });
+                }
+              }
+              setHotkeyChipCount(tempHotkeyChipCount);
+            }
+          }
+        }
+      });
+    }
+  });
 
   let isTJQKDistinctionNeeded = false;
   if (settings.activeTab == "Poker") {
@@ -255,6 +398,79 @@ export default function TouchscreenMenu() {
             {settings.activeTab == "Players" ? "Set Balance" : "Bet"}
           </Button>
         </Group>
+        {hotkeyChipCount.length > 0 && (
+          <>
+            <Divider my="xs" />
+            <Grid>
+              <Grid.Col
+                span={9}
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  flexWrap: "wrap",
+                  gap: "0.5rem",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                {hotkeyChipCount.map((c, i) => {
+                  return (
+                    <Button
+                      key={i}
+                      autoContrast
+                      mr="xs"
+                      size="compact-xl"
+                      color={
+                        (chips.find((chip) => chip.id === c.chipId) || { color: "blue" }).color
+                      }
+                      onClick={() => {
+                        setHotkeyChipCount((draft) => {
+                          let newDraft = cloneDeep(draft);
+                          newDraft.splice(i, 1);
+                          return newDraft;
+                        });
+                      }}
+                      style={{
+                        cursor: "pointer",
+                        userSelect: "none",
+                      }}
+                    >
+                      {`${c.amount}`.replace(/-1/g, "1")}
+                    </Button>
+                  );
+                })}
+              </Grid.Col>
+              <Grid.Col
+                span={3}
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "end",
+                  alignItems: "center",
+                }}
+              >
+                <Button
+                  size="xl"
+                  m={0}
+                  onClick={() => {
+                    let tempChipCount: { [key: UUID]: number } = {};
+                    hotkeyChipCount.forEach((c) => {
+                      tempChipCount[c.chipId] = 0;
+                    });
+
+                    hotkeyChipCount.forEach((c) => {
+                      tempChipCount[c.chipId] += Math.abs(c.amount);
+                    });
+                    setChipCount(tempChipCount);
+                    setHotkeyChipCount([]);
+                  }}
+                >
+                  Set
+                </Button>
+              </Grid.Col>
+            </Grid>
+          </>
+        )}
         <Divider my="xs" />
         <SimpleGrid cols={3} spacing="xs">
           {chips.map((chip) => {

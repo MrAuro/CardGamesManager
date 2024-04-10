@@ -512,7 +512,7 @@ export default function GeneralSettings() {
                     {keyEditing === keybinding.id ? (
                       <Select
                         searchable
-                        data={getActions(keybinding.scope)}
+                        data={getActions(keybinding.scope, chips)}
                         defaultValue={keybinding.action}
                         allowDeselect={false}
                         onChange={(value) => saveAction(keybinding.id, value as string)}

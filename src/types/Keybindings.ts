@@ -1,6 +1,8 @@
 // conditional types based on Scope
 
+import { formatMoney } from "@/utils/MoneyHelper";
 import { CardRank_NOEMPTY, CardSuit_NOEMPTY } from "./Card";
+import { Chip } from "./Settings";
 
 export type CardInputs =
   | CardRank_NOEMPTY
@@ -10,6 +12,7 @@ export type CardInputs =
 export type Scope =
   | "None"
   | "Selectors"
+  | "Chips Menu"
   | "Blackjack PreRound"
   | "Blackjack Round"
   | "Blackjack PostRound"
@@ -18,6 +21,7 @@ export type Scope =
 export const Scopes: Scope[] = [
   "None",
   "Selectors",
+  "Chips Menu",
   "Blackjack PreRound",
   "Blackjack Round",
   "Blackjack PostRound",
@@ -53,6 +57,23 @@ export type PokerRoundActions =
   | "Remove Last Card"
   | "Draw Random Card";
 
+type ChipTitle = `${string} ${string} (${string})`;
+export type ChipsMenuActions =
+  | "Flatten"
+  | "Clear"
+  | "Remove Last Chip"
+  | "0"
+  | "1"
+  | "2"
+  | "3"
+  | "4"
+  | "5"
+  | "6"
+  | "7"
+  | "8"
+  | "9"
+  | ChipTitle;
+
 export type Keybinding = {
   id: string;
   key: string;
@@ -61,6 +82,10 @@ export type Keybinding = {
   | {
       action: SelectorsActions;
       scope: "Selectors";
+    }
+  | {
+      action: ChipsMenuActions;
+      scope: "Chips Menu";
     }
   | {
       action: BlackjackPreRoundActions;
@@ -95,10 +120,30 @@ export const availableCards = availableRanks.flatMap((rank) =>
   availableSuits.map((suit) => `${rank}${suit}`)
 );
 
-export function getActions(scope: Scope): string[] {
+export function getActions(scope: Scope, chips: Chip[]): string[] {
   switch (scope) {
     case "Selectors":
       return ["A (hold)", "A (toggle)", "B (hold)", "B (toggle)"];
+    case "Chips Menu":
+      return [
+        "Move to Calculator",
+        "Bet/Raise/Set Balance",
+        "Clear",
+        "Remove Last Chip",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        ...chips.map(
+          (chip) => `${chip.color} (${formatMoney(chip.denomination, true, true)}) (${chip.id})`
+        ),
+      ];
     case "Blackjack PreRound":
       return ["Start Game"];
     case "Blackjack Round":
