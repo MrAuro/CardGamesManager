@@ -16,6 +16,7 @@ import { CARD_SELECTOR_STATE } from "../routes/Round";
 import { getCardTotal } from "@/utils/BlackjackHelper";
 import { useScrollIntoView } from "@mantine/hooks";
 import { useEffect } from "react";
+import { BLACKJACK_GAME_STATE } from "@/Root";
 
 export default function DealerCard({
   cards,
@@ -40,6 +41,8 @@ export default function DealerCard({
     offset: 100,
     duration: 500,
   });
+
+  const [blackjackGame, setBlackjackGame] = useRecoilState(BLACKJACK_GAME_STATE);
 
   useEffect(() => {
     if (isActive) {
@@ -128,7 +131,16 @@ export default function DealerCard({
               Next Turn
             </Button>
           ) : (
-            <Button disabled={!isActive} fullWidth>
+            <Button
+              disabled={!isActive}
+              fullWidth
+              onClick={() => {
+                setBlackjackGame({
+                  ...blackjackGame,
+                  dealerCards: [...blackjackGame.dealerCards, "--"],
+                });
+              }}
+            >
               Add Card
             </Button>
           )}
