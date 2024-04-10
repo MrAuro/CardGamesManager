@@ -470,7 +470,7 @@ export default function TouchscreenMenu() {
           </>
         )}
         <Divider my="xs" />
-        <SimpleGrid cols={4}>
+        <SimpleGrid cols={4} spacing="xs" verticalSpacing="xs">
           {chips.map((chip) => {
             return (
               <Paper
