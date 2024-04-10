@@ -11,7 +11,7 @@ import {
 import { emitBjAction } from "@/pages/Blackjack/routes/Round";
 import { FOCUSED_PLAYER } from "@/pages/Players";
 import { emitPokerAction } from "@/pages/Poker/routes/Round";
-import { CardSuit } from "@/types/Card";
+import { CardRank, CardSuit } from "@/types/Card";
 import { Scope } from "@/types/Keybindings";
 import { suitToIcon } from "@/utils/CardHelper";
 import { formatMoney } from "@/utils/MoneyHelper";
@@ -285,7 +285,7 @@ export default function TouchscreenMenu() {
       >
         <Flex direction="row" align="center" gap="xs">
           <Text
-            size="xl"
+            size="lg"
             fw={800}
             style={{
               fontFamily: "monospace",
@@ -326,7 +326,7 @@ export default function TouchscreenMenu() {
         <Group grow>
           <Button
             color="red"
-            size="xl"
+            size="lg"
             onClick={() => {
               // Check if we have an identical chip count in history. If we don't, then add it.
               if (
@@ -343,7 +343,7 @@ export default function TouchscreenMenu() {
           </Button>
           <Button
             color="blue"
-            size="xl"
+            size="lg"
             p="xs"
             style={{
               fontSize: "1rem",
@@ -363,7 +363,7 @@ export default function TouchscreenMenu() {
           </Button>
           <Button
             color="green"
-            size="xl"
+            size="lg"
             p="xs"
             disabled={settings.activeTab == "Players" && !focusedPlayer}
             onClick={() => {
@@ -448,7 +448,7 @@ export default function TouchscreenMenu() {
                 }}
               >
                 <Button
-                  size="xl"
+                  size="lg"
                   m={0}
                   onClick={() => {
                     let tempChipCount: { [key: UUID]: number } = {};
@@ -470,7 +470,7 @@ export default function TouchscreenMenu() {
           </>
         )}
         <Divider my="xs" />
-        <SimpleGrid cols={3} spacing="xs">
+        <SimpleGrid cols={4}>
           {chips.map((chip) => {
             return (
               <Paper
@@ -523,7 +523,7 @@ export default function TouchscreenMenu() {
                 <Flex direction="row" align="center" justify="center">
                   <SimpleGrid cols={3} spacing="xs">
                     <ActionIcon
-                      size="xl"
+                      size="lg"
                       color={chip.color}
                       autoContrast
                       style={{
@@ -542,7 +542,7 @@ export default function TouchscreenMenu() {
                       color={chip.color}
                       autoContrast
                       variant="filled"
-                      size="xl"
+                      size="lg"
                       style={{
                         fontSize: "1.5rem",
                         fontWeight: 500,
@@ -559,7 +559,7 @@ export default function TouchscreenMenu() {
                       {chipCount[chip.id]}
                     </ActionIcon>
                     <ActionIcon
-                      size="xl"
+                      size="lg"
                       color={chip.color}
                       autoContrast
                       style={{
@@ -592,7 +592,7 @@ export default function TouchscreenMenu() {
       >
         <Flex direction="row" align="center" gap="xs">
           <Text
-            size="xl"
+            size="lg"
             fw={800}
             style={{
               fontFamily: "monospace",
@@ -627,9 +627,9 @@ export default function TouchscreenMenu() {
             })}
           </Flex>
         </Flex>
-        <SimpleGrid cols={4}>
+        <SimpleGrid cols={4} spacing="xs" verticalSpacing="xs">
           <Button
-            size="xl"
+            size="lg"
             onClick={() => {
               if (calculatorValue === 0) {
                 let total = chips.reduce(
@@ -646,7 +646,7 @@ export default function TouchscreenMenu() {
             X2
           </Button>
           <Button
-            size="xl"
+            size="lg"
             onClick={() => {
               if (calculatorValue === 0) {
                 let total = chips.reduce(
@@ -664,7 +664,7 @@ export default function TouchscreenMenu() {
           </Button>
 
           <Button
-            size="xl"
+            size="lg"
             onClick={() => {
               if (calculatorValue === 0) {
                 let total = chips.reduce(
@@ -681,7 +681,7 @@ export default function TouchscreenMenu() {
             1/2
           </Button>
           <Button
-            size="xl"
+            size="lg"
             color="green"
             onClick={() => {
               if (settings.activeTab == "Poker" && pokerGameState != "PREROUND") {
@@ -694,7 +694,7 @@ export default function TouchscreenMenu() {
             Bet
           </Button>
           <Button
-            size="xl"
+            size="lg"
             p={0}
             disabled={intitalCalculatorValue == 0}
             onClick={() => {
@@ -704,7 +704,7 @@ export default function TouchscreenMenu() {
             +{formatMoney(intitalCalculatorValue)}
           </Button>
           <Button
-            size="xl"
+            size="lg"
             p={0}
             disabled={intitalCalculatorValue == 0}
             onClick={() => {
@@ -714,7 +714,7 @@ export default function TouchscreenMenu() {
             -{formatMoney(intitalCalculatorValue)}
           </Button>
           <Button
-            size="xl"
+            size="lg"
             color="grape"
             disabled={calculatorValue === intitalCalculatorValue || intitalCalculatorValue === 0}
             p={0}
@@ -723,7 +723,7 @@ export default function TouchscreenMenu() {
             Reset
           </Button>
           <Button
-            size="xl"
+            size="lg"
             color="red"
             disabled={calculatorValue === 0}
             p={0}
@@ -745,101 +745,62 @@ export default function TouchscreenMenu() {
           backgroundColor: theme.colors.dark[7],
         }}
       >
-        <Grid columns={9} grow gutter="xs">
-          {["A", "2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K"]
-            .filter((suit) => {
-              if (!isTJQKDistinctionNeeded && ["J", "Q", "K"].includes(suit)) {
-                return false;
-              } else {
-                return true;
-              }
-            })
-            .map((rank) => {
-              return (
-                <Grid.Col
-                  key={rank}
-                  span={
-                    !isTJQKDistinctionNeeded
-                      ? rank == "T"
-                        ? 9
-                        : 3
-                      : ["A", "2", "3", "4", "5", "6", "7", "8", "9"].includes(rank)
-                      ? 3
-                      : 2
-                  }
-                >
-                  <Button
-                    size="xl"
-                    p="xs"
-                    color="gray"
-                    fullWidth
-                    style={{
-                      fontSize: "1.75rem",
-                      fontWeight: 700,
-                    }}
-                    onClick={() => {
-                      // This is hacky, but it works
-                      // We emulate a keydown event to trigger the keybinding, rather than adding a ton of
-                      // additional logic to multiple components
+        <Grid columns={8} grow gutter="xs">
+          {(
+            [
+              { value: "7", type: "rank" },
+              { value: "8", type: "rank" },
+              { value: "9", type: "rank" },
+              { value: "h", type: "suit" },
+              { value: "4", type: "rank" },
+              { value: "5", type: "rank" },
+              { value: "6", type: "rank" },
+              { value: "s", type: "suit" },
+              { value: "1", type: "rank" },
+              { value: "2", type: "rank" },
+              { value: "3", type: "rank" },
+              { value: "d", type: "suit" },
+              { value: "J", type: "rank" },
+              { value: "Q", type: "rank" },
+              { value: "K", type: "rank" },
+              { value: "c", type: "suit" },
+              { value: "A", type: "rank", wider: true },
+              { value: "T", type: "rank", wider: true },
+              { value: "Remove Last Card", type: "other" },
+            ] as {
+              value: CardRank | CardSuit | "Remove Last Card";
+              type: "rank" | "suit" | "other";
+              wider: boolean;
+            }[]
+          ).map((item) => {
+            let color: "red" | "dark" | "blue" | "green" | "gray" | "white" = "gray";
+            if (item.value == "Remove Last Card") color = "white";
 
-                      let targetScope: Scope = "None";
-                      if (settings.activeTab == "Poker" && pokerGameState != "PREROUND") {
-                        targetScope = "Poker Round";
-                      } else if (
-                        settings.activeTab == "Blackjack" &&
-                        blackjackGameState == "ROUND"
-                      ) {
-                        targetScope = "Blackjack Round";
-                      }
-                      let keybinding = keybindings.find((keybinding) => {
-                        if (
-                          keybinding.action == rank &&
-                          keybinding.scope == targetScope &&
-                          keybinding.selector == "None"
-                        ) {
-                          return true;
-                        } else {
-                          return false;
-                        }
-                      });
-
-                      if (keybinding) {
-                        document.dispatchEvent(
-                          new KeyboardEvent("keydown", { key: keybinding.key })
-                        );
-                      } else {
-                        alert(
-                          `Missing keybinding for scope: "${targetScope}" and action: "${rank}" and selector: "None". Add before using this button.`
-                        );
-                      }
-                    }}
-                  >
-                    {rank}
-                  </Button>
-                </Grid.Col>
-              );
-            })}
-        </Grid>
-        <Divider my="xs" />
-        <Grid columns={5} grow>
-          {["h", "s", "d", "c"].map((suit) => {
-            let color: "red" | "dark" | "blue" | "green" =
-              suit == "h" || suit == "d" ? "red" : "dark";
-            if (settings.fourColorDeck) {
-              if (suit == "d") {
-                color = "blue";
-              } else if (suit == "c") {
-                color = "green";
+            if (item.type == "suit") {
+              color = item.value == "h" || item.value == "d" ? "red" : "dark";
+              if (settings.fourColorDeck) {
+                if (item.value == "d") {
+                  color = "blue";
+                } else if (item.value == "c") {
+                  color = "green";
+                }
               }
             }
 
             return (
-              <Grid.Col span={1} key={suit}>
+              <Grid.Col key={item.value} span={item.wider ? 3 : 2}>
                 <Button
                   size="xl"
                   p="xs"
                   color={color}
                   fullWidth
+                  autoContrast={color == "white"}
+                  style={{
+                    fontSize: "1.75rem",
+                    fontWeight: 700,
+                    height: "100%",
+                    width: "100",
+                  }}
                   onClick={() => {
                     // This is hacky, but it works
                     // We emulate a keydown event to trigger the keybinding, rather than adding a ton of
@@ -853,7 +814,7 @@ export default function TouchscreenMenu() {
                     }
                     let keybinding = keybindings.find((keybinding) => {
                       if (
-                        keybinding.action == suit &&
+                        keybinding.action == item.value &&
                         keybinding.scope == targetScope &&
                         keybinding.selector == "None"
                       ) {
@@ -867,61 +828,20 @@ export default function TouchscreenMenu() {
                       document.dispatchEvent(new KeyboardEvent("keydown", { key: keybinding.key }));
                     } else {
                       alert(
-                        `Missing keybinding for scope: "${targetScope}" and action: "${suit}" and selector: "None". Add before using this button.`
+                        `Missing keybinding for scope: "${targetScope}" and action: "${item.value}" and selector: "None". Add before using this button.`
                       );
                     }
                   }}
                 >
-                  {suitToIcon(suit as CardSuit)}
+                  {item.value == "Remove Last Card" ? (
+                    <IconBackspaceFilled size="2rem" />
+                  ) : (
+                    item.value
+                  )}
                 </Button>
               </Grid.Col>
             );
           })}
-          <Grid.Col span={1}>
-            <Button
-              size="xl"
-              p="xs"
-              color="white"
-              autoContrast
-              fullWidth
-              onClick={() => {
-                // This is hacky, but it works
-                // We emulate a keydown event to trigger the keybinding, rather than adding a ton of
-                // additional logic to multiple components
-
-                let targetScope: Scope = "None";
-                if (settings.activeTab == "Poker" && pokerGameState != "PREROUND") {
-                  targetScope = "Poker Round";
-                } else if (settings.activeTab == "Blackjack" && blackjackGameState == "ROUND") {
-                  targetScope = "Blackjack Round";
-                } else {
-                  alert("Current tab does not support this action.");
-                  return;
-                }
-                let keybinding = keybindings.find((keybinding) => {
-                  if (
-                    keybinding.action == "Remove Last Card" &&
-                    keybinding.scope == targetScope &&
-                    keybinding.selector == "None"
-                  ) {
-                    return true;
-                  } else {
-                    return false;
-                  }
-                });
-
-                if (keybinding) {
-                  document.dispatchEvent(new KeyboardEvent("keydown", { key: keybinding.key }));
-                } else {
-                  alert(
-                    `Missing keybinding for scope: "${targetScope}" and action: "Remove Last Card" and selector: "None". Add before using this button.`
-                  );
-                }
-              }}
-            >
-              <IconBackspaceFilled size="2rem" />
-            </Button>
-          </Grid.Col>
         </Grid>
       </Paper>
       {settings.activeTab == "Poker" && (
@@ -935,7 +855,7 @@ export default function TouchscreenMenu() {
         >
           <Group grow>
             <Button
-              size="xl"
+              size="lg"
               color="green"
               onClick={() => {
                 emitPokerAction("check");
@@ -944,7 +864,7 @@ export default function TouchscreenMenu() {
               Check
             </Button>
             <Button
-              size="xl"
+              size="lg"
               color="blue"
               onClick={() => {
                 emitPokerAction("call");
@@ -953,7 +873,7 @@ export default function TouchscreenMenu() {
               Call
             </Button>
             <Button
-              size="xl"
+              size="lg"
               color="red"
               onClick={() => {
                 if (foldConfirm) {
@@ -982,7 +902,7 @@ export default function TouchscreenMenu() {
         >
           <Group grow>
             <Button
-              size="xl"
+              size="lg"
               color="green"
               onClick={() => {
                 emitBjAction("stand");
@@ -991,7 +911,7 @@ export default function TouchscreenMenu() {
               Stand
             </Button>
             <Button
-              size="xl"
+              size="lg"
               color="red"
               onClick={() => {
                 emitBjAction("double");
@@ -1000,7 +920,7 @@ export default function TouchscreenMenu() {
               Double
             </Button>
             <Button
-              size="xl"
+              size="lg"
               color="grape"
               onClick={() => {
                 emitBjAction("split");
@@ -1011,7 +931,7 @@ export default function TouchscreenMenu() {
           </Group>
           <Group grow mt="sm">
             <Button
-              size="xl"
+              size="lg"
               color="red"
               variant="light"
               onClick={() => {
@@ -1021,7 +941,7 @@ export default function TouchscreenMenu() {
               Bust
             </Button>
             <Button
-              size="xl"
+              size="lg"
               color="yellow"
               variant="light"
               onClick={() => {
