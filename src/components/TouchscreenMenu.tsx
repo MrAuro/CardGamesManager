@@ -36,6 +36,7 @@ import { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { atom, useRecoilState, useRecoilValue } from "recoil";
 import { CHIP_BREAKDOWN_AMOUNT, CHIP_BREAKDOWN_OPEN } from "./ChipBreakdown";
+import { suitToIcon } from "@/utils/CardHelper";
 
 const CHIP_COUNT = atom<{ [key: UUID]: number }>({
   key: "CHIP_COUNT",
@@ -812,6 +813,8 @@ export default function TouchscreenMenu() {
                 >
                   {item.value == "Remove Last Card" ? (
                     <IconBackspaceFilled size="2rem" />
+                  ) : item.type == "suit" ? (
+                    suitToIcon(item.value as CardSuit)
                   ) : (
                     item.value
                   )}
