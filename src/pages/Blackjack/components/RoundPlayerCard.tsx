@@ -57,6 +57,7 @@ export default function RoundPlayerCard({
   });
 
   const calculatedCardResult = getCardTotal(blackjackPlayer.cards);
+  const dealerCardResult = getCardTotal(blackjackGame.dealerCards);
   const isBust = calculatedCardResult.total > 21;
   const isBlackjack = calculatedCardResult.total == 21;
 
@@ -185,7 +186,7 @@ export default function RoundPlayerCard({
     } else {
       let betBehindHandResult = getHandResult(
         getCardTotal(betBehindPlayer.cards).total,
-        getCardTotal(blackjackGame.dealerCards).total
+        dealerCardResult.total
       );
 
       if (betBehindHandResult == "BLACKJACK") {
@@ -205,24 +206,36 @@ export default function RoundPlayerCard({
     }
   }
 
-  let outlineColor = theme.colors.dark[5];
-  let nonDefaultOutline = false;
-  if (isBust && isActive) {
-    outlineColor = theme.colors.red[6];
-    nonDefaultOutline = true;
-  } else if (isBlackjack && isActive) {
-    outlineColor = theme.colors.green[4];
-    nonDefaultOutline = true;
+  let backgroundColor = theme.colors.dark[7];
+  if (isActive) {
+    backgroundColor = theme.colors.dark[6];
+  } else {
+    if (blackjackGame.currentTurn == "DEALER") {
+      const handResult = getHandResult(calculatedCardResult.total, dealerCardResult.total);
+
+      if (handResult == "BLACKJACK") {
+        backgroundColor = theme.colors.yellow[8];
+      }
+
+      if (handResult == "LOSE") {
+        backgroundColor = theme.colors.red[8];
+      }
+
+      if (handResult == "PUSH") {
+        backgroundColor = theme.colors.gray[8];
+      }
+
+      if (handResult == "WIN") {
+        backgroundColor = theme.colors.green[8];
+      }
+    }
   }
 
   return (
     <div ref={targetRef}>
       <GenericPlayerCard
         header={blackjackPlayer.displayName}
-        backgroundColor={isActive ? theme.colors.dark[6] : theme.colors.dark[7]}
-        styles={{
-          outline: nonDefaultOutline ? `2px solid ${outlineColor}` : undefined,
-        }}
+        backgroundColor={backgroundColor}
         subsection={
           <>
             <Text size="md" fw={600}>
