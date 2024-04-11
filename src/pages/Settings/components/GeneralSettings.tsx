@@ -55,6 +55,8 @@ export default function GeneralSettings() {
   const [keyEditing, setKeyEditing] = useState("");
   const [keys, { start, stop }] = useRecordHotkeys();
 
+  const [wasTouchscreenMenuOn, setWasTouchscreenMenuOn] = useState(settings.touchscreenMenu);
+
   const saveKey = (id: string, key: string) => {
     setKeybindings((draft) => {
       const index = draft.findIndex((kb) => kb.id === id);
@@ -204,6 +206,65 @@ export default function GeneralSettings() {
           ]}
           onChangeEnd={(value) => {
             setSettings({ ...settings, touchscreenMenuWidth: value });
+          }}
+        />
+      </Input.Wrapper>
+      <Input.Wrapper
+        mb="xl"
+        label="Touchscreen Menu Chips Columns"
+        description="Columns of chips in the touchscreen menu"
+        mt="sm"
+      >
+        <Slider
+          mt="xs"
+          defaultValue={settings.touchscreenMenuChipsColumns}
+          min={1}
+          max={10}
+          step={1}
+          marks={[
+            {
+              label: "1",
+              value: 1,
+            },
+            {
+              label: "2",
+              value: 2,
+            },
+            {
+              label: "3",
+              value: 3,
+            },
+            {
+              label: "4",
+              value: 4,
+            },
+            {
+              label: "5",
+              value: 5,
+            },
+            {
+              label: "6",
+              value: 6,
+            },
+            {
+              label: "7",
+              value: 7,
+            },
+            {
+              label: "8",
+              value: 8,
+            },
+            {
+              label: "9",
+              value: 9,
+            },
+            {
+              label: "10",
+              value: 10,
+            },
+          ]}
+          onChangeEnd={(value) => {
+            setSettings({ ...settings, touchscreenMenuChipsColumns: value });
           }}
         />
       </Input.Wrapper>
@@ -401,7 +462,21 @@ export default function GeneralSettings() {
         >
           {settings.debug ? "Close" : "Open"} DevTools
         </Button>
-        <Button onClick={toggle}>{opened ? "Hide" : "Show"} Keybindings Editor</Button>
+        <Button
+          onClick={() => {
+            // Hide the touchscreen menu to prevent issues
+            if (opened) {
+              setSettings({ ...settings, touchscreenMenu: wasTouchscreenMenuOn });
+            } else {
+              setWasTouchscreenMenuOn(settings.touchscreenMenu);
+              setSettings({ ...settings, touchscreenMenu: false });
+            }
+
+            toggle();
+          }}
+        >
+          {opened ? "Hide" : "Show"} Keybindings Editor
+        </Button>
         <Button
           onClick={() => {
             writeTextFile(

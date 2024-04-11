@@ -11,6 +11,7 @@ export type Settings = {
   touchscreenMenu: boolean;
   touchscreenMenuPosition: "left" | "right";
   touchscreenMenuWidth: number;
+  touchscreenMenuChipsColumns: number;
 };
 
 export type Chip = {
