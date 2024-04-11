@@ -23,7 +23,7 @@
         "confirm": false,
         "message": true,
         "open": true,
-        "save": false
+        "save": true
       },
       "all": false,
       "shell": {

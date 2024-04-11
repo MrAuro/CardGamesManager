@@ -20,7 +20,6 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { notifications } from "@mantine/notifications";
 import {
   IconCurrencyDollar,
   IconDeviceFloppy,
