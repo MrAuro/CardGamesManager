@@ -129,6 +129,7 @@ export function getActions(scope: Scope, chips: Chip[]): string[] {
         "Move to Calculator",
         "Bet/Raise/Set Balance",
         "Clear",
+        "Flatten",
         "Remove Last Chip",
         "0",
         "1",
