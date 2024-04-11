@@ -8,6 +8,7 @@ import {
   Code,
   Collapse,
   ColorInput,
+  Flex,
   Grid,
   Input,
   NumberInput,
@@ -19,6 +20,7 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { notifications } from "@mantine/notifications";
 import {
   IconCurrencyDollar,
   IconDeviceFloppy,
@@ -36,6 +38,8 @@ import {
   IconPlus,
   IconTrash,
 } from "@tabler/icons-react";
+import { open } from "@tauri-apps/api/dialog";
+import { BaseDirectory, readTextFile, writeTextFile } from "@tauri-apps/api/fs";
 import { useState } from "react";
 import { useRecordHotkeys } from "react-hotkeys-hook";
 import { useRecoilState } from "recoil";
@@ -390,15 +394,63 @@ export default function GeneralSettings() {
         />
       </Input.Wrapper>
       {/* <Text fw="bold">Keyboard Shortcuts</Text> */}
-      <Button
-        onClick={() => {
-          setSettings({ ...settings, debug: !settings.debug });
-        }}
-        mr="sm"
-      >
-        {settings.debug ? "Close" : "Open"} DevTools
-      </Button>
-      <Button onClick={toggle}>{opened ? "Hide" : "Show"} Keybindings Editor</Button>
+      <Flex gap="xs">
+        <Button
+          onClick={() => {
+            setSettings({ ...settings, debug: !settings.debug });
+          }}
+        >
+          {settings.debug ? "Close" : "Open"} DevTools
+        </Button>
+        <Button onClick={toggle}>{opened ? "Hide" : "Show"} Keybindings Editor</Button>
+        <Button
+          onClick={() => {
+            writeTextFile(
+              {
+                contents: JSON.stringify(keybindings),
+                path: "keybindings.json",
+              },
+              {
+                dir: BaseDirectory.Desktop,
+              }
+            );
+            alert("Keybindings exported to your Desktop");
+          }}
+        >
+          Export Keybindings to JSON
+        </Button>
+        <Button
+          onClick={async () => {
+            const file = await open({
+              directory: false,
+              multiple: false,
+            });
+
+            if (!file) {
+              return;
+            }
+
+            if (typeof file === "string") {
+              const contents = await readTextFile(file);
+
+              let parsed = null;
+              try {
+                parsed = JSON.parse(contents);
+              } catch (e) {
+                alert("Invalid file");
+                return;
+              }
+
+              setKeybindings(parsed);
+            } else {
+              alert("Invalid file");
+              return;
+            }
+          }}
+        >
+          Import Keybindings from JSON
+        </Button>
+      </Flex>
       <Collapse in={opened}>
         <Table
           withColumnBorders
