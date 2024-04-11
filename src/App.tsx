@@ -38,6 +38,11 @@ export const HOTKEY_SELECTOR_B_ENABLED = atom({
   default: false,
 });
 
+export const SPEECH_SYNTHESIS_MESSAGE = atom({
+  key: "speechSynthesisMessage",
+  default: "",
+});
+
 export default function App() {
   const [players] = useRecoilState(PLAYERS_STATE);
   const [playersLastSaved, setPlayersLastSaved] = useState(0);
@@ -66,6 +71,20 @@ export default function App() {
     useRecoilState(HOTKEY_SELECTOR_A_ENABLED);
   const [hotkeySelectorBEnabled, setHotkeySelectorBEnabled] =
     useRecoilState(HOTKEY_SELECTOR_B_ENABLED);
+
+  const [speechSynthesisMessage] = useRecoilState(SPEECH_SYNTHESIS_MESSAGE);
+  useEffect(() => {
+    if (!settings.tts) return;
+
+    if (speechSynthesisMessage) {
+      window.speechSynthesis.cancel();
+      let msg = new SpeechSynthesisUtterance(speechSynthesisMessage);
+      msg.rate = settings.ttsRate || 1.5;
+      msg.pitch = settings.ttsPitch || 1;
+      msg.volume = settings.ttsVolume || 1;
+      window.speechSynthesis.speak(msg);
+    }
+  }, [speechSynthesisMessage, settings]);
 
   // Instead of doing this in a for each loop, we have to do it like this to prevent out of order hooks
   let keyAHold = keybindings.find((k) => k.action === "A (hold)");

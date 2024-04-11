@@ -12,6 +12,11 @@ export type Settings = {
   touchscreenMenuPosition: "left" | "right";
   touchscreenMenuWidth: number;
   touchscreenMenuChipsColumns: number;
+  tts: boolean;
+  ttsVoice: string;
+  ttsRate: number;
+  ttsPitch: number;
+  ttsVolume: number;
 };
 
 export type Chip = {

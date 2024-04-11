@@ -23,6 +23,8 @@ import { useDisclosure } from "@mantine/hooks";
 import {
   IconCurrencyDollar,
   IconDeviceFloppy,
+  IconEar,
+  IconEarOff,
   IconEye,
   IconEyeOff,
   IconHandFinger,
@@ -453,7 +455,130 @@ export default function GeneralSettings() {
           }}
         />
       </Input.Wrapper>
-      {/* <Text fw="bold">Keyboard Shortcuts</Text> */}
+      <Input.Wrapper
+        label="TTS Enabled"
+        description="TTS is experimental and may not work as expected"
+        mt="sm"
+      >
+        <ButtonGroup mt={5}>
+          <Button
+            variant={settings.tts ? "filled" : "default"}
+            leftSection={<IconEar />}
+            onClick={() => {
+              setSettings({ ...settings, tts: true });
+            }}
+          >
+            On
+          </Button>
+          <Button
+            variant={!settings.tts ? "filled" : "default"}
+            leftSection={<IconEarOff />}
+            onClick={() => {
+              setSettings({ ...settings, tts: false });
+            }}
+          >
+            Off
+          </Button>
+        </ButtonGroup>
+      </Input.Wrapper>
+      <Input.Wrapper mb="xl" label="TTS Volume" mt="sm">
+        <Slider
+          mt="xs"
+          defaultValue={settings.ttsVolume}
+          min={0}
+          max={1}
+          step={0.05}
+          marks={[
+            {
+              label: "0",
+              value: 0,
+            },
+            {
+              label: "0.5",
+              value: 0.5,
+            },
+            {
+              label: "1",
+              value: 1,
+            },
+          ]}
+          onChangeEnd={(value) => {
+            setSettings({ ...settings, ttsVolume: value });
+          }}
+        />
+      </Input.Wrapper>
+      <Input.Wrapper mb="xl" label="TTS Rate" mt="sm">
+        <Slider
+          mt="xs"
+          defaultValue={settings.ttsRate}
+          min={0.1}
+          max={2}
+          step={0.05}
+          marks={[
+            {
+              label: "0",
+              value: 0,
+            },
+            {
+              label: "0.5",
+              value: 0.5,
+            },
+            {
+              label: "1",
+              value: 1,
+            },
+            {
+              label: "1.5",
+              value: 1.5,
+            },
+            {
+              label: "2",
+              value: 2,
+            },
+          ]}
+          onChangeEnd={(value) => {
+            setSettings({ ...settings, ttsRate: value });
+          }}
+        />
+      </Input.Wrapper>
+      <Input.Wrapper mb="xl" label="TTS Pitch" mt="sm">
+        <Slider
+          mt="xs"
+          defaultValue={settings.ttsPitch}
+          min={0}
+          max={2}
+          step={0.05}
+          marks={[
+            {
+              label: "0",
+              value: 0,
+            },
+            {
+              label: "1",
+              value: 1,
+            },
+            {
+              label: "2",
+              value: 2,
+            },
+          ]}
+          onChangeEnd={(value) => {
+            setSettings({ ...settings, ttsPitch: value });
+          }}
+        />
+      </Input.Wrapper>
+      <Input.Wrapper mb="xl" label="TTS Voice" mt="sm">
+        <Select
+          data={window.speechSynthesis.getVoices().map((voice) => voice.name)}
+          defaultValue={settings.ttsVoice}
+          clearable={false}
+          allowDeselect={false}
+          placeholder={settings.ttsVoice !== "" ? settings.ttsVoice : "Select a voice"}
+          onChange={(value) => {
+            setSettings({ ...settings, ttsVoice: value as string });
+          }}
+        />
+      </Input.Wrapper>
       <Flex gap="xs">
         <Button
           onClick={() => {

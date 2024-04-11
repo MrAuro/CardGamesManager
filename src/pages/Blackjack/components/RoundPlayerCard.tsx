@@ -28,6 +28,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { CARD_SELECTOR_STATE } from "../routes/Round";
 import { useScrollIntoView } from "@mantine/hooks";
 import { useEffect } from "react";
+import { SPEECH_SYNTHESIS_MESSAGE } from "@/App";
 
 export default function RoundPlayerCard({
   player,
@@ -56,6 +57,8 @@ export default function RoundPlayerCard({
     duration: 500,
   });
 
+  const [, setSpeechSynthesisMessage] = useRecoilState(SPEECH_SYNTHESIS_MESSAGE);
+
   const calculatedCardResult = getCardTotal(blackjackPlayer.cards);
   const dealerCardResult = getCardTotal(blackjackGame.dealerCards);
   const isBust = calculatedCardResult.total > 21;
@@ -66,6 +69,23 @@ export default function RoundPlayerCard({
       scrollIntoView({ alignment: "end" });
     }
   }, [isActive]);
+
+  useEffect(() => {
+    if (isActive) {
+      let textToSpeak = "";
+      if (isBust) {
+        textToSpeak = "Bust";
+      } else if (isBlackjack) {
+        textToSpeak = "Blackjack";
+      } else {
+        if (!(blackjackPlayer.cards.filter((card) => card != EMPTY_CARD).length < 2)) {
+          textToSpeak = `${calculatedCardResult.total}`;
+        }
+      }
+
+      setSpeechSynthesisMessage(textToSpeak);
+    }
+  }, [calculatedCardResult, isActive]);
 
   let ppCards = [...blackjackPlayer.cards];
   if (blackjackPlayer.split && !blackjackPlayer.splitFrom) {

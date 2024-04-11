@@ -180,6 +180,10 @@ export const SETTINGS_STATE = atom<Settings>({
         touchscreenMenuPosition: "right",
         touchscreenMenuWidth: 30,
         touchscreenMenuChipsColumns: 3,
+        tts: false,
+        ttsVoice: "Microsoft David Desktop - English (United States)",
+        ttsRate: 1,
+        ttsPitch: 1,
         chips: [],
       };
       await TAURI_STORE.set("settings", settings);

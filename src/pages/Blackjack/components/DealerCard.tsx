@@ -17,6 +17,8 @@ import { getCardTotal } from "@/utils/BlackjackHelper";
 import { useScrollIntoView } from "@mantine/hooks";
 import { useEffect } from "react";
 import { BLACKJACK_GAME_STATE } from "@/Root";
+import { SPEECH_SYNTHESIS_MESSAGE } from "@/App";
+import { EMPTY_CARD } from "@/utils/CardHelper";
 
 export default function DealerCard({
   cards,
@@ -43,6 +45,7 @@ export default function DealerCard({
   });
 
   const [blackjackGame, setBlackjackGame] = useRecoilState(BLACKJACK_GAME_STATE);
+  const [, setSpeechSynthesisMessage] = useRecoilState(SPEECH_SYNTHESIS_MESSAGE);
 
   useEffect(() => {
     if (isActive) {
@@ -61,6 +64,24 @@ export default function DealerCard({
   } else if (calculatedCardResult.total < 17) {
     dealerAction = "hit";
   }
+
+  useEffect(() => {
+    if (isActive) {
+      let textToSpeak = "";
+      if (calculatedCardResult.total > 21) {
+        textToSpeak = "Bust";
+      } else if (calculatedCardResult.total == 21) {
+        textToSpeak = "Blackjack";
+      } else {
+        if (!(blackjackGame.dealerCards.filter((card) => card != EMPTY_CARD).length < 2)) {
+          // The semicolon is used to add a slight pause between the dealer action and the total
+          textToSpeak = `${dealerAction}; ${calculatedCardResult.total}`;
+        }
+      }
+
+      setSpeechSynthesisMessage(textToSpeak);
+    }
+  }, [blackjackGame.dealerCards, isActive]);
 
   return (
     <div ref={targetRef}>
