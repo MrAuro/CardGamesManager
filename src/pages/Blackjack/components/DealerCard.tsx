@@ -95,13 +95,13 @@ export default function DealerCard({
             }
 
             if (playerResults.every((result) => result.includes("pushes"))) {
-              textToSpeak = "All players push";
+              textToSpeak = "Everybody push";
             } else if (playerResults.every((result) => result.includes("blackjack"))) {
-              textToSpeak = "All players have blackjack";
+              textToSpeak = "Everybody has blackjack";
             } else if (playerResults.every((result) => result.includes("wins"))) {
-              textToSpeak = "All players win";
+              textToSpeak = "Everybody wins";
             } else if (playerResults.every((result) => result.includes("loses"))) {
-              textToSpeak = "All players lose";
+              textToSpeak = "Everybody loses";
             } else {
               textToSpeak = `${dealerAction}; ${calculatedCardResult.total}; ${playerResults
                 .reverse()
