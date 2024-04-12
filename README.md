@@ -1,9 +1,5 @@
 # Card Games Manager
 
-<!-- https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg -->
-
-[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
-
 Manage your various card games with this app (in development).
 
 ---
@@ -36,7 +32,9 @@ This README is in development. More information will be added soon. Please submi
 
 ## License
 
-This project is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. See the [LICENSE](./LICENSE) file for more information.
+All rights reserved. This project is not open source. You may not use, modify, or distribute this project without explicit permission from the creator. Licenses may be purchased for commercial uses. Please contact the creator for more information.
+
+You can contact the creator at [auro@mrauro.dev](mailto:auro@mrauro.dev).
 
 ## Disclaimer
 
