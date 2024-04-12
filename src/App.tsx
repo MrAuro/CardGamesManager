@@ -10,7 +10,7 @@ import {
   POKER_SETTINGS_STATE,
   SETTINGS_STATE,
 } from "@/Root";
-import { AppShell, Container, Divider, Modal, Text, useMantineTheme } from "@mantine/core";
+import { AppShell, Container, Divider, Modal, Text, Title, useMantineTheme } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { atom, useRecoilState } from "recoil";
 import { TAURI_STORE } from "./Root";
@@ -27,6 +27,8 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { notifications } from "@mantine/notifications";
 import TouchscreenMenu from "./components/TouchscreenMenu";
 import ChipBreakdown, { CHIP_BREAKDOWN_OPEN } from "./components/ChipBreakdown";
+import { useLocalStorage } from "@mantine/hooks";
+import { modals } from "@mantine/modals";
 
 export const HOTKEY_SELECTOR_A_ENABLED = atom({
   key: "hotkeySelectorA",
@@ -64,6 +66,61 @@ export default function App() {
   const [pokerPlayersLastSaved, setPokerPlayersLastSaved] = useState(0);
   const [chips] = useRecoilState(CHIPS_STATE);
   const [chipsLastSaved, setChipsLastSaved] = useState(0);
+
+  const [firstTime, setFirstTime] = useLocalStorage({
+    key: "first-time",
+    defaultValue: true,
+  });
+
+  if (firstTime) {
+    modals.openConfirmModal({
+      title: "Notice",
+      size: "xl",
+      children: (
+        <>
+          <Title order={3}>License</Title>
+          <Text>
+            Card Games Manager is NOT free software. All rights reserved. This project is not open
+            source. You may not use, modify, or distribute this project without explicit permission
+            from the creator. Licenses may be purchased for commercial uses. Please contact the
+            creator for more information.
+          </Text>
+          <Title mt="sm" order={3}>
+            Disclaimer
+          </Title>
+          <Text>
+            This tool is intended for entertainment purposes only and does not endorse or promote
+            gambling. The use of this tool for gambling, especially where money is involved, is
+            strictly prohibited and may be illegal in certain jurisdictions. The creators of this
+            tool are not responsible for any misuse or illegal activities associated with its use.
+            Please use this tool responsibly and in accordance with applicable laws and regulations.
+            Additionally, this tool should not be the single source of truth for any card games. It
+            is recommended to use physical cards or other trusted sources to verify the results of
+            any games played with this tool. Any random number generation in this tool is not
+            guaranteed to be truly random and should not be used for any serious or high-stakes
+            games. This tool is provided as-is and without any warranty. The creators of this tool
+            are not responsible for any damages or losses incurred from the use of this tool.
+          </Text>
+          <Divider my="sm" />
+          <Text>
+            By clicking "I agree" you acknowledge that you have read and agree to the terms and
+            conditions outlined in the license and disclaimer above. If you do not agree to these
+            terms, please close this window and do not use this tool. If you have previously agreed,
+            you can not revoke your agreement. To view this notice again, scroll to the buttom of
+            the Settings page. You can email the creator at auro@mrauro.dev
+          </Text>
+        </>
+      ),
+      labels: { confirm: "I Agree", cancel: "I Disagree" },
+      onConfirm: () => {
+        setFirstTime(false);
+        modals.closeAll();
+      },
+      onCancel: async () => {
+        window.close();
+      },
+    });
+  }
 
   const [chipBreakdownOpen, setChipBreakdownOpen] = useRecoilState(CHIP_BREAKDOWN_OPEN);
 
@@ -300,52 +357,54 @@ export default function App() {
     }
   }
 
-  return (
-    <>
-      <Modal
-        title="Chip Breakdown"
-        opened={chipBreakdownOpen}
-        onClose={() => setChipBreakdownOpen(false)}
-      >
-        <ChipBreakdown />
-      </Modal>
-      <AppShell
-        aside={{
-          width: asideWidth,
-          breakpoint: 0,
-        }}
-        navbar={{
-          width: navbarWidth,
-          breakpoint: 0,
-        }}
-      >
-        <AppShell.Main>
-          <Header
-            active={settings.activeTab}
-            setActive={(tab) => {
-              setSettings({ ...settings, activeTab: tab });
-            }}
-          />
-          <Divider my="xs" />
-          {settings.debug ? (
-            <>
-              <DevTools />
-              <Divider my="xs" />
-            </>
-          ) : null}
-          <Container>{content}</Container>
-        </AppShell.Main>
-        {settings?.touchscreenMenu &&
-          (settings?.touchscreenMenuPosition == "left" ? (
-            <AppShell.Navbar>
-              <TouchscreenMenu />
-            </AppShell.Navbar>
-          ) : (
-            <AppShell.Aside>
-              <TouchscreenMenu />
-            </AppShell.Aside>
-          ))}
-      </AppShell>
-    </>
-  );
+  if (firstTime) return null;
+  else
+    return (
+      <>
+        <Modal
+          title="Chip Breakdown"
+          opened={chipBreakdownOpen}
+          onClose={() => setChipBreakdownOpen(false)}
+        >
+          <ChipBreakdown />
+        </Modal>
+        <AppShell
+          aside={{
+            width: asideWidth,
+            breakpoint: 0,
+          }}
+          navbar={{
+            width: navbarWidth,
+            breakpoint: 0,
+          }}
+        >
+          <AppShell.Main>
+            <Header
+              active={settings.activeTab}
+              setActive={(tab) => {
+                setSettings({ ...settings, activeTab: tab });
+              }}
+            />
+            <Divider my="xs" />
+            {settings.debug ? (
+              <>
+                <DevTools />
+                <Divider my="xs" />
+              </>
+            ) : null}
+            <Container>{content}</Container>
+          </AppShell.Main>
+          {settings?.touchscreenMenu &&
+            (settings?.touchscreenMenuPosition == "left" ? (
+              <AppShell.Navbar>
+                <TouchscreenMenu />
+              </AppShell.Navbar>
+            ) : (
+              <AppShell.Aside>
+                <TouchscreenMenu />
+              </AppShell.Aside>
+            ))}
+        </AppShell>
+      </>
+    );
 }
