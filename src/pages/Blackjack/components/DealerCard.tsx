@@ -11,12 +11,12 @@ import {
   rem,
   useMantineTheme,
 } from "@mantine/core";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { CARD_SELECTOR_STATE } from "../routes/Round";
-import { getCardTotal } from "@/utils/BlackjackHelper";
+import { getCardTotal, getHandResult } from "@/utils/BlackjackHelper";
 import { useScrollIntoView } from "@mantine/hooks";
 import { useEffect } from "react";
-import { BLACKJACK_GAME_STATE } from "@/Root";
+import { BLACKJACK_GAME_STATE, BLACKJACK_PLAYERS_STATE } from "@/Root";
 import { SPEECH_SYNTHESIS_MESSAGE } from "@/App";
 import { EMPTY_CARD } from "@/utils/CardHelper";
 
@@ -45,6 +45,7 @@ export default function DealerCard({
   });
 
   const [blackjackGame, setBlackjackGame] = useRecoilState(BLACKJACK_GAME_STATE);
+  const blackjackPlayers = useRecoilValue(BLACKJACK_PLAYERS_STATE);
   const [, setSpeechSynthesisMessage] = useRecoilState(SPEECH_SYNTHESIS_MESSAGE);
 
   useEffect(() => {
@@ -75,7 +76,40 @@ export default function DealerCard({
       } else {
         if (!(blackjackGame.dealerCards.filter((card) => card != EMPTY_CARD).length < 2)) {
           // The semicolon is used to add a slight pause between the dealer action and the total
-          textToSpeak = `${dealerAction}; ${calculatedCardResult.total}`;
+          if (dealerAction == "stand") {
+            let playerResults = [];
+            for (let player of blackjackPlayers) {
+              const result = getHandResult(
+                getCardTotal(player.cards).total,
+                calculatedCardResult.total
+              );
+              if (result == "WIN") {
+                playerResults.push(`${player.displayName} wins`);
+              } else if (result == "LOSE") {
+                playerResults.push(`${player.displayName} loses`);
+              } else if (result == "PUSH") {
+                playerResults.push(`${player.displayName} pushes`);
+              } else if (result == "BLACKJACK") {
+                playerResults.push(`${player.displayName} has blackjack`);
+              }
+            }
+
+            if (playerResults.every((result) => result.includes("pushes"))) {
+              textToSpeak = "All players push";
+            } else if (playerResults.every((result) => result.includes("blackjack"))) {
+              textToSpeak = "All players have blackjack";
+            } else if (playerResults.every((result) => result.includes("wins"))) {
+              textToSpeak = "All players win";
+            } else if (playerResults.every((result) => result.includes("loses"))) {
+              textToSpeak = "All players lose";
+            } else {
+              textToSpeak = `${dealerAction}; ${calculatedCardResult.total}; ${playerResults
+                .reverse()
+                .join("; ")}`;
+            }
+          } else {
+            textToSpeak = `${dealerAction}; ${calculatedCardResult.total}`;
+          }
         }
       }
 
