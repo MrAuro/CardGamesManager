@@ -27,8 +27,8 @@ export default function Settings() {
           }}
           onClick={() => setFirstTime(true)}
         >
-          You have agreed to the Terms of Service. Click to view again (this will NOT void your
-          agreement, it's just for your reference).
+          You have agreed to the License and Disclaimer. Click to view again (this will NOT void
+          your agreement, it's just for your reference).
         </Text>
       )}
     </>

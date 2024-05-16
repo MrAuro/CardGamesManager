@@ -80,10 +80,14 @@ export default function App() {
         <>
           <Title order={3}>License</Title>
           <Text>
-            Card Games Manager is NOT free software. All rights reserved. This project is not open
-            source. You may not use, modify, or distribute this project without explicit permission
-            from the creator. Licenses may be purchased for commercial uses. Please contact the
-            creator for more information.
+            This work is licensed under the{" "}
+            <a href="https://github.com/mrauro/cardgamesmanager/tree/main/LICENSE" target="_blank">
+              Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+            </a>{" "}
+            You are free to share and adapt this work for non-commercial purposes as long as you
+            give appropriate credit and distribute your contributions under the same license.
+            Commercial licenses may be available upon request. If you have any questions or would
+            like to request a commercial license, please contact the creator.
           </Text>
           <Title mt="sm" order={3}>
             Disclaimer
@@ -107,7 +111,11 @@ export default function App() {
             conditions outlined in the license and disclaimer above. If you do not agree to these
             terms, please close this window and do not use this tool. If you have previously agreed,
             you can not revoke your agreement. To view this notice again, scroll to the buttom of
-            the Settings page. You can email the creator at auro@mrauro.dev
+            the Settings page.
+            <Text mt="lg">
+              If you have any questions or concerns, please contact the creator at{" "}
+              <a href="mailto:cardgamesmanager@mrauro.dev">cardgamesmanager@mrauro.dev</a>
+            </Text>
           </Text>
         </>
       ),
