@@ -1,0 +1,44 @@
+site_name: CardGamesManager
+site_url: https://cardgamesmanager.mrauro.dev
+repo_url: https://github.com/mrauro/cardgamesmanager
+use_directory_urls: true
+theme:
+  name: material
+  logo: https://raw.githubusercontent.com/MrAuro/CardGamesManager/main/app-icon.png
+  favicon: https://raw.githubusercontent.com/MrAuro/CardGamesManager/main/app-icon.png
+  palette:
+    - scheme: slate
+      primary: custom
+
+  features:
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
+    - navigation.instant.preview
+    - navigation.expand
+    - navigation.path
+    - toc.integrate
+
+  icon:
+    repo: fontawesome/brands/github
+extra:
+  social:
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/ZHqpuszdaM
+      name: Discord
+    - icon: fontawesome/brands/github
+      link: https://github.com/mrauro/cardgamesmanager
+      name: GitHub
+    - icon: fontawesome/solid/envelope
+      link: mailto:cardgamesmanager@mrauro.dev
+      name: Contact
+extra_css:
+  - stylesheets/extra.css
+
+nav:
+  - Home: Index.md
+  - Players: Players.md
+  - Blackjack: Blackjack.md
+  - Poker: Poker.md
+  - Settings: Settings.md
+  - Touchscreen Menu: Touchscreen.md
