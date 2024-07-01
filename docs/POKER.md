@@ -18,4 +18,4 @@ table. You must select a "Dealer" player to start the game. If using Blinds, the
 positions will be automatically assigned. You can configure the forced bet options in the settings,
 alongside the amounts.
 
-<video src="resources/poker-pregame.mp4" controls></video>
+<video controls src="https://github.com/MrAuro/CardGamesManager/raw/main/docs/resources/poker-pregame.mp4" title="Poker Pre Game Example"></video>
