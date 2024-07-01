@@ -1,0 +1,3 @@
+# Used for mkdocs ONLY
+
+mkdocs-material==9.5.27
