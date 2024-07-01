@@ -36,7 +36,7 @@ extra_css:
   - stylesheets/extra.css
 
 nav:
-  - Home: Index.md
+  - Home: index.md
   - Players: Players.md
   - Blackjack: Blackjack.md
   - Poker: Poker.md
