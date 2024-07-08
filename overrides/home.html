@@ -1,0 +1,39 @@
+
+{#- This file was automatically generated - do not edit -#} {% extends "main.html" %} {% block tabs
+%} {{ super() }}
+<style>
+  .md-header {
+    position: initial;
+  }
+  .md-main__inner {
+    margin: 0;
+  }
+  .md-content {
+    display: none;
+  }
+  @media screen and (min-width: 60em) {
+    .md-sidebar--secondary {
+      display: none;
+    }
+  }
+  @media screen and (min-width: 76.25em) {
+    .md-sidebar--primary {
+      display: none;
+    }
+  }
+</style><!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script type="module" crossorigin src="/index.js"></script>
+    <link rel="stylesheet" crossorigin href="/app.css">
+  </head>
+
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+
+{% endblock %} {% block content %}{% endblock %} {% block footer %}{% endblock %}
