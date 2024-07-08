@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "dev-homepage": "vite --config vite.homepage.config.ts",
+    "build-homepage": "tsc && vite build --config vite.homepage.config.ts && node ./homepage/deploy.js",
+    "deploy-homepage": "node ./homepage/deploy.js"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^16.5.0",

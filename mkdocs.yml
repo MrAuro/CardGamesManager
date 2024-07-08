@@ -4,6 +4,8 @@ repo_url: https://github.com/mrauro/cardgamesmanager
 use_directory_urls: true
 theme:
   name: material
+  custom_dir: docs/overrides
+  language: en
   logo: https://raw.githubusercontent.com/MrAuro/CardGamesManager/main/app-icon.png
   favicon: https://raw.githubusercontent.com/MrAuro/CardGamesManager/main/app-icon.png
   palette:
