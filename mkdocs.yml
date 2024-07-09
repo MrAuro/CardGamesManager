@@ -9,8 +9,11 @@ theme:
   logo: https://raw.githubusercontent.com/MrAuro/CardGamesManager/main/app-icon.png
   favicon: https://raw.githubusercontent.com/MrAuro/CardGamesManager/main/app-icon.png
   palette:
-    - scheme: slate
-      primary: custom
+    scheme: slate
+    primary: custom
+  font:
+    text: Inter
+    code: Roboto Mono
 
   features:
     - navigation.instant

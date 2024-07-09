@@ -11,7 +11,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <MantineProvider
       // This should match the theme in /src/Root.tsx in the Tauri project
       theme={createTheme({
-        fontFamily: "Segoe UI, sans-serif",
+        fontFamily: "Inter, sans-serif",
         colors: {
           dark: [
             "#BFBFC2",
