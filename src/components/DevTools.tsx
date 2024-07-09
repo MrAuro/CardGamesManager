@@ -196,6 +196,24 @@ export default function DevTools() {
       >
         {pokerGameOpen ? "Close" : "Open"} Poker Game
       </Button>
+      {/* <Select
+        value={localStorage.getItem("FONT_FAMILY")}
+        onChange={(value) => {
+          localStorage.setItem("FONT_FAMILY", value as string);
+          window.location.reload();
+        }}
+        placeholder="Font"
+        data={[
+          "Noto Sans",
+          "Roboto",
+          "Open Sans",
+          "Inter",
+          "Lato",
+          "Poppins",
+          "Raleway",
+          "Nunito Sans",
+        ]}
+      /> */}
       <Button
         color="red"
         onClick={() => {

@@ -215,7 +215,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <MantineProvider
       theme={createTheme({
-        fontFamily: "Segoe UI, sans-serif",
+        fontFamily: `${localStorage.getItem("FONT_FAMILY") || "Inter"}, Segoe UI, sans-serif`,
         colors: {
           dark: [
             "#BFBFC2",
