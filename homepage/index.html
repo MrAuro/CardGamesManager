@@ -9,4 +9,12 @@
     <div id="root"></div>
     <script type="module" src="main.tsx"></script>
   </body>
+
+  <script>
+    /* Prevents the logo from being clicked, which reloads the page and messes up the styling */
+    let logo = document.querySelector(".md-header__button");
+    logo.href = "javascript:void(0)";
+    logo.style.cursor = "default";
+    logo.style.pointerEvents = "none";
+  </script>
 </html>
