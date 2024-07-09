@@ -20,7 +20,7 @@
     
     
       
-        <title>Unique - CardGamesManager</title>
+        <title>CardGamesManager</title>
       
     
     
@@ -102,7 +102,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Unique
+              Home
             
           </span>
         </div>
@@ -208,6 +208,14 @@
     <div id="root"></div>
 
   </body>
+
+  <script>
+    /* Prevents the logo from being clicked, which reloads the page and messes up the styling */
+    let logo = document.querySelector(".md-header__button");
+    logo.href = "javascript:void(0)";
+    logo.style.cursor = "default";
+    logo.style.pointerEvents = "none";
+  </script>
 </html>
 
 
