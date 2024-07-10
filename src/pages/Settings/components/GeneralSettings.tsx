@@ -142,33 +142,6 @@ export default function GeneralSettings() {
           </Button>
         </ButtonGroup>
       </Input.Wrapper>
-
-      <Input.Wrapper
-        label="Touchscreen Menu Position"
-        description="Should the menu be on the left or right side of the screen"
-        mt="sm"
-      >
-        <ButtonGroup mt={5}>
-          <Button
-            variant={settings.touchscreenMenuPosition == "left" ? "filled" : "default"}
-            leftSection={<IconLayoutSidebarLeftCollapseFilled />}
-            onClick={() => {
-              setSettings({ ...settings, touchscreenMenuPosition: "left" });
-            }}
-          >
-            Left
-          </Button>
-          <Button
-            variant={settings.touchscreenMenuPosition == "right" ? "filled" : "default"}
-            leftSection={<IconLayoutSidebarRightCollapseFilled />}
-            onClick={() => {
-              setSettings({ ...settings, touchscreenMenuPosition: "right" });
-            }}
-          >
-            Right
-          </Button>
-        </ButtonGroup>
-      </Input.Wrapper>
       <Input.Wrapper
         mb="xl"
         label="Touchscreen Menu Width"
