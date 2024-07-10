@@ -5,7 +5,6 @@ import {
   Divider,
   Flex,
   Image,
-  Overlay,
   Paper,
   ScrollArea,
   Text,
@@ -34,7 +33,7 @@ export default function CameraMenu() {
   const settings = useRecoilValue(SETTINGS_STATE);
 
   const [rawResponse, setRawResponse] = useState<string>("");
-  const [cards, setCards] = useState<Card[]>([]);
+  const [cards, setCards] = useState<Card[]>(["4h", "Ad"]);
   const [loading, setLoading] = useState<boolean>(false);
 
   const genAI = new GoogleGenerativeAI(settings.geminiApiKey);

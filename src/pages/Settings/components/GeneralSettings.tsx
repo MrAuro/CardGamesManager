@@ -12,7 +12,6 @@ import {
   Grid,
   Input,
   NumberInput,
-  PasswordInput,
   Select,
   Slider,
   Table,
@@ -34,15 +33,13 @@ import {
   IconKeyframeFilled,
   IconLayoutColumns,
   IconLayoutGrid,
-  IconLayoutSidebarLeftCollapseFilled,
-  IconLayoutSidebarRightCollapseFilled,
   IconPencil,
   IconPlus,
   IconTrash,
 } from "@tabler/icons-react";
 import { open } from "@tauri-apps/api/dialog";
 import { BaseDirectory, readTextFile, writeTextFile } from "@tauri-apps/api/fs";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { useRecordHotkeys } from "react-hotkeys-hook";
 import { useRecoilState } from "recoil";
 
