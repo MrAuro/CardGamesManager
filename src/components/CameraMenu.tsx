@@ -39,7 +39,7 @@ export default function CameraMenu() {
   const model = genAI.getGenerativeModel({
     model: "gemini-1.5-flash",
     systemInstruction:
-      'Determine which suit and rank the card is. You must respond in JSON format with a rank and suit field. You must give the suit in the abbreviated form (s for Spades, h for Hearts, c for Clubs, d for Diamonds). You must give the rank in the abbreviated form (A for Ace, 2-9 for cards 2-9, T for 10, J for Jacks, Q for Queens, K for Kings). [{"rank": _, "suit": _}]. Return an array of card or cards.',
+      'Determine which suit and rank the card is. You must respond in JSON format with a rank and suit field. You must give the suit in the abbreviated form (s for Spades, h for Hearts, c for Clubs, d for Diamonds). You must give the rank in the abbreviated form (A for Ace, 2-9 for cards 2-9, T for 10, J for Jacks, Q for Queens, K for Kings). [{"rank": _, "suit": _}]. Return an array of card or cards. If you cannot determine the card, return an empty array.',
   });
 
   const webcamRef = useRef<Webcam>(null);
@@ -80,7 +80,7 @@ export default function CameraMenu() {
       const cardData: { rank: CardRank_NOEMPTY; suit: CardSuit_NOEMPTY }[] = JSON.parse(text);
       setRawResponse(text);
       const t1 = performance.now();
-      setCards(cardData.map((card) => `${card.rank}${card.suit}` as Card));
+      setCards(cardData.map((card) => `${card.rank.replace("10", "T")}${card.suit}` as Card));
       setLoading(false);
 
       setStats(`${(t1 - t0).toFixed(2)}ms • ${response.usageMetadata?.totalTokenCount} tokens`);
@@ -127,7 +127,11 @@ export default function CameraMenu() {
             </Flex>
           </Paper>
         ))}
-        {cards.length === 0 && <Text c="dimmed">No cards detected</Text>}
+        {cards.length === 0 && (
+          <Text size="sm" c="dimmed">
+            No cards detected
+          </Text>
+        )}
       </Flex>
 
       <Divider my="sm" />
@@ -138,7 +142,7 @@ export default function CameraMenu() {
         style={{
           cursor: "pointer",
         }}
-        title="View image capture"
+        title="More information"
         onClick={() => {
           modals.open({
             title: "Image Capture",
@@ -152,6 +156,20 @@ export default function CameraMenu() {
         }}
       >
         {stats}
+      </Text>
+      <Divider my="sm" />
+      <Text
+        c="dimmed"
+        ta="justify"
+        size="xs"
+        p="xs"
+        // https://stackoverflow.com/a/18170796
+        style={{
+          textAlignLast: "center",
+        }}
+      >
+        Accuracy may vary. For best results, ensure the card is in focus and well lit, and that
+        there are less than 4 cards in the image. Sideways cards may be detected incorrectly.
       </Text>
     </ScrollArea>
   );
