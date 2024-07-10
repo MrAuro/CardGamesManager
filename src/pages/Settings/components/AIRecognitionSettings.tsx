@@ -10,13 +10,19 @@ import {
   InputWrapper,
   PasswordInput,
   Select,
+  Slider,
   Text,
   Title,
   useMantineTheme,
 } from "@mantine/core";
 import {
+  IconCamera,
+  IconCameraCancel,
+  IconCameraOff,
   IconHandFinger,
   IconHandFingerOff,
+  IconLayoutSidebarLeftCollapseFilled,
+  IconLayoutSidebarRightCollapseFilled,
   IconRotate2,
   IconRotateClockwise2,
   IconSparkles,
@@ -54,6 +60,76 @@ export default function AIRecognitionSettings() {
         You can get your Generative Language Client API key from aistudio.google.com. The free tier
         is sufficient for this application.
       </Text>
+      <Input.Wrapper
+        label="Enable Camera Menu"
+        description="Show the menu to preview and capture images from the camera. The menu will be on the opposite side of the touchscreen menu."
+        mt="sm"
+        mb="sm"
+      >
+        <ButtonGroup mt={5}>
+          <Button
+            variant={settings.cameraMenu ? "filled" : "default"}
+            leftSection={<IconCamera />}
+            onClick={() => {
+              setSettings({ ...settings, cameraMenu: true });
+            }}
+          >
+            On
+          </Button>
+          <Button
+            variant={!settings.cameraMenu ? "filled" : "default"}
+            leftSection={<IconCameraOff />}
+            onClick={() => {
+              setSettings({ ...settings, cameraMenu: false });
+            }}
+          >
+            Off
+          </Button>
+        </ButtonGroup>
+      </Input.Wrapper>
+      <Input.Wrapper
+        mb="xl"
+        label="Camera Menu Width"
+        description="Certain UI elements may look weird at low and high percents"
+        mt="sm"
+      >
+        <Slider
+          mt="xs"
+          defaultValue={settings.cameraMenuWidth}
+          min={15}
+          max={85}
+          step={5}
+          marks={[
+            {
+              label: "15%",
+              value: 15,
+            },
+            {
+              label: "30%",
+              value: 30,
+            },
+            {
+              label: "45%",
+              value: 45,
+            },
+            {
+              label: "60%",
+              value: 60,
+            },
+            {
+              label: "75%",
+              value: 75,
+            },
+            {
+              label: "85%",
+              value: 85,
+            },
+          ]}
+          onChangeEnd={(value) => {
+            setSettings({ ...settings, cameraMenuWidth: value });
+          }}
+        />
+      </Input.Wrapper>
       <Input.Wrapper label="Gemini API Key">
         <Grid>
           <Grid.Col span={{ base: 8 }}>

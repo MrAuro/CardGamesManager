@@ -9,7 +9,7 @@ export type Settings = {
   chipsMode: boolean;
   fourColorDeck: boolean;
   touchscreenMenu: boolean;
-  touchscreenMenuPosition: "left" | "right";
+  swapSideMenus: boolean;
   touchscreenMenuWidth: number;
   touchscreenMenuChipsColumns: number;
   tts: boolean;
@@ -20,6 +20,8 @@ export type Settings = {
   geminiApiKey: string;
   cameraDeviceId: string;
   cameraFlipHorizontal: boolean;
+  cameraMenu: boolean;
+  cameraMenuWidth: number;
 };
 
 export type Chip = {
