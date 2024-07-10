@@ -1,4 +1,13 @@
-import { Button, Image, Paper, ScrollArea, Select, Text, useMantineTheme } from "@mantine/core";
+import {
+  Button,
+  Image,
+  Paper,
+  Progress,
+  ScrollArea,
+  Select,
+  Text,
+  useMantineTheme,
+} from "@mantine/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import Webcam from "react-webcam";
@@ -9,12 +18,17 @@ import { SETTINGS_STATE } from "@/Root";
 import { Card, CardRank, CardRank_NOEMPTY, CardSuit_NOEMPTY } from "@/types/Card";
 import PlayingCard from "./PlayingCard";
 
+// [{"rank": "3", "suit": "d"}] is 28 characters long
+// If there are more cards, the length will be longer, but 28 is the minimum
+const ESTIMATED_RESULT_LENGTH = 28;
+
 export default function CameraMenu() {
   const theme = useMantineTheme();
   const [image, setImage] = useState<string | null>(null);
 
   const settings = useRecoilValue(SETTINGS_STATE);
 
+  const [aiResult, setAiResult] = useState<string>("");
   const [cards, setCards] = useState<Card[]>([]);
 
   const genAI = new GoogleGenerativeAI(settings.geminiApiKey);
@@ -45,7 +59,9 @@ export default function CameraMenu() {
       // and just send the base64 part
       const imageBase64 = image.split(",")[1];
 
-      const result = await model.generateContent([
+      setAiResult("");
+
+      const result = await model.generateContentStream([
         {
           inlineData: {
             data: imageBase64,
@@ -53,8 +69,15 @@ export default function CameraMenu() {
           },
         },
       ]);
+
+      for await (const chunk of result.stream) {
+        const chunkText = chunk.text();
+        setAiResult((prev) => prev + chunkText);
+      }
+
       const response = await result.response;
       const text = await response.text();
+      console.log(`AI Response: ${text}`);
       const cardData: { rank: CardRank_NOEMPTY; suit: CardSuit_NOEMPTY }[] = JSON.parse(text);
       setCards(cardData.map((card) => `${card.rank}${card.suit}` as Card));
     })();
@@ -77,15 +100,15 @@ export default function CameraMenu() {
           screenshotFormat="image/png"
           videoConstraints={{ deviceId: settings.cameraDeviceId }}
         />
-        {/* <Button onClick={capture}>Capture</Button> */}
         <Button
           onClick={async () => {
             if (!webcamRef.current) return;
             setImage(webcamRef.current.getScreenshot());
           }}
         >
-          Do Magic
+          Detect
         </Button>
+        <Progress size="sm" value={(aiResult.length / ESTIMATED_RESULT_LENGTH) * 100} />
         <Image src={image || ""} />
         {cards.map((card, index) => (
           <PlayingCard key={index} onClick={() => {}} disabled card={card} />
