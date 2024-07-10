@@ -145,7 +145,13 @@ export default function CameraMenu() {
       </Button>
       <Divider my="sm" />
 
-      <ScrollArea w={webcamElementSize.width} scrollbars="x" type="always" offsetScrollbars>
+      <ScrollArea
+        w={webcamElementSize.width}
+        scrollbars="x"
+        type="auto"
+        offsetScrollbars
+        scrollbarSize={5}
+      >
         <Flex justify="center" gap="xs">
           {cards.map((card, index) => (
             <Paper key={index} p="xs" radius="lg" withBorder>
