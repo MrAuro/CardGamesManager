@@ -26,18 +26,6 @@ export default function CameraMenu() {
   });
 
   const webcamRef = useRef<Webcam>(null);
-  // const capture = useCallback(() => {
-  //   if (webcamRef.current) setImage(webcamRef.current.getScreenshot());
-  // }, [webcamRef]);
-
-  const [deviceId, setDeviceId] = useState({});
-  const [devices, setDevices] = useState([]);
-
-  const handleDevices = useCallback(
-    (mediaDevices: any) =>
-      setDevices(mediaDevices.filter(({ kind }: any) => kind === "videoinput")),
-    [setDevices]
-  );
 
   useEffect(() => {
     (async () => {
@@ -72,10 +60,6 @@ export default function CameraMenu() {
     })();
   }, [image]);
 
-  useEffect(() => {
-    navigator.mediaDevices.enumerateDevices().then(handleDevices);
-  }, [handleDevices]);
-
   return (
     <ScrollArea m="xs" scrollbars="y" type="never">
       <Paper
@@ -97,39 +81,7 @@ export default function CameraMenu() {
         <Button
           onClick={async () => {
             if (!webcamRef.current) return;
-            console.log(`Capturing image`);
             setImage(webcamRef.current.getScreenshot());
-            // console.log(`Captured image`, image);
-
-            // if (!image) {
-            //   alert("No image to process");
-            //   return;
-            // }
-
-            // model.generationConfig = {
-            //   temperature: 2,
-            //   topP: 0.95,
-            //   topK: 64,
-            //   maxOutputTokens: 8192,
-            //   responseMimeType: "application/json",
-            // };
-
-            // // We need to remove the data:image/png;base64, part of the image
-            // // and just send the base64 part
-            // const imageBase64 = image.split(",")[1];
-
-            // const result = await model.generateContent([
-            //   {
-            //     inlineData: {
-            //       data: imageBase64,
-            //       mimeType: "image/png",
-            //     },
-            //   },
-            // ]);
-            // const response = await result.response;
-            // const text = await response.text();
-            // const cardData: { rank: CardRank_NOEMPTY; suit: CardSuit_NOEMPTY }[] = JSON.parse(text);
-            // setCards(cardData.map((card) => `${card.rank}${card.suit}` as Card));
           }}
         >
           Do Magic
