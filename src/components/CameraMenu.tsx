@@ -5,6 +5,7 @@ import {
   Divider,
   Flex,
   Image,
+  Overlay,
   Paper,
   ScrollArea,
   Text,
@@ -27,6 +28,8 @@ export default function CameraMenu() {
   const theme = useMantineTheme();
   const [image, setImage] = useState<string | null>(null);
   const [stats, setStats] = useState<string>("No image captured");
+
+  const [flashTime, setFlashTime] = useState<number>(0);
 
   const settings = useRecoilValue(SETTINGS_STATE);
 
@@ -100,6 +103,19 @@ export default function CameraMenu() {
             borderRadius: theme.radius.md,
           }}
         />
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: webcamElementSize.width,
+            height: `calc(${webcamElementSize.height}px - 7px)`, // 7px is a magic number that works with multiple devices
+            backgroundColor: "white",
+            opacity: flashTime / 100,
+            zIndex: 1,
+            borderRadius: theme.radius.md,
+          }}
+        />
       </div>
       <Button
         fullWidth
@@ -108,6 +124,20 @@ export default function CameraMenu() {
         onClick={async () => {
           if (!webcamRef.current) return;
           setImage(webcamRef.current.getScreenshot());
+
+          // Flash effect
+          setFlashTime(80); // 80% max looks better than 100%
+
+          // Exponential decay
+          for (let i = 0; i < 100; i++) {
+            setTimeout(() => {
+              setFlashTime((time) => time - 2);
+            }, 10 * i);
+          }
+
+          setTimeout(() => {
+            setFlashTime(0);
+          }, 1000);
         }}
       >
         Capture
@@ -162,7 +192,7 @@ export default function CameraMenu() {
         c="dimmed"
         ta="justify"
         size="xs"
-        p="xs"
+        px="sm"
         // https://stackoverflow.com/a/18170796
         style={{
           textAlignLast: "center",
