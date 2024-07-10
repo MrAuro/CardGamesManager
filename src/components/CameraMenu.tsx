@@ -145,25 +145,27 @@ export default function CameraMenu() {
       </Button>
       <Divider my="sm" />
 
-      <Flex justify="center" gap="md" mt="sm">
-        {cards.map((card, index) => (
-          <Paper key={index} p="xs" radius="lg" withBorder>
-            <Center>
-              <PlayingCard key={index} onClick={() => {}} disabled card={card} />
-            </Center>
-            <Flex justify="center" gap="xs" mx="xs">
-              <Button leftSection={<IconPlus />} color="green" variant="light" mt="xs">
-                Add
-              </Button>
-            </Flex>
-          </Paper>
-        ))}
-        {cards.length === 0 && (
-          <Text size="sm" c="dimmed">
-            No cards detected
-          </Text>
-        )}
-      </Flex>
+      <ScrollArea w={webcamElementSize.width} scrollbars="x" type="always" offsetScrollbars>
+        <Flex justify="center" gap="xs">
+          {cards.map((card, index) => (
+            <Paper key={index} p="xs" radius="lg" withBorder>
+              <Center>
+                <PlayingCard key={index} onClick={() => {}} disabled card={card} />
+              </Center>
+              <Flex justify="center" gap="xs" mx="xs">
+                <Button leftSection={<IconPlus />} color="green" variant="light" mt={5}>
+                  Add
+                </Button>
+              </Flex>
+            </Paper>
+          ))}
+          {cards.length === 0 && (
+            <Text size="sm" c="dimmed">
+              No cards detected
+            </Text>
+          )}
+        </Flex>
+      </ScrollArea>
 
       <Divider my="sm" />
       <Text
