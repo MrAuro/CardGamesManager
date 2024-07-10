@@ -1,39 +1,23 @@
 import { SETTINGS_STATE } from "@/Root";
 import {
-  ActionIcon,
   Button,
   ButtonGroup,
   Checkbox,
-  Flex,
   Grid,
   Input,
-  InputWrapper,
   PasswordInput,
   Select,
   Slider,
   Text,
   Title,
-  useMantineTheme,
 } from "@mantine/core";
-import {
-  IconCamera,
-  IconCameraCancel,
-  IconCameraOff,
-  IconHandFinger,
-  IconHandFingerOff,
-  IconLayoutSidebarLeftCollapseFilled,
-  IconLayoutSidebarRightCollapseFilled,
-  IconRotate2,
-  IconRotateClockwise2,
-  IconSparkles,
-} from "@tabler/icons-react";
-import { useState, useCallback, useEffect } from "react";
+import { IconCamera, IconCameraOff, IconSparkles } from "@tabler/icons-react";
+import { useCallback, useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 
 export default function AIRecognitionSettings() {
   const [settings, setSettings] = useRecoilState(SETTINGS_STATE);
   const [tempGeminiApiKey, setTempGeminiApiKey] = useState(settings.geminiApiKey);
-  const theme = useMantineTheme();
 
   const [devices, setDevices] = useState([]);
 
