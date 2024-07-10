@@ -4,6 +4,7 @@ import BlackjackSettings from "./components/BlackjackSettings";
 import { Divider } from "@mantine/core";
 import { useLocalStorage } from "@mantine/hooks";
 import { Text } from "@mantine/core";
+import AIRecognitionSettings from "./components/AIRecognitionSettings";
 
 export default function Settings() {
   const [firstTime, setFirstTime] = useLocalStorage({
@@ -18,6 +19,8 @@ export default function Settings() {
       <BlackjackSettings />
       <Divider my="sm" />
       <PokerSettings />
+      <Divider my="sm" />
+      <AIRecognitionSettings />
       <Divider my="sm" />
       {!firstTime && (
         <Text

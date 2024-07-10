@@ -97,6 +97,7 @@ export default function CameraMenu() {
           width="100%"
           ref={webcamRef}
           audio={false}
+          mirrored={settings.cameraFlipHorizontal}
           screenshotFormat="image/png"
           videoConstraints={{ deviceId: settings.cameraDeviceId }}
           style={{

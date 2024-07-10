@@ -19,6 +19,7 @@ export type Settings = {
   ttsVolume: number;
   geminiApiKey: string;
   cameraDeviceId: string;
+  cameraFlipHorizontal: boolean;
 };
 
 export type Chip = {

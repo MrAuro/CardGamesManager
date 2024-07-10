@@ -51,8 +51,6 @@ export default function GeneralSettings() {
   const [keybindings, setKeybindings] = useRecoilImmerState(KEYBINDINGS_STATE);
   const [chips, setChips] = useRecoilImmerState(CHIPS_STATE);
 
-  const [tempGeminiApiKey, setTempGeminiApiKey] = useState(settings.geminiApiKey);
-
   const theme = useMantineTheme();
 
   const [opened, { toggle }] = useDisclosure(false);
@@ -61,18 +59,6 @@ export default function GeneralSettings() {
   const [keys, { start, stop }] = useRecordHotkeys();
 
   const [wasTouchscreenMenuOn, setWasTouchscreenMenuOn] = useState(settings.touchscreenMenu);
-
-  const [devices, setDevices] = useState([]);
-
-  const handleDevices = useCallback(
-    (mediaDevices: any) =>
-      setDevices(mediaDevices.filter(({ kind }: any) => kind === "videoinput")),
-    [setDevices]
-  );
-
-  useEffect(() => {
-    navigator.mediaDevices.enumerateDevices().then(handleDevices);
-  }, [handleDevices]);
 
   const saveKey = (id: string, key: string) => {
     setKeybindings((draft) => {
@@ -591,50 +577,6 @@ export default function GeneralSettings() {
           placeholder={settings.ttsVoice !== "" ? settings.ttsVoice : "Select a voice"}
           onChange={(value) => {
             setSettings({ ...settings, ttsVoice: value as string });
-          }}
-        />
-      </Input.Wrapper>
-      <Input.Wrapper mb="xl" label="Gemini API Key" mt="sm">
-        <Grid>
-          <Grid.Col span={{ base: 8 }}>
-            <PasswordInput
-              value={tempGeminiApiKey}
-              placeholder="Enter your Gemini API Key"
-              onChange={(event) => setTempGeminiApiKey(event.currentTarget.value)}
-            />
-          </Grid.Col>
-          <Grid.Col span={{ base: 4 }}>
-            <Button
-              fullWidth
-              disabled={tempGeminiApiKey === settings.geminiApiKey}
-              onClick={() => {
-                setSettings({ ...settings, geminiApiKey: tempGeminiApiKey });
-              }}
-            >
-              Save
-            </Button>
-          </Grid.Col>
-        </Grid>
-      </Input.Wrapper>
-      <Input.Wrapper mb="sm" label="Camera Source" mt="sm">
-        <Select
-          data={devices.map((device: any) => ({
-            value: device.deviceId,
-            label: device.label || `Camera ${device.deviceId}`,
-          }))}
-          defaultValue={settings.cameraDeviceId}
-          allowDeselect={false}
-          placeholder={
-            settings.cameraDeviceId !== ""
-              ? (
-                  devices.find((device: any) => device.deviceId === settings.cameraDeviceId) || {
-                    label: "Select Camera",
-                  }
-                ).label
-              : "Select Camera"
-          }
-          onChange={(value) => {
-            setSettings({ ...settings, cameraDeviceId: value as string });
           }}
         />
       </Input.Wrapper>
