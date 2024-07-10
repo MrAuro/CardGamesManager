@@ -17,6 +17,8 @@ export type Settings = {
   ttsRate: number;
   ttsPitch: number;
   ttsVolume: number;
+  geminiApiKey: string;
+  cameraDeviceId: string;
 };
 
 export type Chip = {

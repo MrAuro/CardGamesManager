@@ -184,6 +184,7 @@ export const SETTINGS_STATE = atom<Settings>({
         ttsVoice: "Microsoft David Desktop - English (United States)",
         ttsRate: 1,
         ttsPitch: 1,
+        geminiApiKey: "",
         chips: [],
       };
       await TAURI_STORE.set("settings", settings);

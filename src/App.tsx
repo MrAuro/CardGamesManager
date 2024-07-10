@@ -29,6 +29,7 @@ import TouchscreenMenu from "./components/TouchscreenMenu";
 import ChipBreakdown, { CHIP_BREAKDOWN_OPEN } from "./components/ChipBreakdown";
 import { useLocalStorage } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
+import CameraMenu from "./components/CameraMenu";
 
 export const HOTKEY_SELECTOR_A_ENABLED = atom({
   key: "hotkeySelectorA",
@@ -356,7 +357,7 @@ export default function App() {
   }
 
   let asideWidth: number | string = 0;
-  let navbarWidth: number | string = 0;
+  let navbarWidth: number | string = `${settings?.touchscreenMenuWidth}%`;
   if (settings?.touchscreenMenu) {
     if (settings?.touchscreenMenuPosition == "left") {
       navbarWidth = `${settings?.touchscreenMenuWidth}%`;
@@ -402,6 +403,9 @@ export default function App() {
             ) : null}
             <Container>{content}</Container>
           </AppShell.Main>
+          <AppShell.Navbar>
+            <CameraMenu />
+          </AppShell.Navbar>
           {settings?.touchscreenMenu &&
             (settings?.touchscreenMenuPosition == "left" ? (
               <AppShell.Navbar>
