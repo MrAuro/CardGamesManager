@@ -187,13 +187,14 @@ export default function CameraMenu() {
               </Flex>
             </Paper>
           ))}
-          {cards.length === 0 && (
-            <Text size="sm" c="dimmed">
-              No cards detected
-            </Text>
-          )}
         </Flex>
       </ScrollArea>
+
+      {cards.length === 0 && (
+        <Text size="sm" c="dimmed" ta="center">
+          No cards detected
+        </Text>
+      )}
 
       <Divider my="sm" />
       <Text
