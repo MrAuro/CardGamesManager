@@ -38,7 +38,7 @@ export default function CameraMenu() {
   const blackjackGameState = useRecoilValue(BLACKJACK_GAME_STATE).gameState;
 
   const [rawResponse, setRawResponse] = useState<string>("");
-  const [cards, setCards] = useState<Card[]>(["7c", "Ac", "Ts"]);
+  const [cards, setCards] = useState<Card[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   const genAI = new GoogleGenerativeAI(settings.geminiApiKey);
