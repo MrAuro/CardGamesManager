@@ -115,8 +115,8 @@ export default function CameraMenu() {
         <div
           style={{
             position: "absolute",
-            top: 0,
-            left: 0,
+            top: theme.spacing.sm,
+            left: theme.spacing.sm,
             width: webcamElementSize.width,
             height: `calc(${webcamElementSize.height}px - 7px)`, // 7px is a magic number that works with multiple devices
             backgroundColor: "white",
