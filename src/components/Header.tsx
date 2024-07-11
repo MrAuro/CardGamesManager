@@ -14,7 +14,7 @@ export default function Header({
   const [title, setTitle] = useState("Card Games Manager");
 
   return (
-    <Container size="md" mt="sm">
+    <Container size="md" pt="xs">
       <Group gap={5} justify={false ? "center" : "space-between"}>
         <Flex align="center" gap={5}>
           <ActionIcon
@@ -27,7 +27,14 @@ export default function Header({
           >
             <Image src="app-icon.png" />
           </ActionIcon>
-          <Text size={rem(26)} fw="bold">
+          <Text
+            size={rem(26)}
+            fw="bold"
+            style={{
+              cursor: "default",
+              userSelect: "none",
+            }}
+          >
             {title}
           </Text>
         </Flex>
