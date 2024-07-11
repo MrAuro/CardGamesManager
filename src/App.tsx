@@ -398,12 +398,16 @@ export default function App() {
             ) : null}
             <Container>{content}</Container>
           </AppShell.Main>
-          <AppShell.Navbar>
-            <CameraMenu />
-          </AppShell.Navbar>
-          <AppShell.Aside>
-            <TouchscreenMenu />
-          </AppShell.Aside>
+          {settings.cameraMenu && (
+            <AppShell.Navbar>
+              <CameraMenu />
+            </AppShell.Navbar>
+          )}
+          {settings.touchscreenMenu && (
+            <AppShell.Aside>
+              <TouchscreenMenu />
+            </AppShell.Aside>
+          )}
         </AppShell>
       </>
     );
