@@ -10,7 +10,17 @@ import {
   POKER_SETTINGS_STATE,
   SETTINGS_STATE,
 } from "@/Root";
-import { AppShell, Container, Divider, Modal, Text, Title, useMantineTheme } from "@mantine/core";
+import {
+  AppShell,
+  Button,
+  Container,
+  Divider,
+  Flex,
+  Modal,
+  Text,
+  Title,
+  useMantineTheme,
+} from "@mantine/core";
 import { useEffect, useState } from "react";
 import { atom, useRecoilState } from "recoil";
 import { TAURI_STORE } from "./Root";
@@ -22,14 +32,14 @@ import Settings from "./pages/Settings";
 
 import "@/styles/App.css";
 
-import DevTools from "./components/DevTools";
-import { useHotkeys } from "react-hotkeys-hook";
-import { notifications } from "@mantine/notifications";
-import TouchscreenMenu from "./components/TouchscreenMenu";
-import ChipBreakdown, { CHIP_BREAKDOWN_OPEN } from "./components/ChipBreakdown";
 import { useLocalStorage } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
-import CameraMenu from "./components/CameraMenu";
+import { notifications } from "@mantine/notifications";
+import { useHotkeys } from "react-hotkeys-hook";
+import CameraMenu, { emitCameraReset } from "./components/CameraMenu";
+import ChipBreakdown, { CHIP_BREAKDOWN_OPEN } from "./components/ChipBreakdown";
+import DevTools from "./components/DevTools";
+import TouchscreenMenu from "./components/TouchscreenMenu";
 
 export const HOTKEY_SELECTOR_A_ENABLED = atom({
   key: "hotkeySelectorA",
@@ -399,8 +409,40 @@ export default function App() {
             <Container>{content}</Container>
           </AppShell.Main>
           {settings.cameraMenu && (
-            <AppShell.Navbar>
+            <AppShell.Navbar
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                height: "100%",
+              }}
+            >
               <CameraMenu />
+              <Flex justify="center" style={{ marginTop: "auto" }} m="xs" gap="sm">
+                <Button
+                  fullWidth
+                  variant="subtle"
+                  color="blue"
+                  onClick={() => {
+                    emitCameraReset();
+                  }}
+                >
+                  Reset
+                </Button>
+                <Button
+                  fullWidth
+                  variant="subtle"
+                  color="red"
+                  onClick={() => {
+                    setSettings({
+                      ...settings,
+                      cameraMenu: false,
+                    });
+                  }}
+                >
+                  Close
+                </Button>
+              </Flex>
             </AppShell.Navbar>
           )}
           {settings.touchscreenMenu && (

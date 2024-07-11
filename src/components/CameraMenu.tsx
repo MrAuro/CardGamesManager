@@ -1,11 +1,11 @@
 import {
-  ActionIcon,
   Button,
   Center,
   Code,
   Divider,
   Flex,
   Image,
+  Loader,
   Paper,
   ScrollArea,
   Text,
@@ -15,16 +15,19 @@ import { useEffect, useRef, useState } from "react";
 
 import Webcam from "react-webcam";
 
+import { emitBjAction } from "@/pages/Blackjack/routes/Round";
+import { emitPokerAction } from "@/pages/Poker/routes/Round";
 import { BLACKJACK_GAME_STATE, POKER_GAME_STATE, SETTINGS_STATE } from "@/Root";
 import { Card, CardRank_NOEMPTY, CardSuit_NOEMPTY } from "@/types/Card";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { useElementSize } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
-import { IconCamera, IconPlus } from "@tabler/icons-react";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { IconCamera } from "@tabler/icons-react";
+import { createEvent } from "react-event-hook";
+import { useRecoilValue } from "recoil";
 import PlayingCard from "./PlayingCard";
-import { emitPokerAction } from "@/pages/Poker/routes/Round";
-import { emitBjAction } from "@/pages/Blackjack/routes/Round";
+
+export const { useCameraResetListener, emitCameraReset } = createEvent("cameraReset")();
 
 export default function CameraMenu() {
   const theme = useMantineTheme();
@@ -33,9 +36,18 @@ export default function CameraMenu() {
 
   const [flashTime, setFlashTime] = useState<number>(0);
 
-  const [settings, setSettings] = useRecoilState(SETTINGS_STATE);
+  const settings = useRecoilValue(SETTINGS_STATE);
   const pokerGameState = useRecoilValue(POKER_GAME_STATE).gameState;
   const blackjackGameState = useRecoilValue(BLACKJACK_GAME_STATE).gameState;
+
+  const [resettingCamera, setResettingCamera] = useState(false);
+  useCameraResetListener(() => {
+    setResettingCamera(true);
+
+    setTimeout(() => {
+      setResettingCamera(false);
+    }, 1000);
+  });
 
   const [rawResponse, setRawResponse] = useState<string>("");
   const [cards, setCards] = useState<Card[]>([]);
@@ -96,38 +108,45 @@ export default function CameraMenu() {
 
   return (
     <Paper p="sm">
-      <div ref={webcamElementSize.ref}>
-        <Webcam
-          width="100%"
-          ref={webcamRef}
-          audio={false}
-          mirrored={settings.cameraFlipHorizontal}
-          screenshotFormat="image/png"
-          videoConstraints={{
-            deviceId: settings.cameraDeviceId,
-            facingMode: {
-              ideal: "environment",
-            },
-          }}
-          style={{
-            borderRadius: theme.radius.md,
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            top: theme.spacing.sm,
-            left: theme.spacing.sm,
-            width: webcamElementSize.width,
-            height: `calc(${webcamElementSize.height}px - 7px)`, // 7px is a magic number that works with multiple devices
-            backgroundColor: "white",
-            opacity: flashTime / 100,
-            zIndex: 1,
-            borderRadius: theme.radius.md,
-          }}
-        />
-      </div>
+      {resettingCamera ? (
+        <Center mb="sm">
+          <Loader />
+        </Center>
+      ) : (
+        <div ref={webcamElementSize.ref}>
+          <Webcam
+            width="100%"
+            ref={webcamRef}
+            audio={false}
+            mirrored={settings.cameraFlipHorizontal}
+            screenshotFormat="image/png"
+            videoConstraints={{
+              deviceId: settings.cameraDeviceId,
+              facingMode: {
+                ideal: "environment",
+              },
+            }}
+            style={{
+              borderRadius: theme.radius.md,
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              top: theme.spacing.sm,
+              left: theme.spacing.sm,
+              width: webcamElementSize.width,
+              height: `calc(${webcamElementSize.height}px - 7px)`, // 7px is a magic number that works with multiple devices
+              backgroundColor: "white",
+              opacity: flashTime / 100,
+              zIndex: 1,
+              borderRadius: theme.radius.md,
+            }}
+          />
+        </div>
+      )}
       <Button
+        disabled={loading || resettingCamera}
         fullWidth
         leftSection={<IconCamera />}
         loading={loading}
