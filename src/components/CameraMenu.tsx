@@ -94,7 +94,7 @@ export default function CameraMenu() {
   }, [image]);
 
   return (
-    <ScrollArea m="xs" scrollbars="y" type="never">
+    <Paper p="sm">
       <div ref={webcamElementSize.ref}>
         <Webcam
           width="100%"
@@ -233,6 +233,6 @@ export default function CameraMenu() {
         Accuracy may vary. For best results, ensure the card is in focus and well lit, and that
         there are less than 4 cards in the image. Sideways cards may be detected incorrectly.
       </Text>
-    </ScrollArea>
+    </Paper>
   );
 }
