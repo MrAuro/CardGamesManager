@@ -1,4 +1,5 @@
 import {
+  ActionIcon,
   Button,
   Center,
   Code,
@@ -37,7 +38,7 @@ export default function CameraMenu() {
   const blackjackGameState = useRecoilValue(BLACKJACK_GAME_STATE).gameState;
 
   const [rawResponse, setRawResponse] = useState<string>("");
-  const [cards, setCards] = useState<Card[]>([]);
+  const [cards, setCards] = useState<Card[]>(["7c", "Ac", "Ts"]);
   const [loading, setLoading] = useState<boolean>(false);
 
   const genAI = new GoogleGenerativeAI(settings.geminiApiKey);
@@ -151,7 +152,19 @@ export default function CameraMenu() {
       >
         Capture
       </Button>
-      <Divider my="sm" />
+      <Divider mt="xs" />
+      {cards.length > 0 && (
+        <Text c="dimmed" ta="center" size="xs" my={5}>
+          Click on a card to add it to the game
+        </Text>
+      )}
+
+      {cards.length == 0 && (
+        <Text size="sm" c="dimmed" ta="center" mt="xs">
+          No cards detected
+        </Text>
+      )}
+
       <ScrollArea
         w={webcamElementSize.width}
         scrollbars="x"
@@ -159,42 +172,26 @@ export default function CameraMenu() {
         offsetScrollbars
         scrollbarSize={5}
       >
-        <Flex justify="center" gap="xs">
+        <Flex justify="center" gap={5}>
           {cards.map((card, index) => (
-            <Paper key={index} p="xs" radius="lg" withBorder>
-              <Center>
-                <PlayingCard key={index} onClick={() => {}} disabled card={card} />
-              </Center>
-              <Flex justify="center" gap="xs" mx="xs">
-                <Button
-                  leftSection={<IconPlus />}
-                  color="green"
-                  variant="light"
-                  mt={5}
-                  onClick={() => {
-                    setCards((cards) => cards.filter((_, i) => i !== index));
+            <PlayingCard
+              key={index}
+              onClick={() => {
+                setCards((cards) => cards.filter((_, i) => i !== index));
 
-                    if (settings.activeTab == "Poker" && pokerGameState != "PREROUND") {
-                      emitPokerAction(card);
-                    }
-                    if (settings.activeTab == "Blackjack" && blackjackGameState != "PREROUND") {
-                      emitBjAction(card);
-                    }
-                  }}
-                >
-                  Add
-                </Button>
-              </Flex>
-            </Paper>
+                if (settings.activeTab == "Poker" && pokerGameState != "PREROUND") {
+                  emitPokerAction(card);
+                }
+                if (settings.activeTab == "Blackjack" && blackjackGameState != "PREROUND") {
+                  emitBjAction(card);
+                }
+              }}
+              disabled
+              card={card}
+            />
           ))}
         </Flex>
       </ScrollArea>
-
-      {cards.length === 0 && (
-        <Text size="sm" c="dimmed" ta="center">
-          No cards detected
-        </Text>
-      )}
 
       <Divider my="sm" />
       <Text
