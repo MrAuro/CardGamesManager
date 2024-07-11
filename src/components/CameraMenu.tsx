@@ -14,14 +14,16 @@ import { useEffect, useRef, useState } from "react";
 
 import Webcam from "react-webcam";
 
-import { SETTINGS_STATE } from "@/Root";
+import { BLACKJACK_GAME_STATE, POKER_GAME_STATE, SETTINGS_STATE } from "@/Root";
 import { Card, CardRank_NOEMPTY, CardSuit_NOEMPTY } from "@/types/Card";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { useElementSize } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
 import { IconCamera, IconPlus } from "@tabler/icons-react";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import PlayingCard from "./PlayingCard";
+import { emitPokerAction } from "@/pages/Poker/routes/Round";
+import { emitBjAction } from "@/pages/Blackjack/routes/Round";
 
 export default function CameraMenu() {
   const theme = useMantineTheme();
@@ -30,10 +32,12 @@ export default function CameraMenu() {
 
   const [flashTime, setFlashTime] = useState<number>(0);
 
-  const settings = useRecoilValue(SETTINGS_STATE);
+  const [settings, setSettings] = useRecoilState(SETTINGS_STATE);
+  const pokerGameState = useRecoilValue(POKER_GAME_STATE).gameState;
+  const blackjackGameState = useRecoilValue(BLACKJACK_GAME_STATE).gameState;
 
   const [rawResponse, setRawResponse] = useState<string>("");
-  const [cards, setCards] = useState<Card[]>(["4h", "Ad"]);
+  const [cards, setCards] = useState<Card[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   const genAI = new GoogleGenerativeAI(settings.geminiApiKey);
@@ -98,7 +102,12 @@ export default function CameraMenu() {
           audio={false}
           mirrored={settings.cameraFlipHorizontal}
           screenshotFormat="image/png"
-          videoConstraints={{ deviceId: settings.cameraDeviceId }}
+          videoConstraints={{
+            deviceId: settings.cameraDeviceId,
+            facingMode: {
+              ideal: "environment",
+            },
+          }}
           style={{
             borderRadius: theme.radius.md,
           }}
@@ -143,7 +152,6 @@ export default function CameraMenu() {
         Capture
       </Button>
       <Divider my="sm" />
-
       <ScrollArea
         w={webcamElementSize.width}
         scrollbars="x"
@@ -158,7 +166,22 @@ export default function CameraMenu() {
                 <PlayingCard key={index} onClick={() => {}} disabled card={card} />
               </Center>
               <Flex justify="center" gap="xs" mx="xs">
-                <Button leftSection={<IconPlus />} color="green" variant="light" mt={5}>
+                <Button
+                  leftSection={<IconPlus />}
+                  color="green"
+                  variant="light"
+                  mt={5}
+                  onClick={() => {
+                    setCards((cards) => cards.filter((_, i) => i !== index));
+
+                    if (settings.activeTab == "Poker" && pokerGameState != "PREROUND") {
+                      emitPokerAction(card);
+                    }
+                    if (settings.activeTab == "Blackjack" && blackjackGameState != "PREROUND") {
+                      emitBjAction(card);
+                    }
+                  }}
+                >
                   Add
                 </Button>
               </Flex>

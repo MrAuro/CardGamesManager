@@ -87,7 +87,7 @@ export const USED_CARDS = atom<Card[]>({
 });
 
 export const { usePokerActionListener, emitPokerAction } = createEvent("pokerAction")<
-  "check" | "call" | "fold" | number
+  "check" | "call" | "fold" | number | Card
 >();
 
 export default function Round() {
@@ -127,6 +127,38 @@ export default function Round() {
 
     if (msg == "call") {
       callAction();
+      return;
+    }
+
+    if (typeof msg == "string") {
+      if (betUIOpen) return;
+
+      if (pokerGame.capturingCommunityCards) {
+        let cards = [...pokerGame.communityCards];
+        if (cards.includes(EMPTY_CARD)) {
+          cards[cards.indexOf(EMPTY_CARD)] = msg as Card;
+        }
+
+        setPokerGame({
+          ...pokerGame,
+          communityCards: cards,
+        });
+      } else {
+        setPokerPlayers((draft) => {
+          let pokerPlayer = draft.find((p) => p.id == pokerGame.currentTurn);
+
+          if (pokerPlayer) {
+            if (pokerPlayer.cards.includes(EMPTY_CARD)) {
+              pokerPlayer.cards[pokerPlayer.cards.indexOf(EMPTY_CARD)] = msg as Card;
+            } else {
+              // Texas Hold'em only allows 2 cards per player, however
+              // if in the future we want to allow more cards, we can uncomment this
+              // // pokerPlayer.cards.push(card as Card);
+            }
+          }
+        });
+      }
+
       return;
     }
 
