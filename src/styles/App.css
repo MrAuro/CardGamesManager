@@ -1,3 +1,4 @@
-body {
-  overflow-y: scroll;
+body::-webkit-scrollbar {
+  /* Hide scrollbars but keep functionality */
+    display: none;
 }
