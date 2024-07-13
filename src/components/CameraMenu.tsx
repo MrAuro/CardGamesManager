@@ -17,7 +17,7 @@ import Webcam from "react-webcam";
 
 import { emitBjAction } from "@/pages/Blackjack/routes/Round";
 import { emitPokerAction } from "@/pages/Poker/routes/Round";
-import { BLACKJACK_GAME_STATE, POKER_GAME_STATE, SETTINGS_STATE } from "@/Root";
+import { BLACKJACK_GAME_STATE, KEYBINDINGS_STATE, POKER_GAME_STATE, SETTINGS_STATE } from "@/Root";
 import { Card, CardRank_NOEMPTY, CardSuit_NOEMPTY } from "@/types/Card";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { useElementSize } from "@mantine/hooks";
@@ -26,6 +26,9 @@ import { IconCamera } from "@tabler/icons-react";
 import { createEvent } from "react-event-hook";
 import { useRecoilValue } from "recoil";
 import PlayingCard from "./PlayingCard";
+import { useRecoilImmerState } from "@/utils/RecoilImmer";
+import { HOTKEY_SELECTOR_A_ENABLED, HOTKEY_SELECTOR_B_ENABLED } from "@/App";
+import { useHotkeys } from "react-hotkeys-hook";
 
 export const { useCameraResetListener, emitCameraReset } = createEvent("cameraReset")();
 
@@ -39,6 +42,35 @@ export default function CameraMenu() {
   const settings = useRecoilValue(SETTINGS_STATE);
   const pokerGameState = useRecoilValue(POKER_GAME_STATE).gameState;
   const blackjackGameState = useRecoilValue(BLACKJACK_GAME_STATE).gameState;
+
+  const [keybindings] = useRecoilImmerState(KEYBINDINGS_STATE);
+
+  const selectorA = useRecoilValue(HOTKEY_SELECTOR_A_ENABLED);
+  const selectorB = useRecoilValue(HOTKEY_SELECTOR_B_ENABLED);
+
+  keybindings.forEach((keybinding) => {
+    if (keybinding.scope === "Camera Menu") {
+      useHotkeys(keybinding.key, () => {
+        if (keybinding.selector == "A" && !selectorA) return;
+        if (keybinding.selector == "B" && !selectorB) return;
+
+        if (keybinding.selector == "None" && (selectorA || selectorB)) return;
+
+        switch (keybinding.action) {
+          case "Capture":
+            capture();
+            break;
+
+          case "Add Card":
+            if (cards.length > 0) {
+              // Add the first/leftmod card
+              addCard(0);
+            }
+            break;
+        }
+      });
+    }
+  });
 
   const [resettingCamera, setResettingCamera] = useState(false);
   useCameraResetListener(() => {
@@ -106,6 +138,40 @@ export default function CameraMenu() {
     })();
   }, [image]);
 
+  const capture = () => {
+    if (!webcamRef.current) return;
+    if (loading) return;
+    if (resettingCamera) return;
+
+    setImage(webcamRef.current.getScreenshot());
+
+    // Flash effect
+    setFlashTime(80); // 80% max looks better than 100%
+
+    // Exponential decay
+    for (let i = 0; i < 100; i++) {
+      setTimeout(() => {
+        setFlashTime((time) => time - 2);
+      }, 10 * i);
+    }
+
+    setTimeout(() => {
+      setFlashTime(0);
+    }, 1000);
+  };
+
+  const addCard = (index: number) => {
+    const card = cards[index];
+    setCards((cards) => cards.filter((_, i) => i !== index));
+
+    if (settings.activeTab == "Poker" && pokerGameState != "PREROUND") {
+      emitPokerAction(card);
+    }
+    if (settings.activeTab == "Blackjack" && blackjackGameState != "PREROUND") {
+      emitBjAction(card);
+    }
+  };
+
   return (
     <Paper p="sm">
       {resettingCamera ? (
@@ -150,24 +216,7 @@ export default function CameraMenu() {
         fullWidth
         leftSection={<IconCamera />}
         loading={loading}
-        onClick={async () => {
-          if (!webcamRef.current) return;
-          setImage(webcamRef.current.getScreenshot());
-
-          // Flash effect
-          setFlashTime(80); // 80% max looks better than 100%
-
-          // Exponential decay
-          for (let i = 0; i < 100; i++) {
-            setTimeout(() => {
-              setFlashTime((time) => time - 2);
-            }, 10 * i);
-          }
-
-          setTimeout(() => {
-            setFlashTime(0);
-          }, 1000);
-        }}
+        onClick={capture}
       >
         Capture
       </Button>
@@ -196,14 +245,7 @@ export default function CameraMenu() {
             <PlayingCard
               key={index}
               onClick={() => {
-                setCards((cards) => cards.filter((_, i) => i !== index));
-
-                if (settings.activeTab == "Poker" && pokerGameState != "PREROUND") {
-                  emitPokerAction(card);
-                }
-                if (settings.activeTab == "Blackjack" && blackjackGameState != "PREROUND") {
-                  emitBjAction(card);
-                }
+                addCard(index);
               }}
               disabled
               card={card}
