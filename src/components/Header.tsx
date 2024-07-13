@@ -25,7 +25,7 @@ export default function Header({
               setTitle(shuffle(title.split(" ")).join(" "));
             }}
           >
-            <Image src="app-icon.png" />
+            <Image src="logo.png" />
           </ActionIcon>
           <Text
             size={rem(26)}
