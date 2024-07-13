@@ -17,7 +17,8 @@ export type Scope =
   | "Blackjack Round"
   | "Blackjack PostRound"
   | "Poker PreRound"
-  | "Poker Round";
+  | "Poker Round"
+  | "Camera Menu";
 export const Scopes: Scope[] = [
   "None",
   "Selectors",
@@ -27,6 +28,7 @@ export const Scopes: Scope[] = [
   "Blackjack PostRound",
   "Poker PreRound",
   "Poker Round",
+  "Camera Menu",
 ];
 
 export type SelectorsActions = "A (hold)" | "A (toggle)" | "B (hold)" | "B (toggle)";
@@ -74,6 +76,8 @@ export type ChipsMenuActions =
   | "9"
   | ChipTitle;
 
+export type CameraMenuActions = "Capture" | "Add Card";
+
 export type Keybinding = {
   id: string;
   key: string;
@@ -106,6 +110,10 @@ export type Keybinding = {
   | {
       action: PokerRoundActions;
       scope: "Poker Round";
+    }
+  | {
+      action: CameraMenuActions;
+      scope: "Camera Menu";
     }
   | {
       action: "None";
@@ -176,6 +184,8 @@ export function getActions(scope: Scope, chips: Chip[]): string[] {
         ...availableSuits,
         ...availableCards,
       ];
+    case "Camera Menu":
+      return ["Capture", "Add Card"];
     case "None":
       return ["None"];
   }

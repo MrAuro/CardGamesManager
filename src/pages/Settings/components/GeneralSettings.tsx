@@ -56,6 +56,7 @@ export default function GeneralSettings() {
   const [keys, { start, stop }] = useRecordHotkeys();
 
   const [wasTouchscreenMenuOn, setWasTouchscreenMenuOn] = useState(settings.touchscreenMenu);
+  const [wasCameraMenuOn, setWasCameraMenuOn] = useState(settings.cameraMenu);
 
   const saveKey = (id: string, key: string) => {
     setKeybindings((draft) => {
@@ -120,6 +121,7 @@ export default function GeneralSettings() {
       >
         <ButtonGroup mt={5}>
           <Button
+            disabled={opened}
             variant={settings?.touchscreenMenu ? "filled" : "default"}
             leftSection={<IconHandFinger />}
             onClick={() => {
@@ -561,12 +563,17 @@ export default function GeneralSettings() {
         </Button>
         <Button
           onClick={() => {
-            // Hide the touchscreen menu to prevent issues
+            // Hide the touchscreen and camera menu to prevent issues with keybinding hooks
             if (opened) {
-              setSettings({ ...settings, touchscreenMenu: wasTouchscreenMenuOn });
+              setSettings({
+                ...settings,
+                touchscreenMenu: wasTouchscreenMenuOn,
+                cameraMenu: wasCameraMenuOn,
+              });
             } else {
               setWasTouchscreenMenuOn(settings.touchscreenMenu);
-              setSettings({ ...settings, touchscreenMenu: false });
+              setWasCameraMenuOn(settings.cameraMenu);
+              setSettings({ ...settings, touchscreenMenu: false, cameraMenu: false });
             }
 
             toggle();
@@ -623,6 +630,16 @@ export default function GeneralSettings() {
         </Button>
       </Flex>
       <Collapse in={opened}>
+        {(wasCameraMenuOn || wasTouchscreenMenuOn) && (
+          <Text fw="bold" c="red" ta="center" size="xs" mt="xs">
+            The {wasCameraMenuOn && "Camera Menu"}
+            {wasCameraMenuOn && wasTouchscreenMenuOn && " and the "}
+            {wasTouchscreenMenuOn && "Touchscreen Menu"}{" "}
+            {wasCameraMenuOn && wasTouchscreenMenuOn ? "were" : "was"} hidden to prevent issues with
+            keybindings. {wasCameraMenuOn && wasTouchscreenMenuOn ? "They" : "It"} will be restored
+            when you close the keybindings editor.
+          </Text>
+        )}
         <Table
           withColumnBorders
           withTableBorder
