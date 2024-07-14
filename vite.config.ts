@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { reactClickToComponent } from "vite-plugin-react-click-to-component";
 import path from "path";
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
@@ -29,5 +30,6 @@ export default defineConfig(async () => ({
 
   build: {
     target: "esnext",
+    sourcemap: true,
   },
 }));

@@ -217,6 +217,14 @@ export default function DevTools() {
       <Button
         color="red"
         onClick={() => {
+          throw new Error("Test error");
+        }}
+      >
+        Throw Error
+      </Button>
+      <Button
+        color="red"
+        onClick={() => {
           TAURI_STORE.clear();
           window.location.reload();
         }}
@@ -362,6 +370,7 @@ export default function DevTools() {
           >
             Save
           </Button>
+
           <Button
             variant="light"
             fullWidth
