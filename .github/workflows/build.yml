@@ -40,6 +40,18 @@ jobs:
         # webkitgtk 4.0 is for Tauri v1 - webkitgtk 4.1 is for Tauri v2.
         # You can remove the one that doesn't apply to your app to speed up the workflow a bit.
 
+      - name: create changelog
+        if:
+          matrix.platform == 'ubuntu-22.04' && contains(github.event.head_commit.message, 'Update
+          version')
+        uses: mikepenz/release-changelog-builder-action@v4.2.2
+        id: build_changelog
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          owner: "mrauro"
+          repo: "cardgamesmanager"
+
       - name: setup node
         uses: actions/setup-node@v4
         with:
@@ -64,6 +76,7 @@ jobs:
         run: yarn install # change this to npm or pnpm depending on which one you use.
 
       - uses: tauri-apps/tauri-action@v0
+        if: ${{ !contains(github.event.head_commit.message, 'Update version') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
@@ -74,5 +87,29 @@ jobs:
           prerelease: true
           includeDebug: true
           includeRelease: false
-          appVersion: "nightly-${{ github.sha }}"
+          includeUpdaterJson: false
           args: ${{ matrix.args }}
+
+      - uses: tauri-apps/tauri-action@v0
+        if: ${{ contains(github.event.head_commit.message, 'Update version') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+        with:
+          tagName: __VERSION__
+          releaseName: __VERSION__
+          releaseBody: ""
+          prerelease: false
+          includeDebug: false
+          includeRelease: true
+          includeUpdaterJson: true
+          args: ${{ matrix.args }}
+
+      - name: Update Sentry Mappings
+        if:
+          matrix.platform == 'ubuntu-22.04' && contains(github.event.head_commit.message, 'Update
+          version')
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: |
+          npx @sentry/wizard@latest -i sourcemaps
