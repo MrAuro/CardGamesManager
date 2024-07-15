@@ -72,4 +72,7 @@ jobs:
           releaseName: "Nightly Build"
           releaseBody: "This is an automated nightly build and may not be stable."
           prerelease: true
+          includeDebug: true
+          includeRelease: false
+          appVersion: "nightly-${{ github.sha }}"
           args: ${{ matrix.args }}
