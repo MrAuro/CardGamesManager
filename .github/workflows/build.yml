@@ -98,7 +98,7 @@ jobs:
         with:
           tagName: __VERSION__
           releaseName: __VERSION__
-          releaseBody: ""
+          releaseBody: ${{ steps.build_changelog.outputs.changelog}}
           prerelease: false
           includeDebug: false
           includeRelease: true
