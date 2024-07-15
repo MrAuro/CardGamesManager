@@ -133,6 +133,15 @@ export default function Round() {
     if (typeof msg == "string") {
       if (betUIOpen) return;
 
+      if (usedCards.includes(msg as Card)) {
+        notifications.show({
+          message: "Card is already in use",
+          color: "red",
+        });
+
+        return;
+      }
+
       if (pokerGame.capturingCommunityCards) {
         let cards = [...pokerGame.communityCards];
         if (cards.includes(EMPTY_CARD)) {
@@ -354,12 +363,14 @@ export default function Round() {
     });
 
     if (new Set(usedCards).size !== usedCards.length) {
-      notifications.show({
-        message: "Duplicate cards are not allowed, removing duplicates",
-        color: "red",
+      modals.open({
+        title: "Duplicate cards",
+        children: (
+          <>
+            <Text>There are duplicate cards in play. Remove them to continue.</Text>
+          </>
+        ),
       });
-
-      usedCards = [...new Set(usedCards)];
     }
 
     setUsedCards(usedCards);
