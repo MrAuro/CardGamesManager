@@ -40,26 +40,6 @@ jobs:
         # webkitgtk 4.0 is for Tauri v1 - webkitgtk 4.1 is for Tauri v2.
         # You can remove the one that doesn't apply to your app to speed up the workflow a bit.
 
-      - name: get previous tag
-        id: previoustag
-        uses: "WyriHaximus/github-action-get-previous-tag@v1"
-        with:
-          fallback: 1.0.0 # Optional fallback tag to use when no tag can be found
-
-      - name: create changelog
-        if:
-          matrix.platform == 'ubuntu-22.04' && contains(github.event.head_commit.message, 'Update
-          version')
-        uses: mikepenz/release-changelog-builder-action@v4.2.2
-        id: build_changelog
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          owner: "mrauro"
-          repo: "cardgamesmanager"
-          fromTag: ${{ steps.previoustag.outputs.tag }}
-          toTag: ${{ github.ref }}
-
       - name: setup node
         uses: actions/setup-node@v4
         with:
@@ -106,7 +86,7 @@ jobs:
         with:
           tagName: __VERSION__
           releaseName: __VERSION__
-          releaseBody: ${{ steps.build_changelog.outputs.changelog}}
+          releaseBody: "Changelog available at github.com/mrauro/cardgamesmanager/releases"
           prerelease: false
           includeDebug: false
           includeRelease: true
