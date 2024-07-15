@@ -42,6 +42,11 @@
         "renameFile": false,
         "scope": ["$DESKTOP/keybindings.json"],
         "writeFile": true
+      },
+      "app": {
+        "all": true,
+        "hide": false,
+        "show": false
       }
     },
     "bundle": {

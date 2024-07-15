@@ -5,6 +5,9 @@ import { Divider } from "@mantine/core";
 import { useLocalStorage } from "@mantine/hooks";
 import { Text } from "@mantine/core";
 import AIRecognitionSettings from "./components/AIRecognitionSettings";
+import { getTauriVersion, getVersion } from "@tauri-apps/api/app";
+const tauriVersion = await getTauriVersion();
+const appVersion = await getVersion();
 
 export default function Settings() {
   const [firstTime, setFirstTime] = useLocalStorage({
@@ -22,6 +25,9 @@ export default function Settings() {
       <Divider my="sm" />
       <AIRecognitionSettings />
       <Divider my="sm" />
+      <Text size="sm" c="dimmed">
+        v{appVersion} (Tauri v{tauriVersion})
+      </Text>
       {!firstTime && (
         <Text
           mb="md"
