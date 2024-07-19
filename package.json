@@ -8,7 +8,7 @@
     "packages/*"
   ],
   "scripts": {
-    "tauri": "yarn workspace tauri",
+    "desktop": "yarn workspace desktop",
     "docs": "yarn workspace docs"
   }
 }
