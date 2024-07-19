@@ -28,13 +28,19 @@ directory to install the required packages. Then run `yarn tauri dev` to start t
 
 ---
 
-This README is in development. More information will be added soon. Please submit a pull request if
-you would like to contribute.
+## Development
 
-`mkdocs serve` for running the documentation locally.
+### desktop
 
-To modify the front/homepage, edit /homepage/Homepage.tsx. Build it with `yarn build-homepage` and
-copy /homepage/dist/index.js and /homepage/dist/app.css to /docs/overrides/.
+- `yarn desktop tauri dev`
+
+- `yarn desktop tauri ...`
+
+### docs
+
+- `yarn docs start`
+
+- `yarn docs docusaurus ...`
 
 ---
 

@@ -1,13 +1,11 @@
 {
-  "name": "cardgamesmanager",
+  "name": "desktop",
   "private": true,
   "version": "2.3.1",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "dev": "vite"
   },
   "dependencies": {
     "@google/generative-ai": "^0.14.1",
@@ -25,7 +23,7 @@
     "immer": "^10.0.3",
     "lodash": "^4.17.21",
     "poker-variants-odds-calculator": "^0.0.3",
-    "react": "^18.2.0",
+    "react": "18.3.1",
     "react-dom": "^18.2.0",
     "react-error-boundary": "^4.0.12",
     "react-event-hook": "^3.1.2",
