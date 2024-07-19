@@ -7,10 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "tauri": "tauri",
-    "dev-homepage": "vite --config vite.homepage.config.ts",
-    "build-homepage": "tsc && vite build --config vite.homepage.config.ts && node ./homepage/deploy.js",
-    "deploy-homepage": "node ./homepage/deploy.js"
+    "tauri": "tauri"
   },
   "dependencies": {
     "@google/generative-ai": "^0.14.1",
