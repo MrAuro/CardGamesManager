@@ -1,54 +1,14 @@
 {
   "name": "cardgamesmanager",
   "private": true,
-  "version": "2.3.1",
-  "type": "module",
+  "version": "0.0.0",
+  "repository": "https://github.com/mrauro/cardgamesmanager",
+  "author": "Auro <35087590+MrAuro@users.noreply.github.com>",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "tauri": "tauri"
-  },
-  "dependencies": {
-    "@google/generative-ai": "^0.14.1",
-    "@hello-pangea/dnd": "^16.5.0",
-    "@mantine/core": "^7.5.2",
-    "@mantine/hooks": "^7.5.2",
-    "@mantine/modals": "^7.5.2",
-    "@mantine/notifications": "^7.5.2",
-    "@sentry/react": "^8.17.0",
-    "@tabler/icons-react": "^2.46.0",
-    "@tauri-apps/api": "^1.5.2",
-    "@types/lodash": "^4.14.202",
-    "@types/react-twemoji": "^0.4.3",
-    "clsx": "^2.1.0",
-    "immer": "^10.0.3",
-    "lodash": "^4.17.21",
-    "poker-variants-odds-calculator": "^0.0.3",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-error-boundary": "^4.0.12",
-    "react-event-hook": "^3.1.2",
-    "react-hotkeys-hook": "^4.5.0",
-    "react-twemoji": "^0.5.0",
-    "react-webcam": "^7.2.0",
-    "recoil": "^0.7.7",
-    "tauri-plugin-sql-api": "https://github.com/tauri-apps/tauri-plugin-sql#v1",
-    "tauri-plugin-store-api": "https://github.com/tauri-apps/tauri-plugin-store#v1",
-    "use-immer": "^0.9.0"
-  },
-  "devDependencies": {
-    "@sentry/vite-plugin": "^2.21.1",
-    "@tauri-apps/cli": "^1.5.8",
-    "@types/node": "^20.11.19",
-    "@types/react": "^18.2.15",
-    "@types/react-dom": "^18.2.7",
-    "@vitejs/plugin-react": "^4.2.1",
-    "postcss": "^8.4.33",
-    "postcss-preset-mantine": "^1.12.3",
-    "postcss-simple-vars": "^7.0.1",
-    "typescript": "^5.0.2",
-    "vite": "^5.0.0",
-    "vite-plugin-react-click-to-component": "^3.0.0"
+    "tauri": "yarn workspace tauri",
+    "docs": "yarn workspace docs"
   }
 }
