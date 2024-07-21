@@ -6,24 +6,14 @@ const config: Config = {
   title: "CardGamesManager",
   tagline: "Empower your card game experience",
   favicon: "img/favicon.ico",
-
-  // Set the production url of your site here
   url: "https://cardgamesmanager.mrauro.dev",
-  // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: "/",
-
-  // GitHub pages deployment config.
-  // If you aren't using GitHub pages, you don't need these.
-  organizationName: "mrauro", // Usually your GitHub org/user name.
-  projectName: "cardgamesmanager", // Usually your repo name.
+  organizationName: "mrauro",
+  projectName: "cardgamesmanager",
 
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
 
-  // Even if you don't use internationalization, you can use this field to set
-  // useful metadata like html lang. For example, if your site is Chinese, you
-  // may want to replace "en" with "zh-Hans".
   i18n: {
     defaultLocale: "en",
     locales: ["en"],
@@ -35,8 +25,6 @@ const config: Config = {
       {
         docs: {
           sidebarPath: "./sidebars.ts",
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
           editUrl: "https://github.com/mrauro/cardgamesmanager/tree/main/packages/docs/",
         },
         theme: {
@@ -47,7 +35,6 @@ const config: Config = {
   ],
 
   themeConfig: {
-    // Replace with your project's social card
     image: "img/docusaurus-social-card.jpg",
     navbar: {
       title: "CardGamesManager",
@@ -63,9 +50,9 @@ const config: Config = {
           label: "Tutorial",
         },
         {
-          href: "https://github.com/facebook/docusaurus",
-          label: "GitHub",
           position: "right",
+          type: "html",
+          value: `<a href="https://github.com/mrauro/cardgamesmanager" target="_blank" style="content: \'\'; width: 24px; height: 24px; background-image: url(\'img/github-mark-white.svg\'); background-repeat: no-repeat;  background-size: 24px 24px; display: flex">`,
         },
       ],
     },
@@ -90,11 +77,7 @@ const config: Config = {
             },
             {
               label: "Discord",
-              href: "https://discordapp.com/invite/docusaurus",
-            },
-            {
-              label: "Twitter",
-              href: "https://twitter.com/docusaurus",
+              href: "https://discordapp.com/invite/ZHqpuszdaM",
             },
           ],
         },
@@ -103,7 +86,7 @@ const config: Config = {
           items: [
             {
               label: "GitHub",
-              href: "https://github.com/facebook/docusaurus",
+              href: "https://github.com/mrauro/cardgamesmanager",
             },
           ],
         },
