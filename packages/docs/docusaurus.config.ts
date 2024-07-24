@@ -35,6 +35,11 @@ const config: Config = {
   ],
 
   themeConfig: {
+    colorMode: {
+      defaultMode: "dark",
+      disableSwitch: true,
+      respectPrefersColorScheme: false,
+    },
     image: "img/docusaurus-social-card.jpg",
     navbar: {
       title: "CardGamesManager",
@@ -94,7 +99,7 @@ const config: Config = {
       copyright: `Copyright © ${new Date().getFullYear()} MrAuro • Built with Docusaurus.`,
     },
     prism: {
-      theme: prismThemes.github,
+      theme: prismThemes.dracula,
       darkTheme: prismThemes.dracula,
     },
   } satisfies Preset.ThemeConfig,

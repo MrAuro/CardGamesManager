@@ -12,6 +12,15 @@
   .footer {
     --ifm-footer-background-color: var(--ifm-color-primary);
   }
+
+    /* The titles look better when white in dark mode */
+    .hero__title {
+      color: #EBEDF0;
+    }
+  
+    .hero__subtitle {
+      color: #EBEDF0;
+    }
 }
 
 [data-theme='dark'] {
