@@ -26,15 +26,26 @@ function HomepageHeader() {
   );
 }
 
+const HeroSvg: React.ComponentType<React.ComponentProps<"svg">> =
+  require("@site/static/img/hero-main.svg").default;
+
 export default function Home(): JSX.Element {
   const { siteConfig } = useDocusaurusContext();
+
   return (
     <Layout
     // title={`Hello from ${siteConfig.title}`}
     // description="Description will go into a meta tag in <head />"
     >
-      <HomepageHeader />
       <main>
+        <h1
+          style={{
+            fontSize: "2.5em",
+          }}
+        >
+          Empowering your game management
+        </h1>
+        <HeroSvg />
         <HomepageFeatures />
       </main>
     </Layout>
