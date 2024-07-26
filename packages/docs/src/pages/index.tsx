@@ -24,6 +24,7 @@ import {
   useMatches,
 } from "@mantine/core";
 import { useMediaQuery, useWindowScroll } from "@mantine/hooks";
+import { HeroBullets } from "../components/HeroBullets";
 
 // function HomepageHeader() {
 //   const { siteConfig } = useDocusaurusContext();
@@ -100,9 +101,55 @@ export default function Home(): JSX.Element {
                 </Title>
               </Flex>
 
-              <Flex gap="lg" align="center" justify="center" flex={1}>
-                <Text>Pricing</Text>
-                <Text>Docs</Text>
+              <Flex gap="xl" align="center" justify="center" flex={1}>
+                <Button
+                  fullWidth
+                  variant="transparent"
+                  c="gray"
+                  fw="bold"
+                  size="compact-md"
+                  p={0}
+                  component="a"
+                  href="#features"
+                >
+                  Features
+                </Button>
+                <Button
+                  fullWidth
+                  variant="transparent"
+                  c="gray"
+                  fw="bold"
+                  size="compact-md"
+                  p={0}
+                  component="a"
+                  href="#pricing"
+                >
+                  Pricing
+                </Button>
+                <Button
+                  fullWidth
+                  variant="transparent"
+                  c="gray"
+                  fw="bold"
+                  size="compact-md"
+                  p={0}
+                  component="a"
+                  href="/docs/download"
+                >
+                  Download
+                </Button>
+                <Button
+                  fullWidth
+                  variant="transparent"
+                  c="gray"
+                  fw="bold"
+                  size="compact-md"
+                  p={0}
+                  component="a"
+                  href="/docs/intro"
+                >
+                  Docs
+                </Button>
               </Flex>
 
               <Flex align="center" gap="sm" flex={1} justify="flex-end">
@@ -132,9 +179,7 @@ export default function Home(): JSX.Element {
         </AppShell.Header>
         <AppShell.Main>
           <Container size="xl">
-            {[...Array(100)].map((_, index) => (
-              <Text key={index}>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</Text>
-            ))}
+            <HeroBullets />
           </Container>
         </AppShell.Main>
       </AppShell>
