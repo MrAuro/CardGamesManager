@@ -11,6 +11,8 @@ import {
   ThemeIcon,
 } from "@mantine/core";
 
+import { motion } from "framer-motion";
+
 import styles from "./styles.module.css";
 
 const Svg = require("@site/static/img/hero-main.svg").default;
@@ -29,31 +31,43 @@ export function HeroBullets() {
             justifyContent: "center",
           }}
         >
-          <Title
-            c="white"
-            size={rem(50)}
-            style={{
-              fontFamily: "Comfortaa, Nunito, sans-serif",
-            }}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
           >
-            Deal With{" "}
-            <span
+            <Title
+              c="white"
+              size={rem(50)}
               style={{
-                position: "relative",
-                backgroundColor: alpha("var(--mantine-color-blue-7)", 0.6),
-                borderRadius: rem(16),
-                padding: `${rem(4)} ${rem(4)}`,
+                fontFamily: "Comfortaa, Nunito, sans-serif",
               }}
             >
-              {/* Makes the fi in Confidence not so close together */}
-              Con<span style={{ letterSpacing: "0.1px" }}>f</span>idence
-            </span>{" "}
-            <br /> Not Chaos
-          </Title>
-          <Text size="md">
-            Streamline your game management with CardGamesManager. Effortlessly manage your
-            Blackjack and Poker games with a few clicks and ensure a smooth gaming experience.
-          </Text>
+              Deal With{" "}
+              <span
+                style={{
+                  position: "relative",
+                  backgroundColor: alpha("var(--mantine-color-blue-7)", 0.6),
+                  borderRadius: rem(16),
+                  padding: `${rem(4)} ${rem(4)}`,
+                }}
+              >
+                {/* Makes the fi in Confidence not so close together */}
+                Con<span style={{ letterSpacing: "0.1px" }}>f</span>idence
+              </span>{" "}
+              <br /> Not Chaos
+            </Title>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <Text size="md">
+              Streamline your game management with CardGamesManager. Effortlessly manage your
+              Blackjack and Poker games with a few clicks and ensure a smooth gaming experience.
+            </Text>
+          </motion.div>
           <List
             mt={30}
             spacing="sm"
@@ -71,18 +85,36 @@ export function HeroBullets() {
               </ThemeIcon>
             }
           >
-            <List.Item>
-              <b>Real-Time Balances</b> – Keep track of your players' balances effortlessly with
-              instant updates
-            </List.Item>
-            <List.Item>
-              <b>Customizable Settings</b> – Tailor your game and app settings to your liking with
-              powerful customization options
-            </List.Item>
-            <List.Item>
-              <b>Advanced Bet Management</b> – Manage bets, sidepots, and more with ease and
-              confidence, all in one place
-            </List.Item>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
+              <List.Item>
+                <b>Real-Time Balances</b> – Keep track of your players' balances effortlessly with
+                instant updates
+              </List.Item>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+            >
+              <List.Item>
+                <b>Customizable Settings</b> – Tailor your game and app settings to your liking with
+                powerful customization options
+              </List.Item>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.8 }}
+            >
+              <List.Item>
+                <b>Advanced Bet Management</b> – Manage bets, sidepots, and more with ease and
+                confidence, all in one place
+              </List.Item>
+            </motion.div>
           </List>
         </Grid.Col>
         <Grid.Col
@@ -93,7 +125,13 @@ export function HeroBullets() {
             justifyContent: "center",
           }}
         >
-          <object type="image/svg+xml" data="/img/hero-main.svg"></object>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <object type="image/svg+xml" data="/img/hero-main.svg"></object>
+          </motion.div>
         </Grid.Col>
       </Grid>
     </Container>
