@@ -19,12 +19,14 @@ import {
   MantineProvider,
   rgba,
   ScrollArea,
+  Space,
   Text,
   Title,
   useMatches,
 } from "@mantine/core";
 import { useMediaQuery, useWindowScroll } from "@mantine/hooks";
 import { HeroBullets } from "../components/HeroBullets";
+import Features from "../components/Features";
 
 // function HomepageHeader() {
 //   const { siteConfig } = useDocusaurusContext();
@@ -180,6 +182,7 @@ export default function Home(): JSX.Element {
         <AppShell.Main>
           <Container size="xl">
             <HeroBullets />
+            <Features />
           </Container>
         </AppShell.Main>
       </AppShell>
