@@ -1,4 +1,19 @@
-import { Card, Container, Grid, Image, Title, Text, CardSection, Divider } from "@mantine/core";
+import {
+  Card,
+  Container,
+  Grid,
+  Image,
+  Title,
+  Text,
+  CardSection,
+  Divider,
+  HoverCard,
+  useMantineTheme,
+  darken,
+} from "@mantine/core";
+import { TiltCard } from "../HoverCard";
+
+import { motion } from "framer-motion";
 
 type FeatureItem = {
   title: string;
@@ -40,36 +55,39 @@ const FeatureList: FeatureItem[] = [
 ];
 
 export default function Features() {
+  const theme = useMantineTheme();
+
   return (
     <Container size="lg" mt={120}>
       <Grid>
         {FeatureList.map((feature, index) => (
           <Grid.Col span={4} key={index}>
-            <Card
-              style={{
-                width: "100%",
-                height: "100%",
-              }}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 1 + index * 0.2 }}
             >
-              <img
-                src={feature.Svg}
-                alt={feature.title}
-                height="200px"
-                width="200px"
-                style={{
-                  display: "block",
-                  marginLeft: "auto",
-                  marginRight: "auto",
-                }}
-              />
+              <TiltCard>
+                <img
+                  src={feature.Svg}
+                  alt={feature.title}
+                  height="200px"
+                  width="200px"
+                  style={{
+                    display: "block",
+                    marginLeft: "auto",
+                    marginRight: "auto",
+                  }}
+                />
 
-              <Title order={4} ta="center" c="gray.3" mt="sm">
-                {feature.title}
-              </Title>
-              <Text ta="center" fw="light" size="md">
-                {feature.description}
-              </Text>
-            </Card>
+                <Title order={4} ta="center" c="gray.3" mt="sm">
+                  {feature.title}
+                </Title>
+                <Text ta="center" fw="light" size="md">
+                  {feature.description}
+                </Text>
+              </TiltCard>
+            </motion.div>
           </Grid.Col>
         ))}
       </Grid>
