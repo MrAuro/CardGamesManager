@@ -1,4 +1,17 @@
-import { Container, Grid, Title, alpha, rem, useMantineTheme } from "@mantine/core";
+import {
+  Container,
+  Grid,
+  Title,
+  alpha,
+  rem,
+  useMantineTheme,
+  Text,
+  Divider,
+  List,
+  ThemeIcon,
+} from "@mantine/core";
+
+import styles from "./styles.module.css";
 
 const Svg = require("@site/static/img/hero-main.svg").default;
 
@@ -6,7 +19,7 @@ export function HeroBullets() {
   const theme = useMantineTheme();
 
   return (
-    <Container size="xl" mt="xl" mx="xl">
+    <Container size="lg" mt={120}>
       <Grid grow gutter="xl">
         <Grid.Col
           span={7}
@@ -37,6 +50,40 @@ export function HeroBullets() {
             </span>{" "}
             <br /> Not Chaos
           </Title>
+          <Text size="md">
+            Streamline your game management with CardGamesManager. Effortlessly manage your
+            Blackjack and Poker games with a few clicks and ensure a smooth gaming experience.
+          </Text>
+          <List
+            mt={30}
+            spacing="sm"
+            size="sm"
+            icon={
+              <ThemeIcon size={24} radius="xl">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </ThemeIcon>
+            }
+          >
+            <List.Item>
+              <b>Real-Time Balances</b> – Keep track of your players' balances effortlessly with
+              instant updates
+            </List.Item>
+            <List.Item>
+              <b>Customizable Settings</b> – Tailor your game and app settings to your liking with
+              powerful customization options
+            </List.Item>
+            <List.Item>
+              <b>Advanced Bet Management</b> – Manage bets, sidepots, and more with ease and
+              confidence, all in one place
+            </List.Item>
+          </List>
         </Grid.Col>
         <Grid.Col
           span={5}
