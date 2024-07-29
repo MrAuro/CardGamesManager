@@ -180,10 +180,39 @@ export default function Home(): JSX.Element {
           </Container>
         </AppShell.Header>
         <AppShell.Main>
-          <Container size="xl">
-            <HeroBullets />
-            <Features />
-          </Container>
+          <div style={{ display: "grid" }}>
+            <Container size="xl" style={{ gridArea: "1 / 1" }}>
+              <HeroBullets />
+            </Container>
+            <div
+              style={{
+                marginTop: "120px",
+                gridArea: "2 / 1",
+                position: "relative",
+                width: "100%",
+              }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  top: 80,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: theme.colors.dark[6],
+                }}
+              />
+
+              <Container size="xl" style={{ position: "relative" }} mb={40}>
+                <Features />
+              </Container>
+            </div>
+            1 <br />
+            2 <br />
+            3 <br />
+            4 <br />
+            5 <br />
+          </div>
         </AppShell.Main>
       </AppShell>
     </MantineProvider>

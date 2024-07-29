@@ -68,7 +68,7 @@ export function TiltCard({
         backgroundColor: darken(theme.colors.dark[6], 0.2),
         padding: "20px",
         borderRadius: theme.radius.xl,
-        border: "2px solid var(--mantine-color-dark-6)",
+        border: "2px solid var(--mantine-color-dark-5)",
         userSelect: "none",
       }}
     >
