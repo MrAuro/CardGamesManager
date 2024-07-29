@@ -70,7 +70,6 @@ export function HeroBullets() {
           </motion.div>
           <List
             mt={30}
-            spacing="sm"
             size="sm"
             icon={
               <ThemeIcon size={24} radius="xl">
@@ -89,6 +88,9 @@ export function HeroBullets() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
+              style={{
+                marginBottom: rem(10),
+              }}
             >
               <List.Item>
                 <b>Real-Time Balances</b> – Keep track of your players' balances effortlessly with
@@ -99,6 +101,9 @@ export function HeroBullets() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.6 }}
+              style={{
+                marginBottom: rem(10),
+              }}
             >
               <List.Item>
                 <b>Customizable Settings</b> – Tailor your game and app settings to your liking with
@@ -109,6 +114,9 @@ export function HeroBullets() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.8 }}
+              style={{
+                marginBottom: rem(10),
+              }}
             >
               <List.Item>
                 <b>Advanced Bet Management</b> – Manage bets, sidepots, and more with ease and

@@ -1,12 +1,21 @@
 import React, { useRef } from "react";
 import { motion, useMotionTemplate, useMotionValue, useSpring } from "framer-motion";
-import { Card, darken, useMantineTheme } from "@mantine/core";
+import { Text, darken, Title, useMantineTheme, Center } from "@mantine/core";
 
 const ROTATION_RANGE = 25;
 const HALF_ROTATION_RANGE = 12.5;
 
 // Thanks https://hover.dev/
-export function TiltCard({ children }: { children: React.ReactNode[] }) {
+
+export function TiltCard({
+  feature,
+}: {
+  feature: {
+    title: string;
+    Svg: string;
+    description: string;
+  };
+}) {
   const theme = useMantineTheme();
 
   const ref = useRef(null);
@@ -18,6 +27,8 @@ export function TiltCard({ children }: { children: React.ReactNode[] }) {
   const ySpring = useSpring(y);
 
   const transform = useMotionTemplate`rotateX(${xSpring}deg) rotateY(${ySpring}deg)`;
+
+  const [active, setActive] = React.useState(false);
 
   const handleMouseMove = (e) => {
     if (!ref.current) return [0, 0];
@@ -35,11 +46,15 @@ export function TiltCard({ children }: { children: React.ReactNode[] }) {
 
     x.set(rX);
     y.set(rY);
+
+    setActive(true);
   };
 
   const handleMouseLeave = () => {
     x.set(0);
     y.set(0);
+
+    setActive(false);
   };
 
   return (
@@ -50,35 +65,100 @@ export function TiltCard({ children }: { children: React.ReactNode[] }) {
       style={{
         transformStyle: "preserve-3d",
         transform,
-        backgroundColor: darken(theme.colors.dark[7], 0.2),
+        backgroundColor: darken(theme.colors.dark[6], 0.2),
         padding: "20px",
         borderRadius: theme.radius.xl,
-        outline: "1px solid var(--mantine-color-dark-6)",
+        border: "2px solid var(--mantine-color-dark-6)",
         userSelect: "none",
       }}
     >
       <div
         style={{
-          transform: "translateZ(12px)",
+          transform: "translateZ(30px)",
         }}
-        className="mx-auto text-4xl"
       >
-        {children[0]}
+        <img
+          src={feature.Svg}
+          alt={feature.title}
+          height="200px"
+          width="200px"
+          style={{
+            display: "block",
+            marginLeft: "auto",
+            marginRight: "auto",
+          }}
+        />
       </div>
+
+      <div>
+        <Center>
+          <img
+            src={feature.Svg}
+            alt={feature.title}
+            height="200px"
+            width="200px"
+            style={{
+              position: "absolute",
+              top: 20,
+              filter: "blur(10px) brightness(0%) contrast(100%)",
+              opacity: active ? 1 : 0,
+              transition: "opacity 0.5s",
+            }}
+          />
+        </Center>
+      </div>
+
       <div
         style={{
-          transform: "translateZ(19px)",
+          transform: "translateZ(35px)",
         }}
       >
-        {children[1]}
+        <Title order={4} ta="center" c="gray.3" mt="sm">
+          {feature.title}
+        </Title>
       </div>
       <p
         style={{
-          transform: "translateZ(25px)",
+          color: "transparent",
+          textShadow: "0 0 5px #000000",
+          position: "absolute",
+          top: 200,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          padding: "20px",
         }}
-        className="text-center text-2xl font-bold"
       >
-        {children[2]}
+        <Title order={4} ta="center" mt="sm">
+          {feature.title}
+        </Title>
+      </p>
+      <p
+        style={{
+          transform: "translateZ(40px)",
+          position: "relative",
+        }}
+      >
+        <Text ta="center" fw="light" size="md">
+          {feature.description}
+        </Text>
+      </p>
+      <p
+        style={{
+          color: "transparent",
+          textShadow: "0 0 5px #000000",
+          position: "absolute",
+          top: 240,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          padding: "20px",
+        }}
+      >
+        {" "}
+        <Text ta="center" fw="light" size="md">
+          {feature.description}
+        </Text>
       </p>
     </motion.div>
   );
