@@ -179,14 +179,14 @@ export default function Home(): JSX.Element {
             </Flex>
           </Container>
         </AppShell.Header>
-        <AppShell.Main>
+        <AppShell.Main style={{ overflow: "hidden" }}>
           <div style={{ display: "grid" }}>
             <Container size="xl" style={{ gridArea: "1 / 1" }}>
               <HeroBullets />
             </Container>
             <div
               style={{
-                marginTop: "120px",
+                marginTop: "200px",
                 gridArea: "2 / 1",
                 position: "relative",
                 width: "100%",
@@ -195,26 +195,76 @@ export default function Home(): JSX.Element {
               <div
                 style={{
                   position: "absolute",
-                  top: 80,
-                  left: 0,
-                  right: 0,
+                  top: 0,
+                  left: "50%",
+                  right: "50%",
                   bottom: 0,
+                  marginLeft: "-50vw",
+                  marginRight: "-50vw",
                   backgroundColor: theme.colors.dark[6],
                 }}
-              />
-
-              <Container size="xl" style={{ position: "relative" }} mb={40}>
+              >
+                <WavyDivider color={theme.colors.dark[6]} />
+                <BottomWavyDivider color={theme.colors.dark[7]} />
+              </div>
+              <Container size="xl" style={{ position: "relative" }} mb={70} pb={100} mt={80}>
                 <Features />
               </Container>
             </div>
-            1 <br />
-            2 <br />
-            3 <br />
-            4 <br />
-            5 <br />
+            <div style={{ backgroundColor: theme.colors.dark[7], padding: "20px 0" }}>
+              1 <br />
+              2 <br />
+              3 <br />
+              4 <br />
+              5 <br />
+            </div>
           </div>
         </AppShell.Main>
       </AppShell>
     </MantineProvider>
   );
 }
+
+const WavyDivider = ({ color }) => (
+  <svg
+    viewBox="0 0 1440 100"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style={{
+      position: "absolute",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100px",
+      transform: "translateY(-99px)",
+    }}
+    preserveAspectRatio="none"
+  >
+    <path
+      d="M0 100V60C80 75 160 30 240 20C320 10 400 35 480 50C560 65 640 70 720 65C800 60 880 45 960 40C1040 35 1120 40 1200 50C1280 60 1360 75 1400 80L1440 85V100H0Z"
+      fill={color}
+    />
+  </svg>
+);
+
+const BottomWavyDivider = ({ color }) => (
+  <svg
+    viewBox="0 0 1440 100"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style={{
+      position: "absolute",
+      bottom: 0,
+      left: 0,
+      width: "100%",
+      height: "100px",
+      transform: "translateY(1px) scaleX(-1)",
+    }}
+    preserveAspectRatio="none"
+  >
+    <path
+      d="M0 100V60C80 75 160 30 240 20C320 10 400 35 480 50C560 65 640 70 720 65C800 60 880 45 960 40C1040 35 1120 40 1200 50C1280 60 1360 75 1400 80L1440 85V100H0Z"
+      fill={color}
+    />
+  </svg>
+);

@@ -46,7 +46,7 @@ export default function Features() {
   const theme = useMantineTheme();
 
   return (
-    <Container size="lg" mt={120}>
+    <Container size="lg">
       <Grid>
         {FeatureList.map((feature, index) => (
           <Grid.Col span={4} key={index}>
