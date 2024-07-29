@@ -18,39 +18,27 @@ import { motion } from "framer-motion";
 type FeatureItem = {
   title: string;
   Svg: string;
-  description: JSX.Element;
+  description: string;
 };
 
 const FeatureList: FeatureItem[] = [
   {
     title: "Poker Game Management",
     Svg: "/img/poker.svg",
-    description: (
-      <>
-        Keep your poker games organized and fair with detailed hand descriptions and accurate
-        tracking. Never lose track of bets and sidepots again.
-      </>
-    ),
+    description:
+      "Keep your poker games organized and fair with detailed hand descriptions and tracking. Never lose track of bets and sidepots again.",
   },
   {
     title: "Blackjack Dealer Assistance",
     Svg: "/img/blackjack.svg",
-    description: (
-      <>
-        Get real-time dealer instructions, automatic payout calculations, and sidebet management.
-        Make your blackjack games run smoother than ever.
-      </>
-    ),
+    description:
+      "Get real-time dealer instructions, automatic payout calculations, and sidebet management. Make your blackjack games run smoother than ever.",
   },
   {
     title: "AI Card Recognition",
     Svg: "/img/ai_card_recognition.svg",
-    description: (
-      <>
-        Leverage advanced AI to recognize cards and suits instantly, reducing manual input and
-        potential errors. Speed up your game management.
-      </>
-    ),
+    description:
+      "Leverage advanced AI to recognize cards and suits instantly, reducing manual input and potential errors. Speed up your game management.",
   },
 ];
 
@@ -67,26 +55,7 @@ export default function Features() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 1 + index * 0.2 }}
             >
-              <TiltCard>
-                <img
-                  src={feature.Svg}
-                  alt={feature.title}
-                  height="200px"
-                  width="200px"
-                  style={{
-                    display: "block",
-                    marginLeft: "auto",
-                    marginRight: "auto",
-                  }}
-                />
-
-                <Title order={4} ta="center" c="gray.3" mt="sm">
-                  {feature.title}
-                </Title>
-                <Text ta="center" fw="light" size="md">
-                  {feature.description}
-                </Text>
-              </TiltCard>
+              <TiltCard feature={feature} />
             </motion.div>
           </Grid.Col>
         ))}
