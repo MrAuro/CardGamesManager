@@ -11,7 +11,7 @@ import {
   useMantineTheme,
   darken,
 } from "@mantine/core";
-import { TiltCard } from "../HoverCard";
+import { TiltCard } from "../TiltCard";
 
 import { motion } from "framer-motion";
 

@@ -127,6 +127,8 @@ export function TiltCard({
           right: 0,
           bottom: 0,
           padding: "20px",
+          opacity: active ? 1 : 0,
+          transition: "opacity 0.5s",
         }}
       >
         <Title order={4} ta="center" mt="sm">
@@ -153,6 +155,8 @@ export function TiltCard({
           right: 0,
           bottom: 0,
           padding: "20px",
+          opacity: active ? 1 : 0,
+          transition: "opacity 0.5s",
         }}
       >
         {" "}
