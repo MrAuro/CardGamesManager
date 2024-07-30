@@ -370,6 +370,36 @@ export default function TouchscreenMenu() {
           >
             {settings.activeTab == "Players" ? "Set Balance" : "Bet"}
           </Button>
+          {settings.activeTab == "Players" && (
+            <Button
+              color="green"
+              size="lg"
+              p="xs"
+              disabled={settings.activeTab == "Players" && !focusedPlayer}
+              onClick={() => {
+                let total = chips.reduce(
+                  (acc, chip) => acc + chip.denomination * chipCount[chip.id],
+                  0
+                );
+                setChipHistory([...chipHistory, chipCount]);
+                setChipCount(Object.fromEntries(chips.map((chip) => [chip.id, 0])));
+
+                if (focusedPlayer) {
+                  setPlayers((draft) => {
+                    const player = draft.find((p) => p.id === focusedPlayer);
+                    if (player) {
+                      player.balance += total;
+                    }
+                  });
+                  setFocusedPlayer(null);
+                } else {
+                  alert(`Focus a player before setting their balance.`);
+                }
+              }}
+            >
+              Add
+            </Button>
+          )}
         </Group>
         {hotkeyChipCount.length > 0 && (
           <>
