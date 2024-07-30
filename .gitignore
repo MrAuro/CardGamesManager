@@ -49,3 +49,9 @@ dist-ssr
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+/packages/desktop/src-tauri/gen/android/.gradle
+/packages/desktop/src-tauri/gen/android/buildSrc
+packages/desktop/src-tauri/gen/android/keystore.properties
+packages/desktop/src-tauri/gen/android/local.properties
+packages/desktop/src-tauri/gen/android/tauri.settings.gradle
+/packages/desktop/src-tauri/gen/android/app
