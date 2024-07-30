@@ -37,8 +37,8 @@ import {
   IconPlus,
   IconTrash,
 } from "@tabler/icons-react";
-import { open } from "@tauri-apps/api/dialog";
-import { BaseDirectory, readTextFile, writeTextFile } from "@tauri-apps/api/fs";
+import { open } from "@tauri-apps/plugin-dialog";
+import { BaseDirectory, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import { useState } from "react";
 import { useRecordHotkeys } from "react-hotkeys-hook";
 import { useRecoilState } from "recoil";

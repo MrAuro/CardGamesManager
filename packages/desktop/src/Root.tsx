@@ -29,7 +29,6 @@ export const PLAYERS_STATE = atom<Player[]>({
       players = [];
       await TAURI_STORE.set("players", players);
     }
-
     resolve(players as Player[]);
   }),
 });
@@ -43,7 +42,6 @@ export const KEYBINDINGS_STATE = atom<Keybinding[]>({
       keybindings = [...DefaultKeybinds];
       await TAURI_STORE.set("keybindings", keybindings);
     }
-
     resolve(keybindings as Keybinding[]);
   }),
 });
@@ -61,7 +59,6 @@ export const BLACKJACK_GAME_STATE = atom<BlackjackGame>({
       };
       await TAURI_STORE.set("blackjackGame", game);
     }
-
     resolve(game as BlackjackGame);
   }),
 });
@@ -77,27 +74,22 @@ export const BLACKJACK_SETTINGS = atom<BlackjackSettings>({
         doubleAfterSplit: true,
         splitAces: true,
         splitAcesReceiveOneCard: true,
-
         blackjackPayout: 1.5,
-
         twentyOnePlusThreeEnabled: false,
         twentyOnePlusThreeFlushPayout: 5,
         twentyOnePlusThreeStraightPayout: 10,
         twentyOnePlusThreeThreeOfAKindPayout: 30,
         twentyOnePlusThreeStraightFlushPayout: 40,
         twentyOnePlusThreeThreeOfAKindSuitedPayout: 100,
-
         perfectPairsEnabled: false,
         perfectPairsMixedPayout: 6,
         perfectPairsColoredPayout: 12,
         perfectPairsSuitedPayout: 30,
-
         betBehindEnabled: false,
       };
       await TAURI_STORE.set("blackjackSettings", settings);
     }
     console.log(settings);
-
     resolve(settings as BlackjackSettings);
   }),
 });
@@ -110,7 +102,6 @@ export const BLACKJACK_PLAYERS_STATE = atom<BlackjackPlayer[]>({
       players = [];
       await TAURI_STORE.set("blackjackPlayers", players);
     }
-
     resolve(players as BlackjackPlayer[]);
   }),
 });
@@ -129,7 +120,6 @@ export const POKER_GAME_STATE = atom<PokerGame>({
       };
       await TAURI_STORE.set("pokerGame", game);
     }
-
     resolve(game as PokerGame);
   }),
 });
@@ -142,7 +132,6 @@ export const POKER_PLAYERS_STATE = atom<PokerPlayer[]>({
       players = [];
       await TAURI_STORE.set("pokerPlayers", players);
     }
-
     resolve(players as PokerPlayer[]);
   }),
 });
@@ -160,7 +149,6 @@ export const POKER_SETTINGS_STATE = atom<PokerSettings>({
       };
       await TAURI_STORE.set("pokerSettings", settings);
     }
-
     resolve(settings as PokerSettings);
   }),
 });
@@ -189,7 +177,6 @@ export const SETTINGS_STATE = atom<Settings>({
       };
       await TAURI_STORE.set("settings", settings);
     }
-
     resolve(settings as Settings);
   }),
 });
@@ -202,7 +189,6 @@ export const CHIPS_STATE = atom<Chip[]>({
       chips = [];
       await TAURI_STORE.set("chips", chips);
     }
-
     resolve(chips as Chip[]);
   }),
 });
@@ -214,28 +200,28 @@ setInterval(() => {
 
 import * as Sentry from "@sentry/react";
 
-Sentry.init({
-  dsn: "https://974f6beb8a6de4c30bbe28b8d7c7c00d@o4505139595575296.ingest.us.sentry.io/4507600938401792",
-  integrations: [
-    Sentry.browserTracingIntegration(),
-    Sentry.replayIntegration({
-      maskAllText: false,
-    }),
-  ],
-  // Performance Monitoring
-  tracesSampleRate: 0.1, //  Capture 100% of the transactions
-  // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
-  tracePropagationTargets: ["localhost", /^https:\/\/yourserver\.io\/api/],
-  // Session Replay
-  replaysSessionSampleRate: 0.1, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
-  replaysOnErrorSampleRate: 1.0, // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where errors occur.
-  beforeSend(event) {
-    if (event.exception && event.event_id) {
-      Sentry.showReportDialog({ eventId: event.event_id });
-    }
-    return event;
-  },
-});
+// Sentry.init({
+//   dsn: "https://974f6beb8a6de4c30bbe28b8d7c7c00d@o4505139595575296.ingest.us.sentry.io/4507600938401792",
+//   integrations: [
+//     Sentry.browserTracingIntegration(),
+//     Sentry.replayIntegration({
+//       maskAllText: false,
+//     }),
+//   ],
+//   // Performance Monitoring
+//   tracesSampleRate: 0.1, //  Capture 100% of the transactions
+//   // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
+//   tracePropagationTargets: ["localhost", /^https:\/\/yourserver\.io\/api/],
+//   // Session Replay
+//   replaysSessionSampleRate: 0.1, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
+//   replaysOnErrorSampleRate: 1.0, // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where errors occur.
+//   beforeSend(event) {
+//     if (event.exception && event.event_id) {
+//       Sentry.showReportDialog({ eventId: event.event_id });
+//     }
+//     return event;
+//   },
+// });
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
