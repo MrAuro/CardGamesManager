@@ -198,7 +198,7 @@ setInterval(() => {
   TAURI_STORE.save();
 }, 1000 * 60);
 
-import * as Sentry from "@sentry/react";
+// import * as Sentry from "@sentry/react";
 
 // Sentry.init({
 //   dsn: "https://974f6beb8a6de4c30bbe28b8d7c7c00d@o4505139595575296.ingest.us.sentry.io/4507600938401792",

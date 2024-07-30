@@ -39,7 +39,7 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import { open } from "@tauri-apps/plugin-dialog";
-import { BaseDirectory, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
+import { readTextFile } from "@tauri-apps/plugin-fs";
 import { useState } from "react";
 import { useRecordHotkeys } from "react-hotkeys-hook";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -591,15 +591,16 @@ export default function GeneralSettings() {
         </Button>
         <Button
           onClick={() => {
-            writeTextFile(
-              {
-                contents: JSON.stringify(keybindings),
-                path: "keybindings.json",
-              },
-              {
-                dir: BaseDirectory.Desktop,
-              }
-            );
+            // TODO: Migrate from v1 to v2
+            // writeTextFile(
+            //   {
+            //     contents: JSON.stringify(keybindings),
+            //     path: "keybindings.json",
+            //   },
+            //   {
+            //     dir: BaseDirectory.Desktop,
+            //   }
+            // );
             alert("Keybindings exported to your Desktop");
           }}
         >

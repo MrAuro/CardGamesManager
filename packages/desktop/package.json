@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "tauri": "tauri",
-    "dev": "vite"
+    "dev": "vite",
+    "build": "tsc && vite build"
   },
   "dependencies": {
     "@google/generative-ai": "^0.14.1",
