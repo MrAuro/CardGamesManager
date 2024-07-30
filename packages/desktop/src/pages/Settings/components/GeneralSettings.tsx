@@ -1,3 +1,4 @@
+import { PLATFORM } from "@/App";
 import { CHIPS_STATE, KEYBINDINGS_STATE, SETTINGS_STATE } from "@/Root";
 import { Scope, Scopes, getActions } from "@/types/Keybindings";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
@@ -41,7 +42,7 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { BaseDirectory, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import { useState } from "react";
 import { useRecordHotkeys } from "react-hotkeys-hook";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 
 export default function GeneralSettings() {
   const [settings, setSettings] = useRecoilState(SETTINGS_STATE);
@@ -57,6 +58,8 @@ export default function GeneralSettings() {
 
   const [wasTouchscreenMenuOn, setWasTouchscreenMenuOn] = useState(settings.touchscreenMenu);
   const [wasCameraMenuOn, setWasCameraMenuOn] = useState(settings.cameraMenu);
+
+  const platform = useRecoilValue(PLATFORM);
 
   const saveKey = (id: string, key: string) => {
     setKeybindings((draft) => {
@@ -541,16 +544,21 @@ export default function GeneralSettings() {
         />
       </Input.Wrapper>
       <Input.Wrapper mb="sm" label="TTS Voice" mt="sm">
-        <Select
-          data={window.speechSynthesis.getVoices().map((voice) => voice.name)}
-          defaultValue={settings.ttsVoice}
-          clearable={false}
-          allowDeselect={false}
-          placeholder={settings.ttsVoice !== "" ? settings.ttsVoice : "Select a voice"}
-          onChange={(value) => {
-            setSettings({ ...settings, ttsVoice: value as string });
-          }}
-        />
+        {platform == "windows" ? (
+          // <Select
+          //   data={window.speechSynthesis.getVoices().map((voice) => voice.name)}
+          //   defaultValue={settings.ttsVoice}
+          //   clearable={false}
+          //   allowDeselect={false}
+          //   placeholder={settings.ttsVoice !== "" ? settings.ttsVoice : "Select a voice"}
+          //   onChange={(value) => {
+          //     setSettings({ ...settings, ttsVoice: value as string });
+          //   }}
+          // />
+          "TODO: Fix this not working on other devices"
+        ) : (
+          <Text>TTS is only available on Windows</Text>
+        )}
       </Input.Wrapper>
 
       <Flex gap="xs">

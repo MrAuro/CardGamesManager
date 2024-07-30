@@ -2,9 +2,7 @@
   "identifier": "migrated",
   "description": "permissions that were migrated from v1",
   "local": true,
-  "windows": [
-    "main"
-  ],
+  "windows": ["main"],
   "permissions": [
     "path:default",
     "event:default",
@@ -17,9 +15,7 @@
     "fs:allow-write-file",
     {
       "identifier": "fs:scope",
-      "allow": [
-        "$DESKTOP/keybindings.json"
-      ]
+      "allow": ["$DESKTOP/keybindings.json"]
     },
     "shell:allow-open",
     "dialog:allow-open",
@@ -30,6 +26,10 @@
     "fs:default",
     "shell:default",
     "dialog:default",
-    "store:default"
+    "store:default",
+    "os:default",
+    "os:allow-arch",
+    "os:allow-hostname",
+    "os:allow-os-type"
   ]
 }

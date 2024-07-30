@@ -9450,6 +9450,12 @@ tapable@^2.0.0, tapable@^2.1.1, tapable@^2.2.0, tapable@^2.2.1:
   resolved "https://registry.npmjs.org/tapable/-/tapable-2.2.1.tgz"
   integrity sha512-GNzQvQTOIP6RyTfE2Qxb8ZVlNmw0n88vp1szwWRimP02mnTsx3Wtn5qRdqY9w2XduFNUgvOwhNnQsjwCp+kqaQ==
 
+"tauri-plugin-os@https://github.com/tauri-apps/tauri-plugin-os#v2":
+  version "2.0.0-beta.7"
+  resolved "https://github.com/tauri-apps/tauri-plugin-os#9f2dac8f23e94b97c0f65dbeabd056315140a2a7"
+  dependencies:
+    "@tauri-apps/api" "2.0.0-beta.16"
+
 "tauri-plugin-sql-api@https://github.com/tauri-apps/tauri-plugin-sql#v2":
   version "2.0.0-beta.7"
   resolved "https://github.com/tauri-apps/tauri-plugin-sql#1c8d12b1b5003f2a75256cdd8bef7cf5c39c05de"

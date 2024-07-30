@@ -41,6 +41,14 @@ import ChipBreakdown, { CHIP_BREAKDOWN_OPEN } from "./components/ChipBreakdown";
 import DevTools from "./components/DevTools";
 import TouchscreenMenu from "./components/TouchscreenMenu";
 
+import { platform } from "tauri-plugin-os";
+
+const os = await platform();
+export const PLATFORM = atom({
+  key: "platform",
+  default: os,
+});
+
 export const HOTKEY_SELECTOR_A_ENABLED = atom({
   key: "hotkeySelectorA",
   default: false,
