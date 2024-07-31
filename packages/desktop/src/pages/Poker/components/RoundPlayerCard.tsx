@@ -220,9 +220,6 @@ const RoundPlayerCard = forwardRef(
                       });
                     }}
                     disabled={true}
-                    style={{
-                      backgroundColor: active ? theme.colors.dark[6] : theme.colors.dark[7],
-                    }}
                   />
                 </Container>
               ))}
