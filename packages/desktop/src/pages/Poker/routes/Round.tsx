@@ -771,6 +771,7 @@ export default function Round() {
       pokerPlayer.allIn = true;
     }
 
+    let prevCurrentBet = pokerPlayer.currentBet;
     pokerPlayer.currentBet = amount;
     let currentBets = cloneDeep(tempPokerGame.currentBets);
     if (!currentBets[pokerPlayer.id]) {
@@ -786,7 +787,9 @@ export default function Round() {
 
     tempPokerPlayers[currentPlayerIndex] = pokerPlayer;
 
-    player.balance = Math.round((player.balance - amount) * 100) / 100;
+    let amountToTake = amount - prevCurrentBet;
+
+    player.balance = Math.round((player.balance - amountToTake) * 100) / 100;
     tempPlayers[tempPlayers.findIndex((p) => p.id === player.id)] = player;
 
     const tempData = getNextTurnData(tempPokerGame, tempPokerPlayers);
