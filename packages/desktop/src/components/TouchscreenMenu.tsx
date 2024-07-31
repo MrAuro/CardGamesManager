@@ -313,7 +313,7 @@ export default function TouchscreenMenu() {
           </Flex>
         </Flex>
 
-        <Group grow>
+        <Group grow gap="xs">
           <Button
             color="red"
             size="lg"
@@ -331,26 +331,28 @@ export default function TouchscreenMenu() {
           >
             Clear
           </Button>
-          <Button
-            color="blue"
-            size="lg"
-            p="xs"
-            style={{
-              fontSize: "1rem",
-            }}
-            onClick={() => {
-              let total = chips.reduce(
-                (acc, chip) => acc + chip.denomination * chipCount[chip.id],
-                0
-              );
-              // todo
-              // if (!chipHistory.includes(chipCount)) setChipHistory([...chipHistory, chipCount]);
-              setCalculatorValue(total);
-              setInitialCalculatorValue(total);
-            }}
-          >
-            Move to Calculator
-          </Button>
+          {settings.touchscreenMenuCalculator && (
+            <Button
+              color="blue"
+              size="lg"
+              p="xs"
+              style={{
+                fontSize: "1rem",
+              }}
+              onClick={() => {
+                let total = chips.reduce(
+                  (acc, chip) => acc + chip.denomination * chipCount[chip.id],
+                  0
+                );
+                // todo
+                // if (!chipHistory.includes(chipCount)) setChipHistory([...chipHistory, chipCount]);
+                setCalculatorValue(total);
+                setInitialCalculatorValue(total);
+              }}
+            >
+              Move to Calculator
+            </Button>
+          )}
           <Button
             color="green"
             size="lg"
