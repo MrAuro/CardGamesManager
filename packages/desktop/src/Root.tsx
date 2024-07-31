@@ -1,7 +1,7 @@
 import { Button, Container, MantineProvider, Title, createTheme } from "@mantine/core";
 import "@mantine/core/styles.css";
 import { ModalsProvider } from "@mantine/modals";
-import { Notifications } from "@mantine/notifications";
+import { notifications, Notifications } from "@mantine/notifications";
 import "@mantine/notifications/styles.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
@@ -236,6 +236,14 @@ Sentry.init({
     }
     return event;
   },
+});
+
+window.addEventListener("error", (event) => {
+  notifications.show({
+    title: "An error occurred",
+    message: event.message,
+    color: "red",
+  });
 });
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(

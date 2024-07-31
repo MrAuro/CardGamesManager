@@ -52,6 +52,9 @@ export default function ChipBreakdown() {
   return (
     <>
       <Stack>
+        <Text size="lg" fw="bold">
+          {formatMoney(amount)}
+        </Text>
         {chips.map((chip) => {
           return (
             <Flex direction="row" gap="xs" align="center" key={chip.id}>
@@ -81,7 +84,10 @@ export default function ChipBreakdown() {
                 </Badge>
               </ColorSwatch>
               <Text size="xl" style={{ fontFamily: MONOSPACE }}>
-                {chipBreakdown[chip.id] || ""}
+                {chipBreakdown[chip.id] &&
+                  `${chipBreakdown[chip.id]} (${formatMoney(
+                    chip.denomination * chipBreakdown[chip.id]
+                  )})`}
               </Text>
             </Flex>
           );
