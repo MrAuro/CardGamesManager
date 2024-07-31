@@ -265,6 +265,13 @@ export default function TouchscreenMenu() {
             style={{
               fontFamily: "monospace",
               fontSize: "1.65rem",
+              cursor: "pointer",
+            }}
+            onClick={() => {
+              setChipBreakdownOpen(true);
+              setChipBreakdownAmount(
+                chips.reduce((acc, chip) => acc + chip.denomination * chipCount[chip.id], 0)
+              );
             }}
           >
             {formatMoney(
