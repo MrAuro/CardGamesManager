@@ -73,6 +73,7 @@ export default function PlayingCard({
         border: invalidCard ? `2px solid ${theme.colors.gray[0]}` : undefined,
 
         cursor: disabled ? "pointer" : "not-allowed",
+        userSelect: "none",
       }}
       onClick={() => {
         if (disabled) {
