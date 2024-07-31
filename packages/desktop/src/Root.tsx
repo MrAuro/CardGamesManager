@@ -215,28 +215,29 @@ setInterval(() => {
 
 import * as Sentry from "@sentry/react";
 
-Sentry.init({
-  dsn: "https://974f6beb8a6de4c30bbe28b8d7c7c00d@o4505139595575296.ingest.us.sentry.io/4507600938401792",
-  integrations: [
-    Sentry.browserTracingIntegration(),
-    Sentry.replayIntegration({
-      maskAllText: false,
-    }),
-  ],
-  // Performance Monitoring
-  tracesSampleRate: 0.1, //  Capture 100% of the transactions
-  // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
-  tracePropagationTargets: ["localhost", /^https:\/\/yourserver\.io\/api/],
-  // Session Replay
-  replaysSessionSampleRate: 0.1, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
-  replaysOnErrorSampleRate: 1.0, // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where errors occur.
-  beforeSend(event) {
-    if (event.exception && event.event_id) {
-      Sentry.showReportDialog({ eventId: event.event_id });
-    }
-    return event;
-  },
-});
+if (process.env.NODE_ENV === "production")
+  Sentry.init({
+    dsn: "https://974f6beb8a6de4c30bbe28b8d7c7c00d@o4505139595575296.ingest.us.sentry.io/4507600938401792",
+    integrations: [
+      Sentry.browserTracingIntegration(),
+      Sentry.replayIntegration({
+        maskAllText: false,
+      }),
+    ],
+    // Performance Monitoring
+    tracesSampleRate: 0.1, //  Capture 100% of the transactions
+    // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
+    tracePropagationTargets: ["localhost", /^https:\/\/yourserver\.io\/api/],
+    // Session Replay
+    replaysSessionSampleRate: 0.1, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
+    replaysOnErrorSampleRate: 1.0, // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where errors occur.
+    beforeSend(event) {
+      if (event.exception && event.event_id) {
+        Sentry.showReportDialog({ eventId: event.event_id });
+      }
+      return event;
+    },
+  });
 
 window.addEventListener("error", (event) => {
   notifications.show({
