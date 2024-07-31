@@ -70,7 +70,11 @@ export default function CommunityCards({
         cursor: !pokerGame.capturingCommunityCards ? "pointer" : "default",
       }}
       ref={targetRef}
-      onClick={() => {
+      onClick={(e) => {
+        if ((e.target as HTMLElement).closest("button")) {
+          return;
+        }
+
         if (pokerGame.capturingCommunityCards) return;
 
         setPokerGame({
