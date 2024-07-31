@@ -1529,23 +1529,8 @@ export default function Round() {
                 opacity: pokerPlayer.folded ? 0.25 : 1,
                 filter: pokerPlayer.folded ? "blur(1.5px)" : "none",
                 userSelect: "none",
-                cursor:
-                  pokerGame.gameState === "SHOWDOWN"
-                    ? pokerPlayer.folded
-                      ? "not-allowed"
-                      : "pointer"
-                    : "default",
               }}
               key={pokerPlayer.id}
-              onClick={() => {
-                if (pokerGame.gameState === "SHOWDOWN" && !pokerPlayer.folded) {
-                  setPokerGame({
-                    ...pokerGame,
-                    currentTurn: pokerPlayer.id,
-                    capturingCommunityCards: false,
-                  });
-                }
-              }}
             >
               <RoundPlayerCard
                 ref={betInputRef}

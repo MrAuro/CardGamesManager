@@ -1,4 +1,4 @@
-import { Card, Group, Text } from "@mantine/core";
+import { Card, Group, MantineStyleProp, Text } from "@mantine/core";
 
 export default function GenericPlayerCard({
   header,
@@ -8,6 +8,7 @@ export default function GenericPlayerCard({
   children,
   backgroundColor,
   styles,
+  onClick,
 }: {
   header: string | JSX.Element;
   subtext?: string;
@@ -15,7 +16,8 @@ export default function GenericPlayerCard({
   rightSection?: JSX.Element;
   children?: JSX.Element[] | JSX.Element;
   backgroundColor?: string;
-  styles?: any;
+  styles?: MantineStyleProp;
+  onClick?: () => void;
 }) {
   return (
     <Card
@@ -28,6 +30,7 @@ export default function GenericPlayerCard({
         backgroundColor: backgroundColor ? backgroundColor : undefined,
         ...styles,
       }}
+      onClick={onClick}
     >
       <Group justify="space-between">
         <div
