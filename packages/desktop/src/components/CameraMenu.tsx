@@ -32,6 +32,7 @@ import PlayingCard from "./PlayingCard";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import { HOTKEY_SELECTOR_A_ENABLED, HOTKEY_SELECTOR_B_ENABLED } from "@/App";
 import { useHotkeys } from "react-hotkeys-hook";
+import { notifications } from "@mantine/notifications";
 
 export const { useCameraResetListener, emitCameraReset } = createEvent("cameraReset")();
 
@@ -136,7 +137,15 @@ export default function CameraMenu() {
       setLoading(false);
 
       setStats(`${(t1 - t0).toFixed(2)}ms • ${response.usageMetadata?.totalTokenCount} tokens`);
-    })();
+    })().catch((e) => {
+      notifications.show({
+        title: "Error",
+        message: e.message,
+        color: "red",
+      });
+
+      setLoading(false);
+    });
   }, [image]);
 
   const capture = () => {
