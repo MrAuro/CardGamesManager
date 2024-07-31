@@ -1528,6 +1528,7 @@ export default function Round() {
               style={{
                 opacity: pokerPlayer.folded ? 0.25 : 1,
                 filter: pokerPlayer.folded ? "blur(1.5px)" : "none",
+                userSelect: "none",
                 cursor:
                   pokerGame.gameState === "SHOWDOWN"
                     ? pokerPlayer.folded
