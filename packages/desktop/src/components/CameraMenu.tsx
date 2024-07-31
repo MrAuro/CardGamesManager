@@ -2,10 +2,12 @@ import {
   Button,
   Center,
   Code,
+  darken,
   Divider,
   Flex,
   Image,
   Loader,
+  LoadingOverlay,
   Paper,
   ScrollArea,
   Text,
@@ -36,8 +38,6 @@ export default function CameraMenu() {
   const theme = useMantineTheme();
   const [image, setImage] = useState<string | null>(null);
   const [stats, setStats] = useState<string>("No image captured");
-
-  const [flashTime, setFlashTime] = useState<number>(0);
 
   const settings = useRecoilValue(SETTINGS_STATE);
   const pokerGameState = useRecoilValue(POKER_GAME_STATE).gameState;
@@ -144,20 +144,6 @@ export default function CameraMenu() {
     if (resettingCamera) return;
 
     setImage(webcamRef.current.getScreenshot());
-
-    // Flash effect
-    setFlashTime(80); // 80% max looks better than 100%
-
-    // Exponential decay
-    for (let i = 0; i < 100; i++) {
-      setTimeout(() => {
-        setFlashTime((time) => time - 2);
-      }, 10 * i);
-    }
-
-    setTimeout(() => {
-      setFlashTime(0);
-    }, 1000);
   };
 
   const addCard = (index: number) => {
@@ -179,7 +165,36 @@ export default function CameraMenu() {
           <Loader />
         </Center>
       ) : (
-        <div ref={webcamElementSize.ref}>
+        <div
+          ref={webcamElementSize.ref}
+          style={{
+            cursor: "pointer",
+            position: "relative",
+          }}
+          onClick={() => {
+            if (loading) return;
+            if (resettingCamera) return;
+
+            capture();
+          }}
+        >
+          {/* We hide the loadingoverlay to prevent performance issues */}
+          {loading && (
+            <LoadingOverlay
+              visible={loading}
+              style={{
+                marginBottom: "9px",
+              }}
+              loaderProps={{
+                color: "white",
+              }}
+              overlayProps={{
+                color: "rgba(0, 0, 0, 0.75)",
+                blur: 2,
+                radius: theme.radius.md,
+              }}
+            />
+          )}
           <Webcam
             width="100%"
             ref={webcamRef}
@@ -196,31 +211,9 @@ export default function CameraMenu() {
               borderRadius: theme.radius.md,
             }}
           />
-          <div
-            style={{
-              position: "absolute",
-              top: theme.spacing.sm,
-              left: theme.spacing.sm,
-              width: webcamElementSize.width,
-              height: `calc(${webcamElementSize.height}px - 7px)`, // 7px is a magic number that works with multiple devices
-              backgroundColor: "white",
-              opacity: flashTime / 100,
-              zIndex: 1,
-              borderRadius: theme.radius.md,
-            }}
-          />
         </div>
       )}
-      <Button
-        disabled={loading || resettingCamera}
-        fullWidth
-        leftSection={<IconCamera />}
-        loading={loading}
-        onClick={capture}
-      >
-        Capture
-      </Button>
-      <Divider mt="xs" />
+      <Divider />
       {cards.length > 0 && (
         <Text c="dimmed" ta="center" size="xs" my={5}>
           Click on a card to add it to the game
@@ -283,7 +276,18 @@ export default function CameraMenu() {
         ta="justify"
         size="xs"
         px="sm"
-        // https://stackoverflow.com/a/18170796
+        style={{
+          textAlignLast: "center",
+          marginBottom: theme.spacing.xs,
+        }}
+      >
+        Click the camera to capture an image
+      </Text>
+      <Text
+        c="dimmed"
+        ta="justify"
+        size="xs"
+        px="sm"
         style={{
           textAlignLast: "center",
         }}
