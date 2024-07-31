@@ -226,7 +226,7 @@ const RoundPlayerCard = forwardRef(
             </>
           }
         >
-          {pokerGame.gameState == "SHOWDOWN" && !pokerPlayer.folded ? (
+          {pokerGame.gameState == "SHOWDOWN" ? (
             <>{/* Add additional information here if needed */}</>
           ) : (
             <>
