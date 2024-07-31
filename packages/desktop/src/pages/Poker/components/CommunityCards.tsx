@@ -67,8 +67,17 @@ export default function CommunityCards({
         backgroundColor: pokerGame.capturingCommunityCards
           ? theme.colors.dark[6]
           : theme.colors.dark[7],
+        cursor: !pokerGame.capturingCommunityCards ? "pointer" : "default",
       }}
       ref={targetRef}
+      onClick={() => {
+        if (pokerGame.capturingCommunityCards) return;
+
+        setPokerGame({
+          ...pokerGame,
+          capturingCommunityCards: true,
+        });
+      }}
     >
       <Title order={3} ta="center">
         Community Cards
@@ -134,25 +143,16 @@ export default function CommunityCards({
           Save Cards
         </Button>
         <Button
-          fullWidth
-          disabled={pokerGame.capturingCommunityCards}
-          style={{
-            backgroundColor: pokerGame.capturingCommunityCards ? theme.colors.dark[5] : undefined,
-          }}
-          onClick={() => {
-            setPokerGame({
-              ...pokerGame,
-              capturingCommunityCards: true,
-            });
-          }}
-        >
-          Focus
-        </Button>
-        <Button
           color="green"
           fullWidth
           onClick={distributePot}
           disabled={pokerGame.gameState !== "SHOWDOWN"}
+          style={{
+            backgroundColor:
+              pokerGame.gameState !== "SHOWDOWN" && pokerGame.capturingCommunityCards
+                ? theme.colors.dark[5]
+                : undefined,
+          }}
         >
           Distribute Pots
         </Button>
