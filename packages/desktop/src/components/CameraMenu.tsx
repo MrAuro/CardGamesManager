@@ -2,6 +2,7 @@ import {
   Button,
   Center,
   Code,
+  Container,
   darken,
   Divider,
   Flex,
@@ -226,26 +227,25 @@ export default function CameraMenu() {
         </Text>
       )}
 
-      <ScrollArea
-        w={webcamElementSize.width}
-        scrollbars="x"
-        type="auto"
-        offsetScrollbars
-        scrollbarSize={5}
+      <Container
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          gap: theme.spacing.xs,
+        }}
       >
-        <Flex justify="center" gap={5}>
-          {cards.map((card, index) => (
-            <PlayingCard
-              key={index}
-              onClick={() => {
-                addCard(index);
-              }}
-              disabled
-              card={card}
-            />
-          ))}
-        </Flex>
-      </ScrollArea>
+        {cards.map((card, index) => (
+          <PlayingCard
+            key={index}
+            onClick={() => {
+              addCard(index);
+            }}
+            disabled
+            card={card}
+          />
+        ))}
+      </Container>
 
       <Divider my="sm" />
       <Text
