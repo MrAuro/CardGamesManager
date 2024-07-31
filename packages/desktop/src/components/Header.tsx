@@ -1,6 +1,6 @@
 import { ActionIcon, Container, Flex, Group, Image, Tabs, Text, rem } from "@mantine/core";
 import { PAGES, Page } from "../types/State";
-import { IconCards, IconClubs, IconSettings, IconUsers } from "@tabler/icons-react";
+import { IconCards, IconClubs, IconRefresh, IconSettings, IconUsers } from "@tabler/icons-react";
 import { useState } from "react";
 import shuffle from "lodash/shuffle";
 
@@ -37,6 +37,17 @@ export default function Header({
           >
             {title}
           </Text>
+          <ActionIcon
+            variant="transparent"
+            c="gray"
+            ml="xs"
+            onClick={() => {
+              window.location.reload();
+            }}
+            title="Refresh page"
+          >
+            <IconRefresh />
+          </ActionIcon>
         </Flex>
         <Tabs variant="pills" radius="xl">
           <Tabs.List>
