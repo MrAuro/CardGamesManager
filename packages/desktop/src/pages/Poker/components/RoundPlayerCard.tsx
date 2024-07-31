@@ -124,6 +124,18 @@ const RoundPlayerCard = forwardRef(
     return (
       <div ref={targetRef}>
         <GenericPlayerCard
+          onClick={() => {
+            if (pokerPlayer.folded || active) return;
+
+            setPokerGame({
+              ...pokerGame,
+              currentTurn: pokerPlayer.id,
+              capturingCommunityCards: false,
+            });
+          }}
+          styles={{
+            cursor: !pokerPlayer.folded ? (active ? "default" : "pointer") : "not-allowed",
+          }}
           header={
             <>
               <Flex align="center" mr="sm" gap="xs">
@@ -399,18 +411,6 @@ const RoundPlayerCard = forwardRef(
                       Bet
                     </Button>
                   )}
-                  <Button
-                    color="gray"
-                    disabled={active || pokerPlayer.folded}
-                    onClick={() => {
-                      setPokerGame({
-                        ...pokerGame,
-                        currentTurn: pokerPlayer.id,
-                      });
-                    }}
-                  >
-                    Force Turn
-                  </Button>
                 </Group>
               )}
             </>
