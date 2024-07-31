@@ -45,6 +45,7 @@ import { atom, useRecoilState, useRecoilValue } from "recoil";
 import CommunityCards from "../components/CommunityCards";
 import RoundPlayerCard from "../components/RoundPlayerCard";
 import { getDealerData } from "./PreRound";
+import { CHIP_BREAKDOWN_AMOUNT, CHIP_BREAKDOWN_OPEN } from "@/components/ChipBreakdown";
 
 export const FOLD_CONFIRM = atom<boolean>({
   key: "FOLD_CONFIRM",
@@ -86,6 +87,23 @@ export const USED_CARDS = atom<Card[]>({
   default: [],
 });
 
+type LastPots = {
+  [key: number]: {
+    // Pot number (0 is Main)
+    [playerId: string]: number; // How much each player gets from the pot
+  };
+};
+
+export const LAST_POT = atom<LastPots>({
+  key: "LAST_POT",
+  default: {},
+});
+
+export const PAYOUT_MODAL_OPEN = atom<boolean>({
+  key: "PAYOUT_MODAL_OPEN",
+  default: false,
+});
+
 export const { usePokerActionListener, emitPokerAction } = createEvent("pokerAction")<
   "check" | "call" | "fold" | number | Card
 >();
@@ -104,6 +122,12 @@ export default function Round() {
   // const [holdemTable, setHoldemTable] = useRecoilState(HOLDEM_TABLE);
   const [playerHandResults, setPlayerHandResults] = useRecoilState(PLAYER_HAND_RESULTS);
   const [usedCards, setUsedCards] = useRecoilState(USED_CARDS);
+
+  const [, setChipBreakdownOpen] = useRecoilState(CHIP_BREAKDOWN_OPEN);
+  const [, setChipBreakdownAmount] = useRecoilState(CHIP_BREAKDOWN_AMOUNT);
+
+  const [lastPot, setLastPot] = useRecoilState(LAST_POT);
+  const [payoutModalOpen, setPayoutModalOpen] = useRecoilState(PAYOUT_MODAL_OPEN);
 
   // !
   const [foldConfirm, setFoldConfirm] = useRecoilState(FOLD_CONFIRM);
@@ -956,62 +980,8 @@ export default function Round() {
       tempPlayers[tempPlayers.findIndex((p) => p.id === playerId)] = player;
     }
 
-    modals.open({
-      title: "Pot Distribution",
-      onKeyDown: (event) => {
-        if (event.key === "Enter") {
-          modals.closeAll();
-        }
-
-        // Prevent keybindings from being triggered
-        event.stopPropagation();
-      },
-      children: (
-        <>
-          <Stack>
-            {Object.entries(potResults).map(([potNumber, results]) => {
-              return (
-                <Container mx={0} px={0}>
-                  <Divider
-                    my={3}
-                    label={potNumber == "0" ? "Main Pot" : `Side Pot ${potNumber}`}
-                    labelPosition="left"
-                    styles={{
-                      label: {
-                        fontSize: 14,
-                        fontWeight: 600,
-                      },
-                    }}
-                  />
-                  {Object.entries(results).map(([playerId, amount]) => {
-                    let player = getPlayer(playerId, tempPlayers)!;
-                    return (
-                      <Paper
-                        py={4}
-                        px={6}
-                        key={playerId}
-                        radius="md"
-                        style={{
-                          backgroundColor: darken(theme.colors.dark[6], 0.2),
-                        }}
-                      >
-                        <Group justify="space-between">
-                          <Text>{player.name}</Text>
-
-                          <Text c="green" fw={600}>
-                            +{formatMoney(amount)}
-                          </Text>
-                        </Group>
-                      </Paper>
-                    );
-                  })}
-                </Container>
-              );
-            })}
-          </Stack>
-        </>
-      ),
-    });
+    setLastPot(potResults);
+    setPayoutModalOpen(true);
 
     setPlayerHandResults(null);
     setPlayers(tempPlayers);

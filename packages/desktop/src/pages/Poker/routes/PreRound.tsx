@@ -33,6 +33,7 @@ import {
 import { useRef } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useRecoilState, useRecoilValue } from "recoil";
+import { PAYOUT_MODAL_OPEN } from "./Round";
 
 function getStyle(style: any, snapshot: DraggableStateSnapshot) {
   if (!snapshot.isDropAnimating) {
@@ -82,6 +83,7 @@ export default function PreRound() {
   const [pokerPlayers, setPokerPlayers] = useRecoilImmerState(POKER_PLAYERS_STATE);
   const [players, setPlayers] = useRecoilImmerState(PLAYERS_STATE);
   const [keybindings] = useRecoilImmerState(KEYBINDINGS_STATE);
+  const [, setPayoutModalOpen] = useRecoilState(PAYOUT_MODAL_OPEN);
 
   const playerSelectorRef = useRef<PlayerSelectorHandles>(null);
 
@@ -310,6 +312,17 @@ export default function PreRound() {
         }}
       >
         Shuffle Players
+      </Button>
+      <Button
+        variant="light"
+        color="gray"
+        mt="xs"
+        fullWidth
+        onClick={() => {
+          setPayoutModalOpen(true);
+        }}
+      >
+        Open Previous Payouts
       </Button>
       <Divider my="md" />
       <Title order={2} mb="sm">
