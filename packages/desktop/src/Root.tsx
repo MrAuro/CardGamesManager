@@ -180,6 +180,7 @@ export const SETTINGS_STATE = atom<Settings>({
         touchscreenMenuPosition: "right",
         touchscreenMenuWidth: 30,
         touchscreenMenuChipsColumns: 3,
+        touchscreenMenuCalculator: true,
         tts: false,
         ttsVoice: "Microsoft David Desktop - English (United States)",
         ttsRate: 1,

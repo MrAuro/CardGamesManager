@@ -12,6 +12,7 @@ export type Settings = {
   swapSideMenus: boolean;
   touchscreenMenuWidth: number;
   touchscreenMenuChipsColumns: number;
+  touchscreenMenuCalculator: boolean;
   tts: boolean;
   ttsVoice: string;
   ttsRate: number;

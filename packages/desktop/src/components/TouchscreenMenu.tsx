@@ -599,164 +599,167 @@ export default function TouchscreenMenu() {
           })}
         </SimpleGrid>
       </Paper>
-      <Paper
-        mt="xs"
-        withBorder
-        p="xs"
-        pt={2}
-        style={{
-          backgroundColor: theme.colors.dark[7],
-        }}
-      >
-        <Flex direction="row" align="center" gap="xs">
-          <Text
-            size="lg"
-            fw={800}
-            style={{
-              fontFamily: "monospace",
-              fontSize: "1.65rem",
-              cursor: "pointer",
-            }}
-            onClick={() => {
-              setChipBreakdownOpen(true);
-              setChipBreakdownAmount(calculatorValue);
-            }}
-          >
-            {formatMoney(calculatorValue)}
-          </Text>
-          <Flex direction="row-reverse" gap="xs">
-            {calculatorHistory.map((total, index) => {
-              return (
-                <Badge
-                  key={index}
-                  size="lg"
-                  variant="light"
-                  style={{
-                    cursor: "pointer",
-                    userSelect: "none",
-                  }}
-                  onClick={() => {
-                    setCalculatorValue(total);
-                  }}
-                >
-                  {formatMoney(total)}
-                </Badge>
-              );
-            })}
+      {settings.touchscreenMenuCalculator && (
+        <Paper
+          mt="xs"
+          withBorder
+          p="xs"
+          pt={2}
+          style={{
+            backgroundColor: theme.colors.dark[7],
+          }}
+        >
+          <Flex direction="row" align="center" gap="xs">
+            <Text
+              size="lg"
+              fw={800}
+              style={{
+                fontFamily: "monospace",
+                fontSize: "1.65rem",
+                cursor: "pointer",
+              }}
+              onClick={() => {
+                setChipBreakdownOpen(true);
+                setChipBreakdownAmount(calculatorValue);
+              }}
+            >
+              {formatMoney(calculatorValue)}
+            </Text>
+            <Flex direction="row-reverse" gap="xs">
+              {calculatorHistory.map((total, index) => {
+                return (
+                  <Badge
+                    key={index}
+                    size="lg"
+                    variant="light"
+                    style={{
+                      cursor: "pointer",
+                      userSelect: "none",
+                    }}
+                    onClick={() => {
+                      setCalculatorValue(total);
+                    }}
+                  >
+                    {formatMoney(total)}
+                  </Badge>
+                );
+              })}
+            </Flex>
           </Flex>
-        </Flex>
-        <SimpleGrid cols={4} spacing="xs" verticalSpacing="xs">
-          <Button
-            size="lg"
-            onClick={() => {
-              if (calculatorValue === 0) {
-                let total = chips.reduce(
-                  (acc, chip) => acc + chip.denomination * chipCount[chip.id],
-                  0
-                );
-                setInitialCalculatorValue(total);
-                setCalculatorValue(total * 2);
-              } else {
-                setCalculatorValue(calculatorValue * 2);
-              }
-            }}
-          >
-            X2
-          </Button>
-          <Button
-            size="lg"
-            onClick={() => {
-              if (calculatorValue === 0) {
-                let total = chips.reduce(
-                  (acc, chip) => acc + chip.denomination * chipCount[chip.id],
-                  0
-                );
-                setInitialCalculatorValue(total);
-                setCalculatorValue(total * 1.5);
-              } else {
-                setCalculatorValue(calculatorValue * 1.5);
-              }
-            }}
-          >
-            X1.5
-          </Button>
+          <SimpleGrid cols={4} spacing="xs" verticalSpacing="xs">
+            <Button
+              size="lg"
+              onClick={() => {
+                if (calculatorValue === 0) {
+                  let total = chips.reduce(
+                    (acc, chip) => acc + chip.denomination * chipCount[chip.id],
+                    0
+                  );
+                  setInitialCalculatorValue(total);
+                  setCalculatorValue(total * 2);
+                } else {
+                  setCalculatorValue(calculatorValue * 2);
+                }
+              }}
+            >
+              X2
+            </Button>
+            <Button
+              size="lg"
+              onClick={() => {
+                if (calculatorValue === 0) {
+                  let total = chips.reduce(
+                    (acc, chip) => acc + chip.denomination * chipCount[chip.id],
+                    0
+                  );
+                  setInitialCalculatorValue(total);
+                  setCalculatorValue(total * 1.5);
+                } else {
+                  setCalculatorValue(calculatorValue * 1.5);
+                }
+              }}
+            >
+              X1.5
+            </Button>
 
-          <Button
-            size="lg"
-            onClick={() => {
-              if (calculatorValue === 0) {
-                let total = chips.reduce(
-                  (acc, chip) => acc + chip.denomination * chipCount[chip.id],
-                  0
-                );
-                setInitialCalculatorValue(total);
-                setCalculatorValue(total / 2);
-              } else {
-                setCalculatorValue(calculatorValue / 2);
-              }
-            }}
-          >
-            1/2
-          </Button>
-          <Button
-            size="lg"
-            color="green"
-            onClick={() => {
-              if (settings.activeTab == "Poker" && pokerGameState != "PREROUND") {
-                emitPokerAction(calculatorValue);
-              } else if (settings.activeTab == "Blackjack" && blackjackGameState == "ROUND") {
-                emitBjAction(calculatorValue);
-              }
-            }}
-          >
-            Bet
-          </Button>
-          <Button
-            size="lg"
-            p={0}
-            disabled={intitalCalculatorValue == 0}
-            onClick={() => {
-              setCalculatorValue(calculatorValue + intitalCalculatorValue);
-            }}
-          >
-            +{formatMoney(intitalCalculatorValue)}
-          </Button>
-          <Button
-            size="lg"
-            p={0}
-            disabled={intitalCalculatorValue == 0}
-            onClick={() => {
-              setCalculatorValue(calculatorValue - intitalCalculatorValue);
-            }}
-          >
-            -{formatMoney(intitalCalculatorValue)}
-          </Button>
-          <Button
-            size="lg"
-            color="grape"
-            disabled={calculatorValue === intitalCalculatorValue || intitalCalculatorValue === 0}
-            p={0}
-            onClick={() => setCalculatorValue(intitalCalculatorValue)}
-          >
-            Reset
-          </Button>
-          <Button
-            size="lg"
-            color="red"
-            disabled={calculatorValue === 0}
-            p={0}
-            onClick={() => {
-              if (!calculatorHistory.includes(calculatorValue)) {
-                setCalculatorHistory([...calculatorHistory, calculatorValue]);
-              }
-              setCalculatorValue(0);
-              setInitialCalculatorValue(0);
-            }}
-          >
-            Clear
-          </Button>
-        </SimpleGrid>
-      </Paper>
+            <Button
+              size="lg"
+              onClick={() => {
+                if (calculatorValue === 0) {
+                  let total = chips.reduce(
+                    (acc, chip) => acc + chip.denomination * chipCount[chip.id],
+                    0
+                  );
+                  setInitialCalculatorValue(total);
+                  setCalculatorValue(total / 2);
+                } else {
+                  setCalculatorValue(calculatorValue / 2);
+                }
+              }}
+            >
+              1/2
+            </Button>
+            <Button
+              size="lg"
+              color="green"
+              onClick={() => {
+                if (settings.activeTab == "Poker" && pokerGameState != "PREROUND") {
+                  emitPokerAction(calculatorValue);
+                } else if (settings.activeTab == "Blackjack" && blackjackGameState == "ROUND") {
+                  emitBjAction(calculatorValue);
+                }
+              }}
+            >
+              Bet
+            </Button>
+            <Button
+              size="lg"
+              p={0}
+              disabled={intitalCalculatorValue == 0}
+              onClick={() => {
+                setCalculatorValue(calculatorValue + intitalCalculatorValue);
+              }}
+            >
+              +{formatMoney(intitalCalculatorValue)}
+            </Button>
+            <Button
+              size="lg"
+              p={0}
+              disabled={intitalCalculatorValue == 0}
+              onClick={() => {
+                setCalculatorValue(calculatorValue - intitalCalculatorValue);
+              }}
+            >
+              -{formatMoney(intitalCalculatorValue)}
+            </Button>
+            <Button
+              size="lg"
+              color="grape"
+              disabled={calculatorValue === intitalCalculatorValue || intitalCalculatorValue === 0}
+              p={0}
+              onClick={() => setCalculatorValue(intitalCalculatorValue)}
+            >
+              Reset
+            </Button>
+            <Button
+              size="lg"
+              color="red"
+              disabled={calculatorValue === 0}
+              p={0}
+              onClick={() => {
+                if (!calculatorHistory.includes(calculatorValue)) {
+                  setCalculatorHistory([...calculatorHistory, calculatorValue]);
+                }
+                setCalculatorValue(0);
+                setInitialCalculatorValue(0);
+              }}
+            >
+              Clear
+            </Button>
+          </SimpleGrid>
+        </Paper>
+      )}
+
       <Paper
         withBorder
         p="xs"
