@@ -401,7 +401,7 @@ const RoundPlayerCard = forwardRef(
                   )}
                   <Button
                     color="gray"
-                    disabled={active}
+                    disabled={active || pokerPlayer.folded}
                     onClick={() => {
                       setPokerGame({
                         ...pokerGame,
