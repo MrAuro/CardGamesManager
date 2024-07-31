@@ -119,6 +119,10 @@ export default function CommunityCards({
         </Button>
         <Button
           fullWidth
+          disabled={pokerGame.capturingCommunityCards}
+          style={{
+            backgroundColor: pokerGame.capturingCommunityCards ? theme.colors.dark[5] : undefined,
+          }}
           onClick={() => {
             setPokerGame({
               ...pokerGame,

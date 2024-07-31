@@ -1571,6 +1571,7 @@ export default function Round() {
                   setPokerGame({
                     ...pokerGame,
                     currentTurn: pokerPlayer.id,
+                    capturingCommunityCards: false,
                   });
                 }
               }}
