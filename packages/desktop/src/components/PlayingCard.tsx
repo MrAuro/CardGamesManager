@@ -1,7 +1,7 @@
 import { SETTINGS_STATE } from "@/Root";
 import { Card } from "@/types/Card";
 import { getSuit, suitToIcon, getRank, EMPTY_CARD } from "@/utils/CardHelper";
-import { Paper, useMantineTheme, Text, darken } from "@mantine/core";
+import { Paper, useMantineTheme, Text, darken, MantineStyleProp } from "@mantine/core";
 import { IconLock, IconPlus } from "@tabler/icons-react";
 import { useRecoilValue } from "recoil";
 
@@ -11,12 +11,14 @@ export default function PlayingCard({
   disabled,
   highContrast,
   strict,
+  style,
 }: {
   card: Card;
   onClick: (card: Card) => void;
   disabled: boolean;
   highContrast?: boolean;
   strict?: boolean;
+  style?: MantineStyleProp;
 }) {
   const theme = useMantineTheme();
   const settings = useRecoilValue(SETTINGS_STATE);
@@ -74,6 +76,8 @@ export default function PlayingCard({
 
         cursor: disabled ? "pointer" : "not-allowed",
         userSelect: "none",
+
+        ...style,
       }}
       onClick={() => {
         if (disabled) {
