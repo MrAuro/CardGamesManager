@@ -288,7 +288,15 @@ export default function TouchscreenMenu() {
                     userSelect: "none",
                   }}
                   onClick={() => {
-                    setChipCount(_chips);
+                    if (_chips === chipCount) {
+                      setChipHistory((draft) => {
+                        let newDraft = cloneDeep(draft);
+                        newDraft.splice(index, 1);
+                        return newDraft;
+                      });
+                    } else {
+                      setChipCount(_chips);
+                    }
                   }}
                 >
                   {formatMoney(total)}
