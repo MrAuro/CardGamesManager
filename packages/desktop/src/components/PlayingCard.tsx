@@ -1,7 +1,14 @@
 import { SETTINGS_STATE } from "@/Root";
 import { Card } from "@/types/Card";
 import { getSuit, suitToIcon, getRank, EMPTY_CARD } from "@/utils/CardHelper";
-import { Paper, useMantineTheme, Text, darken, MantineStyleProp } from "@mantine/core";
+import {
+  Paper,
+  useMantineTheme,
+  Text,
+  darken,
+  MantineStyleProp,
+  MantineColor,
+} from "@mantine/core";
 import { IconLock, IconPlus } from "@tabler/icons-react";
 import { useRecoilValue } from "recoil";
 
@@ -19,20 +26,17 @@ export default function PlayingCard({
   highContrast?: boolean;
   strict?: boolean;
   style?: MantineStyleProp;
+  bgColorOverride?: MantineColor;
 }) {
   const theme = useMantineTheme();
   const settings = useRecoilValue(SETTINGS_STATE);
 
   let backgroundColor;
-  if (!disabled) {
-    if (card == EMPTY_CARD) {
-      backgroundColor = theme.colors.dark[7];
-    } else {
-      backgroundColor = theme.colors.gray[0];
-    }
-  } else if (card == EMPTY_CARD) {
-    backgroundColor = theme.colors.dark[6];
-  } else {
+  if (card == EMPTY_CARD || !disabled) {
+    backgroundColor = "transparent";
+  }
+
+  if (card != EMPTY_CARD) {
     backgroundColor = theme.colors.gray[0];
   }
 

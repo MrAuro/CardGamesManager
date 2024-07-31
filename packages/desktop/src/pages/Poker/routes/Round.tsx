@@ -7,6 +7,7 @@ import {
   POKER_SETTINGS_STATE,
 } from "@/Root";
 import CardSelector from "@/components/CardSelector";
+import { CHIP_BREAKDOWN_AMOUNT, CHIP_BREAKDOWN_OPEN } from "@/components/ChipBreakdown";
 import { CARD_SELECTOR_STATE } from "@/pages/Blackjack/routes/Round";
 import { Card, CardRank, CardSuit, Card_NOEMPTY } from "@/types/Card";
 import { availableCards } from "@/types/Keybindings";
@@ -23,17 +24,7 @@ import { formatMoney, round } from "@/utils/MoneyHelper";
 import { getPlayer } from "@/utils/PlayerHelper";
 import { joinedStringToCards, rankToNumber } from "@/utils/PokerHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
-import {
-  Container,
-  Divider,
-  Flex,
-  Group,
-  Paper,
-  Stack,
-  Text,
-  darken,
-  useMantineTheme,
-} from "@mantine/core";
+import { Flex, Text, useMantineTheme } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import cloneDeep from "lodash/cloneDeep";
@@ -45,7 +36,6 @@ import { atom, useRecoilState, useRecoilValue } from "recoil";
 import CommunityCards from "../components/CommunityCards";
 import RoundPlayerCard from "../components/RoundPlayerCard";
 import { getDealerData } from "./PreRound";
-import { CHIP_BREAKDOWN_AMOUNT, CHIP_BREAKDOWN_OPEN } from "@/components/ChipBreakdown";
 
 export const FOLD_CONFIRM = atom<boolean>({
   key: "FOLD_CONFIRM",
@@ -980,12 +970,14 @@ export default function Round() {
       tempPlayers[tempPlayers.findIndex((p) => p.id === playerId)] = player;
     }
 
+    console.log(`(POT) Setting last pot`, potResults);
     setLastPot(potResults);
     setPayoutModalOpen(true);
 
     setPlayerHandResults(null);
     setPlayers(tempPlayers);
     // End the game
+    console.log("(POT) Ending game");
     setPokerGame({
       ...pokerGame,
       communityCards: [EMPTY_CARD, EMPTY_CARD, EMPTY_CARD, EMPTY_CARD, EMPTY_CARD],

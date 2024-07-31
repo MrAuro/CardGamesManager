@@ -47,7 +47,7 @@ export default function PayoutModal() {
         <Stack>
           {Object.entries(lastPot).map(([potNumber, results]) => {
             return (
-              <Container mx={0} px={0}>
+              <Container mx={0} px={0} key={potNumber}>
                 <Divider
                   my={3}
                   label={potNumber == "0" ? "Main Pot" : `Side Pot ${potNumber}`}
