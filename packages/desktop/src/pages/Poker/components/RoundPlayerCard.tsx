@@ -22,7 +22,12 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { useScrollIntoView } from "@mantine/hooks";
-import { IconCurrencyDollar, IconTriangleFilled } from "@tabler/icons-react";
+import {
+  IconCurrencyDollar,
+  IconPigMoney,
+  IconPokerChip,
+  IconTriangleFilled,
+} from "@tabler/icons-react";
 import { forwardRef, useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { AllInBadge, BigBlindBadge, DealerBadge, SmallBlindBadge } from "../routes/PreRound";
@@ -162,11 +167,27 @@ const RoundPlayerCard = forwardRef(
           backgroundColor={active ? theme.colors.dark[6] : theme.colors.dark[7]}
           subsection={
             <>
-              <Text size="md" fw={600}>
+              <Text
+                size="md"
+                fw={600}
+                style={{ display: "flex", alignItems: "center", gap: 5 }}
+                title="Amount in pot"
+              >
+                <IconPokerChip size={24} />
                 {formatMoney(pokerPlayer.currentBet)}
               </Text>
-              <Text size="sm" c="dimmed">
-                {formatMoney(player.balance)}
+              <Text
+                mt={3}
+                size="sm"
+                c="dimmed"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
+                }}
+                title="Overall balance"
+              >
+                <IconPigMoney size={18} /> {formatMoney(player.balance)}
               </Text>
             </>
           }
