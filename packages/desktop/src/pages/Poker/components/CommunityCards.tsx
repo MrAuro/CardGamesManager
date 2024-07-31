@@ -4,7 +4,9 @@ import { CARD_SELECTOR_STATE } from "@/pages/Blackjack/routes/Round";
 import { isAnyEmpty } from "@/utils/CardHelper";
 import { formatMoney } from "@/utils/MoneyHelper";
 import { Button, Card, Divider, Flex, Text, Title, useMantineTheme } from "@mantine/core";
+import { useScrollIntoView } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
+import { useEffect } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
 export default function CommunityCards({
@@ -19,6 +21,11 @@ export default function CommunityCards({
   const pokerSettings = useRecoilValue(POKER_SETTINGS_STATE);
   const pokerPlayers = useRecoilValue(POKER_PLAYERS_STATE);
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
+
+  const { scrollIntoView, targetRef } = useScrollIntoView<HTMLDivElement>({
+    offset: 100,
+    duration: 500,
+  });
 
   let totalAmountToBePutInPot = 0;
   for (const [_, v] of Object.entries(pokerGame.currentBets)) {
@@ -42,6 +49,14 @@ export default function CommunityCards({
     }
   }
 
+  useEffect(() => {
+    if (pokerGame.capturingCommunityCards) {
+      scrollIntoView({
+        alignment: "start",
+      });
+    }
+  }, [pokerGame.capturingCommunityCards]);
+
   return (
     <Card
       withBorder
@@ -53,6 +68,7 @@ export default function CommunityCards({
           ? theme.colors.dark[6]
           : theme.colors.dark[7],
       }}
+      ref={targetRef}
     >
       <Title order={3} ta="center">
         Community Cards
