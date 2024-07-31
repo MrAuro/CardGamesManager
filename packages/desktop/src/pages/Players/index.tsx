@@ -150,7 +150,7 @@ export default function Players() {
           });
         }}
       >
-        Reset All Balances
+        Set All to $100
       </Button>
       <Button
         fullWidth
