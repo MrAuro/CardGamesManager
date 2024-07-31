@@ -21,6 +21,8 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
+  IconCalculator,
+  IconCalculatorOff,
   IconCurrencyDollar,
   IconDeviceFloppy,
   IconEar,
@@ -135,6 +137,33 @@ export default function GeneralSettings() {
             leftSection={<IconHandFingerOff />}
             onClick={() => {
               setSettings({ ...settings, touchscreenMenu: false });
+            }}
+          >
+            Off
+          </Button>
+        </ButtonGroup>
+      </Input.Wrapper>
+      <Input.Wrapper
+        label="Show Calculator"
+        description="Displays a simple calculator in the touchscreen menu for quick multiplications"
+        mt="sm"
+      >
+        <ButtonGroup mt={5}>
+          <Button
+            disabled={opened}
+            variant={settings?.touchscreenMenuCalculator ? "filled" : "default"}
+            leftSection={<IconCalculator />}
+            onClick={() => {
+              setSettings({ ...settings, touchscreenMenuCalculator: true });
+            }}
+          >
+            On
+          </Button>
+          <Button
+            variant={!settings?.touchscreenMenuCalculator ? "filled" : "default"}
+            leftSection={<IconCalculatorOff />}
+            onClick={() => {
+              setSettings({ ...settings, touchscreenMenuCalculator: false });
             }}
           >
             Off
