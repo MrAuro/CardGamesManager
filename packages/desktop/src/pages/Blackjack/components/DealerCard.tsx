@@ -122,6 +122,14 @@ export default function DealerCard({
       <GenericPlayerCard
         header="Dealer"
         backgroundColor={isActive ? theme.colors.dark[6] : theme.colors.dark[7]}
+        styles={{
+          cursor: isActive ? "default" : "pointer",
+        }}
+        onClick={() => {
+          if (isActive) return;
+
+          forceTurn("DEALER");
+        }}
         rightSection={
           <>
             <Paper
@@ -212,9 +220,6 @@ export default function DealerCard({
               Payout & End
             </Button>
           )}
-          <Button disabled={isActive} fullWidth color="gray" onClick={() => forceTurn("DEALER")}>
-            Force Turn
-          </Button>
         </Group>
       </GenericPlayerCard>
     </div>

@@ -256,6 +256,14 @@ export default function RoundPlayerCard({
       <GenericPlayerCard
         header={blackjackPlayer.displayName}
         backgroundColor={backgroundColor}
+        styles={{
+          cursor: isActive ? "default" : "pointer",
+        }}
+        onClick={() => {
+          if (isActive) return;
+
+          forceTurn(blackjackPlayer.id);
+        }}
         subsection={
           <>
             <Text size="md" fw={600}>
@@ -532,16 +540,6 @@ export default function RoundPlayerCard({
             }}
           >
             Split
-          </Button>
-          <Button
-            disabled={isActive}
-            fullWidth
-            color="gray"
-            onClick={() => {
-              forceTurn(blackjackPlayer.id);
-            }}
-          >
-            Force Turn
           </Button>
         </Group>
       </GenericPlayerCard>
