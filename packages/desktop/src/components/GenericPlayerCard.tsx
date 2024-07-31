@@ -30,7 +30,11 @@ export default function GenericPlayerCard({
       }}
     >
       <Group justify="space-between">
-        <div>
+        <div
+          style={{
+            userSelect: "none",
+          }}
+        >
           {typeof header === "string" ? (
             <Text size="xl" fw="bold">
               {header}
