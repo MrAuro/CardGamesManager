@@ -7,7 +7,6 @@ import {
   POKER_SETTINGS_STATE,
 } from "@/Root";
 import CardSelector from "@/components/CardSelector";
-import { CHIP_BREAKDOWN_AMOUNT, CHIP_BREAKDOWN_OPEN } from "@/components/ChipBreakdown";
 import { CARD_SELECTOR_STATE } from "@/pages/Blackjack/routes/Round";
 import { Card, CardRank, CardSuit, Card_NOEMPTY } from "@/types/Card";
 import { availableCards } from "@/types/Keybindings";
@@ -24,7 +23,7 @@ import { formatMoney, round } from "@/utils/MoneyHelper";
 import { getPlayer } from "@/utils/PlayerHelper";
 import { joinedStringToCards, rankToNumber } from "@/utils/PokerHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
-import { Flex, Text, useMantineTheme } from "@mantine/core";
+import { Flex, Text } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import cloneDeep from "lodash/cloneDeep";
@@ -99,8 +98,6 @@ export const { usePokerActionListener, emitPokerAction } = createEvent("pokerAct
 >();
 
 export default function Round() {
-  const theme = useMantineTheme();
-
   const [pokerGame, setPokerGame] = useRecoilState(POKER_GAME_STATE);
 
   const [pokerPlayers, setPokerPlayers] = useRecoilImmerState(POKER_PLAYERS_STATE);
@@ -109,15 +106,11 @@ export default function Round() {
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
   const [activeCardOverride] = useState<Card | undefined>(undefined);
   const [keybindings] = useRecoilImmerState(KEYBINDINGS_STATE);
-  // const [holdemTable, setHoldemTable] = useRecoilState(HOLDEM_TABLE);
   const [playerHandResults, setPlayerHandResults] = useRecoilState(PLAYER_HAND_RESULTS);
   const [usedCards, setUsedCards] = useRecoilState(USED_CARDS);
 
-  const [, setChipBreakdownOpen] = useRecoilState(CHIP_BREAKDOWN_OPEN);
-  const [, setChipBreakdownAmount] = useRecoilState(CHIP_BREAKDOWN_AMOUNT);
-
-  const [lastPot, setLastPot] = useRecoilState(LAST_POT);
-  const [payoutModalOpen, setPayoutModalOpen] = useRecoilState(PAYOUT_MODAL_OPEN);
+  const [, setLastPot] = useRecoilState(LAST_POT);
+  const [, setPayoutModalOpen] = useRecoilState(PAYOUT_MODAL_OPEN);
 
   // !
   const [foldConfirm, setFoldConfirm] = useRecoilState(FOLD_CONFIRM);
