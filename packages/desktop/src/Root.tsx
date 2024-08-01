@@ -197,6 +197,7 @@ setInterval(() => {
 }, 1000 * 60);
 
 import * as Sentry from "@sentry/react";
+import DevTools from "./components/DevTools";
 
 if (process.env.NODE_ENV === "production")
   Sentry.init({
@@ -291,6 +292,7 @@ function fallbackRender(props: { error: any; resetErrorBoundary: any }) {
       </Button>
       <pre>{props.error.message}</pre>
       <pre>{props.error?.stack}</pre>
+      <DevTools />
     </Container>
   );
 }
