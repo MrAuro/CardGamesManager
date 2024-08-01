@@ -2,6 +2,13 @@ import { Card } from "./Card";
 
 export type GameState = "PREROUND" | "ROUND" | "POSTROUND";
 
+export const DEFAULT_BLACKJACK_GAME: BlackjackGame = {
+  gameState: "PREROUND",
+  currentTurn: "",
+  dealerCards: [],
+  dealerFirstTime: true,
+};
+
 export type BlackjackGame = {
   gameState: GameState;
   currentTurn: string;
@@ -38,6 +45,30 @@ export type EarningsResultType = {
     }
 );
 
+export const DEFAULT_BLACKJACK_SETTINGS: BlackjackSettings = {
+  decks: 2,
+  dealerHitsSoft17: true,
+  doubleAfterSplit: true,
+  splitAces: true,
+  splitAcesReceiveOneCard: true,
+
+  blackjackPayout: 1.5,
+
+  twentyOnePlusThreeEnabled: false,
+  twentyOnePlusThreeFlushPayout: 5,
+  twentyOnePlusThreeStraightPayout: 10,
+  twentyOnePlusThreeThreeOfAKindPayout: 30,
+  twentyOnePlusThreeStraightFlushPayout: 40,
+  twentyOnePlusThreeThreeOfAKindSuitedPayout: 100,
+
+  perfectPairsEnabled: false,
+  perfectPairsMixedPayout: 6,
+  perfectPairsColoredPayout: 12,
+  perfectPairsSuitedPayout: 30,
+
+  betBehindEnabled: false,
+};
+
 export type BlackjackSettings = {
   decks: number;
   dealerHitsSoft17: boolean;
@@ -60,6 +91,24 @@ export type BlackjackSettings = {
   perfectPairsSuitedPayout: number;
 
   betBehindEnabled: boolean;
+};
+
+export const DEFAULT_BLACKJACK_PLAYER: BlackjackPlayer = {
+  id: "",
+  cards: [],
+  bet: 0,
+  doubledDown: false,
+  split: false,
+  displayName: "",
+  errors: [],
+  sidebets: {
+    twentyOnePlusThree: 0,
+    perfectPairs: 0,
+    betBehind: {
+      bet: 0,
+      target: null,
+    },
+  },
 };
 
 export type BlackjackPlayer = {
