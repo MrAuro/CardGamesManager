@@ -12,9 +12,11 @@ import { useRecoilState, useRecoilValue } from "recoil";
 export default function CommunityCards({
   cardsAllowed,
   distributePot,
+  refundAndCancel,
 }: {
   cardsAllowed: number;
   distributePot: () => void;
+  refundAndCancel: () => void;
 }) {
   const theme = useMantineTheme();
   const [pokerGame, setPokerGame] = useRecoilState(POKER_GAME_STATE);
@@ -84,7 +86,10 @@ export default function CommunityCards({
       }}
     >
       <Title order={3} ta="center">
-        Community Cards
+        Community Cards (
+        {pokerGame.gameState.toLowerCase()[0].toUpperCase() +
+          pokerGame.gameState.toLowerCase().slice(1)}
+        )
       </Title>
       {pokerGame.pots.map((pot, index) => {
         return (
@@ -96,9 +101,6 @@ export default function CommunityCards({
       })}
       <Text c="dimmed" size="sm" ta="center" fw={500}>
         {formatMoney(totalAmountToBePutInPot)} pending
-      </Text>
-      <Text c="dimmed" size="xs" ta="center" tt="uppercase">
-        {pokerGame.gameState}
       </Text>
       <Divider my="xs" />
       <Flex justify="center" gap="sm" align="center">
@@ -151,6 +153,7 @@ export default function CommunityCards({
           fullWidth
           onClick={distributePot}
           disabled={pokerGame.gameState !== "SHOWDOWN"}
+          variant={pokerGame.capturingCommunityCards ? "filled" : "light"}
           style={{
             backgroundColor:
               pokerGame.gameState !== "SHOWDOWN" && pokerGame.capturingCommunityCards
@@ -159,6 +162,14 @@ export default function CommunityCards({
           }}
         >
           Distribute Pots
+        </Button>
+        <Button
+          color="red"
+          fullWidth
+          variant={pokerGame.capturingCommunityCards ? "filled" : "light"}
+          onClick={refundAndCancel}
+        >
+          Refund & Cancel
         </Button>
       </Flex>
     </Card>
