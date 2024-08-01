@@ -62,4 +62,5 @@ export type PokerPot = {
    */
   maximum?: number;
   closed: boolean;
+  winnerOverrides: string[];
 };

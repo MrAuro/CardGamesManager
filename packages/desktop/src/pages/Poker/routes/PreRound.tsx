@@ -245,6 +245,7 @@ export default function PreRound() {
           amount: round(amountInPot),
           maximum: round(amountInPot),
           closed: false,
+          winnerOverrides: [],
         },
       ],
       currentBets,
