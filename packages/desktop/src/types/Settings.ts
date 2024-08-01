@@ -1,6 +1,30 @@
 import { UUID } from "crypto";
 import { Page } from "./State";
 
+export const DEFAULT_SETTINGS: Settings = {
+  scale: 100,
+  debug: false,
+  activeTab: "Players",
+  cornerOfEyeMode: false,
+  chipsMode: false,
+  fourColorDeck: false,
+  touchscreenMenu: false,
+  swapSideMenus: false,
+  touchscreenMenuWidth: 30,
+  touchscreenMenuChipsColumns: 3,
+  touchscreenMenuCalculator: true,
+  tts: false,
+  ttsVoice: "Microsoft David Desktop - English (United States)",
+  ttsRate: 1,
+  ttsPitch: 1,
+  ttsVolume: 1,
+  geminiApiKey: "",
+  cameraDeviceId: "",
+  cameraFlipHorizontal: false,
+  cameraMenu: false,
+  cameraMenuWidth: 15,
+};
+
 export type Settings = {
   scale: number;
   debug: boolean;
@@ -23,6 +47,12 @@ export type Settings = {
   cameraFlipHorizontal: boolean;
   cameraMenu: boolean;
   cameraMenuWidth: number;
+};
+
+export const DEFAULT_CHIP: Chip = {
+  id: crypto.randomUUID(),
+  color: "#ffffff",
+  denomination: 0,
 };
 
 export type Chip = {

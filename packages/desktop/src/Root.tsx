@@ -1,4 +1,5 @@
-import { Button, Container, MantineProvider, Title, createTheme } from "@mantine/core";
+import { Chip, DEFAULT_SETTINGS, Settings } from "@/types/Settings";
+import { Button, Container, createTheme, MantineProvider, Title } from "@mantine/core";
 import "@mantine/core/styles.css";
 import { ModalsProvider } from "@mantine/modals";
 import { notifications, Notifications } from "@mantine/notifications";
@@ -6,30 +7,45 @@ import "@mantine/notifications/styles.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { ErrorBoundary } from "react-error-boundary";
-import { RecoilRoot } from "recoil";
-import App from "./App";
+import { atom, RecoilRoot } from "recoil";
 import { Store } from "tauri-plugin-store-api";
-import { atom } from "recoil";
-import { Chip, Settings } from "@/types/Settings";
-import { BlackjackGame, BlackjackPlayer, BlackjackSettings } from "./types/Blackjack";
-import { Player } from "./types/Player";
-import { EMPTY_CARD } from "./utils/CardHelper";
+import App from "./App";
+import {
+  BlackjackGame,
+  BlackjackPlayer,
+  BlackjackSettings,
+  DEFAULT_BLACKJACK_GAME,
+  DEFAULT_BLACKJACK_PLAYER,
+  DEFAULT_BLACKJACK_SETTINGS,
+} from "./types/Blackjack";
 import { Keybinding } from "./types/Keybindings";
+import { DEFAULT_PLAYER, Player } from "./types/Player";
+import {
+  DEFAULT_POKER_GAME,
+  DEFAULT_POKER_PLAYER,
+  DEFAULT_POKER_POT,
+  DEFAULT_POKER_SETTINGS,
+  PokerGame,
+  PokerPlayer,
+  PokerSettings,
+} from "./types/Poker";
 import { DefaultKeybinds } from "./utils/DefaultKeybinds";
-import { PokerGame, PokerPlayer, PokerSettings } from "./types/Poker";
 
 export const TAURI_STORE = new Store(".data");
 
 export const PLAYERS_STATE = atom<Player[]>({
   key: "PLAYERS",
   default: new Promise(async (resolve) => {
-    let players = await TAURI_STORE.get("players");
-    console.log("initial players", players);
-    if (!players) {
-      players = [];
-      await TAURI_STORE.set("players", players);
-    }
+    let storedData: Partial<Player>[] | null = await TAURI_STORE.get("players");
 
+    let players = storedData || [];
+
+    players = players.map((player) => ({
+      ...DEFAULT_PLAYER,
+      ...player,
+    }));
+
+    TAURI_STORE.set("players", players);
     resolve(players as Player[]);
   }),
 });
@@ -51,17 +67,11 @@ export const KEYBINDINGS_STATE = atom<Keybinding[]>({
 export const BLACKJACK_GAME_STATE = atom<BlackjackGame>({
   key: "BLACKJACK_GAME",
   default: new Promise(async (resolve) => {
-    let game = await TAURI_STORE.get("blackjackGame");
-    if (!game) {
-      game = {
-        gameState: "PREROUND",
-        currentTurn: "",
-        dealerCards: [EMPTY_CARD, EMPTY_CARD],
-        dealerFirstTime: true,
-      };
-      await TAURI_STORE.set("blackjackGame", game);
-    }
+    let storedData: Partial<BlackjackGame> | null = await TAURI_STORE.get("blackjackGame");
 
+    let game = deepMerge(DEFAULT_BLACKJACK_GAME, storedData || {});
+
+    TAURI_STORE.set("blackjackGame", game);
     resolve(game as BlackjackGame);
   }),
 });
@@ -69,35 +79,11 @@ export const BLACKJACK_GAME_STATE = atom<BlackjackGame>({
 export const BLACKJACK_SETTINGS = atom<BlackjackSettings>({
   key: "BLACKJACK_SETTINGS",
   default: new Promise(async (resolve) => {
-    let settings = await TAURI_STORE.get("blackjackSettings");
-    if (!settings) {
-      settings = {
-        decks: 2,
-        dealerHitsSoft17: true,
-        doubleAfterSplit: true,
-        splitAces: true,
-        splitAcesReceiveOneCard: true,
+    let storedData: Partial<BlackjackSettings> | null = await TAURI_STORE.get("blackjackSettings");
 
-        blackjackPayout: 1.5,
+    let settings = deepMerge(DEFAULT_BLACKJACK_SETTINGS, storedData || {});
 
-        twentyOnePlusThreeEnabled: false,
-        twentyOnePlusThreeFlushPayout: 5,
-        twentyOnePlusThreeStraightPayout: 10,
-        twentyOnePlusThreeThreeOfAKindPayout: 30,
-        twentyOnePlusThreeStraightFlushPayout: 40,
-        twentyOnePlusThreeThreeOfAKindSuitedPayout: 100,
-
-        perfectPairsEnabled: false,
-        perfectPairsMixedPayout: 6,
-        perfectPairsColoredPayout: 12,
-        perfectPairsSuitedPayout: 30,
-
-        betBehindEnabled: false,
-      };
-      await TAURI_STORE.set("blackjackSettings", settings);
-    }
-    console.log(settings);
-
+    TAURI_STORE.set("blackjackSettings", settings);
     resolve(settings as BlackjackSettings);
   }),
 });
@@ -105,12 +91,16 @@ export const BLACKJACK_SETTINGS = atom<BlackjackSettings>({
 export const BLACKJACK_PLAYERS_STATE = atom<BlackjackPlayer[]>({
   key: "BLACKJACK_PLAYERS",
   default: new Promise(async (resolve) => {
-    let players = await TAURI_STORE.get("blackjackPlayers");
-    if (!players) {
-      players = [];
-      await TAURI_STORE.set("blackjackPlayers", players);
-    }
+    let storedData: Partial<BlackjackPlayer>[] | null = await TAURI_STORE.get("blackjackPlayers");
 
+    let players = storedData || [];
+
+    players = players.map((player) => ({
+      ...DEFAULT_BLACKJACK_PLAYER,
+      ...player,
+    }));
+
+    TAURI_STORE.set("blackjackPlayers", players);
     resolve(players as BlackjackPlayer[]);
   }),
 });
@@ -118,18 +108,13 @@ export const BLACKJACK_PLAYERS_STATE = atom<BlackjackPlayer[]>({
 export const POKER_GAME_STATE = atom<PokerGame>({
   key: "POKER_GAME",
   default: new Promise(async (resolve) => {
-    let game = await TAURI_STORE.get("pokerGame");
-    if (!game) {
-      game = {
-        gameState: "PREROUND",
-        currentTurn: "",
-        communityCards: [],
-        currentBet: 0,
-        currentBets: {},
-      };
-      await TAURI_STORE.set("pokerGame", game);
-    }
+    let storedData: Partial<PokerGame> | null = await TAURI_STORE.get("pokerGame");
 
+    let game = deepMerge(DEFAULT_POKER_GAME, storedData || {});
+
+    game.pots = game.pots.map((pot) => deepMerge(DEFAULT_POKER_POT, pot));
+
+    TAURI_STORE.set("pokerGame", game);
     resolve(game as PokerGame);
   }),
 });
@@ -137,12 +122,16 @@ export const POKER_GAME_STATE = atom<PokerGame>({
 export const POKER_PLAYERS_STATE = atom<PokerPlayer[]>({
   key: "POKER_PLAYERS",
   default: new Promise(async (resolve) => {
-    let players = await TAURI_STORE.get("pokerPlayers");
-    if (!players) {
-      players = [];
-      await TAURI_STORE.set("pokerPlayers", players);
-    }
+    let storedData: Partial<PokerPlayer>[] | null = await TAURI_STORE.get("pokerPlayers");
 
+    let players = storedData || [];
+
+    players = players.map((player) => ({
+      ...DEFAULT_POKER_PLAYER,
+      ...player,
+    }));
+
+    TAURI_STORE.set("pokerPlayers", players);
     resolve(players as PokerPlayer[]);
   }),
 });
@@ -150,17 +139,11 @@ export const POKER_PLAYERS_STATE = atom<PokerPlayer[]>({
 export const POKER_SETTINGS_STATE = atom<PokerSettings>({
   key: "POKER_SETTINGS",
   default: new Promise(async (resolve) => {
-    let settings = await TAURI_STORE.get("pokerSettings");
-    if (!settings) {
-      settings = {
-        forcedBetOption: "BLINDS",
-        smallBlind: 5,
-        bigBlind: 10,
-        ante: 1,
-      };
-      await TAURI_STORE.set("pokerSettings", settings);
-    }
+    let storedData: Partial<PokerSettings> | null = await TAURI_STORE.get("pokerSettings");
 
+    let settings = deepMerge(DEFAULT_POKER_SETTINGS, storedData || {});
+
+    TAURI_STORE.set("pokerSettings", settings);
     resolve(settings as PokerSettings);
   }),
 });
@@ -168,29 +151,11 @@ export const POKER_SETTINGS_STATE = atom<PokerSettings>({
 export const SETTINGS_STATE = atom<Settings>({
   key: "SETTINGS",
   default: new Promise(async (resolve) => {
-    let settings = await TAURI_STORE.get("settings");
-    if (!settings) {
-      settings = {
-        scale: 100,
-        debug: false,
-        activeTab: "Players",
-        cornerOfEyeMode: false,
-        chipsMode: false,
-        touchscreenMenu: false,
-        touchscreenMenuPosition: "right",
-        touchscreenMenuWidth: 30,
-        touchscreenMenuChipsColumns: 3,
-        touchscreenMenuCalculator: true,
-        tts: false,
-        ttsVoice: "Microsoft David Desktop - English (United States)",
-        ttsRate: 1,
-        ttsPitch: 1,
-        geminiApiKey: "",
-        chips: [],
-      };
-      await TAURI_STORE.set("settings", settings);
-    }
+    let storedData: Partial<Settings> | null = await TAURI_STORE.get("settings");
 
+    let settings = deepMerge(DEFAULT_SETTINGS, storedData || {});
+
+    TAURI_STORE.set("settings", settings);
     resolve(settings as Settings);
   }),
 });
@@ -207,6 +172,24 @@ export const CHIPS_STATE = atom<Chip[]>({
     resolve(chips as Chip[]);
   }),
 });
+
+function deepMerge<T>(defaultObj: T, storedObj: Partial<T>): T {
+  const result: any = { ...defaultObj };
+  for (const key in storedObj) {
+    if (storedObj.hasOwnProperty(key)) {
+      if (
+        typeof storedObj[key] === "object" &&
+        storedObj[key] !== null &&
+        !Array.isArray(storedObj[key])
+      ) {
+        result[key] = deepMerge(defaultObj[key] as any, storedObj[key] as any);
+      } else {
+        result[key] = storedObj[key];
+      }
+    }
+  }
+  return result as T;
+}
 
 setInterval(() => {
   console.log(`Autosaving...`);
