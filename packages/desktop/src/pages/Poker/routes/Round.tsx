@@ -95,7 +95,7 @@ export const PAYOUT_MODAL_OPEN = atom<boolean>({
 });
 
 export const { usePokerActionListener, emitPokerAction } = createEvent("pokerAction")<
-  "check" | "call" | "fold" | number | Card
+  "check" | "call" | "fold" | "distribute" | number | Card
 >();
 
 export default function Round() {
@@ -141,6 +141,11 @@ export default function Round() {
 
     if (msg == "call") {
       callAction();
+      return;
+    }
+
+    if (msg == "distribute") {
+      distributePot();
       return;
     }
 
@@ -450,6 +455,7 @@ export default function Round() {
         amount: 0,
         eligiblePlayers: [],
         closed: false,
+        winnerOverrides: [],
       };
       if (!pots.includes(mainPot)) {
         pots.push(mainPot);
@@ -935,16 +941,6 @@ export default function Round() {
   };
 
   const distributePot = () => {
-    if (pokerGame.gameState !== "SHOWDOWN") {
-      console.error(`Game state is not SHOWDOWN`);
-      return;
-    }
-
-    if (!playerHandResults || playerHandResults?.length == 0) {
-      console.error(`No player hand results`);
-      return;
-    }
-
     let tempPokerPlayers = cloneDeep(pokerPlayers);
     let tempPokerGame = cloneDeep(pokerGame);
     let tempPlayers = cloneDeep(players);
@@ -971,6 +967,23 @@ export default function Round() {
       let pot = pots[i];
       let eligiblePlayers = pot.eligiblePlayers;
       let totalAmount = pot.amount;
+
+      if (pot.winnerOverrides.length > 0) {
+        console.log(`(POT) Winner overrides:`, pot.winnerOverrides);
+
+        let amountDivided = totalAmount / pot.winnerOverrides.length;
+        for (const playerId of pot.winnerOverrides) {
+          potResults[i][playerId] = amountDivided;
+          amountWon[playerId] += amountDivided;
+        }
+
+        continue;
+      }
+
+      if (!playerHandResults || playerHandResults?.length == 0) {
+        console.error(`No player hand results`);
+        return;
+      }
 
       let activeHands = playerHandResults.filter((result) => eligiblePlayers.includes(result.id));
       console.log(`(POT) Eligible players:`, eligiblePlayers);

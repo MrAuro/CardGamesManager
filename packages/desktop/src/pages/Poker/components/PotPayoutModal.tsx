@@ -8,6 +8,7 @@ import {
   Button,
   ButtonGroup,
   Card,
+  Checkbox,
   Container,
   darken,
   Divider,
@@ -18,6 +19,7 @@ import {
   Modal,
   NumberInput,
   Select,
+  Tabs,
   Text,
   Tooltip,
   useMantineTheme,
@@ -25,6 +27,7 @@ import {
 import { IconCurrencyDollar, IconLock, IconLockOpen, IconSearch, IconX } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { atom, useRecoilState } from "recoil";
+import { emitPokerAction } from "../routes/Round";
 
 export const POT_EDITOR_OPEN = atom<boolean>({
   key: "POT_EDITOR_OPEN",
@@ -37,63 +40,102 @@ export default function PotEditorModal() {
   const [pokerPlayers, setPokerPlayers] = useRecoilImmerState(POKER_PLAYERS_STATE);
   const [open, setOpen] = useRecoilState(POT_EDITOR_OPEN);
 
+  useEffect(() => {
+    setModifiedPokerGame(pokerGame);
+  }, [open]);
+
   return (
     <Modal
       opened={open}
       onClose={() => {
         setOpen(false);
       }}
-      title="Pot Payout"
+      title="Editor"
       size="md"
     >
-      <Flex direction="column" gap="md">
-        {modifiedPokerGame.pots.map((pot, index) => {
-          return (
-            <Pot
-              index={index}
-              key={index}
-              pot={pot}
-              pokerPlayers={pokerPlayers}
-              savePot={(newPot) => {
-                setModifiedPokerGame({
-                  ...modifiedPokerGame,
-                  pots: modifiedPokerGame.pots.map((p, i) => (i === index ? newPot : p)),
-                });
-              }}
-              removePot={() => {
-                setModifiedPokerGame({
-                  ...modifiedPokerGame,
-                  pots: modifiedPokerGame.pots.filter((_, i) => i !== index),
-                });
-              }}
-            />
-          );
-        })}
-      </Flex>
-      <Button
-        fullWidth
-        mt="xs"
-        color="blue"
-        onClick={() => {
-          setModifiedPokerGame({
-            ...modifiedPokerGame,
-            pots: [...modifiedPokerGame.pots, { amount: 0, closed: false, eligiblePlayers: [] }],
-          });
-        }}
-      >
-        Add Side Pot
-      </Button>
-      <Button
-        fullWidth
-        mt="xs"
-        color="green"
-        onClick={() => {
-          setPokerGame(modifiedPokerGame);
-          setOpen(false);
-        }}
-      >
-        Commit Changes
-      </Button>
+      <Tabs defaultValue="pots">
+        <Tabs.List>
+          <Tabs.Tab value="pots">Pot Editor</Tabs.Tab>
+          <Tabs.Tab value="winner">Winner Override</Tabs.Tab>
+        </Tabs.List>
+
+        <Tabs.Panel value="pots" pt="xs">
+          <Flex direction="column" gap="md">
+            {modifiedPokerGame.pots.map((pot, index) => {
+              return (
+                <Pot
+                  index={index}
+                  key={index}
+                  pot={pot}
+                  pokerPlayers={pokerPlayers}
+                  savePot={(newPot) => {
+                    setModifiedPokerGame({
+                      ...modifiedPokerGame,
+                      pots: modifiedPokerGame.pots.map((p, i) => (i === index ? newPot : p)),
+                    });
+                  }}
+                  removePot={() => {
+                    setModifiedPokerGame({
+                      ...modifiedPokerGame,
+                      pots: modifiedPokerGame.pots.filter((_, i) => i !== index),
+                    });
+                  }}
+                />
+              );
+            })}
+          </Flex>
+          <Button
+            fullWidth
+            mt="xs"
+            color="blue"
+            onClick={() => {
+              setModifiedPokerGame({
+                ...modifiedPokerGame,
+                pots: [
+                  ...modifiedPokerGame.pots,
+                  { amount: 0, closed: false, eligiblePlayers: [], winnerOverrides: [] },
+                ],
+              });
+            }}
+          >
+            Add Side Pot
+          </Button>
+          <Button
+            fullWidth
+            mt="xs"
+            color="green"
+            onClick={() => {
+              setPokerGame(modifiedPokerGame);
+              setOpen(false);
+            }}
+          >
+            Commit Changes
+          </Button>
+          <Text ta="center" size="xs" c="dimmed" mt="xs">
+            Changes made here must be committed to take effect
+          </Text>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="winner" pt="xs">
+          <Flex direction="column" gap="md">
+            {modifiedPokerGame.pots.map((pot, index) => {
+              return <WinnersPot index={index} key={index} pot={pot} pokerPlayers={pokerPlayers} />;
+            })}
+          </Flex>
+          <Button
+            fullWidth
+            mt="xs"
+            color="green"
+            onClick={() => {
+              emitPokerAction("distribute");
+              setOpen(false);
+            }}
+            disabled={pokerGame.pots.some((pot) => pot?.winnerOverrides.length <= 0)}
+          >
+            Distribute and End
+          </Button>
+        </Tabs.Panel>
+      </Tabs>
     </Modal>
   );
 }
@@ -257,6 +299,91 @@ function Pot({
           </Button>
         </Tooltip>
       </Flex>
+    </Card>
+  );
+}
+
+function WinnersPot({
+  pot,
+  pokerPlayers,
+  index,
+}: {
+  pot: {
+    amount: number;
+    closed: boolean;
+    eligiblePlayers: string[];
+  };
+  pokerPlayers: any[];
+  index: number;
+}) {
+  const theme = useMantineTheme();
+  const [pokerGame, setPokerGame] = useRecoilState(POKER_GAME_STATE);
+
+  return (
+    <Card
+      p="sm"
+      withBorder
+      style={{
+        backgroundColor: theme.colors.dark[8],
+      }}
+    >
+      <Text fw="bold" size="lg">
+        {index == 0 ? "Main Pot" : `Side Pot #${index}`} ({formatMoney(pot.amount)})
+      </Text>
+      <Divider my={2} />
+      <InputWrapper label="Winners" description="Multiple checked winners will split the pot">
+        {pot.eligiblePlayers.map((id) => {
+          let player = pokerPlayers.find((p) => p.id === id) as PokerPlayer | undefined;
+          if (!player) return null;
+
+          return (
+            <Flex gap={3} align="center" mt="xs">
+              <Checkbox
+                size="md"
+                label={player.displayName}
+                checked={pokerGame.pots[index]?.winnerOverrides?.includes(id)}
+                onChange={(event) => {
+                  let checked = event.currentTarget.checked;
+                  setPokerGame({
+                    ...pokerGame,
+                    pots: pokerGame.pots.map((p, i) => {
+                      if (i !== index) return p;
+                      return {
+                        ...p,
+                        winnerOverrides: checked
+                          ? [...(p.winnerOverrides || []), id]
+                          : (p.winnerOverrides || []).filter((w) => w !== id),
+                      };
+                    }),
+                  });
+                }}
+                style={{
+                  userSelect: "none",
+                }}
+              />
+            </Flex>
+          );
+        })}
+      </InputWrapper>
+      <Text size="sm" c="dimmed" mt="xs">
+        Splitting{" "}
+        <span
+          style={{
+            fontWeight: "bold",
+          }}
+        >
+          {pokerGame.pots[index]?.winnerOverrides?.length || 0}
+        </span>{" "}
+        way
+        {pokerGame.pots[index]?.winnerOverrides?.length == 1 ? "" : "s"}:{" "}
+        <span
+          style={{
+            fontWeight: "bold",
+          }}
+        >
+          {formatMoney(pot.amount / (pokerGame.pots[index]?.winnerOverrides?.length || 1))}
+        </span>
+      </Text>
     </Card>
   );
 }
