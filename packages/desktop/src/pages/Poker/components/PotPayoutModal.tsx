@@ -1,19 +1,14 @@
-import PlayerSelector from "@/components/PlayerSelector";
 import { POKER_GAME_STATE, POKER_PLAYERS_STATE } from "@/Root";
 import { PokerPlayer } from "@/types/Poker";
 import { formatMoney } from "@/utils/MoneyHelper";
-import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import {
   ActionIcon,
   Button,
   ButtonGroup,
   Card,
   Checkbox,
-  Container,
-  darken,
   Divider,
   Flex,
-  Group,
   Input,
   InputWrapper,
   Modal,
@@ -26,7 +21,7 @@ import {
 } from "@mantine/core";
 import { IconCurrencyDollar, IconLock, IconLockOpen, IconSearch, IconX } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { atom, useRecoilState } from "recoil";
+import { atom, useRecoilState, useRecoilValue } from "recoil";
 import { emitPokerAction } from "../routes/Round";
 
 export const POT_EDITOR_OPEN = atom<boolean>({
@@ -37,7 +32,7 @@ export const POT_EDITOR_OPEN = atom<boolean>({
 export default function PotEditorModal() {
   const [pokerGame, setPokerGame] = useRecoilState(POKER_GAME_STATE);
   const [modifiedPokerGame, setModifiedPokerGame] = useState(pokerGame);
-  const [pokerPlayers, setPokerPlayers] = useRecoilImmerState(POKER_PLAYERS_STATE);
+  const pokerPlayers = useRecoilValue(POKER_PLAYERS_STATE);
   const [open, setOpen] = useRecoilState(POT_EDITOR_OPEN);
 
   useEffect(() => {
