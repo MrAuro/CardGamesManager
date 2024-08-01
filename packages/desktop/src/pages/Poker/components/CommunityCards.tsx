@@ -181,6 +181,16 @@ export default function CommunityCards({
           Distribute Pots
         </Button>
         <Button
+          color="blue"
+          fullWidth
+          onClick={() => {
+            setOpen(true);
+          }}
+          variant={pokerGame.capturingCommunityCards ? "filled" : "light"}
+        >
+          Open Editor
+        </Button>
+        <Button
           color="red"
           fullWidth
           variant={pokerGame.capturingCommunityCards ? "filled" : "light"}
