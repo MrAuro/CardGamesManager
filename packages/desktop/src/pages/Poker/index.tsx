@@ -3,6 +3,7 @@ import { useRecoilState } from "recoil";
 import PreRound from "./routes/PreRound";
 import Round from "./routes/Round";
 import PayoutModal from "./components/PayoutModal";
+import PotEditorModal from "./components/PotPayoutModal";
 
 export default function Poker() {
   const [gameState] = useRecoilState(POKER_GAME_STATE);
@@ -17,6 +18,7 @@ export default function Poker() {
   return (
     <>
       <PayoutModal />
+      <PotEditorModal />
       {component}
     </>
   );

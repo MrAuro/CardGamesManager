@@ -3,11 +3,12 @@ import PlayingCard from "@/components/PlayingCard";
 import { CARD_SELECTOR_STATE } from "@/pages/Blackjack/routes/Round";
 import { isAnyEmpty } from "@/utils/CardHelper";
 import { formatMoney } from "@/utils/MoneyHelper";
-import { Button, Card, Divider, Flex, Text, Title, useMantineTheme } from "@mantine/core";
+import { Button, Card, Divider, Flex, Text, Title, Tooltip, useMantineTheme } from "@mantine/core";
 import { useScrollIntoView } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { useEffect } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
+import { POT_EDITOR_OPEN } from "./PotPayoutModal";
 
 export default function CommunityCards({
   cardsAllowed,
@@ -23,6 +24,7 @@ export default function CommunityCards({
   const pokerSettings = useRecoilValue(POKER_SETTINGS_STATE);
   const pokerPlayers = useRecoilValue(POKER_PLAYERS_STATE);
   const [cardSelector, setCardSelector] = useRecoilState(CARD_SELECTOR_STATE);
+  const [, setOpen] = useRecoilState(POT_EDITOR_OPEN);
 
   const { scrollIntoView, targetRef } = useScrollIntoView<HTMLDivElement>({
     offset: 100,
@@ -91,14 +93,29 @@ export default function CommunityCards({
           pokerGame.gameState.toLowerCase().slice(1)}
         )
       </Title>
-      {pokerGame.pots.map((pot, index) => {
-        return (
-          <Text size="sm" fw={500} ta="center" key={index}>
-            {pokerGame.pots.length > 0 ? (index == 0 ? "Main Pot" : `Sidepot #${index}`) : "Pot"}:{" "}
-            {formatMoney(pot.amount)}
-          </Text>
-        );
-      })}
+      <Tooltip label="Click to modify pots">
+        <div
+          style={{
+            cursor: "pointer",
+          }}
+          onClick={() => {
+            setOpen(true);
+          }}
+        >
+          {pokerGame.pots.map((pot, index) => {
+            return (
+              <Text size="sm" fw={500} ta="center" key={index}>
+                {pokerGame.pots.length > 0
+                  ? index == 0
+                    ? "Main Pot"
+                    : `Sidepot #${index}`
+                  : "Pot"}
+                : {formatMoney(pot.amount)}
+              </Text>
+            );
+          })}
+        </div>
+      </Tooltip>
       <Text c="dimmed" size="sm" ta="center" fw={500}>
         {formatMoney(totalAmountToBePutInPot)} pending
       </Text>
