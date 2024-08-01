@@ -1,16 +1,12 @@
 import {
-  Button,
   Center,
   Code,
   Container,
-  darken,
   Divider,
-  Flex,
   Image,
   Loader,
   LoadingOverlay,
   Paper,
-  ScrollArea,
   Text,
   useMantineTheme,
 } from "@mantine/core";
@@ -18,21 +14,20 @@ import { useEffect, useRef, useState } from "react";
 
 import Webcam from "react-webcam";
 
+import { HOTKEY_SELECTOR_A_ENABLED, HOTKEY_SELECTOR_B_ENABLED } from "@/App";
 import { emitBjAction } from "@/pages/Blackjack/routes/Round";
 import { emitPokerAction } from "@/pages/Poker/routes/Round";
 import { BLACKJACK_GAME_STATE, KEYBINDINGS_STATE, POKER_GAME_STATE, SETTINGS_STATE } from "@/Root";
 import { Card, CardRank_NOEMPTY, CardSuit_NOEMPTY } from "@/types/Card";
+import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { useElementSize } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
-import { IconCamera } from "@tabler/icons-react";
+import { notifications } from "@mantine/notifications";
 import { createEvent } from "react-event-hook";
+import { useHotkeys } from "react-hotkeys-hook";
 import { useRecoilValue } from "recoil";
 import PlayingCard from "./PlayingCard";
-import { useRecoilImmerState } from "@/utils/RecoilImmer";
-import { HOTKEY_SELECTOR_A_ENABLED, HOTKEY_SELECTOR_B_ENABLED } from "@/App";
-import { useHotkeys } from "react-hotkeys-hook";
-import { notifications } from "@mantine/notifications";
 
 export const { useCameraResetListener, emitCameraReset } = createEvent("cameraReset")();
 
