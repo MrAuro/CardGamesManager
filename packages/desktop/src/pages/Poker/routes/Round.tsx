@@ -883,6 +883,57 @@ export default function Round() {
     setPokerPlayers(tempPokerPlayers);
   };
 
+  const refundAndCancel = () => {
+    modals.openConfirmModal({
+      title: "Refund and Cancel",
+      children: (
+        <Text>
+          Are you sure you want to refund all players and cancel the game? This will return all
+          players to their original balance and cancel the game.
+        </Text>
+      ),
+      labels: { confirm: "Refund", cancel: "Cancel" },
+      confirmProps: { color: "red" },
+      onCancel: () => {},
+      onConfirm: () => {
+        setPlayers((draft) => {
+          for (const player of draft) {
+            if (pokerGame?.initialBalances === undefined) {
+              console.error(`No initial balances`);
+              break;
+            }
+
+            if (!pokerGame.initialBalances[player.id]) {
+              console.error(`No initial balance for player ${player.id}`);
+            } else {
+              player.balance = pokerGame.initialBalances[player.id];
+            }
+          }
+        });
+
+        setPokerGame({
+          ...pokerGame,
+          communityCards: [EMPTY_CARD, EMPTY_CARD, EMPTY_CARD, EMPTY_CARD, EMPTY_CARD],
+          currentBet: 0,
+          gameState: "PREROUND",
+          currentTurn: "",
+          capturingCommunityCards: false,
+          runningThroughShowdown: false,
+          runningItTwice: false,
+          pots: [],
+          ...getDealerData(
+            pokerPlayers[
+              (pokerPlayers.findIndex((player) => player.id == pokerGame.currentDealer) + 1) %
+                pokerPlayers.length
+            ].id,
+            pokerSettings,
+            pokerPlayers
+          ),
+        });
+      },
+    });
+  };
+
   const distributePot = () => {
     if (pokerGame.gameState !== "SHOWDOWN") {
       console.error(`Game state is not SHOWDOWN`);
@@ -1516,7 +1567,11 @@ export default function Round() {
       />
 
       <Flex direction="column" gap="xs">
-        <CommunityCards cardsAllowed={cardsAllowed} distributePot={distributePot} />
+        <CommunityCards
+          cardsAllowed={cardsAllowed}
+          distributePot={distributePot}
+          refundAndCancel={refundAndCancel}
+        />
         {pokerPlayers.map((pokerPlayer) => {
           return (
             <div

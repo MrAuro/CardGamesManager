@@ -157,6 +157,11 @@ export default function PreRound() {
       return;
     }
 
+    const initialBalances: Record<string, number> = {};
+    players.forEach((player) => {
+      initialBalances[player.id] = player.balance;
+    });
+
     let amountInPot = 0;
     let paymentsToTake: { [key: string]: number } = {};
     for (const player of pokerPlayers) {
@@ -243,6 +248,7 @@ export default function PreRound() {
         },
       ],
       currentBets,
+      initialBalances,
     });
   };
 

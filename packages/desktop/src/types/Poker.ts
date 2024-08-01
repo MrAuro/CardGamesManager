@@ -20,6 +20,7 @@ export type PokerGame = {
       dontAddToPot: boolean;
     };
   };
+  initialBalances: Record<string, number>; // Player ID to initial balance
 };
 
 export type PlayerResult = {
