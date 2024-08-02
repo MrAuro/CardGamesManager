@@ -1,5 +1,6 @@
 import { CHIPS_STATE, KEYBINDINGS_STATE, SETTINGS_STATE } from "@/Root";
 import { Scope, Scopes, getActions } from "@/types/Keybindings";
+import { VISUAL_FOCUS_TARGETS, VisualFocusTarget } from "@/types/Settings";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import {
   ActionIcon,
@@ -578,6 +579,36 @@ export default function GeneralSettings() {
           placeholder={settings.ttsVoice !== "" ? settings.ttsVoice : "Select a voice"}
           onChange={(value) => {
             setSettings({ ...settings, ttsVoice: value as string });
+          }}
+        />
+      </Input.Wrapper>
+
+      <Input.Wrapper
+        mb="sm"
+        label="Selector Visual Focus"
+        mt="sm"
+        description="When a hotkey selector is enabled, should other elements be dimmed? This has no effect on hotkey scoping and is purely visual."
+      >
+        <Select
+          label="Selector A"
+          data={VISUAL_FOCUS_TARGETS}
+          defaultValue={settings.selectorAVisualFocus}
+          clearable={false}
+          allowDeselect={false}
+          placeholder={settings.selectorAVisualFocus}
+          onChange={(value) => {
+            setSettings({ ...settings, selectorAVisualFocus: value as VisualFocusTarget });
+          }}
+        />
+        <Select
+          label="Selector B"
+          data={VISUAL_FOCUS_TARGETS}
+          defaultValue={settings.selectorBVisualFocus}
+          clearable={false}
+          allowDeselect={false}
+          placeholder={settings.selectorBVisualFocus}
+          onChange={(value) => {
+            setSettings({ ...settings, selectorBVisualFocus: value as VisualFocusTarget });
           }}
         />
       </Input.Wrapper>
