@@ -12,6 +12,7 @@ import { FOCUSED_PLAYER } from "@/pages/Players";
 import { emitPokerAction } from "@/pages/Poker/routes/Round";
 import { CardRank, CardSuit } from "@/types/Card";
 import { Scope } from "@/types/Keybindings";
+import { suitToIcon } from "@/utils/CardHelper";
 import { formatMoney } from "@/utils/MoneyHelper";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import {
@@ -36,7 +37,6 @@ import { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { atom, useRecoilState, useRecoilValue } from "recoil";
 import { CHIP_BREAKDOWN_AMOUNT, CHIP_BREAKDOWN_OPEN } from "./ChipBreakdown";
-import { suitToIcon } from "@/utils/CardHelper";
 
 const CHIP_COUNT = atom<{ [key: UUID]: number }>({
   key: "CHIP_COUNT",
@@ -648,6 +648,61 @@ export default function TouchscreenMenu() {
                       <IconMinus strokeWidth={4} />
                     </ActionIcon>
                   </SimpleGrid>
+                </Flex>
+                <Flex direction="row" align="center" justify="center" gap={5}>
+                  <Button
+                    variant="subtle"
+                    color="white"
+                    size="compact-md"
+                    style={{
+                      fontFamily: MONOSPACE,
+                      opacity: 0.5,
+                    }}
+                    onClick={() => {
+                      setChipCount({
+                        ...chipCount,
+                        [chip.id]: chipCount[chip.id] + 5,
+                      });
+                    }}
+                  >
+                    +5
+                  </Button>
+                  <Button
+                    variant="subtle"
+                    color="white"
+                    size="compact-md"
+                    c="white"
+                    style={{
+                      fontFamily: MONOSPACE,
+                      opacity: 0.5,
+                    }}
+                    onClick={() => {
+                      setChipCount({
+                        ...chipCount,
+                        [chip.id]: chipCount[chip.id] + 20,
+                      });
+                    }}
+                  >
+                    +20
+                  </Button>
+                  <Button
+                    variant="subtle"
+                    color="white"
+                    size="compact-md"
+                    c="white"
+                    style={{
+                      fontFamily: MONOSPACE,
+                      opacity: 0.5,
+                    }}
+                    onClick={() => {
+                      setChipCount({
+                        ...chipCount,
+                        [chip.id]: 0,
+                      });
+                    }}
+                  >
+                    0
+                  </Button>
                 </Flex>
               </Paper>
             );
