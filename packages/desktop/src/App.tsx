@@ -446,8 +446,30 @@ export default function App() {
             </AppShell.Navbar>
           )}
           {settings.touchscreenMenu && (
-            <AppShell.Aside>
+            <AppShell.Aside
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                height: "100%",
+              }}
+            >
               <TouchscreenMenu />
+              <Flex justify="center" style={{ marginTop: "auto" }} m="xs" gap="sm">
+                <Button
+                  fullWidth
+                  variant="subtle"
+                  color="red"
+                  onClick={() => {
+                    setSettings({
+                      ...settings,
+                      touchscreenMenu: false,
+                    });
+                  }}
+                >
+                  Close
+                </Button>
+              </Flex>
             </AppShell.Aside>
           )}
         </AppShell>
