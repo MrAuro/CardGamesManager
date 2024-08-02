@@ -157,6 +157,53 @@ export default function TouchscreenMenu() {
             }
             break;
 
+          case "Bet/Raise/Set Balance":
+            {
+              let total = chips.reduce(
+                (acc, chip) => acc + chip.denomination * chipCount[chip.id],
+                0
+              );
+
+              if (total == 0) {
+                // Auto flatten
+                let tempChipCount: { [key: UUID]: number } = {};
+                hotkeyChipCount.forEach((c) => {
+                  tempChipCount[c.chipId] = 0;
+                });
+
+                hotkeyChipCount.forEach((c) => {
+                  tempChipCount[c.chipId] += Math.abs(c.amount);
+                });
+
+                setChipCount(tempChipCount);
+                setHotkeyChipCount([]);
+
+                total = chips.reduce(
+                  (acc, chip) => acc + chip.denomination * tempChipCount[chip.id],
+                  0
+                );
+              }
+
+              if (settings.activeTab == "Players") {
+                if (focusedPlayer) {
+                  setPlayers((draft) => {
+                    const player = draft.find((p) => p.id === focusedPlayer);
+                    if (player) {
+                      player.balance = total;
+                    }
+                  });
+                  setFocusedPlayer(null);
+                } else {
+                  alert(`Focus a player before setting their balance.`);
+                }
+              } else if (settings.activeTab == "Poker" && pokerGameState != "PREROUND") {
+                emitPokerAction(total);
+              } else if (settings.activeTab == "Blackjack" && blackjackGameState == "ROUND") {
+                emitBjAction(total);
+              }
+            }
+            break;
+
           case "0":
           case "1":
           case "2":
@@ -276,7 +323,7 @@ export default function TouchscreenMenu() {
           >
             {formatMoney(
               chips.reduce((acc, chip) => acc + chip.denomination * chipCount[chip.id], 0)
-            )}
+            )}{" "}
           </Text>
           <Flex direction="row-reverse" gap="xs">
             {chipHistory.map((_chips: { [key: UUID]: number }, index) => {
@@ -364,7 +411,6 @@ export default function TouchscreenMenu() {
                 0
               );
               setChipHistory([...chipHistory, chipCount]);
-              setChipCount(Object.fromEntries(chips.map((chip) => [chip.id, 0])));
 
               if (settings.activeTab == "Players") {
                 if (focusedPlayer) {
@@ -485,7 +531,7 @@ export default function TouchscreenMenu() {
                     setHotkeyChipCount([]);
                   }}
                 >
-                  Set
+                  Flatten
                 </Button>
               </Grid.Col>
             </Grid>

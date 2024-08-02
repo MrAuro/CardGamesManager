@@ -64,6 +64,7 @@ export type ChipsMenuActions =
   | "Flatten"
   | "Clear"
   | "Remove Last Chip"
+  | "Bet/Raise/Set Balance"
   | "0"
   | "1"
   | "2"
