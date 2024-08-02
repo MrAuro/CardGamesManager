@@ -376,7 +376,6 @@ export default function App() {
   let darkenMain = false;
 
   const DARKEN_FILTER = "opacity(25%) blur(1px) grayscale(100%)";
-  const INNER_SHADOW = `inset 0px 0px 0px 5px ${theme.colors.dark[0]}`;
 
   if (hotkeySelectorAEnabled) {
     darkenCameraMenu = true;
