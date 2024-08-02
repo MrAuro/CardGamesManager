@@ -23,6 +23,8 @@ export const DEFAULT_SETTINGS: Settings = {
   cameraFlipHorizontal: false,
   cameraMenu: false,
   cameraMenuWidth: 15,
+  selectorAVisualFocus: "NONE",
+  selectorBVisualFocus: "NONE",
 };
 
 export type Settings = {
@@ -47,7 +49,12 @@ export type Settings = {
   cameraFlipHorizontal: boolean;
   cameraMenu: boolean;
   cameraMenuWidth: number;
+  selectorAVisualFocus: VisualFocusTarget;
+  selectorBVisualFocus: VisualFocusTarget;
 };
+
+export type VisualFocusTarget = "CAMERA" | "TOUCHSCREEN" | "GAME" | "NONE";
+export const VISUAL_FOCUS_TARGETS: VisualFocusTarget[] = ["CAMERA", "TOUCHSCREEN", "GAME", "NONE"];
 
 export const DEFAULT_CHIP: Chip = {
   id: crypto.randomUUID(),

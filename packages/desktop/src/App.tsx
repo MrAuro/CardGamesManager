@@ -371,6 +371,61 @@ export default function App() {
     : 0;
   let navbarWidth: number | string = settings.cameraMenu ? `${settings?.cameraMenuWidth}%` : 0;
 
+  let darkenCameraMenu = false;
+  let darkenTouchscreenMenu = false;
+  let darkenMain = false;
+
+  const DARKEN_FILTER = "opacity(25%) blur(1px) grayscale(100%)";
+  const INNER_SHADOW = `inset 0px 0px 0px 5px ${theme.colors.dark[0]}`;
+
+  if (hotkeySelectorAEnabled) {
+    darkenCameraMenu = true;
+    darkenTouchscreenMenu = true;
+    darkenMain = true;
+
+    switch (settings.selectorAVisualFocus) {
+      case "CAMERA":
+        darkenCameraMenu = false;
+        break;
+      case "TOUCHSCREEN":
+        darkenTouchscreenMenu = false;
+        break;
+      case "GAME":
+        darkenMain = false;
+        break;
+
+      case "NONE":
+        darkenCameraMenu = false;
+        darkenTouchscreenMenu = false;
+        darkenMain = false;
+        break;
+    }
+  }
+
+  if (hotkeySelectorBEnabled) {
+    darkenCameraMenu = true;
+    darkenTouchscreenMenu = true;
+    darkenMain = true;
+
+    switch (settings.selectorBVisualFocus) {
+      case "CAMERA":
+        darkenCameraMenu = false;
+        break;
+      case "TOUCHSCREEN":
+        darkenTouchscreenMenu = false;
+        break;
+      case "GAME":
+        darkenMain = false;
+        break;
+
+      case "NONE":
+        darkenCameraMenu = false;
+        darkenTouchscreenMenu = false;
+        darkenMain = false;
+        break;
+    }
+  }
+
   if (firstTime) return null;
   else
     return (
@@ -392,7 +447,12 @@ export default function App() {
             breakpoint: 0,
           }}
         >
-          <AppShell.Main>
+          <AppShell.Main
+            style={{
+              filter: darkenMain ? DARKEN_FILTER : undefined,
+              transition: "filter 0.25s",
+            }}
+          >
             <Header
               active={settings.activeTab}
               setActive={(tab) => {
@@ -415,6 +475,9 @@ export default function App() {
                 flexDirection: "column",
                 justifyContent: "space-between",
                 height: "100%",
+
+                filter: darkenCameraMenu ? DARKEN_FILTER : undefined,
+                transition: "filter 0.25s",
               }}
             >
               <CameraMenu />
@@ -452,6 +515,8 @@ export default function App() {
                 flexDirection: "column",
                 justifyContent: "space-between",
                 height: "100%",
+                filter: darkenTouchscreenMenu ? DARKEN_FILTER : undefined,
+                transition: "filter 0.25s",
               }}
             >
               <TouchscreenMenu />
