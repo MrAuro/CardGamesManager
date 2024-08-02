@@ -284,13 +284,13 @@ export default function TouchscreenMenu() {
   }, [chipCount]);
 
   useEffect(() => {
-    if (chipHistory.length > 8) {
+    if (chipHistory.length > 4) {
       setChipHistory(chipHistory.slice(1));
     }
   }, [chipHistory]);
 
   useEffect(() => {
-    if (calculatorHistory.length > 8) {
+    if (calculatorHistory.length > 4) {
       setCalculatorHistory(calculatorHistory.slice(1));
     }
   }, [calculatorHistory]);
