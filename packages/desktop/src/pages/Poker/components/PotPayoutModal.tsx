@@ -1,4 +1,4 @@
-import { POKER_GAME_STATE, POKER_PLAYERS_STATE, POKER_SETTINGS_STATE } from "@/Root";
+import { PLAYERS_STATE, POKER_GAME_STATE, POKER_PLAYERS_STATE, POKER_SETTINGS_STATE } from "@/Root";
 import { GameState, PokerPlayer } from "@/types/Poker";
 import { formatMoney } from "@/utils/MoneyHelper";
 import {
@@ -16,20 +16,28 @@ import {
   Select,
   Tabs,
   Text,
+  TextInput,
   Tooltip,
   useMantineTheme,
 } from "@mantine/core";
 import {
+  IconArrowDown,
+  IconArrowUp,
   IconCurrencyDollar,
+  IconEdit,
   IconLock,
   IconLockOpen,
+  IconPencil,
   IconSearch,
+  IconTrash,
   IconTriangleSquareCircle,
   IconX,
 } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { atom, useRecoilState, useRecoilValue } from "recoil";
 import { emitPokerAction } from "../routes/Round";
+import { useRecoilImmerState } from "@/utils/RecoilImmer";
+import { UUID } from "crypto";
 
 export const POT_EDITOR_OPEN = atom<boolean>({
   key: "POT_EDITOR_OPEN",
@@ -39,9 +47,14 @@ export const POT_EDITOR_OPEN = atom<boolean>({
 export default function PotEditorModal() {
   const [pokerGame, setPokerGame] = useRecoilState(POKER_GAME_STATE);
   const [modifiedPokerGame, setModifiedPokerGame] = useState(pokerGame);
-  const pokerPlayers = useRecoilValue(POKER_PLAYERS_STATE);
+  const [pokerPlayers, setPokerPlayers] = useRecoilImmerState(POKER_PLAYERS_STATE);
   const pokerSettings = useRecoilValue(POKER_SETTINGS_STATE);
   const [open, setOpen] = useRecoilState(POT_EDITOR_OPEN);
+  const players = useRecoilValue(PLAYERS_STATE);
+
+  const theme = useMantineTheme();
+
+  const [selectedPlayer, setSelectedPlayer] = useState<UUID | null>();
 
   useEffect(() => {
     setModifiedPokerGame(pokerGame);
@@ -61,6 +74,7 @@ export default function PotEditorModal() {
           <Tabs.Tab value="pots">Pot Editor</Tabs.Tab>
           <Tabs.Tab value="winner">Winner Override</Tabs.Tab>
           <Tabs.Tab value="round">Round Editor</Tabs.Tab>
+          <Tabs.Tab value="player">Player Editor</Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="pots" pt="xs">
@@ -141,7 +155,7 @@ export default function PotEditorModal() {
         </Tabs.Panel>
 
         <Tabs.Panel value="round" pt="xs">
-          <Flex direction="column" gap="sm">
+          <Flex direction="column" gap="xs">
             <Select
               label="Game State"
               value={pokerGame.gameState}
@@ -177,6 +191,30 @@ export default function PotEditorModal() {
             />
 
             <Divider />
+
+            <Select
+              label="Current Turn"
+              description="You can click on a player to select them at any time"
+              value={pokerGame.currentTurn}
+              data={pokerPlayers.map((player) => ({
+                value: player.id,
+                label: player.displayName,
+              }))}
+              allowDeselect={false}
+              placeholder="Select Player"
+              leftSectionPointerEvents="none"
+              leftSection={<IconSearch size="1.25rem" />}
+              onChange={(value) => {
+                if (!value) return;
+                let player = pokerPlayers.find((p) => p.id === value);
+                if (!player) return console.error("Player not found");
+
+                setPokerGame({
+                  ...pokerGame,
+                  currentTurn: player.id,
+                });
+              }}
+            />
 
             <Select
               label="Current Dealer"
@@ -253,6 +291,233 @@ export default function PotEditorModal() {
             )}
           </Flex>
         </Tabs.Panel>
+
+        <Tabs.Panel value="player" pt="xs">
+          <Flex direction="column" gap="sm">
+            <Select
+              label="Selected Player"
+              value={selectedPlayer}
+              data={pokerPlayers.map((player) => ({
+                value: player.id,
+                label: player.displayName,
+              }))}
+              allowDeselect={false}
+              placeholder="Select Player"
+              leftSectionPointerEvents="none"
+              leftSection={<IconSearch size="1.25rem" />}
+              onChange={(value) => {
+                setSelectedPlayer(value as UUID | null);
+              }}
+            />
+            {selectedPlayer ? (
+              <>
+                <Card
+                  p="sm"
+                  withBorder
+                  style={{
+                    backgroundColor: theme.colors.dark[8],
+                  }}
+                >
+                  <Flex direction="column" gap="sm">
+                    <Text size="xs" c="dimmed">
+                      Player ID: {selectedPlayer}
+                    </Text>
+                    <TextInput
+                      label="Display Name"
+                      placeholder="Player Name"
+                      description="This name only affects the active Poker game"
+                      leftSection={<IconPencil size="1.25rem" />}
+                      value={pokerPlayers.find((p) => p.id === selectedPlayer)?.displayName}
+                      onChange={(event) => {
+                        setPokerPlayers((players) => {
+                          let player = players.find((p) => p.id === selectedPlayer);
+                          if (!player) return players;
+
+                          player.displayName = event.currentTarget.value;
+                        });
+                      }}
+                    />
+                    <Input.Wrapper
+                      label="Player Flags"
+                      description="These flags pot calculations so you will need to manually adjust them"
+                    >
+                      <Checkbox
+                        ml="md"
+                        mt={5}
+                        size="md"
+                        label="Folded"
+                        style={{
+                          userSelect: "none",
+                          cursor: "pointer",
+                        }}
+                        checked={pokerPlayers.find((p) => p.id === selectedPlayer)?.folded}
+                        onChange={(event) => {
+                          setPokerPlayers((players) => {
+                            let player = players.find((p) => p.id === selectedPlayer);
+                            if (!player) return players;
+
+                            player.folded = event.currentTarget.checked;
+                          });
+                        }}
+                      />
+                      <Checkbox
+                        ml="md"
+                        mt={5}
+                        size="md"
+                        label="All In"
+                        style={{
+                          userSelect: "none",
+                          cursor: "pointer",
+                        }}
+                        checked={pokerPlayers.find((p) => p.id === selectedPlayer)?.allIn}
+                        onChange={(event) => {
+                          setPokerPlayers((players) => {
+                            let player = players.find((p) => p.id === selectedPlayer);
+                            if (!player) return players;
+
+                            player.allIn = event.currentTarget.checked;
+                          });
+                        }}
+                      />
+                      <Checkbox
+                        ml="md"
+                        mt={5}
+                        size="md"
+                        label="Been On"
+                        style={{
+                          userSelect: "none",
+                          cursor: "pointer",
+                        }}
+                        checked={pokerPlayers.find((p) => p.id === selectedPlayer)?.beenOn}
+                        onChange={(event) => {
+                          setPokerPlayers((players) => {
+                            let player = players.find((p) => p.id === selectedPlayer);
+                            if (!player) return players;
+
+                            player.beenOn = event.currentTarget.checked;
+                          });
+                        }}
+                      />
+                    </Input.Wrapper>
+                    <NumberInput
+                      label="Current Bet"
+                      value={pokerPlayers.find((p) => p.id === selectedPlayer)?.currentBet}
+                      allowNegative={false}
+                      thousandSeparator=","
+                      leftSection={<IconCurrencyDollar />}
+                      placeholder="0"
+                      decimalScale={2}
+                      fixedDecimalScale
+                      max={players.find((p) => p.id === selectedPlayer)?.balance}
+                      onChange={(value) => {
+                        setPokerPlayers((players) => {
+                          let player = players.find((p) => p.id === selectedPlayer);
+                          if (!player) return players;
+
+                          player.currentBet = parseFloat(`${value}`);
+                        });
+                      }}
+                    />
+                    <Input.Wrapper label="Player Actions">
+                      <Flex direction="row" gap="xs" mt={5}>
+                        <Button
+                          leftSection={<IconArrowUp />}
+                          fullWidth
+                          color="blue"
+                          variant="light"
+                          disabled={pokerPlayers.findIndex((p) => p.id === selectedPlayer) === 0}
+                          onClick={() => {
+                            setPokerPlayers((players) => {
+                              let player = players.find((p) => p.id === selectedPlayer);
+                              if (!player) return players;
+
+                              let index = players.findIndex((p) => p.id === selectedPlayer);
+                              if (index === 0) return players;
+
+                              players[index] = players[index - 1];
+                              players[index - 1] = player;
+                            });
+                          }}
+                        >
+                          Move Up
+                        </Button>
+                        <Button
+                          leftSection={<IconArrowDown />}
+                          fullWidth
+                          color="blue"
+                          variant="light"
+                          disabled={
+                            pokerPlayers.findIndex((p) => p.id === selectedPlayer) ===
+                            pokerPlayers.length - 1
+                          }
+                          onClick={() => {
+                            setPokerPlayers((players) => {
+                              let player = players.find((p) => p.id === selectedPlayer);
+                              if (!player) return players;
+
+                              let index = players.findIndex((p) => p.id === selectedPlayer);
+                              if (index === players.length - 1) return players;
+
+                              players[index] = players[index + 1];
+                              players[index + 1] = player;
+                            });
+                          }}
+                        >
+                          Move Down
+                        </Button>
+                        <Button
+                          leftSection={<IconTrash />}
+                          fullWidth
+                          color="red"
+                          variant="light"
+                          onClick={() => {
+                            setPokerPlayers((players) => {
+                              let player = players.find((p) => p.id === selectedPlayer);
+                              if (!player) return players;
+
+                              return players.filter((p) => p.id !== selectedPlayer);
+                            });
+
+                            setPokerGame((game) => {
+                              return {
+                                ...game,
+                                currentDealer:
+                                  game.currentDealer === selectedPlayer
+                                    ? pokerPlayers[0].id
+                                    : game.currentDealer,
+                                pots: game.pots.map((pot) => {
+                                  return {
+                                    ...pot,
+                                    eligiblePlayers: pot.eligiblePlayers.filter(
+                                      (p) => p !== selectedPlayer
+                                    ),
+                                    winnerOverrides: (pot.winnerOverrides || []).filter(
+                                      (w) => w !== selectedPlayer
+                                    ),
+                                  };
+                                }),
+                              };
+                            });
+
+                            setSelectedPlayer(null);
+                          }}
+                        >
+                          Remove
+                        </Button>
+                      </Flex>
+                    </Input.Wrapper>
+                  </Flex>
+                </Card>
+              </>
+            ) : (
+              <>
+                <Text size="sm" c="dimmed" ta="center">
+                  Select a player to edit
+                </Text>
+              </>
+            )}
+          </Flex>
+        </Tabs.Panel>
       </Tabs>
     </Modal>
   );
@@ -293,6 +558,7 @@ function Pot({
       style={{
         backgroundColor: theme.colors.dark[8],
       }}
+      key={index}
     >
       <Text fw="bold" size="lg">
         {index == 0 ? "Main Pot" : `Side Pot #${index}`}
@@ -348,7 +614,7 @@ function Pot({
           if (!player) return null;
 
           return (
-            <Flex gap={3} align="center" mt={i == 0 ? undefined : "xs"}>
+            <Flex gap={3} align="center" mt={i == 0 ? undefined : "xs"} key={id}>
               <ActionIcon
                 size="sm"
                 variant="transparent"
@@ -444,6 +710,7 @@ function WinnersPot({
       style={{
         backgroundColor: theme.colors.dark[8],
       }}
+      key={index}
     >
       <Text fw="bold" size="lg">
         {index == 0 ? "Main Pot" : `Side Pot #${index}`} ({formatMoney(pot.amount)})
@@ -455,7 +722,7 @@ function WinnersPot({
           if (!player) return null;
 
           return (
-            <Flex gap={3} align="center" mt="xs">
+            <Flex gap={3} align="center" mt="xs" key={id}>
               <Checkbox
                 size="md"
                 label={player.displayName}
@@ -477,6 +744,7 @@ function WinnersPot({
                 }}
                 style={{
                   userSelect: "none",
+                  cursor: "pointer",
                 }}
               />
             </Flex>
