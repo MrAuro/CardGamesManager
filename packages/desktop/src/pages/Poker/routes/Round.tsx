@@ -123,6 +123,16 @@ export default function Round() {
   const betInputRef = useRef<HTMLInputElement>(null);
   // !
 
+  useEffect(() => {
+    if (pokerPlayers.length == 0) {
+      setPokerGame({
+        ...pokerGame,
+        gameState: "PREROUND",
+      });
+      alert("No players in the game, returning to pre-round");
+    }
+  }, [pokerPlayers.length]);
+
   usePokerActionListener((msg) => {
     if (msg == "check") {
       checkAction();
