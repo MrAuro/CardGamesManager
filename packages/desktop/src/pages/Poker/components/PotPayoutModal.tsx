@@ -1,5 +1,5 @@
-import { POKER_GAME_STATE, POKER_PLAYERS_STATE } from "@/Root";
-import { PokerPlayer } from "@/types/Poker";
+import { POKER_GAME_STATE, POKER_PLAYERS_STATE, POKER_SETTINGS_STATE } from "@/Root";
+import { GameState, PokerPlayer } from "@/types/Poker";
 import { formatMoney } from "@/utils/MoneyHelper";
 import {
   ActionIcon,
@@ -19,7 +19,14 @@ import {
   Tooltip,
   useMantineTheme,
 } from "@mantine/core";
-import { IconCurrencyDollar, IconLock, IconLockOpen, IconSearch, IconX } from "@tabler/icons-react";
+import {
+  IconCurrencyDollar,
+  IconLock,
+  IconLockOpen,
+  IconSearch,
+  IconTriangleSquareCircle,
+  IconX,
+} from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { atom, useRecoilState, useRecoilValue } from "recoil";
 import { emitPokerAction } from "../routes/Round";
@@ -33,6 +40,7 @@ export default function PotEditorModal() {
   const [pokerGame, setPokerGame] = useRecoilState(POKER_GAME_STATE);
   const [modifiedPokerGame, setModifiedPokerGame] = useState(pokerGame);
   const pokerPlayers = useRecoilValue(POKER_PLAYERS_STATE);
+  const pokerSettings = useRecoilValue(POKER_SETTINGS_STATE);
   const [open, setOpen] = useRecoilState(POT_EDITOR_OPEN);
 
   useEffect(() => {
@@ -46,12 +54,13 @@ export default function PotEditorModal() {
         setOpen(false);
       }}
       title="Editor"
-      size="md"
+      size="lg"
     >
       <Tabs defaultValue="pots">
         <Tabs.List>
           <Tabs.Tab value="pots">Pot Editor</Tabs.Tab>
           <Tabs.Tab value="winner">Winner Override</Tabs.Tab>
+          <Tabs.Tab value="round">Round Editor</Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="pots" pt="xs">
@@ -129,6 +138,120 @@ export default function PotEditorModal() {
           >
             Distribute and End
           </Button>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="round" pt="xs">
+          <Flex direction="column" gap="sm">
+            <Select
+              label="Game State"
+              value={pokerGame.gameState}
+              data={["PREFLOP", "FLOP", "TURN", "RIVER", "SHOWDOWN"]}
+              allowDeselect={false}
+              placeholder="Add Player"
+              leftSectionPointerEvents="none"
+              leftSection={<IconTriangleSquareCircle size="1.25rem" />}
+              onChange={(value) => {
+                if (!value) return;
+                if (["PREFLOP", "FLOP", "TURN", "RIVER", "SHOWDOWN"].includes(value))
+                  setPokerGame({
+                    ...pokerGame,
+                    gameState: value as GameState,
+                  });
+              }}
+            />
+            <NumberInput
+              label="Current Bet"
+              value={pokerGame.currentBet}
+              allowNegative={false}
+              thousandSeparator=","
+              leftSection={<IconCurrencyDollar />}
+              placeholder="0"
+              decimalScale={2}
+              fixedDecimalScale
+              onChange={(value) => {
+                setPokerGame({
+                  ...pokerGame,
+                  currentBet: parseFloat(`${value}`),
+                });
+              }}
+            />
+
+            <Divider />
+
+            <Select
+              label="Current Dealer"
+              description="Modifying the dealer may adversely affect the game"
+              value={pokerGame.currentDealer}
+              data={pokerPlayers.map((player) => ({
+                value: player.id,
+                label: player.displayName,
+              }))}
+              allowDeselect={false}
+              placeholder="Select Dealer"
+              leftSectionPointerEvents="none"
+              leftSection={<IconSearch size="1.25rem" />}
+              onChange={(value) => {
+                if (!value) return;
+                let player = pokerPlayers.find((p) => p.id === value);
+                if (!player) return console.error("Player not found");
+
+                setPokerGame({
+                  ...pokerGame,
+                  currentDealer: player.id,
+                });
+              }}
+            />
+
+            {pokerSettings.forcedBetOption !== "ANTE" && (
+              <>
+                <Select
+                  label="Small Blind"
+                  value={pokerGame.currentSmallBlind}
+                  data={pokerPlayers.map((player) => ({
+                    value: player.id,
+                    label: player.displayName,
+                  }))}
+                  allowDeselect={false}
+                  placeholder="Select Small Blind"
+                  leftSectionPointerEvents="none"
+                  leftSection={<IconSearch size="1.25rem" />}
+                  onChange={(value) => {
+                    if (!value) return;
+                    let player = pokerPlayers.find((p) => p.id === value);
+                    if (!player) return console.error("Player not found");
+
+                    setPokerGame({
+                      ...pokerGame,
+                      currentSmallBlind: player.id,
+                    });
+                  }}
+                />
+
+                <Select
+                  label="Big Blind"
+                  value={pokerGame.currentBigBlind}
+                  data={pokerPlayers.map((player) => ({
+                    value: player.id,
+                    label: player.displayName,
+                  }))}
+                  allowDeselect={false}
+                  placeholder="Select Big Blind"
+                  leftSectionPointerEvents="none"
+                  leftSection={<IconSearch size="1.25rem" />}
+                  onChange={(value) => {
+                    if (!value) return;
+                    let player = pokerPlayers.find((p) => p.id === value);
+                    if (!player) return console.error("Player not found");
+
+                    setPokerGame({
+                      ...pokerGame,
+                      currentBigBlind: player.id,
+                    });
+                  }}
+                />
+              </>
+            )}
+          </Flex>
         </Tabs.Panel>
       </Tabs>
     </Modal>
