@@ -33,7 +33,7 @@ import {
 import { useRef } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { PAYOUT_MODAL_OPEN } from "./Round";
+import { PAYOUT_MODAL_OPEN, PLAYER_HAND_RESULTS } from "./Round";
 
 function getStyle(style: any, snapshot: DraggableStateSnapshot) {
   if (!snapshot.isDropAnimating) {
@@ -84,6 +84,7 @@ export default function PreRound() {
   const [players, setPlayers] = useRecoilImmerState(PLAYERS_STATE);
   const [keybindings] = useRecoilImmerState(KEYBINDINGS_STATE);
   const [, setPayoutModalOpen] = useRecoilState(PAYOUT_MODAL_OPEN);
+  const [, setPlayerHandResults] = useRecoilState(PLAYER_HAND_RESULTS);
 
   const playerSelectorRef = useRef<PlayerSelectorHandles>(null);
 
@@ -229,6 +230,8 @@ export default function PreRound() {
         dontAddToPot: paymentsToTake[playerId] == 0 ? false : true,
       };
     }
+
+    setPlayerHandResults([]);
 
     setPokerGame({
       ...pokerGame,
