@@ -13,6 +13,7 @@ export const DEFAULT_SETTINGS: Settings = {
   touchscreenMenuWidth: 30,
   touchscreenMenuChipsColumns: 3,
   touchscreenMenuCalculator: true,
+  autoClearChipTotal: true,
   tts: false,
   ttsVoice: "Microsoft David Desktop - English (United States)",
   ttsRate: 1,
@@ -39,6 +40,7 @@ export type Settings = {
   touchscreenMenuWidth: number;
   touchscreenMenuChipsColumns: number;
   touchscreenMenuCalculator: boolean;
+  autoClearChipTotal: boolean;
   tts: boolean;
   ttsVoice: string;
   ttsRate: number;

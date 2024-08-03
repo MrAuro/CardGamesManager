@@ -39,6 +39,7 @@ import {
   IconPencil,
   IconPlus,
   IconTrash,
+  IconTrashOff,
 } from "@tabler/icons-react";
 import { open } from "@tauri-apps/api/dialog";
 import { BaseDirectory, readTextFile, writeTextFile } from "@tauri-apps/api/fs";
@@ -172,6 +173,32 @@ export default function GeneralSettings() {
         </ButtonGroup>
       </Input.Wrapper>
       <Input.Wrapper
+        label="Auto Clear Touchscreen Chip Total"
+        description={`When the Bet/Raise/Set Balance keybinding is used, should the chip total be cleared?`}
+        mt="sm"
+      >
+        <ButtonGroup mt={5}>
+          <Button
+            variant={settings.autoClearChipTotal ? "filled" : "default"}
+            leftSection={<IconTrash />}
+            onClick={() => {
+              setSettings({ ...settings, autoClearChipTotal: true });
+            }}
+          >
+            Clear
+          </Button>
+          <Button
+            variant={!settings.autoClearChipTotal ? "filled" : "default"}
+            leftSection={<IconTrashOff />}
+            onClick={() => {
+              setSettings({ ...settings, autoClearChipTotal: false });
+            }}
+          >
+            Keep
+          </Button>
+        </ButtonGroup>
+      </Input.Wrapper>
+      <Input.Wrapper
         mb="xl"
         label="Touchscreen Menu Width"
         description="Certain UI elements may look weird at low and high percents"
@@ -214,6 +241,7 @@ export default function GeneralSettings() {
           }}
         />
       </Input.Wrapper>
+
       <Input.Wrapper
         mb="xl"
         label="Touchscreen Menu Chips Columns"
@@ -273,6 +301,7 @@ export default function GeneralSettings() {
           }}
         />
       </Input.Wrapper>
+
       <Input.Wrapper
         label="Four Color Deck"
         description="Diamonds are blue and Clubs are green"
