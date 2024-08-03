@@ -158,8 +158,11 @@ export default function TouchscreenMenu() {
                 setChipCount(Object.fromEntries(chips.map((chip) => [chip.id, 0])));
               }
 
-              setHotkeySelectorAEnabled(false);
-              setHotkeySelectorBEnabled(false);
+              // We use a timeout to prevent the hotkey from being triggered twice
+              setTimeout(() => {
+                setHotkeySelectorAEnabled(false);
+                setHotkeySelectorBEnabled(false);
+              }, 100);
             }
             break;
 
