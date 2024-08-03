@@ -52,6 +52,9 @@ export default function DevTools() {
   const [autoUpdatePokerGame, setAutoUpdatePokerGame] = useState(false);
 
   const [settings, setSettings] = useRecoilState(SETTINGS_STATE);
+  const [tempSettings, setTempSettings] = useState<string>(JSON.stringify(settings, null, 2));
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [autoUpdateSettings, setAutoUpdateSettings] = useState(false);
 
   useEffect(() => {
     if (autoUpdatePlayers) {
@@ -82,6 +85,12 @@ export default function DevTools() {
       setTempPokerGame(JSON.stringify(pokerGame, null, 2));
     }
   }, [pokerGame, autoUpdatePokerGame]);
+
+  useEffect(() => {
+    if (autoUpdateSettings) {
+      setTempSettings(JSON.stringify(settings, null, 2));
+    }
+  }, [settings, autoUpdateSettings]);
 
   return (
     <Paper withBorder p="sm">
@@ -195,6 +204,14 @@ export default function DevTools() {
         color="grape"
       >
         {pokerGameOpen ? "Close" : "Open"} Poker Game
+      </Button>
+      <Button
+        onClick={() => {
+          setSettingsOpen(!settingsOpen);
+        }}
+        color="cyan"
+      >
+        {settingsOpen ? "Close" : "Open"} Settings
       </Button>
       {/* <Select
         value={localStorage.getItem("FONT_FAMILY")}
@@ -632,6 +649,86 @@ export default function DevTools() {
             checked={autoUpdatePokerGame}
             onChange={(event) => {
               setAutoUpdatePokerGame(event.currentTarget.checked);
+            }}
+          />
+        </Flex>
+      </Collapse>
+
+      <Collapse in={settingsOpen}>
+        <JsonInput
+          label={
+            JSON.stringify(settings, null, 2) === tempSettings ? "Settings" : "Settings (modified)"
+          }
+          radius="sm"
+          value={tempSettings}
+          onChange={(value) => {
+            setTempSettings(value);
+          }}
+          formatOnBlur
+          autosize
+          minRows={4}
+          maxRows={20}
+          validationError="Invalid JSON"
+          onKeyDown={getHotkeyHandler([
+            [
+              "mod+S",
+              () => {
+                let parsed = null;
+                try {
+                  parsed = JSON.parse(tempSettings);
+                } catch (e) {
+                  console.error(e);
+                  notifications.show({
+                    message: "Invalid JSON",
+                    color: "red",
+                  });
+                }
+
+                if (parsed) {
+                  setSettings(parsed);
+                }
+              },
+            ],
+          ])}
+        />
+        <Flex gap="xs" mt="xs" align="center">
+          <Button
+            variant="light"
+            fullWidth
+            onClick={() => {
+              let parsed = null;
+              try {
+                parsed = JSON.parse(tempSettings);
+              } catch (e) {
+                console.error(e);
+                notifications.show({
+                  message: "Invalid JSON",
+                  color: "red",
+                });
+              }
+
+              if (parsed) {
+                setSettings(parsed);
+              }
+            }}
+          >
+            Save
+          </Button>
+          <Button
+            variant="light"
+            fullWidth
+            color="red"
+            onClick={() => {
+              setTempSettings(JSON.stringify(settings, null, 2));
+            }}
+          >
+            Reset
+          </Button>
+          <Checkbox
+            radius="sm"
+            checked={autoUpdateSettings}
+            onChange={(event) => {
+              setAutoUpdateSettings(event.currentTarget.checked);
             }}
           />
         </Flex>
