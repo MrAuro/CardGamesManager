@@ -1129,21 +1129,10 @@ export default function Round() {
                 if (betUIOpen) return;
 
                 if (pokerGame.capturingCommunityCards) {
-                  let notAllCardsUsed =
-                    pokerGame.communityCards.filter((card) => !isAnyEmpty(card)).length <
-                    cardsAllowed;
-                  if (notAllCardsUsed) {
-                    notifications.show({
-                      message: "You must add all possible community cards",
-                      color: "red",
-                    });
-                    return;
-                  } else {
-                    setPokerGame({
-                      ...pokerGame,
-                      capturingCommunityCards: false,
-                    });
-                  }
+                  setPokerGame({
+                    ...pokerGame,
+                    capturingCommunityCards: false,
+                  });
                 } else {
                   if (betUIOpen) return;
 
