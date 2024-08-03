@@ -743,6 +743,11 @@ export default function Round() {
   };
 
   const betAction = (amount: number) => {
+    if (isNaN(amount)) {
+      console.error(`Bet Amount is NaN`, amount);
+      return;
+    }
+
     let tempPokerPlayers = cloneDeep(pokerPlayers);
     let tempPokerGame = cloneDeep(pokerGame);
     let tempPlayers = cloneDeep(players);
@@ -770,8 +775,16 @@ export default function Round() {
       pokerPlayer.allIn = true;
     }
 
+    let newAmount = amount + pokerPlayer.currentBet;
+    if (newAmount < tempPokerGame.currentBet) {
+      console.error(
+        `Player ${pokerPlayer.displayName} must bet at least ${tempPokerGame.currentBet}, not ${newAmount}`
+      );
+      return;
+    }
+
     let prevCurrentBet = pokerPlayer.currentBet;
-    pokerPlayer.currentBet = amount;
+    pokerPlayer.currentBet = newAmount;
     let currentBets = cloneDeep(tempPokerGame.currentBets);
     if (!currentBets[pokerPlayer.id]) {
       currentBets[pokerPlayer.id] = {
@@ -779,10 +792,10 @@ export default function Round() {
         dontAddToPot: false,
       };
     }
-    currentBets[pokerPlayer.id].amount = amount;
+    currentBets[pokerPlayer.id].amount = newAmount;
 
     tempPokerGame.currentBets = currentBets;
-    tempPokerGame.currentBet = Math.max(pokerGame.currentBet, amount);
+    tempPokerGame.currentBet = Math.max(pokerGame.currentBet, newAmount);
 
     tempPokerPlayers[currentPlayerIndex] = pokerPlayer;
 
