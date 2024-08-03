@@ -35,6 +35,7 @@ import { atom, useRecoilState, useRecoilValue } from "recoil";
 import CommunityCards from "../components/CommunityCards";
 import RoundPlayerCard from "../components/RoundPlayerCard";
 import { getDealerData } from "./PreRound";
+import { POT_EDITOR_OPEN } from "../components/PotPayoutModal";
 
 export const FOLD_CONFIRM = atom<boolean>({
   key: "FOLD_CONFIRM",
@@ -111,6 +112,7 @@ export default function Round() {
 
   const [, setLastPot] = useRecoilState(LAST_POT);
   const [, setPayoutModalOpen] = useRecoilState(PAYOUT_MODAL_OPEN);
+  const potEditorOpen = useRecoilValue(POT_EDITOR_OPEN);
 
   // !
   const [foldConfirm, setFoldConfirm] = useRecoilState(FOLD_CONFIRM);
@@ -1084,6 +1086,8 @@ export default function Round() {
         (e) => {
           if (keybinding.selector == "A" && !selectorA) return;
           if (keybinding.selector == "B" && !selectorB) return;
+
+          if (potEditorOpen) return;
 
           if (keybinding.selector == "None" && (selectorA || selectorB)) return;
 
