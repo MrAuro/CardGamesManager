@@ -1,6 +1,7 @@
 import { PLAYERS_STATE, POKER_GAME_STATE, POKER_PLAYERS_STATE, POKER_SETTINGS_STATE } from "@/Root";
 import { GameState, PokerPlayer } from "@/types/Poker";
 import { formatMoney } from "@/utils/MoneyHelper";
+import { useRecoilImmerState } from "@/utils/RecoilImmer";
 import {
   ActionIcon,
   Button,
@@ -24,7 +25,6 @@ import {
   IconArrowDown,
   IconArrowUp,
   IconCurrencyDollar,
-  IconEdit,
   IconLock,
   IconLockOpen,
   IconPencil,
@@ -33,11 +33,10 @@ import {
   IconTriangleSquareCircle,
   IconX,
 } from "@tabler/icons-react";
+import { UUID } from "crypto";
 import { useEffect, useState } from "react";
 import { atom, useRecoilState, useRecoilValue } from "recoil";
 import { emitPokerAction } from "../routes/Round";
-import { useRecoilImmerState } from "@/utils/RecoilImmer";
-import { UUID } from "crypto";
 
 export const POT_EDITOR_OPEN = atom<boolean>({
   key: "POT_EDITOR_OPEN",
