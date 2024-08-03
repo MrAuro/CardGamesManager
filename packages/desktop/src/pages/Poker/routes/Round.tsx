@@ -894,8 +894,13 @@ export default function Round() {
     tempPokerGame = tempData[0];
     tempPokerPlayers = tempData[1];
 
+    // This piece of code right here caused me so much pain - twice
+    // Once when I was debugging the beenOn variable, and later
+    // when the currentBet being sticky
+    // AAAAAAAAAAAAAAA I HATE STATE MANAGEMENT
     tempPokerPlayers[currentPlayerIndex] = {
       ...pokerPlayer,
+      currentBet: tempData[1][currentPlayerIndex].currentBet,
       beenOn: tempData[1][currentPlayerIndex].beenOn,
     };
 
