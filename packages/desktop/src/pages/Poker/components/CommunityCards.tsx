@@ -1,11 +1,9 @@
 import { POKER_GAME_STATE, POKER_PLAYERS_STATE, POKER_SETTINGS_STATE } from "@/Root";
 import PlayingCard from "@/components/PlayingCard";
 import { CARD_SELECTOR_STATE } from "@/pages/Blackjack/routes/Round";
-import { isAnyEmpty } from "@/utils/CardHelper";
 import { formatMoney } from "@/utils/MoneyHelper";
 import { Button, Card, Divider, Flex, Text, Title, Tooltip, useMantineTheme } from "@mantine/core";
 import { useScrollIntoView } from "@mantine/hooks";
-import { notifications } from "@mantine/notifications";
 import { useEffect } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { POT_EDITOR_OPEN } from "./PotPayoutModal";
@@ -147,16 +145,6 @@ export default function CommunityCards({
           fullWidth
           disabled={!pokerGame.capturingCommunityCards}
           onClick={() => {
-            if (
-              pokerGame.communityCards.filter((card) => !isAnyEmpty(card)).length < cardsAllowed
-            ) {
-              notifications.show({
-                message: "You must add all possible community cards",
-                color: "red",
-              });
-              return;
-            }
-
             setPokerGame({
               ...pokerGame,
               capturingCommunityCards: false,
