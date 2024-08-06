@@ -1,7 +1,7 @@
 import { KEYBINDINGS_STATE, SETTINGS_STATE } from "@/Root";
 import { Button, Flex } from "@mantine/core";
-import { open } from "@tauri-apps/api/dialog";
-import { BaseDirectory, copyFile, readTextFile, writeTextFile } from "@tauri-apps/api/fs";
+import { open } from "@tauri-apps/plugin-dialog";
+import { BaseDirectory, copyFile, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import { useRecoilState } from "recoil";
 
 export default function OtherSettings() {
