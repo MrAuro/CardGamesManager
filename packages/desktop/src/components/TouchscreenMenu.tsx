@@ -30,7 +30,7 @@ import {
   Text,
   useMantineTheme,
 } from "@mantine/core";
-import { IconBackspaceFilled, IconMinus, IconPlus, IconTrash, IconX } from "@tabler/icons-react";
+import { IconBackspaceFilled, IconMinus, IconPlus } from "@tabler/icons-react";
 import { UUID } from "crypto";
 import cloneDeep from "lodash/cloneDeep";
 import { useEffect, useState } from "react";

@@ -328,13 +328,15 @@ export default function GeneralSettings() {
 
       <Input.Wrapper
         label="Poker Chips"
-        description="Poker chips are only available when the Touchscreen menu is enabled. IMPORTANT: Refresh the page after changing chips to prevent issues."
+        description="Poker chips are only available when the Touchscreen menu is enabled"
         mt="sm"
       >
+        <Text size="xs" c="red" mt={2} mb={2}>
+          Refresh the page after changing chips to prevent issues
+        </Text>
         <Table
           withColumnBorders
           withTableBorder
-          mt="xs"
           style={{
             tableLayout: "fixed",
             width: "50%",
