@@ -9,7 +9,6 @@ import {
   Code,
   Collapse,
   ColorInput,
-  Flex,
   Grid,
   Input,
   NumberInput,
@@ -41,8 +40,6 @@ import {
   IconTrash,
   IconTrashOff,
 } from "@tabler/icons-react";
-import { open } from "@tauri-apps/api/dialog";
-import { BaseDirectory, readTextFile, writeTextFile } from "@tauri-apps/api/fs";
 import { useState } from "react";
 import { useRecordHotkeys } from "react-hotkeys-hook";
 import { useRecoilState } from "recoil";
@@ -642,82 +639,26 @@ export default function GeneralSettings() {
         />
       </Input.Wrapper>
 
-      <Flex gap="xs">
-        <Button
-          onClick={() => {
-            setSettings({ ...settings, debug: !settings.debug });
-          }}
-        >
-          {settings.debug ? "Close" : "Open"} DevTools
-        </Button>
-        <Button
-          onClick={() => {
-            // Hide the touchscreen and camera menu to prevent issues with keybinding hooks
-            if (opened) {
-              setSettings({
-                ...settings,
-                touchscreenMenu: wasTouchscreenMenuOn,
-                cameraMenu: wasCameraMenuOn,
-              });
-            } else {
-              setWasTouchscreenMenuOn(settings.touchscreenMenu);
-              setWasCameraMenuOn(settings.cameraMenu);
-              setSettings({ ...settings, touchscreenMenu: false, cameraMenu: false });
-            }
-
-            toggle();
-          }}
-        >
-          {opened ? "Hide" : "Show"} Keybindings Editor
-        </Button>
-        <Button
-          onClick={() => {
-            writeTextFile(
-              {
-                contents: JSON.stringify(keybindings),
-                path: "keybindings.json",
-              },
-              {
-                dir: BaseDirectory.Desktop,
-              }
-            );
-            alert("Keybindings exported to your Desktop");
-          }}
-        >
-          Export Keybindings to JSON
-        </Button>
-        <Button
-          onClick={async () => {
-            const file = await open({
-              directory: false,
-              multiple: false,
+      <Button
+        onClick={() => {
+          // Hide the touchscreen and camera menu to prevent issues with keybinding hooks
+          if (opened) {
+            setSettings({
+              ...settings,
+              touchscreenMenu: wasTouchscreenMenuOn,
+              cameraMenu: wasCameraMenuOn,
             });
+          } else {
+            setWasTouchscreenMenuOn(settings.touchscreenMenu);
+            setWasCameraMenuOn(settings.cameraMenu);
+            setSettings({ ...settings, touchscreenMenu: false, cameraMenu: false });
+          }
 
-            if (!file) {
-              return;
-            }
-
-            if (typeof file === "string") {
-              const contents = await readTextFile(file);
-
-              let parsed = null;
-              try {
-                parsed = JSON.parse(contents);
-              } catch (e) {
-                alert("Invalid file");
-                return;
-              }
-
-              setKeybindings(parsed);
-            } else {
-              alert("Invalid file");
-              return;
-            }
-          }}
-        >
-          Import Keybindings from JSON
-        </Button>
-      </Flex>
+          toggle();
+        }}
+      >
+        {opened ? "Hide" : "Show"} Keybindings Editor
+      </Button>
       <Collapse in={opened}>
         {(wasCameraMenuOn || wasTouchscreenMenuOn) && (
           <Text fw="bold" c="red" ta="center" size="xs" mt="xs">

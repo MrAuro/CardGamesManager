@@ -32,7 +32,7 @@
       },
       "fs": {
         "all": false,
-        "copyFile": false,
+        "copyFile": true,
         "createDir": false,
         "exists": false,
         "readDir": false,
@@ -40,7 +40,7 @@
         "removeDir": false,
         "removeFile": false,
         "renameFile": false,
-        "scope": ["$DESKTOP/keybindings.json"],
+        "scope": ["$DESKTOP/keybindings.json", "$APPCONFIG/*.data"],
         "writeFile": true
       },
       "app": {
@@ -52,7 +52,7 @@
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "dev.mrauro.dev",
+      "identifier": "dev.mrauro.cardgamesmanager",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
