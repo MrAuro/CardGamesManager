@@ -30,7 +30,7 @@ import {
   Text,
   useMantineTheme,
 } from "@mantine/core";
-import { IconBackspaceFilled, IconMinus, IconPlus } from "@tabler/icons-react";
+import { IconBackspaceFilled, IconMinus, IconPlus, IconTrash, IconX } from "@tabler/icons-react";
 import { UUID } from "crypto";
 import cloneDeep from "lodash/cloneDeep";
 import { useEffect, useState } from "react";
@@ -528,49 +528,16 @@ export default function TouchscreenMenu() {
                   </SimpleGrid>
                 </Flex>
                 <Flex direction="row" align="center" justify="center" gap={5}>
-                  <Button
-                    variant="subtle"
-                    color="white"
-                    size="compact-md"
+                  <ActionIcon
+                    color={chip.color}
+                    autoContrast
+                    variant="filled"
+                    size="lg"
                     style={{
+                      fontSize: "1rem",
+                      fontWeight: 500,
                       fontFamily: MONOSPACE,
-                      opacity: 0.5,
-                    }}
-                    onClick={() => {
-                      setChipCount({
-                        ...chipCount,
-                        [chip.id]: chipCount[chip.id] + 5,
-                      });
-                    }}
-                  >
-                    +5
-                  </Button>
-                  <Button
-                    variant="subtle"
-                    color="white"
-                    size="compact-md"
-                    c="white"
-                    style={{
-                      fontFamily: MONOSPACE,
-                      opacity: 0.5,
-                    }}
-                    onClick={() => {
-                      setChipCount({
-                        ...chipCount,
-                        [chip.id]: chipCount[chip.id] + 20,
-                      });
-                    }}
-                  >
-                    +20
-                  </Button>
-                  <Button
-                    variant="subtle"
-                    color="white"
-                    size="compact-md"
-                    c="white"
-                    style={{
-                      fontFamily: MONOSPACE,
-                      opacity: 0.5,
+                      opacity: chipCount[chip.id] === 0 ? 0.5 : 1,
                     }}
                     onClick={() => {
                       setChipCount({
@@ -580,7 +547,47 @@ export default function TouchscreenMenu() {
                     }}
                   >
                     0
-                  </Button>
+                  </ActionIcon>
+                  <ActionIcon
+                    color={chip.color}
+                    autoContrast
+                    variant="filled"
+                    size="lg"
+                    style={{
+                      fontSize: "1rem",
+                      fontWeight: 500,
+                      fontFamily: MONOSPACE,
+                      opacity: chipCount[chip.id] === 0 ? 0.5 : 1,
+                    }}
+                    onClick={() => {
+                      setChipCount({
+                        ...chipCount,
+                        [chip.id]: chipCount[chip.id] + 5,
+                      });
+                    }}
+                  >
+                    +5
+                  </ActionIcon>
+                  <ActionIcon
+                    color={chip.color}
+                    autoContrast
+                    variant="filled"
+                    size="lg"
+                    style={{
+                      fontSize: "1rem",
+                      fontWeight: 500,
+                      fontFamily: MONOSPACE,
+                      opacity: chipCount[chip.id] === 0 ? 0.5 : 1,
+                    }}
+                    onClick={() => {
+                      setChipCount({
+                        ...chipCount,
+                        [chip.id]: chipCount[chip.id] + 20,
+                      });
+                    }}
+                  >
+                    +20
+                  </ActionIcon>
                 </Flex>
               </Paper>
             );
