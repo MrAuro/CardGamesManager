@@ -600,7 +600,7 @@ export default function GeneralSettings() {
       </Input.Wrapper>
       <Input.Wrapper mb="sm" label="TTS Voice" mt="sm">
         <Select
-          data={window.speechSynthesis.getVoices().map((voice) => voice.name)}
+          data={[...new Set(window.speechSynthesis.getVoices().map((voice) => voice.name))]}
           defaultValue={settings.ttsVoice}
           clearable={false}
           allowDeselect={false}
