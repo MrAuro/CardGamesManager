@@ -15,7 +15,10 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "createUpdaterArtifacts": "v1Compatible"
+    "createUpdaterArtifacts": "v1Compatible",
+    "iOS": {
+      "developmentTeam": "YOUR_TEAM_ID"
+    }
   },
   "productName": "cardgamesmanager",
   "version": "2.3.1",
@@ -23,9 +26,7 @@
   "plugins": {
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEFDMTk2NDA5Rjk4QjlDQzYKUldUR25JdjVDV1FackhrUnlQQ3BOUHlyZHBTNWJhbFhWN0VVVlBHcHJhekxGSU41N3BvVG42WncK",
-      "endpoints": [
-        "https://i.mrauro.dev/cardgamesmanager.json"
-      ]
+      "endpoints": ["https://i.mrauro.dev/cardgamesmanager.json"]
     }
   },
   "app": {
