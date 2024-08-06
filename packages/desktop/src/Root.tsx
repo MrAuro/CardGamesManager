@@ -231,6 +231,27 @@ window.addEventListener("error", (event) => {
   });
 });
 
+// Make console.errors and warns show a notification
+const consoleError = console.error;
+console.error = (...args: any[]) => {
+  notifications.show({
+    title: "An error occurred (stderr)",
+    message: args.join(" "),
+    color: "red",
+  });
+  consoleError(...args);
+};
+
+const consoleWarn = console.warn;
+console.warn = (...args: any[]) => {
+  notifications.show({
+    title: "A warning occurred (stderr)",
+    message: args.join(" "),
+    color: "yellow",
+  });
+  consoleWarn(...args);
+};
+
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <MantineProvider
