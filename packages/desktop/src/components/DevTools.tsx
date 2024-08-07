@@ -1,6 +1,7 @@
 import {
   BLACKJACK_GAME_STATE,
   BLACKJACK_PLAYERS_STATE,
+  CHIPS_STATE,
   KEYBINDINGS_STATE,
   PLAYERS_STATE,
   POKER_GAME_STATE,
@@ -56,6 +57,11 @@ export default function DevTools() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [autoUpdateSettings, setAutoUpdateSettings] = useState(false);
 
+  const [chips, setChips] = useRecoilState(CHIPS_STATE);
+  const [tempChips, setTempChips] = useState<string>(JSON.stringify(chips, null, 2));
+  const [chipsOpen, setChipsOpen] = useState(false);
+  const [autoUpdateChips, setAutoUpdateChips] = useState(false);
+
   useEffect(() => {
     if (autoUpdatePlayers) {
       setTempPlayers(JSON.stringify(players, null, 2));
@@ -91,6 +97,12 @@ export default function DevTools() {
       setTempSettings(JSON.stringify(settings, null, 2));
     }
   }, [settings, autoUpdateSettings]);
+
+  useEffect(() => {
+    if (autoUpdateChips) {
+      setTempChips(JSON.stringify(chips, null, 2));
+    }
+  }, [chips, autoUpdateChips]);
 
   return (
     <Paper withBorder p="sm">
@@ -212,6 +224,14 @@ export default function DevTools() {
         color="cyan"
       >
         {settingsOpen ? "Close" : "Open"} Settings
+      </Button>
+      <Button
+        onClick={() => {
+          setChipsOpen(!chipsOpen);
+        }}
+        color="blue"
+      >
+        {chipsOpen ? "Close" : "Open"} Chips
       </Button>
       {/* <Select
         value={localStorage.getItem("FONT_FAMILY")}
@@ -729,6 +749,84 @@ export default function DevTools() {
             checked={autoUpdateSettings}
             onChange={(event) => {
               setAutoUpdateSettings(event.currentTarget.checked);
+            }}
+          />
+        </Flex>
+      </Collapse>
+
+      <Collapse in={chipsOpen}>
+        <JsonInput
+          label={JSON.stringify(chips, null, 2) === tempChips ? "Chips" : "Chips (modified)"}
+          radius="sm"
+          value={tempChips}
+          onChange={(value) => {
+            setTempChips(value);
+          }}
+          formatOnBlur
+          autosize
+          minRows={4}
+          maxRows={20}
+          validationError="Invalid JSON"
+          onKeyDown={getHotkeyHandler([
+            [
+              "mod+S",
+              () => {
+                let parsed = null;
+                try {
+                  parsed = JSON.parse(tempChips);
+                } catch (e) {
+                  console.error(e);
+                  notifications.show({
+                    message: "Invalid JSON",
+                    color: "red",
+                  });
+                }
+
+                if (parsed) {
+                  setChips(parsed);
+                }
+              },
+            ],
+          ])}
+        />
+        <Flex gap="xs" mt="xs" align="center">
+          <Button
+            variant="light"
+            fullWidth
+            onClick={() => {
+              let parsed = null;
+              try {
+                parsed = JSON.parse(tempChips);
+              } catch (e) {
+                console.error(e);
+                notifications.show({
+                  message: "Invalid JSON",
+                  color: "red",
+                });
+              }
+
+              if (parsed) {
+                setChips(parsed);
+              }
+            }}
+          >
+            Save
+          </Button>
+          <Button
+            variant="light"
+            fullWidth
+            color="red"
+            onClick={() => {
+              setTempChips(JSON.stringify(chips, null, 2));
+            }}
+          >
+            Reset
+          </Button>
+          <Checkbox
+            radius="sm"
+            checked={autoUpdateChips}
+            onChange={(event) => {
+              setAutoUpdateChips(event.currentTarget.checked);
             }}
           />
         </Flex>
