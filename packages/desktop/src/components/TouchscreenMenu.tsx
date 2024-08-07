@@ -280,7 +280,10 @@ export default function TouchscreenMenu() {
             {chipHistory.map((_chips: { [key: UUID]: number }, index) => {
               let total = 0;
               for (const [key, value] of Object.entries(_chips)) {
-                total += chips.find((chip) => chip.id === key)!.denomination * value;
+                let chip = chips.find((chip) => chip.id === key);
+                if (chip) {
+                  total += chip.denomination * value;
+                }
               }
 
               return (
