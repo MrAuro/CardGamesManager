@@ -12,7 +12,17 @@ import {
 import { Player } from "@/types/Player";
 import { DefaultKeybinds } from "@/utils/DefaultKeybinds";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
-import { Button, Checkbox, Collapse, Flex, JsonInput, Paper, Text } from "@mantine/core";
+import {
+  Button,
+  Checkbox,
+  Collapse,
+  Flex,
+  JsonInput,
+  Paper,
+  Text,
+  Textarea,
+  TextInput,
+} from "@mantine/core";
 import { getHotkeyHandler } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { useEffect, useState } from "react";
@@ -66,6 +76,11 @@ export default function DevTools() {
   );
   const [keybindingsOpen, setKeybindingsOpen] = useState(false);
   const [autoUpdateKeybindings, setAutoUpdateKeybindings] = useState(false);
+
+  const [exporterOpen, setExporter] = useState(false);
+  const [exporterData, setExporterData] = useState<string>(
+    "Paste existing data here or fetch to get"
+  );
 
   useEffect(() => {
     if (autoUpdatePlayers) {
@@ -245,6 +260,9 @@ export default function DevTools() {
         color="blue"
       >
         {keybindingsOpen ? "Close" : "Open"} Keybindings
+      </Button>
+      <Button onClick={() => setExporter(!exporterOpen)} color="red">
+        {exporterOpen ? "Close" : "Open"} Exporter
       </Button>
       {/* <Select
         value={localStorage.getItem("FONT_FAMILY")}
@@ -923,6 +941,100 @@ export default function DevTools() {
               setAutoUpdateKeybindings(event.currentTarget.checked);
             }}
           />
+        </Flex>
+      </Collapse>
+      <Collapse in={exporterOpen}>
+        <Textarea
+          label="Exporter"
+          radius="sm"
+          value={exporterData}
+          onChange={(event) => {
+            setExporterData(event.currentTarget.value);
+          }}
+          autosize
+          minRows={4}
+          maxRows={20}
+        />
+        <Flex gap="xs" mt="xs" align="center">
+          <Button
+            variant="light"
+            fullWidth
+            onClick={() => {
+              let newData = null;
+              try {
+                newData = JSON.parse(exporterData);
+              } catch (e) {
+                console.error(e);
+                notifications.show({
+                  message: "Invalid JSON",
+                  color: "red",
+                });
+
+                return;
+              }
+
+              for (const key in newData) {
+                if (key === "players") {
+                  setPlayers(newData[key]);
+                } else if (key === "blackjackPlayers") {
+                  setBlackjackPlayers(newData[key]);
+                } else if (key === "blackjackGame") {
+                  setBlackjackGame(newData[key]);
+                } else if (key === "pokerPlayers") {
+                  setPokerPlayers(newData[key]);
+                } else if (key === "pokerGame") {
+                  setPokerGame(newData[key]);
+                } else if (key === "settings") {
+                  setSettings(newData[key]);
+                } else if (key === "chips") {
+                  setChips(newData[key]);
+                }
+              }
+            }}
+          >
+            Set
+          </Button>
+          <Button
+            variant="light"
+            fullWidth
+            color="red"
+            onClick={() => {
+              const data = {
+                players,
+                blackjackPlayers,
+                blackjackGame,
+                pokerPlayers,
+                pokerGame,
+                settings,
+                chips,
+              };
+
+              setExporterData(JSON.stringify(data, null, 2));
+            }}
+          >
+            Fetch Pretty
+          </Button>
+          <Button
+            variant="light"
+            fullWidth
+            color="yellow"
+            onClick={() => {
+              // Minify the data
+              const data = {
+                players,
+                blackjackPlayers,
+                blackjackGame,
+                pokerPlayers,
+                pokerGame,
+                settings,
+                chips,
+              };
+
+              setExporterData(JSON.stringify(data));
+            }}
+          >
+            Fetch Minified
+          </Button>
         </Flex>
       </Collapse>
     </Paper>
