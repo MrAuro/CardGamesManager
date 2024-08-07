@@ -19,8 +19,6 @@ import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 
 export default function DevTools() {
-  const [, setKeybindings] = useRecoilImmerState(KEYBINDINGS_STATE);
-
   const [players, setPlayers] = useRecoilImmerState(PLAYERS_STATE);
   const [tempPlayers, setTempPlayers] = useState<string>(JSON.stringify(players, null, 2));
   const [playersOpen, setPlayersOpen] = useState(false);
@@ -61,6 +59,13 @@ export default function DevTools() {
   const [tempChips, setTempChips] = useState<string>(JSON.stringify(chips, null, 2));
   const [chipsOpen, setChipsOpen] = useState(false);
   const [autoUpdateChips, setAutoUpdateChips] = useState(false);
+
+  const [keybindings, setKeybindings] = useRecoilImmerState(KEYBINDINGS_STATE);
+  const [tempKeybindings, setTempKeybindings] = useState<string>(
+    JSON.stringify(keybindings, null, 2)
+  );
+  const [keybindingsOpen, setKeybindingsOpen] = useState(false);
+  const [autoUpdateKeybindings, setAutoUpdateKeybindings] = useState(false);
 
   useEffect(() => {
     if (autoUpdatePlayers) {
@@ -232,6 +237,14 @@ export default function DevTools() {
         color="blue"
       >
         {chipsOpen ? "Close" : "Open"} Chips
+      </Button>
+      <Button
+        onClick={() => {
+          setKeybindingsOpen(!keybindingsOpen);
+        }}
+        color="blue"
+      >
+        {keybindingsOpen ? "Close" : "Open"} Keybindings
       </Button>
       {/* <Select
         value={localStorage.getItem("FONT_FAMILY")}
@@ -827,6 +840,87 @@ export default function DevTools() {
             checked={autoUpdateChips}
             onChange={(event) => {
               setAutoUpdateChips(event.currentTarget.checked);
+            }}
+          />
+        </Flex>
+      </Collapse>
+      <Collapse in={keybindingsOpen}>
+        <JsonInput
+          label={
+            JSON.stringify(keybindings, null, 2) === tempKeybindings
+              ? "Keybindings"
+              : "Keybindings (modified)"
+          }
+          radius="sm"
+          value={tempKeybindings}
+          onChange={(value) => {
+            setTempKeybindings(value);
+          }}
+          formatOnBlur
+          autosize
+          minRows={4}
+          maxRows={20}
+          validationError="Invalid JSON"
+          onKeyDown={getHotkeyHandler([
+            [
+              "mod+S",
+              () => {
+                let parsed = null;
+                try {
+                  parsed = JSON.parse(tempKeybindings);
+                } catch (e) {
+                  console.error(e);
+                  notifications.show({
+                    message: "Invalid JSON",
+                    color: "red",
+                  });
+                }
+
+                if (parsed) {
+                  setKeybindings(parsed);
+                }
+              },
+            ],
+          ])}
+        />
+        <Flex gap="xs" mt="xs" align="center">
+          <Button
+            variant="light"
+            fullWidth
+            onClick={() => {
+              let parsed = null;
+              try {
+                parsed = JSON.parse(tempKeybindings);
+              } catch (e) {
+                console.error(e);
+                notifications.show({
+                  message: "Invalid JSON",
+                  color: "red",
+                });
+              }
+
+              if (parsed) {
+                setKeybindings(parsed);
+              }
+            }}
+          >
+            Save
+          </Button>
+          <Button
+            variant="light"
+            fullWidth
+            color="red"
+            onClick={() => {
+              setTempKeybindings(JSON.stringify(keybindings, null, 2));
+            }}
+          >
+            Reset
+          </Button>
+          <Checkbox
+            radius="sm"
+            checked={autoUpdateKeybindings}
+            onChange={(event) => {
+              setAutoUpdateKeybindings(event.currentTarget.checked);
             }}
           />
         </Flex>
