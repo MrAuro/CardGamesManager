@@ -21,7 +21,7 @@
     }
   },
   "productName": "cardgamesmanager",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "identifier": "dev.mrauro.cardgamesmanager",
   "plugins": {
     "updater": {
