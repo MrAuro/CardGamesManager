@@ -113,6 +113,9 @@ export default function Home(): JSX.Element {
                   p={0}
                   component="a"
                   href="#features"
+                  style={{
+                    textDecoration: "none",
+                  }}
                 >
                   Features
                 </Button>
@@ -125,6 +128,9 @@ export default function Home(): JSX.Element {
                   p={0}
                   component="a"
                   href="#pricing"
+                  style={{
+                    textDecoration: "none",
+                  }}
                 >
                   Pricing
                 </Button>
@@ -137,6 +143,9 @@ export default function Home(): JSX.Element {
                   p={0}
                   component="a"
                   href="/docs/download"
+                  style={{
+                    textDecoration: "none",
+                  }}
                 >
                   Download
                 </Button>
@@ -149,6 +158,9 @@ export default function Home(): JSX.Element {
                   p={0}
                   component="a"
                   href="/docs/intro"
+                  style={{
+                    textDecoration: "none",
+                  }}
                 >
                   Docs
                 </Button>
