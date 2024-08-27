@@ -9,7 +9,7 @@ export default function OtherSettings() {
   const [keybindings, setKeybindings] = useRecoilState(KEYBINDINGS_STATE);
 
   return (
-    <Flex gap={5}>
+    <Flex gap={5} mb={5}>
       <Button
         size="compact-sm"
         variant="light"
