@@ -27,6 +27,7 @@ import {
 import { useMediaQuery, useWindowScroll } from "@mantine/hooks";
 import { HeroBullets } from "../components/HeroBullets";
 import Features from "../components/Features";
+import HowItWorks from "../components/HowItWorks";
 
 // function HomepageHeader() {
 //   const { siteConfig } = useDocusaurusContext();
@@ -223,6 +224,7 @@ export default function Home(): JSX.Element {
                 <Features />
               </Container>
             </div>
+            <HowItWorks />
             <div style={{ backgroundColor: theme.colors.dark[7], padding: "20px 0" }}>
               1 <br />
               2 <br />
