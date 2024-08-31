@@ -98,7 +98,15 @@ export default function Home(): JSX.Element {
           <Container h="100%" size="xl">
             <Flex align="center" justify="space-between" w="100%" h="100%">
               <Flex align="center" flex={1}>
-                <Image src="/img/logo.png" alt="CardGamesManager" width={35} height={35} mr={5} />
+                <img
+                  src="/img/logo.png"
+                  alt="Logo"
+                  width={35}
+                  height={35}
+                  style={{
+                    marginRight: "10px",
+                  }}
+                />
                 <Title order={1} c="gray.1" size="1.5rem" fw={700}>
                   CardGamesManager
                 </Title>
