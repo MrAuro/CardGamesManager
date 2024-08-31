@@ -1,5 +1,6 @@
 import React from "react";
 import { Container, Title, Paper, SimpleGrid, Text, rem, rgba } from "@mantine/core";
+import { motion } from "framer-motion";
 
 export default function HowItWorks() {
   return (
@@ -103,18 +104,30 @@ function Section({
   );
 
   return (
-    <Paper
-      h={300}
-      w="90%"
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: 0.35 }}
+      viewport={{ once: true }}
       style={{
-        backgroundColor: "#151517",
+        display: "flex",
+        width: "90%",
+        justifyContent: "center",
       }}
-      radius="xl"
     >
-      <SimpleGrid cols={2} h="100%">
-        {side === "left" ? TextContent : ImageContent}
-        {side === "left" ? ImageContent : TextContent}
-      </SimpleGrid>
-    </Paper>
+      <Paper
+        h={300}
+        w="100%"
+        style={{
+          backgroundColor: "#151517",
+        }}
+        radius="xl"
+      >
+        <SimpleGrid cols={2} h="100%">
+          {side === "left" ? TextContent : ImageContent}
+          {side === "left" ? ImageContent : TextContent}
+        </SimpleGrid>
+      </Paper>
+    </motion.div>
   );
 }
