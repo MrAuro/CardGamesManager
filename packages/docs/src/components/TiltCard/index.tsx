@@ -68,7 +68,7 @@ export function TiltCard({
         backgroundColor: darken(theme.colors.dark[6], 0.2),
         padding: "20px",
         borderRadius: theme.radius.xl,
-        border: "2px solid var(--mantine-color-dark-5)",
+        // border: "2px solid var(--mantine-color-dark-5)",
         userSelect: "none",
       }}
     >
@@ -90,24 +90,6 @@ export function TiltCard({
         />
       </div>
 
-      <div>
-        <Center>
-          <img
-            src={feature.Svg}
-            alt={feature.title}
-            height="200px"
-            width="200px"
-            style={{
-              position: "absolute",
-              top: 20,
-              filter: "blur(10px) brightness(0%) contrast(100%)",
-              opacity: active ? 1 : 0,
-              transition: "opacity 0.5s",
-            }}
-          />
-        </Center>
-      </div>
-
       <div
         style={{
           transform: "translateZ(35px)",
@@ -120,7 +102,6 @@ export function TiltCard({
       <p
         style={{
           color: "transparent",
-          textShadow: "0 0 5px #000000",
           position: "absolute",
           top: 200,
           left: 0,
@@ -148,7 +129,6 @@ export function TiltCard({
       <p
         style={{
           color: "transparent",
-          textShadow: "0 0 5px #000000",
           position: "absolute",
           top: 240,
           left: 0,
