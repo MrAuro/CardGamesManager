@@ -269,13 +269,7 @@ export default function Home(): JSX.Element {
 
             {/* Final Section */}
             <div style={{ backgroundColor: theme.colors.dark[7], padding: "20px 0" }}>
-              <Container size="xl">
-                1 <br />
-                2 <br />
-                3 <br />
-                4 <br />
-                5 <br />
-              </Container>
+              <Container size="xl">Footer</Container>
             </div>
           </div>
         </AppShell.Main>

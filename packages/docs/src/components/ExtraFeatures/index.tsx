@@ -12,6 +12,7 @@ import {
   CheckIcon,
   alpha,
 } from "@mantine/core";
+import { delay, motion } from "framer-motion";
 
 export default function ExtraFeatures() {
   const theme = useMantineTheme();
@@ -53,7 +54,11 @@ export default function ExtraFeatures() {
             width: "100%",
           }}
         >
-          <Section title="Poker" features={["Sidebets", "Allin", "Blinds", "Ante", "Rebuys"]} />
+          <Section
+            title="Poker"
+            features={["Sidebets", "Allin", "Blinds", "Ante", "Rebuys"]}
+            framerDelay={0}
+          />
           <Section
             title="Blackjack"
             features={[
@@ -64,60 +69,81 @@ export default function ExtraFeatures() {
               "Doubling",
               "AI Voice Announcing",
             ]}
+            framerDelay={0.2}
           />
-          <Section title="Tracking" features={["Stuff", "Will", "Go", "Here"]} />
+          <Section title="Tracking" features={["Stuff", "Will", "Go", "Here"]} framerDelay={0.4} />
         </SimpleGrid>
       </Container>
     </>
   );
 }
 
-function Section({ title, features }: { title: string; features: string[] }) {
+function Section({
+  title,
+  features,
+  framerDelay,
+}: {
+  title: string;
+  features: string[];
+  framerDelay?: number;
+}) {
   const theme = useMantineTheme();
 
   return (
-    <Card
-      p="xl"
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: framerDelay }}
+      viewport={{ once: true }}
       style={{
-        backgroundColor: darken(theme.colors.dark[6], 0.2),
-        borderRadius: theme.radius.xl,
+        display: "flex",
         width: "100%",
+        justifyContent: "center",
       }}
     >
-      <Text c="gray.4" ta="center" size={rem(26)} fw="bold">
-        {title}
-      </Text>
-      <List
+      <Card
+        p="xl"
         style={{
+          backgroundColor: darken(theme.colors.dark[6], 0.2),
+          borderRadius: theme.radius.xl,
           width: "100%",
-          color: "white",
         }}
-        icon={
-          <ThemeIcon color="blue" size={22} radius="xl" variant="light">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="3"
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-          </ThemeIcon>
-        }
       >
-        {features.map((feature, index) => (
-          <List.Item
-            key={index}
-            style={{
-              lineHeight: 2,
-            }}
-          >
-            <Text c="gray.3" ta="center" size="lg">
-              {feature}
-            </Text>
-          </List.Item>
-        ))}
-      </List>
-    </Card>
+        <Text c="gray.4" ta="center" size={rem(26)} fw="bold">
+          {title}
+        </Text>
+        <List
+          style={{
+            width: "100%",
+            color: "white",
+          }}
+          icon={
+            <ThemeIcon color="blue" size={22} radius="xl" variant="light">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="3"
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </ThemeIcon>
+          }
+        >
+          {features.map((feature, index) => (
+            <List.Item
+              key={index}
+              style={{
+                lineHeight: 2,
+              }}
+            >
+              <Text c="gray.3" ta="center" size="lg">
+                {feature}
+              </Text>
+            </List.Item>
+          ))}
+        </List>
+      </Card>
+    </motion.div>
   );
 }
