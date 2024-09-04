@@ -1,5 +1,14 @@
 import React from "react";
-import { Container, Title, Paper, SimpleGrid, Text, rem, rgba } from "@mantine/core";
+import {
+  Container,
+  Title,
+  Paper,
+  SimpleGrid,
+  Text,
+  rem,
+  rgba,
+  useMantineTheme,
+} from "@mantine/core";
 import { motion } from "framer-motion";
 
 export default function HowItWorks() {
@@ -14,7 +23,7 @@ export default function HowItWorks() {
         gap: "30px",
       }}
     >
-      <Container ta="center">
+      <Container ta="center" mb={20}>
         <Title order={2} c="white" size={rem(45)} fw="bold">
           Set Up Your Game in Minutes
         </Title>
@@ -58,6 +67,8 @@ function Section({
   svg: string;
   side: "left" | "right";
 }) {
+  const theme = useMantineTheme();
+
   const TextContent = (
     <Container
       style={{
@@ -119,7 +130,7 @@ function Section({
         h={300}
         w="100%"
         style={{
-          backgroundColor: "#151517",
+          backgroundColor: theme.colors.dark[6],
         }}
         radius="xl"
       >

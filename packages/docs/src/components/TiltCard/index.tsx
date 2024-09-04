@@ -63,8 +63,8 @@ export function TiltCard({
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{
-        transformStyle: "preserve-3d",
-        transform,
+        // transformStyle: "preserve-3d",
+        // transform,
         backgroundColor: darken(theme.colors.dark[6], 0.2),
         padding: "20px",
         borderRadius: theme.radius.xl,
