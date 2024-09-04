@@ -13,10 +13,13 @@ import {
   Button,
   Container,
   createTheme,
+  Divider,
   Flex,
   Group,
   Image,
+  List,
   MantineProvider,
+  rem,
   rgba,
   ScrollArea,
   Space,
@@ -28,6 +31,7 @@ import { useMediaQuery, useWindowScroll } from "@mantine/hooks";
 import { HeroBullets } from "../components/HeroBullets";
 import Features from "../components/Features";
 import HowItWorks from "../components/HowItWorks";
+import ExtraFeatures from "../components/ExtraFeatures";
 
 // function HomepageHeader() {
 //   const { siteConfig } = useDocusaurusContext();
@@ -201,18 +205,13 @@ export default function Home(): JSX.Element {
           </Container>
         </AppShell.Header>
         <AppShell.Main style={{ overflow: "hidden" }}>
-          <div style={{ display: "grid" }}>
-            <Container size="xl" style={{ gridArea: "1 / 1" }}>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <Container size="xl">
               <HeroBullets />
             </Container>
-            <div
-              style={{
-                marginTop: "200px",
-                gridArea: "2 / 1",
-                position: "relative",
-                width: "100%",
-              }}
-            >
+
+            {/* Features Section */}
+            <div style={{ position: "relative", marginTop: "200px" }}>
               <div
                 style={{
                   position: "absolute",
@@ -228,17 +227,55 @@ export default function Home(): JSX.Element {
                 <WavyDivider color={theme.colors.dark[6]} />
                 <BottomWavyDivider color={theme.colors.dark[7]} />
               </div>
-              <Container size="xl" style={{ position: "relative" }} mb={70} pb={100} mt={80}>
+              <Container
+                size="xl"
+                style={{ position: "relative", paddingTop: 80, paddingBottom: 175 }}
+              >
                 <Features />
               </Container>
             </div>
-            <HowItWorks />
+
+            {/* How It Works Section */}
+            <div style={{ backgroundColor: theme.colors.dark[7] }}>
+              <Container size="xl">
+                <HowItWorks />
+              </Container>
+            </div>
+
+            {/* Extra Features Section */}
+            <div style={{ position: "relative", marginTop: "225px" }}>
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: "50%",
+                  right: "50%",
+                  bottom: 0,
+                  marginLeft: "-50vw",
+                  marginRight: "-50vw",
+                  backgroundColor: theme.colors.dark[6],
+                }}
+              >
+                <WavyDivider color={theme.colors.dark[6]} />
+                <BottomWavyDivider color={theme.colors.dark[7]} />
+              </div>
+              <Container
+                size="xl"
+                style={{ position: "relative", paddingTop: 0, paddingBottom: 160 }}
+              >
+                <ExtraFeatures />
+              </Container>
+            </div>
+
+            {/* Final Section */}
             <div style={{ backgroundColor: theme.colors.dark[7], padding: "20px 0" }}>
-              1 <br />
-              2 <br />
-              3 <br />
-              4 <br />
-              5 <br />
+              <Container size="xl">
+                1 <br />
+                2 <br />
+                3 <br />
+                4 <br />
+                5 <br />
+              </Container>
             </div>
           </div>
         </AppShell.Main>
@@ -247,7 +284,7 @@ export default function Home(): JSX.Element {
   );
 }
 
-const WavyDivider = ({ color }) => (
+export const WavyDivider = ({ color }) => (
   <svg
     viewBox="0 0 1440 100"
     fill="none"
@@ -269,7 +306,7 @@ const WavyDivider = ({ color }) => (
   </svg>
 );
 
-const BottomWavyDivider = ({ color }) => (
+export const BottomWavyDivider = ({ color }) => (
   <svg
     viewBox="0 0 1440 100"
     fill="none"
