@@ -26,13 +26,10 @@ jobs:
       - name: Build website
         run: yarn docs build
 
-      - name: List files
-        run: ls -al
-
       - name: Upload Build Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: build
+          path: packages/docs/build
 
   deploy:
     name: Deploy to GitHub Pages
