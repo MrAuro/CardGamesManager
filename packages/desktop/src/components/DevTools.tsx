@@ -12,17 +12,7 @@ import {
 import { Player } from "@/types/Player";
 import { DefaultKeybinds } from "@/utils/DefaultKeybinds";
 import { useRecoilImmerState } from "@/utils/RecoilImmer";
-import {
-  Button,
-  Checkbox,
-  Collapse,
-  Flex,
-  JsonInput,
-  Paper,
-  Text,
-  Textarea,
-  TextInput,
-} from "@mantine/core";
+import { Button, Checkbox, Collapse, Flex, JsonInput, Paper, Text, Textarea } from "@mantine/core";
 import { getHotkeyHandler } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { useEffect, useState } from "react";
@@ -988,6 +978,8 @@ export default function DevTools() {
                   setSettings(newData[key]);
                 } else if (key === "chips") {
                   setChips(newData[key]);
+                } else if (key === "keybindings") {
+                  setKeybindings(newData[key]);
                 }
               }
             }}
@@ -1007,6 +999,7 @@ export default function DevTools() {
                 pokerGame,
                 settings,
                 chips,
+                keybindings,
               };
 
               setExporterData(JSON.stringify(data, null, 2));
@@ -1028,6 +1021,7 @@ export default function DevTools() {
                 pokerGame,
                 settings,
                 chips,
+                keybindings,
               };
 
               setExporterData(JSON.stringify(data));
