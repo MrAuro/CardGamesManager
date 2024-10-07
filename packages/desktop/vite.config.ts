@@ -4,8 +4,6 @@ import { reactClickToComponent } from "vite-plugin-react-click-to-component";
 import path from "path";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
 
-const host = process.env.TAURI_DEV_HOST;
-
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
   plugins: [
@@ -24,20 +22,12 @@ export default defineConfig(async () => ({
   clearScreen: false,
   // 2. tauri expects a fixed port, fail if that port is not available
   server: {
-    host: host || false,
     port: 1420,
     strictPort: true,
     watch: {
       // 3. tell vite to ignore watching `src-tauri`
       ignored: ["**/src-tauri/**"],
     },
-    hmr: host
-      ? {
-          protocol: "ws",
-          host,
-          port: 1430,
-        }
-      : undefined,
   },
 
   resolve: {

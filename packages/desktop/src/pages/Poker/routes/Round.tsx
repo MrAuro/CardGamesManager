@@ -813,11 +813,6 @@ export default function Round() {
 
     let amountToTake = amount - prevCurrentBet;
 
-    if (pokerGame.gameState == "PREFLOP") {
-      amountToTake += pokerGame.currentBets[pokerPlayer.id].amount;
-    }
-
-    console.log("Taking", amountToTake, "from", player.name);
     player.balance = Math.round((player.balance - amountToTake) * 100) / 100;
     tempPlayers[tempPlayers.findIndex((p) => p.id === player.id)] = player;
 
