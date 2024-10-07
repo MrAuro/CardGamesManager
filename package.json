@@ -10,5 +10,8 @@
   "scripts": {
     "desktop": "yarn workspace desktop",
     "docs": "yarn workspace docs"
+  },
+  "dependencies": {
+    "postcss-preset-mantine": "^1.17.0"
   }
 }

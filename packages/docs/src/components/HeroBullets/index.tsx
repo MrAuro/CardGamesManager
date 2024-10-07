@@ -72,7 +72,7 @@ export function HeroBullets() {
             mt={30}
             size="sm"
             icon={
-              <ThemeIcon size={24} radius="xl">
+              <ThemeIcon size={22} radius="xl">
                 <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor">
                   <path
                     strokeLinecap="round"
