@@ -19,7 +19,15 @@ export const DEFAULT_SETTINGS: Settings = {
   ttsRate: 1,
   ttsPitch: 1,
   ttsVolume: 1,
+  cardRecognitionMode: "GEMINI",
   geminiApiKey: "",
+  roboflowModelId: "card-detection-zk7wu-gzidp",
+  roboflowModelVersion: 1,
+  roboflowPublishableKey: "",
+  roboflowShowOverlay: true,
+  roboflowFrameRate: 30,
+  roboflowMinimumConfidence: 0.5,
+  cameraDownscalingFactor: 1,
   cameraDeviceId: "",
   cameraFlipHorizontal: false,
   cameraMenu: false,
@@ -46,7 +54,15 @@ export type Settings = {
   ttsRate: number;
   ttsPitch: number;
   ttsVolume: number;
+  cardRecognitionMode: "GEMINI" | "ROBOFLOW";
   geminiApiKey: string;
+  roboflowModelId: string;
+  roboflowModelVersion: number;
+  roboflowPublishableKey: string;
+  roboflowShowOverlay: boolean;
+  roboflowFrameRate: number;
+  roboflowMinimumConfidence: number;
+  cameraDownscalingFactor: number;
   cameraDeviceId: string;
   cameraFlipHorizontal: boolean;
   cameraMenu: boolean;

@@ -56,6 +56,11 @@ export const SPEECH_SYNTHESIS_MESSAGE = atom({
   default: "",
 });
 
+export const CAMERA_DISABLED = atom({
+  key: "cameraDisabled",
+  default: false,
+});
+
 export default function App() {
   const [players] = useRecoilState(PLAYERS_STATE);
   const [playersLastSaved, setPlayersLastSaved] = useState(0);
@@ -147,6 +152,8 @@ export default function App() {
     useRecoilState(HOTKEY_SELECTOR_A_ENABLED);
   const [hotkeySelectorBEnabled, setHotkeySelectorBEnabled] =
     useRecoilState(HOTKEY_SELECTOR_B_ENABLED);
+
+  const [cameraDisabled, setCameraDisabled] = useRecoilState(CAMERA_DISABLED);
 
   const [speechSynthesisMessage] = useRecoilState(SPEECH_SYNTHESIS_MESSAGE);
   useEffect(() => {
@@ -480,7 +487,18 @@ export default function App() {
               }}
             >
               <CameraMenu />
-              <Flex justify="center" style={{ marginTop: "auto" }} m="xs" gap="sm">
+              <Flex justify="center" style={{ marginTop: "auto" }} m="xs" gap="xs">
+                <Button
+                  fullWidth
+                  variant="subtle"
+                  color="gray"
+                  onClick={() => {
+                    setCameraDisabled(!cameraDisabled);
+                  }}
+                  p="xs"
+                >
+                  {cameraDisabled ? "Enable Camera" : "Disable Camera"}
+                </Button>
                 <Button
                   fullWidth
                   variant="subtle"
@@ -488,6 +506,7 @@ export default function App() {
                   onClick={() => {
                     emitCameraReset();
                   }}
+                  p="xs"
                 >
                   Reset
                 </Button>
@@ -501,6 +520,7 @@ export default function App() {
                       cameraMenu: false,
                     });
                   }}
+                  p="xs"
                 >
                   Close
                 </Button>
